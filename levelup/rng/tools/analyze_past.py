@@ -1,4 +1,7 @@
 """反推每个角色过去每一步（升级/考试跳过），和期望值比较；再看未来路线的期望。输出 analysis.json。"""
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))  # 一次性脚本放在 tools/，数据和模块在上一层
+_os.chdir(_sys.path[0])
 import json, os, random
 from functools import lru_cache
 
@@ -17,10 +20,10 @@ def first_round_u(seed, growth):
     return out
 from planner import plan_all
 from run_plans import OWNED, CURRENT, W, data, make_planner, records, units
-from make_sheet import TARGET, MAX_EXAMS, ORDER
+from run_plans import TARGET, MAX_EXAMS, ORDER
 import demo
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 rnd = random.Random(20261105)
 SEEDS = [rnd.getrandbits(31) for _ in range(20000)]
 

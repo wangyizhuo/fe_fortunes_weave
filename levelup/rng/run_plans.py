@@ -8,6 +8,7 @@
 已有职业、可以考的职业在下面的表里改。
 """
 
+import collections
 import argparse
 import json
 import os
@@ -265,6 +266,17 @@ GOLD_PER_PT = {"P0": 500 / 8, "other": 500 / 12, "P2": 500 / 16}
 THRESHOLDS = {k: (round(500 / v, 1), round(300 / v, 1)) for k, v in GOLD_PER_PT.items()}   # 只用来显示
 P2_SKIP_BELOW = 6   # Yizhuo 11-08：P2 只有这一级升级不到 6 分才跳过（初级/跳过不另设门槛，只要有赚）
 P2 = {"努蒂奴", "乌尔坦德"}   # 11-08 乌也是 P2；杨界 = P1（其他人，12/6）   # Yizhuo 11-08：努蒂奴是 P2，门槛再提高一档（中级 16、初级/跳过 8）
+
+# 与主表「成长记录」的角色顺序一致（全项目共用，别处不要再写一份）
+ORDER = ["迪托利希", "法毕欧", "艾丝梅拉尔达", "米迦艾拉", "杨界", "伊欧", "奇洛伊卡", "努蒂奴", "乌尔坦德"]
+TARGET = collections.defaultdict(lambda: 35)   # 2026-11-05：所有人都规划到 35 级（Lv45 由 plan45 另算）
+MAX_EXAMS = 4
+
+
+def tier_of(name):
+    """优先级标签：P0 / P1 / P2（页面、检查都用这一个函数，别在别处再写一遍名单）。"""
+    return "P0" if name in P0 else "P2" if name in P2 else "P1"
+
 
 SKIP_RULE = {"P0": {"cap": 8, "pct": 0.35, "or": True}, "other": {"cap": 8, "pct": 0.50, "or": False},
              "P2": {"cap": 6, "pct": 0.60, "or": False}}

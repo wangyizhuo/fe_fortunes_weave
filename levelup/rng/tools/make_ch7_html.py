@@ -1,7 +1,10 @@
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))  # 一次性脚本放在 tools/，数据和模块在上一层
+_os.chdir(_sys.path[0])
 import json, os
-OUT_DIR = os.environ.get("FE_OUT_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "out")   # 生成的网页放这里
+OUT_DIR = os.environ.get("FE_OUT_DIR") or os.path.join(_sys.path[0], "..", "..", "out")   # 生成的网页放这里
 os.makedirs(OUT_DIR, exist_ok=True)
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 D = json.load(open(os.path.join(HERE, "ch7.json"), encoding="utf-8"))
 ST = ["HP", "力", "魔", "速", "技", "防", "魔防", "幸", "魅"]
 SHORT = {"迪托利希": "迪", "法毕欧": "法毕欧", "艾丝梅拉尔达": "艾丝", "米迦艾拉": "米迦", "杨界": "杨界", "伊欧": "伊欧", "奇洛伊卡": "奇洛"}

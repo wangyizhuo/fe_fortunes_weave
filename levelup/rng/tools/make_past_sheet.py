@@ -1,6 +1,9 @@
 """analysis.json → 主表新页「过去成长反推」的行（past_sheet.json）。"""
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))  # 一次性脚本放在 tools/，数据和模块在上一层
+_os.chdir(_sys.path[0])
 import json, os
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 A = json.load(open(os.path.join(HERE, "analysis.json"), encoding="utf-8"))
 U = json.load(open(os.path.join(HERE, "uncertain.json"), encoding="utf-8"))
 VD = json.load(open(os.path.join(HERE, "verdict.json"), encoding="utf-8"))

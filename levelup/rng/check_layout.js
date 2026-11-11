@@ -1,5 +1,5 @@
 // 排版自检：每次 make_html.py 之后跑。node check_layout.js <html>；有问题退出码 1。
-// 查：JS 报错、页面横向溢出、文字被挤成窄条（宽 < 110px 却折成 4 行以上）。
+// 查：JS 报错、页面横向溢出、文字被挤成窄条（宽 < 110px 却折成 4 行以上）、渲染出 undefined/NaN。
 const { chromium } = require('playwright');
 (async () => {
   const file = process.argv[2], tabs = ['meal', 'next', 'plan', 'l45', 'past', 'long', 'mine'], problems = [];
@@ -21,6 +21,12 @@ const { chromium } = require('playwright');
           const rc = el.getBoundingClientRect(); if (!rc.width) continue;
           const lh = parseFloat(getComputedStyle(el).lineHeight) || 20;
           if (rc.width < 110 && rc.height > lh * 4) out.push(`文字被挤成窄条（宽 ${Math.round(rc.width)}px）：${own.slice(0, 30)}`);
+        }
+        // 渲染出来的文字里不能有 undefined / NaN / [object Object]（11-11：「我的决定」表曾整列显示 undefined）
+        const txt = document.querySelector('#view')?.innerText || '';
+        for (const bad of ['undefined', 'NaN', '[object Object]']) {
+          const i = txt.indexOf(bad);
+          if (i >= 0) out.push(`页面文字里有「${bad}」：…${txt.slice(Math.max(0, i - 20), i + 20).replace(/\s+/g, ' ')}…`);
         }
         return [...new Set(out)].slice(0, 8);
       }, w);

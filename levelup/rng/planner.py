@@ -6,7 +6,7 @@
           所以每一级都可以临时换成最划算的已有职业（包括转回低级职业）。
   * 考试：吃掉这一步（不涨能力）。考的是一个新职业的话，假定考过，
           之后的升级就多了这个职业可以用（例如考土匪、恶棍）。
-          不想要新职业时，也可以随便考一个当作纯跳过。
+          不想要新职业时，考任意一个初级职业当作纯跳过。
 
 目标：升到目标等级为止，Σ(权重 × 加点) 最大。
 限制：考试次数 ≤ K。对 K = 0,1,2,... 分别求最优路线，再按「每多考一次能多拿几分」给建议。
@@ -270,6 +270,7 @@ class Planner:
         stats = list(self.stats) if self.stats else None
         cur_str = self.str_start
         acts, notes, step, done, gold = [], {}, 0, 0, 0
+        reasons = notes["why"] = {}   # 每一步为什么这样走（检查和页面用）：step -> {s, avg15, c1, c2, want_skip, pick}
         while done < self.n_levels and step < 400:
             lv = self.level + done
             if step < len(forced):
@@ -300,8 +301,10 @@ class Planner:
                     c1 = s_raw <= rule["cap"] + 1e-6
                     c2 = s_raw <= sum(fut) / len(fut) * (1 - rule["pct"]) + 1e-6
                     want_skip = (c1 or c2) if rule["or"] else (c1 and c2)
+                    reasons[step] = {"s": round(s_raw, 2), "avg15": round(sum(fut) / len(fut), 2), "c1": c1, "c2": c2}
                 else:
                     want_skip = sbest < t_skip
+                    reasons[step] = {"s": round(sbest, 2)}
                 if self.seed_at(step) in getattr(self, "no_skip_seeds", ()):
                     want_skip = False
                 pick = None
@@ -311,6 +314,7 @@ class Planner:
                     if want_skip or sbest < thr:
                         pick = c
                         break
+                reasons[step].update(want_skip=want_skip, keep=keep, pick=pick)
                 if pick is not None:
                     a, c = "考试", pick
                 elif want_skip and step not in no_skip:
@@ -436,6 +440,7 @@ class Planner:
             r.balance_note = notes.get(r.step, "")
         total = sum(r.score + r.bonus for r in rows if r.action == "升级")
         pl = Plan(sum(a == "考试" for a, _ in acts), total, rows)
+        pl.why = notes.get("why", {})
         # 11-11 Yizhuo：跳过 = 不学会新职业。考进去却从没用来升级（也不是必考）的职业，当成真正的跳过：不算学会，按初级手形算钱
         fixed = []
         for a, c in acts:
@@ -558,7 +563,7 @@ class Planner:
 
 
 def exam_tiers(planner, plan):
-    """这条路线里每场考试的级别：新职业按 fw_classes 的级别，纯跳过按初级（随便考一个初级就行）。"""
+    """这条路线里每场考试的级别：新职业按 fw_classes 的级别，纯跳过按初级（考任意一个初级就行）。"""
     # 考到但路线里从没用来升级的职业 = 等于跳过（只是顺便拿到职业），门槛按初级算
     used = {r.cls for r in plan.rows if r.action == "升级"}
     return ["初级" if (r.cls not in planner.exam_options or r.cls not in used) else _TIER.get(r.cls, "中级")

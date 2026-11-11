@@ -1,11 +1,14 @@
 """第七章开始重开规划：以 11-07 上传的第 7 章开始部队表截图为起点（等级、能力），种子取观星记录里对应等级的位置。
 输出 ch7.json：每人 新规划 vs 实际已走+现规划（同一起点到 Lv35）。"""
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))  # 一次性脚本放在 tools/，数据和模块在上一层
+_os.chdir(_sys.path[0])
 import json, os, sys
 import run_plans as R
 from planner import Planner, plan_all, gains_text, score
 from fe_growth import STATS
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # 第 7 章开始（截图，显示值，顺序 HP 力 魔 速 技 防 魔防 幸 魅）
 CH7 = {
     "迪托利希": (20, "剑客", [36, 23, 14, 24, 27, 13, 6, 19, 24]),
