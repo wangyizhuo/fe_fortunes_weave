@@ -1,0 +1,206 @@
+<title>角色成长档案</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;800&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* 布局：一列档案卡，每个角色一个可展开的卷宗；表格横向可滚 */
+:root{
+  --bg:#f3f5f4; --paper:#ffffff; --ink:#1d2524; --muted:#5f6b69; --line:#d6dddb;
+  --accent:#1f6f68; --accent-soft:#dcefec; --gain:#1f6f68; --gain-bg:#e3f2ef;
+  --warn:#9a5b00; --warn-bg:#fbefd9; --bad:#a3323a; --bad-bg:#f8e2e3; --exam-bg:#eef0f6;
+  --display:"Noto Serif SC","Songti SC",serif; --body:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#131817; --paper:#1b2120; --ink:#e3e9e7; --muted:#9aa7a4; --line:#2f3836;
+  --accent:#6cc7bb; --accent-soft:#1f3532; --gain:#7fd3c6; --gain-bg:#1d3330;
+  --warn:#e3b260; --warn-bg:#3a2e17; --bad:#ee8d93; --bad-bg:#3d2124; --exam-bg:#232836; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#131817; --paper:#1b2120; --ink:#e3e9e7; --muted:#9aa7a4; --line:#2f3836;
+  --accent:#6cc7bb; --accent-soft:#1f3532; --gain:#7fd3c6; --gain-bg:#1d3330;
+  --warn:#e3b260; --warn-bg:#3a2e17; --bad:#ee8d93; --bad-bg:#3d2124; --exam-bg:#232836; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1{font-family:var(--display);font-weight:800;font-size:28px;margin:0;text-wrap:balance}
+.lede{color:var(--muted);max-width:70ch;margin:0}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--muted);font-size:12.5px}
+details.char{background:var(--paper);border:1px solid var(--line);border-radius:10px}
+details.char>summary{cursor:pointer;list-style:none;padding:14px 18px;display:grid;grid-template-columns:auto 1fr auto;gap:4px 16px;align-items:baseline}
+details.char>summary::-webkit-details-marker{display:none}
+details.char>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:10px}
+.cname{font-family:var(--display);font-weight:800;font-size:20px}
+.cmeta{color:var(--muted);font-size:13px;min-width:0}
+.cmeta b{color:var(--ink);font-weight:600}
+.chev{color:var(--accent);font-size:13px}
+details[open]>summary .chev{transform:rotate(90deg)}
+.body{padding:0 18px 20px;display:flex;flex-direction:column;gap:22px}
+h3{font-family:var(--display);font-size:16px;margin:0 0 6px;display:flex;gap:10px;align-items:baseline}
+h3 small{font-family:var(--body);font-weight:400;color:var(--muted);font-size:12.5px}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;white-space:nowrap}
+th{background:var(--accent-soft);font-weight:600;font-size:12px;letter-spacing:.02em;position:sticky;top:0}
+td.n,th.n{text-align:center;font-family:var(--mono);font-variant-numeric:tabular-nums;min-width:30px}
+td.note{white-space:normal;min-width:240px;color:var(--muted);font-size:12.5px}
+td.g1{background:var(--gain-bg);color:var(--gain);font-weight:600}
+td.neg{background:var(--bad-bg);color:var(--bad);font-weight:600}
+tr.exam td{background:var(--exam-bg)}
+tr.sum td{font-weight:700;border-top:2px solid var(--line)}
+tr.gap td{background:var(--warn-bg)}
+.pill{display:inline-block;padding:0 7px;border-radius:99px;font-size:11.5px;font-weight:600;line-height:18px}
+.p-ok{background:var(--gain-bg);color:var(--gain)} .p-warn{background:var(--warn-bg);color:var(--warn)} .p-bad{background:var(--bad-bg);color:var(--bad)}
+.p-need{background:var(--warn-bg);color:var(--warn)}
+details.opts summary{cursor:pointer;color:var(--accent);font-size:12px}
+details.opts table{margin-top:4px;font-size:12px}
+details.opts td{padding:2px 6px}
+tr.chosen td{font-weight:700}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px 18px}
+.kv div{min-width:0}
+.kv span{display:block;color:var(--muted);font-size:12px}
+.para{max-width:80ch;margin:0;color:var(--ink)}
+.para.m{color:var(--muted);font-size:12.5px}
+@media (max-width:560px){details.char>summary{grid-template-columns:1fr auto}.cmeta{grid-column:1/-1}}
+@media (prefers-reduced-motion:no-preference){.chev{transition:transform .15s}}
+.ov{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card h4{margin:0;font-family:var(--display);font-size:17px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.card h4 a{color:inherit;text-decoration:none}
+.card h4 small{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:400}
+.card p{margin:0;font-size:13px}
+.card .lab{font-size:11.5px;color:var(--muted);letter-spacing:.04em;margin-right:4px}
+.nodes{display:flex;flex-direction:column;gap:2px;font-size:12.5px}
+.team{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px;max-width:90ch}
+h2{font-family:var(--display);font-size:20px;margin:8px 0 0}
+</style>
+
+<div class="wrap">
+  <h1>角色成长档案</h1>
+  <p class="lede">先看总览：每人一句话、要知道的事、比平均好或差的几级、对策。下面每人一份：入队能力、过去每一级的加点、现在去掉所有加成后的裸能力、从现在到 Lv35 每一级可以选的职业和建议，以及每次考试到 35 级的总收益。所有能力都是裸能力（不含职业补正、兵种精通▲、坐骑、装备）。点角色名展开。</p>
+  <div class="legend">
+    <span><span class="pill p-ok">+1</span> 这一级涨了</span>
+    <span><span class="pill p-need">需考</span> 还没拿到的职业</span>
+    <span>灰底行 = 考试（不涨能力，种子前进一步）</span>
+    <span>分 = 按主表「能力权重」加权</span>
+  </div>
+  <h2>总览：到 Lv35 要关注什么</h2>
+  <ul class="team" id="team"></ul>
+  <div class="ov" id="ov"></div>
+  <h2>逐人详情</h2>
+  <div id="list" class="wrap" style="gap:12px"></div>
+  <p class="para m" id="foot"></p>
+</div>
+
+<script>
+const D = __DATA__;
+const META = __META__;
+const S = ["HP","力","魔","速","技","防","魔防","幸","魅"];
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const gt = g => S.filter((_, i) => g[i]).map((s, i) => s).join(" ") || "—";
+const gtxt = g => g.map((v, i) => v ? S[i] + (v === 1 ? "" : (v > 0 ? "+" : "") + v) : "").filter(Boolean).join(" ") || "—";
+const statHead = () => S.map(s => `<th class="n">${s}</th>`).join("");
+const cells = (g, mark) => g.map(v => `<td class="n ${mark && v > 0 ? "g1" : ""} ${mark && v < 0 ? "neg" : ""}">${v === 0 && mark ? "" : (mark && v > 0 ? "+" + v : v)}</td>`).join("");
+const sum8 = a => a.slice(1).reduce((x, y) => x + y, 0);
+
+function past(c) {
+  let cur = c.join.stats.slice();
+  let h = `<table><tr><th>等级</th><th>职业</th><th>类型</th>${statHead()}<th class="n">合计</th><th>说明</th></tr>`;
+  h += `<tr><td>Lv${c.join.lv}</td><td>${esc(c.join.cls)}</td><td>入队</td>${cells(cur)}<td class="n">${sum8(cur)}</td><td class="note">${esc(c.join.note || "初始能力（不含职业补正）")}</td></tr>`;
+  if (c.gap) {
+    cur = cur.map((v, i) => v + c.gap.g[i]);
+    h += `<tr class="gap"><td>Lv${c.gap.frm}→${c.gap.to}</td><td></td><td>合计 ${c.gap.n} 级</td>${cells(c.gap.g, true)}<td class="n">${sum8(cur)}</td><td class="note">这段没有观星记录，只能算合计（现在裸能力 − 入队 − 记录里的加点）。可以照迪的做法从种子往回逐级推。</td></tr>`;
+  }
+  for (const r of c.past) {
+    if (r.kind === "升级") cur = cur.map((v, i) => v + r.g[i]);
+    if (r.kind === "考试") { h += `<tr class="exam"><td>${esc(r.lv)}</td><td>${esc(r.cls)}</td><td>考试</td>${S.map(() => '<td class="n"></td>').join("")}<td class="n">${sum8(cur)}</td><td class="note">${esc(r.note)}</td></tr>`; continue; }
+    h += `<tr><td>${esc(r.lv)}</td><td>${esc(r.cls)}</td><td>升级</td>${cells(r.g, true)}<td class="n">${sum8(cur)}</td><td class="note">${esc(r.note)}</td></tr>`;
+  }
+  h += `<tr class="sum"><td colspan="3">截图时裸能力</td>${cells(c.now.raw)}<td class="n">${sum8(c.now.raw)}</td><td class="note">逐级累计和下面「现在」对得上</td></tr>`;
+  return h + "</table>";
+}
+
+function now(c) {
+  const n = c.now;
+  let h = `<table><tr><th></th>${statHead()}<th class="n">合计</th><th>说明</th></tr>`;
+  h += `<tr><td>11-05 截图 Lv${n.lv} ${esc(n.cls)}</td>${cells(n.shot)}<td class="n">${sum8(n.shot)}</td><td class="note">游戏里显示的</td></tr>`;
+  h += `<tr><td>− ${esc(n.cls)}补正</td>${cells(n.bonus.map(v => -v), true)}<td class="n"></td><td class="note">职业自带的能力补正（不显示▲）</td></tr>`;
+  h += `<tr><td>− ▲加成</td>${cells(n.boost.map(v => -v), true)}<td class="n"></td><td class="note">${esc(n.boost_note)}</td></tr>`;
+  h += `<tr class="sum"><td>= 裸能力 Lv${n.lv}</td>${cells(n.raw)}<td class="n">${sum8(n.raw)}</td><td class="note"></td></tr>`;
+  if (n.after.some(v => v)) h += `<tr><td>+ 截图后已升的级</td>${cells(n.after, true)}<td class="n"></td><td class="note">观星记录里截图之后的升级</td></tr><tr class="sum"><td>= 规划起点 Lv${n.start_lv}</td>${cells(n.raw_start)}<td class="n">${sum8(n.raw_start)}</td><td class="note"></td></tr>`;
+  return h + "</table>";
+}
+
+function optsTable(o, chosen) {
+  return `<details class="opts"><summary>全部职业这一级（${o.length}）</summary><table>` +
+    o.map(x => `<tr class="${x.cls === chosen ? "chosen" : ""}"><td>${esc(x.cls)}${x.owned ? "" : ' <span class="pill p-need">需考</span>'}</td><td class="n">${x.s}分</td><td>${esc(gt(x.g))}</td></tr>`).join("") + "</table></details>";
+}
+
+function future(c) {
+  let h = `<table><tr><th>步</th><th>等级</th><th>用/考</th>${statHead()}<th class="n">分</th><th>建议和原因</th><th>其他选项</th></tr>`;
+  for (const f of c.future) {
+    if (f.kind === "考试") {
+      const name = f.cls || "随便考一个";
+      let verdict;
+      if (f.chance != null) verdict = f.roll < f.chance ? `<span class="pill p-ok">游戏显示 ${f.chance}%：能过</span>` : `<span class="pill p-bad">游戏显示 ${f.chance}%：会失败</span>`;
+      else verdict = f.cls ? `<span class="pill p-warn">成功率要 &gt; ${f.roll}%</span>` : `<span class="pill p-ok">过不过都行</span>`;
+      const why = f.cls ? `考${esc(f.cls)}，判定值 ${f.roll}%。${esc(f.pred)}${f.pred ? "。" : ""}这一步不升级，跳过的这级最多 ${f.s} 分（${esc(gtxt(f.g))}）。` : `纯跳过：这一级最多只有 ${f.s} 分（${esc(gtxt(f.g))}），用一次考试吃掉它，把好种子留给后面的级。判定值 ${f.roll}%。`;
+      h += `<tr class="exam"><td class="n">${f.step}</td><td></td><td>考试：${esc(name)}</td>${S.map(() => '<td class="n"></td>').join("")}<td class="n"></td><td class="note">${verdict} ${why}</td><td>${optsTable(f.opts, "")}</td></tr>`;
+    } else {
+      h += `<tr><td class="n">${f.step}</td><td>${esc(f.lv)}</td><td>${esc(f.cls)}</td>${cells(f.g, true)}<td class="n">${f.s}</td><td class="note">${esc(f.why)}</td><td>${optsTable(f.opts, f.cls)}</td></tr>`;
+    }
+  }
+  h += `<tr class="sum"><td colspan="3">到 Lv35 合计</td>${cells(c.total, true)}<td class="n">${c.wtotal}</td><td class="note">共 ${c.future.filter(f => f.kind === "升级").length} 级、考 ${c.exams_n} 次</td><td></td></tr>`;
+  h += `<tr class="sum"><td colspan="3">Lv35 裸能力</td>${cells(c.end)}<td class="n">${sum8(c.end)}</td><td class="note">不含补正和▲</td><td></td></tr>`;
+  return h + "</table>";
+}
+
+function exams(c) {
+  if (!c.exam_benefit.length) return `<p class="para m">推荐路线不考试。</p>`;
+  let h = `<table><tr><th>步</th><th>考试</th><th class="n">判定值</th>${statHead()}<th class="n">点数</th><th class="n">加权分</th><th>和谁比</th></tr>`;
+  for (const e of c.exam_benefit) {
+    h += `<tr><td class="n">${e.step}</td><td>${esc(e.cls)}${e.req ? ' <span class="pill p-warn">必考</span>' : ""}</td><td class="n">${e.roll}%</td>${cells(e.diff, true)}<td class="n">${e.pts > 0 ? "+" : ""}${e.pts}${e.pts_hp ? `<br><small>HP ${e.pts_hp > 0 ? "+" : ""}${e.pts_hp}</small>` : ""}</td><td class="n">${e.wdiff > 0 ? "+" : ""}${e.wdiff}</td><td class="note">不考这次时的最优路线（少考一次${e.alt_exams.length ? "，改考 " + esc(e.alt_exams.join("、")) : ""}）</td></tr>`;
+  }
+  return h + "</table>";
+}
+
+
+const team = document.getElementById("team");
+for (const t of META.txt.team) { const li = document.createElement("li"); li.textContent = t; team.appendChild(li); }
+const ov = document.getElementById("ov");
+for (const name of META.order) {
+  const s = META.sum[name], t = META.txt.chars[name]; if (!s || !t) continue;
+  const d = s.ws - s.wexp;
+  const hi = s.rows.filter(r => r.diff >= 4).sort((a, b) => b.diff - a.diff).slice(0, 3);
+  const lo = s.rows.filter(r => r.diff <= -2).sort((a, b) => a.diff - b.diff).slice(0, 3);
+  const node = r => `${esc(r.lv)} ${esc(r.cls)}：${esc(r.g)}（${r.s} 分，平均 ${r.es}）`;
+  const c = document.createElement("div"); c.className = "card";
+  c.innerHTML = `<h4><a href="#c-${META.slug[name]}">${esc(name)}</a><small>Lv${s.lv}→35 · ${s.ws} 分 / 平均 ${s.wexp}（${d >= 0 ? "+" : ""}${d.toFixed(0)}）</small></h4>
+    <p>${esc(t.intro)}</p>
+    <p><span class="lab">要知道</span>${esc(t.know)}</p>
+    <div class="nodes"><span><span class="pill p-ok">超出预期</span></span>${hi.length ? hi.map(r => `<span>${node(r)}</span>`).join("") : "<span>没有特别突出的一级</span>"}</div>
+    <div class="nodes"><span><span class="pill p-bad">低于预期</span></span>${lo.length ? lo.map(r => `<span>${node(r)}</span>`).join("") : "<span>没有明显的烂级</span>"}</div>
+    <p><span class="lab">对策</span>${esc(t.plan)}</p>`;
+  c.querySelector("a").addEventListener("click", () => { const el = document.getElementById("c-" + META.slug[name]); el && el.setAttribute("open", ""); });
+  ov.appendChild(c);
+}
+
+const list = document.getElementById("list");
+for (const name of META.order) {
+  const c = D[name]; if (!c) continue;
+  const d = document.createElement("details"); d.className = "char"; d.id = "c-" + META.slug[name];
+  const exs = c.exam_benefit.map(e => e.cls.replace("（随便考，当跳过）", "跳过")).join("、") || "不考";
+  d.innerHTML = `<summary><span class="cname">${esc(name)}</span><span class="cmeta">现在 <b>Lv${c.now.lv} ${esc(c.now.cls)}</b> · 裸能力合计 <b>${sum8(c.now.raw)}</b> · 到 Lv35 再涨 <b>${sum8(c.total)}</b> 点（${c.wtotal} 分）· 考试：<b>${esc(exs)}</b></span><span class="chev">▶</span></summary>
+  <div class="body">
+    <section><h3>入队与过去每一级<small>${name === "迪托利希" ? "种子反推，Lv1 起逐级" : "第一条观星记录起逐级，之前只有合计"}</small></h3><div class="scroll">${past(c)}</div></section>
+    <section><h3>现在<small>截图 → 去掉加成 → 裸能力</small></h3><div class="scroll">${now(c)}</div></section>
+    <section><h3>到 Lv35 每一级<small>已有：${esc(c.owned.join("、"))}；可考：${esc(c.options.join("、"))}</small></h3><div class="scroll">${future(c)}</div>
+      <p class="para m">考试上限 0/1/2/3/4 次时的最高加权分：${c.plan_scores.map(v => v ?? "不可行").join(" / ")}。多考一次至少多 8 分才建议。</p></section>
+    <section><h3>每次考试到 Lv35 的收益<small>推荐路线 − 不考这次的最优路线</small></h3><div class="scroll">${exams(c)}</div></section>
+  </div>`;
+  list.appendChild(d);
+}
+const h = location.hash.slice(1);
+const t = h && document.getElementById(h);
+(t || list.firstElementChild)?.setAttribute("open", "");
+document.getElementById("foot").textContent = META.foot;
+</script>

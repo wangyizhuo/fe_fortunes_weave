@@ -1,0 +1,7 @@
+__pycache__/
+.pytest_cache/
+*.bak*
+out/
+.layout_ok
+levelup/rng/csolve/brute
+levelup/html/

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第七章重开规划</title>
+<style>
+:root { --bg:#f2f3f6; --panel:#fff; --ink:#1c2233; --muted:#5d6680; --line:#dde1ea; --accent:#b0802a; --tint:#fff6e2; --good:#1d7a46; --good-bg:#e3f4ea; --bad:#b23a3a; --bad-bg:#fbe7e7; --warn:#a55a14; --warn-bg:#fdf0e1; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#12151d; --panel:#1b202b; --ink:#e6e9f2; --muted:#9aa3ba; --line:#2c3342; --accent:#d9a84e; --tint:#2d2717; --good:#5fd08f; --good-bg:#17301f; --bad:#f08080; --bad-bg:#3a1c1c; --warn:#ec8f5a; --warn-bg:#33231a; } }
+:root[data-theme="dark"] { --bg:#12151d; --panel:#1b202b; --ink:#e6e9f2; --muted:#9aa3ba; --line:#2c3342; --accent:#d9a84e; --tint:#2d2717; --good:#5fd08f; --good-bg:#17301f; --bad:#f08080; --bad-bg:#3a1c1c; --warn:#ec8f5a; --warn-bg:#33231a; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.55 "Noto Sans SC", system-ui, sans-serif; }
+main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 60px; }
+h1 { font-size: 22px; margin: 0 0 6px; } h2 { font-size: 16px; margin: 0 0 8px; } h3 { font-size: 17px; margin: 0; } h4 { font-size: 13px; color: var(--muted); margin: 14px 0 6px; }
+.lede { color: var(--muted); max-width: 80ch; margin: 0 0 14px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin: 12px 0; min-width: 0; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { padding: 5px 7px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; font-size: 13px; }
+th { color: var(--muted); font-weight: 600; font-size: 12px; } .n { text-align: right; }
+td.note { white-space: normal; min-width: 220px; color: var(--muted); }
+.up { color: var(--good); font-weight: 700; } .dn { color: var(--bad); font-weight: 700; }
+.tag { display: inline-block; font-size: 11.5px; font-weight: 700; border-radius: 4px; padding: 1px 6px; }
+.t0 { background: var(--good-bg); color: var(--good); } .t1 { background: var(--tint); color: var(--accent); } .t2 { background: var(--line); color: var(--muted); }
+.head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.head .r { margin-left: auto; color: var(--muted); font-size: 13px; }
+.route { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
+.route span { font-size: 12px; padding: 2px 6px; border-radius: 4px; background: var(--line); }
+.route span.ex { background: var(--warn-bg); color: var(--warn); font-weight: 600; }
+.route span.ch { background: var(--tint); color: var(--accent); font-weight: 600; }
+ul.caveat { margin: 6px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; } ul.caveat li { margin: 3px 0; }
+details summary { cursor: pointer; color: var(--muted); font-size: 13px; margin-top: 8px; }
+</style></head><body><main>
+<h1>第七章重开规划</h1>
+<p class="lede">培养计划的副本：假设读第 7 章开始的存档，从当时的等级和能力（11-07 上传的部队表截图）重新规划到 Lv35，和「第 7 章之后实际走的 + 现在的 Lv35 规划」比。规则和主计划一样：点数 + 加权分、成长均衡、初级考试多 4 分才考、中级多 8 分、每人至少考进一个中级、平民可用、力量每到 5 的倍数（体格 +1）额外 +3 分（加权分里已含）。种子取观星记录里第 7 章那个等级的位置，所以每一级的结果是确定的。</p>
+<div id="app"></div>
+</main>
+<script>
+const D = /*DATA*/{};
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const sgn = v => (v > 0 ? "+" : "") + v;
+const ST = D.st, S = D.short;
+const wsum = (g, w) => g.reduce((a, v, i) => a + v * w[i], 0);
+function gtxt(g) { return ST.filter((_, i) => g[i]).join(" ") || "—"; }
+function routeHtml(rows, cur) {
+  let prev = cur;
+  return rows.map(r => { if (r.act !== "升级") return `<span class="ex">Lv${r.lv} 考${esc(r.cls || "试")}${r.roll != null ? " " + r.roll + "%" : ""}</span>`;
+    const ch = r.cls !== prev; prev = r.cls; return `<span class="${ch ? "ch" : ""}" title="${esc(gtxt(r.g))}">${r.lv}→${r.lv + 1} ${esc(r.cls)}</span>`; }).join("");
+}
+function card(n) {
+  const c = D.chars[n], w = c.w, o = c.old, nw = c.new, [vt, vtxt] = c.verdict;
+  const tcls = vt.startsWith("值得") ? "t0" : vt.startsWith("可以") ? "t1" : "t2";
+  const diff = nw.g.map((v, i) => v - o.g[i]);
+  const row = (name, g, cls) => `<tr class="${cls || ""}"><td>${name}</td>${g.map(v => `<td class="n">${v}</td>`).join("")}<td class="n">${g.reduce((a, b) => a + b, 0)}</td><td class="n">${wsum(g, w)}</td></tr>`;
+  const end = (g) => c.stats.map((v, i) => v + g[i]);
+  const exRows = nw.rows.filter(r => r.act !== "升级").map(r => `<tr><td>Lv${r.lv}</td><td>${esc(r.cls)}</td><td class="n">${r.roll}%</td><td class="n">${r.cls === "跳过" ? "—" : (r.pct == null ? "?" : r.pct + "%")}</td><td class="note">${r.cls === "跳过" ? "随便考个初级，只为跳过这一级" : r.pct == null ? "成功率没有估计" : r.pct >= 100 ? "按 11-05 技能估计稳过" : "游戏显示要高于判定值才过"}</td></tr>`).join("");
+  return `<section class="card" id="${esc(n)}"><div class="head"><h3>${esc(n)}</h3><span class="tag ${tcls}">${esc(vt)}</span><span class="r">第 7 章 Lv${c.lv} ${esc(c.cls)} · 当时已有：${esc(c.own.join("、"))}</span></div>
+    <p style="margin:8px 0 0">${esc(vtxt)}</p>
+    <h4>到 Lv35 共涨（第 7 章起）</h4><div class="scroll"><table><tr><th></th>${ST.map(k => `<th class="n">${k}</th>`).join("")}<th class="n">点数</th><th class="n">加权分</th></tr>
+      <tr><td>能力权重</td>${w.map(v => `<td class="n">${v}</td>`).join("")}<td></td><td></td></tr>
+      ${row("原来（实际已走 + 现规划，考 " + c.oldExams + " 次）", o.g)}${row("重开（考 " + nw.exams + " 次）", nw.g)}
+      <tr><td><b>重开 − 原来</b></td>${diff.map(v => `<td class="n ${v > 0 ? "up" : v < 0 ? "dn" : ""}">${v ? sgn(v) : "·"}</td>`).join("")}<td class="n ${nw.pts - o.pts > 0 ? "up" : nw.pts - o.pts < 0 ? "dn" : ""}">${sgn(nw.pts - o.pts)}</td><td class="n ${nw.sc - o.sc > 0 ? "up" : nw.sc - o.sc < 0 ? "dn" : ""}">${sgn(nw.sc - o.sc)}</td></tr>
+      ${row("Lv35 能力（原来）", end(o.g))}${row("Lv35 能力（重开）", end(nw.g))}</table></div>
+    <p class="hint" style="margin:6px 0 0;color:var(--muted);font-size:12.5px">同样考 ${c.sameExams.k} 次的话重开最多 ${c.sameExams.sc} 分（${sgn(c.sameExams.sc - o.sc)}）。各考试次数的最高分：${nw.budgets.map((v, k) => v == null ? "" : k + " 次 " + v).filter(Boolean).join("、")}。</p>
+    <h4>重开路线（橙色 = 考试，金色 = 换职业，鼠标停留看加点）</h4><div class="route">${routeHtml(nw.rows, c.cls)}</div>
+    ${exRows ? `<h4>重开路线的考试</h4><div class="scroll"><table><tr><th>等级</th><th>考</th><th class="n">判定值</th><th class="n">估计成功率</th><th>说明</th></tr>${exRows}</table></div>` : ""}
+    <details><summary>原来实际走的 + 现规划</summary><div class="route">${routeHtml(o.rows.map(r => ({ ...r, lv: r.lv ?? "?" })), c.cls)}</div></details>
+  </section>`;
+}
+const sum = D.order.map(n => { const c = D.chars[n], d = c.new.sc - c.old.sc, [vt] = c.verdict;
+  return `<tr><td><a href="#${esc(n)}">${esc(S[n])}</a></td><td>Lv${c.lv} ${esc(c.cls)}</td><td class="n">${c.old.pts} / ${c.old.sc}</td><td class="n">${c.new.pts} / ${c.new.sc}</td><td class="n ${d > 0 ? "up" : d < 0 ? "dn" : ""}">${sgn(c.new.pts - c.old.pts)} / ${sgn(d)}</td><td class="n">${c.oldExams} → ${c.new.exams}</td><td class="n">${sgn(c.sameExams.sc - c.old.sc)}</td><td><span class="tag ${vt.startsWith("值得") ? "t0" : vt.startsWith("可以") ? "t1" : "t2"}">${esc(vt)}</span></td></tr>`; }).join("");
+document.getElementById("app").innerHTML = `<section class="card"><h2>总览（第 7 章 → Lv35，点数 / 加权分）</h2><div class="scroll"><table><tr><th>角色</th><th>第 7 章</th><th class="n">原来</th><th class="n">重开</th><th class="n">重开 − 原来</th><th class="n">考试次数</th><th class="n">同样次数时</th><th>结论</th></tr>${sum}</table></div>
+  <ul class="caveat">
+    <li>变好最多的是<b>杨界（+45，但考 6 次）</b>和<b>法毕欧（+22）</b>，其次艾丝（+12）、米迦（+9）；伊欧、迪、奇洛基本一样。</li>
+    <li>「旧」= 现在的路线（11-08 起：杨界、奇洛、努蒂奴、法毕欧从截图等级重新规划，同分时先考能过的新职业；非 P0 角色多考一次要多 12（中级）/ 6（初级、跳过）分）。法毕欧、艾丝多出来的分里，有一部分是靠多考试跳过（法毕欧 3→7 次）。</li>
+    <li>努蒂奴、乌尔坦德不在第 7 章的部队表里，没有重排。</li>
+    <li>考试成功率是按 11-05 的技能估的；第 7 章时技能更低，要在游戏里看实际显示的成功率（高于判定值才过）。</li>
+    <li>迪、米迦第 7 章那一级有一次考试（迪考剑客、米迦考士兵），按截图里已经是该职业，算作第 7 章之前已经考完。</li>
+  </ul></section>` + D.order.map(card).join("");
+</script></body></html>
