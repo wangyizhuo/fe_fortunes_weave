@@ -293,5 +293,10 @@
   "date": "2026-11-11",
   "rule": "考前训练有成本：每练 1 段（E→E+ 算 1 段）扣 0.5 加权分（暂定），计入净值；米迦不再为 魔+1 去练黑魔术考诅咒师",
   "where": "planner.TRAIN_PTS_PER_RANK / plan_net；tests/test_plan_rules.py"
+ },
+ {
+  "date": "2026-11-11",
+  "rule": "训练成本定为每段 0.5 加权分（Yizhuo 确认米迦考弓箭手；弓箭手/猎兵分界 0.9）",
+  "where": "planner.TRAIN_PTS_PER_RANK"
  }
 ]

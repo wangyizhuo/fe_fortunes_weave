@@ -368,7 +368,7 @@ class Planner:
                 tc[c] = tc.get(c, self.permit_gold.get(_TIER.get(c, "中级"), 500) / gpp) + 2
         return None
 
-    # 11-11 Yizhuo：考前练技能也有成本。暂定每练 1 段（E→E+、E+→D…）扣 0.5 加权分（待 Yizhuo 确认）
+    # 11-11 Yizhuo：考前练技能也有成本。每练 1 段（E→E+、E+→D…）扣 0.5 加权分（Yizhuo 定：米迦考弓箭手，分界 0.9）
     TRAIN_PTS_PER_RANK = 0.5
 
     def train_ranks(self, acts):
