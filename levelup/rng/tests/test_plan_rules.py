@@ -3,7 +3,7 @@ import os, sys, functools
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pytest
 from run_plans import make_planner, EXAM_OPTIONS, PERMIT_GOLD
-from make_sheet import TARGET, MAX_EXAMS
+from run_plans import TARGET, MAX_EXAMS
 from planner import plan_all
 
 NAMES = list(EXAM_OPTIONS)

@@ -1,4 +1,7 @@
 """给主表「成长路线」生成格式请求（Sheets batchUpdate），存为 fmt_req.json。列布局见 make_sheet.py。"""
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))  # 一次性脚本放在 tools/，数据和模块在上一层
+_os.chdir(_sys.path[0])
 import json
 import re
 

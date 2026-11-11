@@ -10,7 +10,7 @@ import contextlib, io
 import run_plans as R
 from planner import plan_all, STATS, exam_tiers
 with contextlib.redirect_stdout(io.StringIO()):
-    from make_sheet import MAX_EXAMS
+    from run_plans import MAX_EXAMS
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MAX45 = 6

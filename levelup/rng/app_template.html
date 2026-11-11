@@ -420,7 +420,7 @@ function routesBox(c, w, row) {
     ${li(1, `正常（${esc(prev || "现在的职业")}）`, g1 ? gtxt(g1) : "现在的职业不在已有职业里")}
     ${li(2, "转职（换已有职业再升级）", g2 ? `${esc(g2.classes.filter((x, i) => g2.owned[i]).join(" / "))}：${gtxt(g2)}${g1 && g2.score <= g1.score ? "，不比正常好" : ""}` : "没有别的已有职业")}
     ${li(3, "考试（考新职业，这一级不升级）", ex.length ? ex.map(e => `${e.cls === pn ? "<b>" : ""}${esc(e.cls)}${e.cls === pn ? "</b>" : ""}（${esc(e.tier)}）：${prob(e)}`).join("<br>") : "没有能考的新职业")}
-    ${li(4, "跳过（300G 初级手形，这一级不升级）", `${basic ? `用${esc(basic.cls)}的考试：${prob(basic)}，过不过都行` : `随便考一场：判定值 ${rt.roll}%，过不过都行`}<br>这一级最高 ${best} 分，未来 15 级平均 ${rt.avg15}（10 级 ${rt.avg10}），${gap > 0 ? `低 ${gap} 分（${Math.round(100 * gap / rt.avg15)}%）` : `高 ${-gap} 分`}；现在的跳过阈值 ${rt.thr} 分`)}
+    ${li(4, "跳过（300G 初级手形，这一级不升级）", `${basic ? `用${esc(basic.cls)}的考试：${prob(basic)}，过不过都行` : `用任意一场初级考试跳过：判定值 ${rt.roll}%，过不过都行`}<br>这一级最高 ${best} 分，未来 15 级平均 ${rt.avg15}（10 级 ${rt.avg10}），${gap > 0 ? `低 ${gap} 分（${Math.round(100 * gap / rt.avg15)}%）` : `高 ${-gap} 分`}；现在的跳过阈值 ${rt.thr} 分`)}
   </ol></details>`;
 }
 function nextItem(c, w, row, i) {
@@ -473,7 +473,7 @@ function gateBox() {
     const s = first.s;
     if (first.r.exam) {
       const n = examName(s);
-      stop.push([n ? "exam" : "skip", a, n ? `先考<b>${esc(n)}</b>（判定值 ${s.roll}%${s.pct != null ? `，估计显示 ${s.pct}%` : ""}）` : `先<b>跳过</b>一级（随便考一场，判定值 ${s.roll}%，过不过都行）`]);
+      stop.push([n ? "exam" : "skip", a, n ? `先考<b>${esc(n)}</b>（判定值 ${s.roll}%${s.pct != null ? `，估计显示 ${s.pct}%` : ""}）` : `先<b>跳过</b>一级（用任意一场初级考试，判定值 ${s.roll}%，过不过都行）`]);
     } else if (first.missing) {
       stop.push(["miss", a, `要用<b>${esc(first.choice)}</b>，但还没考到，先考`]);
     } else if (w.cur && first.choice !== w.cur) {
@@ -503,10 +503,10 @@ function viewMine() {
   rows.sort((a, b) => b[0].localeCompare(a[0]));
   const live = rows.length ? `<div class="scroll"><table><tr><th>角色</th><th class="n">哪一步</th><th>你的决定</th><th class="n">时间（UTC）</th></tr>${rows.map(r => r[1]).join("")}</table></div>`
     : `<p class="txt">${focus ? "这个角色" : "页面上"}还没有确认或改过的选择。</p>`;
-  const rules = DECISIONS.filter(d => !focus || d[1] === "全部" || d[1] === SHORT[CH.find(c => slug(c) === focus).name]).slice().reverse();
+  const rules = DECISIONS.filter(d => !focus || d.scope === "全部" || (d.scope || "").split("、").includes(SHORT[CH.find(c => slug(c) === focus).name])).slice().reverse();
   return `<p class="lede">你做过的所有决定都在这里：上面是在页面上点的（实时保存，所有设备同步），下面是你定下的规划规则（我每次改规则都会加一条）。</p>
   <section class="alerts"><h2>页面上的选择（${rows.length}）</h2>${live}</section>
-  <section class="alerts"><h2>规划规则（${rules.length}）</h2><div class="scroll"><table><tr><th class="n">日期</th><th>范围</th><th>规则</th></tr>${rules.map(d => `<tr><td class="n">${esc(d[0])}</td><td>${esc(d[1])}</td><td class="note">${esc(d[2])}</td></tr>`).join("")}</table></div></section>`;
+  <section class="alerts"><h2>规划规则（${rules.length}）</h2><div class="scroll"><table><tr><th class="n">日期</th><th>范围</th><th>规则</th></tr>${rules.map(d => `<tr><td class="n">${esc(d.date)}</td><td>${esc(d.scope)}</td><td class="note">${esc(d.rule)}</td></tr>`).join("")}</table></div></section>`;
 }
 
 // ---------- 吃饭（11-08）：选 1～2 个主角，找每道菜都 perfect 的同桌 ----------
@@ -672,7 +672,7 @@ function decBox() {
 }
 function examTable(c) {
   const eb = c.hist && c.hist.exam_benefit; if (!eb || !eb.length) return `<p class="txt">推荐路线不考试。</p>${midTable(c)}`;
-  return `<div class="scroll"><table><tr><th>考试</th><th class="n">判定值</th><th>到 Lv35 比不考它的最好路线</th><th class="n">点数</th><th class="n">加权分</th><th class="n">多花</th><th class="n">净值差</th></tr>${eb.map(e => `<tr><td>${esc(e.cls.replace("（随便考，当跳过）", "跳过"))}${e.req ? " · 必考" : ""}</td><td class="n">${e.roll}%</td><td>${esc(gtxt(e.diff))}${e.alt_exams ? `<span class="hint">（对比路线：${esc(e.alt_exams.join("、") || "不考")}）</span>` : ""}</td><td class="n">${sgn(psum(e.diff))}</td><td class="n">${sgn(e.wdiff)}</td><td class="n">${e.dgold == null ? "—" : e.dgold + "G"}</td><td class="n ${e.net > 0 ? "up" : e.net < 0 ? "dn" : ""}">${e.net == null ? "—" : sgn(e.net)}</td></tr>`).join("")}</table></div>
+  return `<div class="scroll"><table><tr><th>考试</th><th class="n">判定值</th><th>到 Lv35 比不考它的最好路线</th><th class="n">点数</th><th class="n">加权分</th><th class="n">多花</th><th class="n">净值差</th></tr>${eb.map(e => `<tr><td>${esc(e.cls)}${e.req ? " · 必考" : ""}</td><td class="n">${e.roll}%</td><td>${esc(gtxt(e.diff))}${e.alt_exams ? `<span class="hint">（对比路线：${esc(e.alt_exams.join("、") || "不考")}）</span>` : ""}</td><td class="n">${sgn(psum(e.diff))}</td><td class="n">${sgn(e.wdiff)}</td><td class="n">${e.dgold == null ? "—" : e.dgold + "G"}</td><td class="n ${e.net > 0 ? "up" : e.net < 0 ? "dn" : ""}">${e.net == null ? "—" : sgn(e.net)}</td></tr>`).join("")}</table></div>
   <p class="hint" style="margin:4px 0 0">考试 0～4 次的最高加权分：${c.hist.plan_scores.map(v => v ?? "—").join(" / ")}。</p>${midTable(c)}`;
 }
 function midTable(c) {   // 11-08 晚（规则式）：硬加一个中级考试，净值变多少

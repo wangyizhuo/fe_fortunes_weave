@@ -1,16 +1,14 @@
-import re
-from run_plans import P0
 """成长规划 HTML：观星记录（备份）+ 规划器的未来路线，一页。
 每个角色：11-05 截图的等级/职业/能力/技能（页面可改）；每一步：这一步种子下所有选择（加点相同的职业并成一组）、
 加点项数、加权分；已完成按当前等级自动判断，也可手动勾。状态存 artifact db，可一键同步到主表「成长进度」。"""
-import json, os
+import json, os, re
 OUT_DIR = os.environ.get("FE_OUT_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "out")   # 生成的网页放这里
 os.makedirs(OUT_DIR, exist_ok=True)
 
 from fe_growth import STATS, level_up, exam_roll
 from planner import plan_all, score
 from run_plans import OWNED, EXAM_OPTIONS, REQUIRED, CURRENT, W, data, make_planner, records, units
-from make_sheet import TARGET, MAX_EXAMS, ORDER
+from run_plans import TARGET, MAX_EXAMS, ORDER, P0, tier_of  # noqa: F401
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SKILLS = ["剑术", "枪术", "斧术", "箭术", "格斗术", "黑魔术", "白魔术", "指挥术", "步兵术", "马术", "重装术", "飞行术"]
@@ -195,7 +193,7 @@ for name in ORDER:
         c["route"] = seg
         c["trend"] = {"cur": cur_cls, "n": p.n_levels, "stay": stay, "best0": best0}
         c["planTotal"] = plan.total   # 11-11：一览的加权分用规划器的合计（含体格）
-        c["tier"] = "P0" if name in P0 else "P2" if name in ("努蒂奴", "乌尔坦德") else "P1"
+        c["tier"] = tier_of(name)
         c["str0"] = p.str_start   # 11-11：页面合计也算体格 +3（力跨过 5 的倍数）
         have = list(OWNED[name])
         lv = p.level
@@ -284,9 +282,10 @@ for r in _dt[1:]:
 _LORDS = {"蕾达": [2,2,0,0,2,2,2,0,2,2,2,2], "凯伊": [3,3,2,3,3,2,3,3,3,3,3,2], "赛奥朵拉": [2,2,1,2,2,1,2,2,1,0,2,1]}
 MEALS = {"dishes": [h.split(" - ")[1] for h in _dt[0][13:25]], "people": _ppl,
          "lords": [{"name": k, "tier": "领主", "pref": v, "in": False} for k, v in _LORDS.items()]}
-data_json = json.dumps({"meals": MEALS, "chars": chars, "stats": STATS, "skills": SKILLS, "team": TXT["team"], "decisions": json.load(open(os.path.join(HERE, "decisions.json"), encoding="utf-8"))}, ensure_ascii=False)
+data_json = json.dumps({"meals": MEALS, "chars": chars, "stats": STATS, "skills": SKILLS, "decisions": json.load(open(os.path.join(HERE, "decisions.json"), encoding="utf-8"))}, ensure_ascii=False)
 tpl = open(os.path.join(HERE, "app_template.html"), encoding="utf-8").read()
 out = tpl.replace("/*ROUTE_DATA*/{}", data_json)
+open(os.path.join(OUT_DIR, "page_data.json"), "w", encoding="utf-8").write(data_json)   # checks.py 读它检查页面数据
 assert out != tpl
 os.makedirs(os.path.join(HERE, "..", "html"), exist_ok=True)
 open(os.path.join(HERE, "..", "html", "成长路线.html"), "w", encoding="utf-8").write(out)

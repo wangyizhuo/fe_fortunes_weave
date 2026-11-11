@@ -3,7 +3,7 @@ import json, os, copy
 from planner import plan_all
 from run_plans import make_planner, EXAM_OPTIONS, EXAM_CHANCE
 import run_plans
-from make_sheet import ORDER
+from run_plans import ORDER
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CLS = {c["name"]: c for c in json.load(open(os.path.join(HERE, "fw_classes.json"), encoding="utf-8"))}
@@ -56,6 +56,9 @@ def run(name, chance_override=None):
         run_plans.EXAM_CHANCE[name] = chance_override
     try:
         p = make_planner(name, 35)
+        if chance_override is not None:
+            # make_planner 会把「要先练技能」的考试的成功率去掉（假定练够了）；这里要模拟「不练直接考」，所以直接覆盖
+            p.exam_chance = dict(chance_override)
         plans, k = plan_all(p, 4)
     finally:
         run_plans.EXAM_CHANCE.clear(); run_plans.EXAM_CHANCE.update(saved)
@@ -120,18 +123,19 @@ for name in ORDER:
         key = (name, e["cls"])
         if key in RISKY:
             ov = dict(EXAM_CHANCE.get(name, {})); ov[e["cls"]] = 0
-            _, fp, fk = run(name, ov)
-            best = max((x for x in fp[:k + 1] if x is not None), key=lambda x: x.total)
+            pf, fp, fk = run(name, ov)
+            best = fp[fk]
             loss = base.total - best.total
+            dnet = round(pf.plan_net(best.raw_actions, best.total, best.gold) - p.plan_net(base.raw_actions, base.total, base.gold), 1)
             g = GRIND.get(key)
             opts.append({"kind": "risk", "title": f"{e['cls']}考试：先练技能再考", "cost": (f"{g[0]}：{g[1]}；{g[2]}" if g else "练技能"),
-                         "gain": loss, "pts": sum(gdiff(bt, tot(best))), "diff": f"不练直接考：成功率{RISKY[key]}，判定值 {e['roll']}%；挂了到 Lv35 少 {sum(gdiff(bt, tot(best)))} 点、{loss} 分（{gtxt(gdiff(bt, tot(best)))}）",
-                         "total": base.total, "rec": "建议" if loss >= 8 else "可选",
-                         "why": f"等于花几次训练买保险：挂的话少 {loss} 分" + ("，值得" if loss >= 8 else "，损失不大，可以赌"), "cur": False})
+                         "gain": loss, "pts": sum(gdiff(bt, tot(best))), "diff": f"不练直接考：成功率{RISKY[key]}，判定值 {e['roll']}%；挂了以后最好的路线到 Lv35：点数 {sum(gdiff(tot(best), bt)):+d}、加权分 {-loss:+d}（{gtxt(gdiff(tot(best), bt))}）",
+                         "total": base.total, "rec": "建议" if loss >= 8 else "可选", "dnet": dnet,
+                         "why": f"不练直接考会挂：少 {loss} 分、净值 {dnet:+}" + ("，值得先练" if loss >= 8 else "，损失不大"), "cur": False})
         elif key in GRIND:
             g = GRIND[key]
             opts.append({"kind": "risk", "title": f"{e['cls']}考试：确认技能", "cost": f"{g[0]}：{g[1]}；{g[2]}", "gain": 0, "pts": 0,
-                         "diff": f"判定值 {e['roll']}%，技能够了基本必过", "total": base.total, "rec": "建议", "why": "成本很低，顺手做", "cur": False})
+                         "diff": f"判定值 {e['roll']}%，技能够了基本必过", "total": base.total, "rec": "建议", "why": "成本很低，顺手做", "cur": False, "dnet": 0.0})
     # 3) 练技能解锁现在考不过的职业
     for (n, cls), g in GRIND.items():
         if n != name or cls in [e["cls"] for e in bex]:
@@ -178,6 +182,9 @@ for name in ORDER:
             if o["kind"] == "budget" and not o["cur"]:
                 o["rec"] = "可选" if o["dnet"] > 0 else "不建议"
                 o["why"] = f"加权分 {o['gain']:+d}，多花 {o['money'] - bm:+d}G，净值 {o['dnet']:+.1f}"
+            elif o["kind"] == "grind":   # 11-11：和其他选项一样按净值给建议（以前是旧的「多 8 分」门槛）
+                o["rec"] = "可选" if o["dnet"] > 0 else "不建议"
+                o["why"] += f"；多花 {o['money'] - bm:+d}G，净值 {o['dnet']:+.1f}（还没扣练技能的回合）"
         if o.get("cur"):
             o["why"] = "按跳过条件逐级走出来的路线"
     out[name] = {"base": base.total, "k": k, "opts": opts}

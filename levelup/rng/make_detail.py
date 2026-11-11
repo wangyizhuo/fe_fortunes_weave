@@ -12,12 +12,10 @@ import os
 from fe_growth import STATS, exam_roll, level_up
 from planner import gains_text, plan_all
 from run_plans import (OWNED, EXAM_OPTIONS, REQUIRED, EXAM_CHANCE, CURRENT, data, make_planner,
-                       records)
+                       records, ORDER, MAX_EXAMS)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-TARGET = 35
-MAX_EXAMS = 4
-ORDER = ["迪托利希", "法毕欧", "艾丝梅拉尔达", "米迦艾拉", "杨界", "伊欧", "奇洛伊卡", "努蒂奴", "乌尔坦德"]
+TARGET = 35   # 这里只做 35 级明细（int）；全局 TARGET 在 run_plans
 KEYS = ["hp", "str", "mag", "spd", "dex", "def", "res", "lck", "cha"]
 
 _chars = {c["name"]: c for c in json.load(open(os.path.join(HERE, "fw_characters.json"), encoding="utf-8"))}

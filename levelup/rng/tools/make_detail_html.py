@@ -1,8 +1,11 @@
 """detail.json + detail_template.html → ../html/角色成长档案.html"""
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))  # 一次性脚本放在 tools/，数据和模块在上一层
+_os.chdir(_sys.path[0])
 import json, os
-OUT_DIR = os.environ.get("FE_OUT_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "out")   # 生成的网页放这里
+OUT_DIR = os.environ.get("FE_OUT_DIR") or os.path.join(_sys.path[0], "..", "..", "out")   # 生成的网页放这里
 os.makedirs(OUT_DIR, exist_ok=True)
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from make_detail import ORDER
 D = json.load(open(os.path.join(HERE, "detail.json"), encoding="utf-8"))
 SLUG = {"迪托利希": "di", "法毕欧": "fabio", "艾丝梅拉尔达": "esme", "米迦艾拉": "mika", "杨界": "yang",
