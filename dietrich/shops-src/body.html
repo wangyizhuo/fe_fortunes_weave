@@ -1,0 +1,53 @@
+<div class="wrap">
+<h1>迪托利希线商店表</h1>
+<p class="sub">按城镇列出能买的武器、教本、手形、武具箱和道具，价格用 G 计。数据来自日文 AppMedia 武器一览，道具类补充自 allthings.how、GameWith、altema 和 game8。</p>
+<div class="notes"><ul>
+<li>大地图是各主角共用的。有一个英文来源说迪托利希一开始陆路就全开，但只有这一个来源，有的港口要坐船才能去，到不了就跳过。</li>
+<li>价格是 AppMedia 写的原价。allthings.how 有的价格只有原价的七成（3000 写成 2100），可能是打折时记下的。</li>
+<li>库存有上限。上级试验手形和魔法教本写明了每章补货，其他东西没找到明确说法。</li>
+<li>中文物品名和地名是按日文名自己翻的，可能和官方中文版不一样。认不出来时看后面的日文原名。</li>
+<li>帝都武器屋的价格是 AppMedia 原文，没写库存。GameWith 把它写在凯伊篇里，迪托利希线能不能买，要在游戏里确认。</li>
+</ul></div>
+<div class="bar">
+<input id="q" type="search" placeholder="搜物品或城镇，比如 银剑、梅盖拉、克骑" aria-label="搜索">
+<div class="chips" id="chips"></div>
+</div>
+<div class="count" id="count"></div>
+<div id="list"></div>
+<section class="town" id="barterSec">
+<h2>范达尔商会（以物易物） <small>帝都达格席翁；戒指在海都阿莱克托</small></h2>
+<div class="tw"><table><thead><tr><th>物品</th><th>换取材料（日文原名）</th><th>备注</th></tr></thead><tbody id="barter"></tbody></table></div>
+</section>
+<footer>来源：<a href="https://appmedia.jp/?p=80411827">AppMedia 武器一覧</a> · <a href="https://allthings.how/?p=264418">allthings.how</a> · <a href="https://gamewith.jp/fefw/579046">GameWith ショップ一覧</a> · <a href="https://fortunesweave.co.uk/map">fortunesweave.co.uk 地图</a> · altema · game8.jp · k1persia · raiderking。整理于 2026-10-31。</footer>
+</div>
+<script>
+const DATA = __DATA__;
+const CATS=['全部','剑','枪','斧','弓','拳套','盾','教本','手形','箱','道具'];
+let cat='全部';
+const chips=document.getElementById('chips');
+CATS.forEach(c=>{const b=document.createElement('button');b.className='chip';b.textContent=c;b.setAttribute('aria-pressed',c===cat);b.onclick=()=>{cat=c;[...chips.children].forEach(x=>x.setAttribute('aria-pressed',x.textContent===cat));render()};chips.appendChild(b)});
+const esc=s=>String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+function hi(s,q){s=esc(s);if(!q)return s;const i=s.indexOf(esc(q));return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+esc(q).length)+'</mark>'+s.slice(i+esc(q).length)}
+function render(){
+  const q=document.getElementById('q').value.trim();
+  let html='',n=0,tn=0;
+  for(const t of DATA.towns){
+    const townHit=q&&(t.cn+t.en+t.jp).toLowerCase().includes(q.toLowerCase());
+    const items=t.items.filter(it=>(cat==='全部'||it.cat===cat)&&(!q||townHit||(it.cn+it.jp+it.note).toLowerCase().includes(q.toLowerCase())));
+    if(!items.length)continue; tn++; n+=items.length;
+    html+=`<section class="town"><h2>${hi(t.cn,q)} <small>${esc(t.jp.replace('-武器屋',''))}${t.en?' · '+esc(t.en):''}</small></h2><div class="tw"><table><thead><tr><th>类别</th><th>物品</th><th style="text-align:right">价格</th><th style="text-align:right">库存</th><th>备注</th><th>来源</th></tr></thead><tbody>`;
+    for(const it of items){
+      const st=it.stock==='1'?'<span class="one">1</span>':esc(it.stock||'—');
+      html+=`<tr><td><span class="cat">${esc(it.cat)}</span></td><td>${hi(it.cn,q)} <span class="jp">${esc(it.jp)}</span></td><td class="num">${it.price?it.price.toLocaleString():'—'}</td><td class="num">${st}</td><td class="tag">${hi(it.note,q)}</td><td class="src">${esc(it.src)}</td></tr>`;
+    }
+    html+='</tbody></table></div></section>';
+  }
+  document.getElementById('list').innerHTML=html||'<p class="empty">没有找到。换个关键词，或者把类别切回「全部」。</p>';
+  document.getElementById('count').textContent=`${tn} 个城镇，${n} 条`;
+  const b=DATA.barter.filter(x=>(cat==='全部'||x.type===cat||(cat==='道具'&&x.type==='戒指'))&&(!q||(x.cn+x.jp+x.cost+x.note).includes(q)));
+  document.getElementById('barterSec').hidden=!b.length;
+  document.getElementById('barter').innerHTML=b.map(x=>`<tr><td>${hi(x.cn,q)} <span class="jp">${esc(x.jp)}</span></td><td>${esc(x.cost)}</td><td class="tag">${esc(x.note)}</td></tr>`).join('');
+}
+document.getElementById('q').addEventListener('input',render);
+render();
+</script>

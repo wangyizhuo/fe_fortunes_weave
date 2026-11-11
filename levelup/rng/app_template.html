@@ -1,0 +1,1090 @@
+<title>万紫千红成长路线</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;800&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* 布局：顶部固定的视图切换（下一步 / 到 Lv35 / 回顾）+ 角色筛选；每个视图里每人一张卡。下一步卡片只放最近 3 步和要做的动作 */
+:root {
+  --bg: #f2f3f6; --panel: #ffffff; --ink: #1c2233; --muted: #5d6680; --line: #dde1ea;
+  --accent: #b0802a; --accent-ink: #7a5614; --tint: #fff6e2;
+  --exam: #c4632d; --exam-bg: #fbeee5;
+  --good: #1f6a3a; --good-bg: #e2f1e6; --bad: #b3372b; --bad-bg: #fbe6e3; --done: #9aa1b3;
+  --serif: "Noto Serif SC", "Songti SC", "SimSun", serif;
+  --sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12151d; --panel: #1b202b; --ink: #e6e9f2; --muted: #9aa3ba; --line: #2c3342;
+  --accent: #d9a84e; --accent-ink: #f0c879; --tint: #2d2717; --exam: #ec8f5a; --exam-bg: #33231a;
+  --good: #8fdcaa; --good-bg: #1c3526; --bad: #f19a8f; --bad-bg: #3a1f1c; --done: #5e6679; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #12151d; --panel: #1b202b; --ink: #e6e9f2; --muted: #9aa3ba; --line: #2c3342;
+  --accent: #d9a84e; --accent-ink: #f0c879; --tint: #2d2717; --exam: #ec8f5a; --exam-bg: #33231a;
+  --good: #8fdcaa; --good-bg: #1c3526; --bad: #f19a8f; --bad-bg: #3a1f1c; --done: #5e6679; color-scheme: dark; }
+
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.55; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--panel); }
+.gut { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.in { max-width: 1040px; margin: 0 auto; }
+header.top { background: var(--panel); border-bottom: 1px solid var(--line); padding-block: 14px 0; }
+.hrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+h1 { font-family: var(--serif); font-weight: 800; font-size: 22px; margin: 0; text-wrap: balance; }
+.live { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
+.live i { width: 8px; height: 8px; border-radius: 50%; background: var(--done); }
+.live.on i { background: var(--good); } .live.warn i { background: var(--exam); } .live.warn { color: var(--exam); }
+.hrow .sp { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+button { font: inherit; cursor: pointer; }
+.btn { font-size: 13px; font-weight: 700; border-radius: 6px; padding: 5px 12px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+.btn.pri { background: var(--accent-ink); color: var(--panel); border-color: var(--accent-ink); }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#syncStatus { font-size: 12.5px; color: var(--muted); } #syncStatus.warn { color: var(--exam); }
+nav.tabs { display: flex; gap: 2px; margin-top: 10px; overflow-x: auto; }
+nav.tabs a { text-decoration: none; color: var(--muted); padding: 8px 14px 9px; border-bottom: 3px solid transparent; white-space: nowrap; font-weight: 500; }
+nav.tabs a small { display: block; font-size: 11px; font-weight: 400; }
+nav.tabs a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--accent); }
+.who { display: flex; flex-wrap: wrap; gap: 6px; padding-block: 14px 0; }
+.pick { color: var(--good); white-space: nowrap; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 12px; }
+.who button { font-size: 13px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 3px 12px; }
+.who button[aria-pressed="true"] { border-color: var(--accent); background: var(--tint); color: var(--accent-ink); font-weight: 700; }
+main { padding-block: 16px 64px; display: grid; gap: 16px; }
+.lede { margin: 0; color: var(--muted); font-size: 13.5px; max-width: 75ch; }
+
+.alerts { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; display: grid; gap: 6px; }
+.alerts h2 { margin: 0; font-size: 13px; letter-spacing: .06em; color: var(--muted); font-weight: 700; }
+.alerts ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 13.5px; }
+.alerts li.oddc { grid-template-columns: 64px 1fr; }
+.alerts li { display: grid; grid-template-columns: 52px 1fr; gap: 8px; align-items: baseline; }
+.alerts ul.decs { gap: 0; }
+.alerts ul.decs li { display: block; padding: 10px 0; border-top: 1px solid var(--line); }
+.alerts ul.decs li:first-child { border-top: 0; }
+.decs .dh { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.decs .dh small { color: var(--muted); }
+.decs .note { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+.decs [data-dec="ok"] { margin-top: 6px; }
+.decs .ok { color: var(--good); }
+.btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); padding: 2px 10px; }
+.decs .opts { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 4px 12px; }
+.sev { font-size: 11px; font-weight: 700; text-align: center; border-radius: 3px; padding: 0 4px; }
+.sev.bad { color: var(--bad); background: var(--bad-bg); } .sev.warn { color: var(--exam); background: var(--exam-bg); } .sev.ok { color: var(--good); background: var(--good-bg); }
+.alerts a { color: inherit; font-weight: 700; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 470px), 1fr)); gap: 14px; align-items: start; }
+.cho td.note { min-width: 12em; }
+.rec { font-size: 11.5px; font-weight: 700; border-radius: 3px; padding: 0 6px; white-space: nowrap; }
+.rec.r1 { color: var(--good); background: var(--good-bg); } .rec.r2 { color: var(--exam); background: var(--exam-bg); } .rec.r3 { color: var(--muted); background: var(--line); } .rec.r0 { color: var(--accent-ink); background: var(--tint); }
+tr.cur td { background: var(--tint); }
+.grid.one { grid-template-columns: 1fr; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
+.ch { padding: 12px 16px 10px; display: grid; gap: 6px; border-bottom: 1px solid var(--line); }
+.ct { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.ct h3 { margin: 0; font-family: var(--serif); font-size: 19px; font-weight: 800; }
+.ct .lv { font-family: var(--mono); color: var(--accent-ink); font-size: 13px; }
+.ct .r { margin-left: auto; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.meter { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--accent); }
+ul.flags { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; font-size: 13px; }
+ul.flags li { display: grid; grid-template-columns: 44px 1fr; gap: 8px; align-items: baseline; }
+ol.chg { margin: 0; padding-left: 1.6em; display: grid; gap: 2px; font-size: 13px; }
+ol.chg b { font-weight: 700; }
+.route { display: flex; flex-wrap: wrap; gap: 4px 4px; align-items: center; font-size: 12.5px; }
+.rt { border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; white-space: nowrap; }
+.rt.x { color: var(--exam); border-color: currentColor; background: var(--exam-bg); }
+.ar { color: var(--muted); }
+.wts { display: flex; flex-wrap: wrap; gap: 3px; font-size: 11.5px; color: var(--muted); }
+.wts span { border: 1px solid var(--line); border-radius: 3px; padding: 0 5px; font-variant-numeric: tabular-nums; }
+.wts b { font-family: var(--mono); font-weight: 500; margin-left: 3px; color: var(--ink); }
+.wts .w4, .wts .w5 { border-color: var(--accent); background: var(--tint); }
+.wts .w4 b, .wts .w5 b { color: var(--accent-ink); }
+.wts::before { content: "能力权重"; font-weight: 700; margin-right: 4px; }
+.intro { font-size: 13px; color: var(--muted); margin: 0; }
+.intro.note2 { margin-top: 6px; color: var(--fg, inherit); }
+
+ol.next { list-style: none; margin: 0; padding: 0; }
+ol.next > li { padding: 10px 16px 12px; border-bottom: 1px solid var(--line); display: grid; gap: 6px; }
+ol.next > li:last-child { border-bottom: 0; }
+ol.next > li.first { background: var(--tint); box-shadow: inset 3px 0 0 var(--accent); }
+ol.next > li.exam.first { background: var(--exam-bg); box-shadow: inset 3px 0 0 var(--exam); }
+.when { font-size: 11.5px; font-weight: 700; letter-spacing: .04em; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; }
+.when .src { font-weight: 400; }
+.what { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.what b { font-size: 16px; }
+.what .sc { margin-left: auto; font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; color: var(--muted); }
+.pick { color: var(--good); white-space: nowrap; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chips span { font-size: 12px; padding: 0 7px; border-radius: 3px; background: var(--good-bg); color: var(--good); }
+.rts { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 6px; font-size: 12.5px; }
+.rts li { display: grid; grid-template-columns: 22px 1fr; gap: 6px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); min-width: 0; }
+.rts li > div { min-width: 0; overflow-wrap: anywhere; }
+.rts li.pk { border-color: var(--good); }
+.rts .rn { font-weight: 700; color: var(--muted); }
+.rts .tag { font-size: 11px; padding: 0 6px; border-radius: 9px; background: var(--good-bg); color: var(--good); }
+.rts b.ok { color: var(--good); } .rts b.bad { color: var(--bad); }
+.hint { font-size: 12.5px; color: var(--muted); }
+.notes { margin-top: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; font-size: 13px; color: var(--muted); }
+.notes > summary { cursor: pointer; color: var(--ink); font-weight: 600; }
+.notes ul { margin: 8px 0 2px; padding-left: 18px; display: grid; gap: 5px; }
+.notes b { color: var(--ink); font-weight: 500; }
+.ovt td, .ovt th { white-space: nowrap; }
+.ovt td.note { white-space: normal; min-width: 14em; }
+.hint b { color: var(--ink); font-weight: 500; }
+.vs { font-size: 11.5px; font-weight: 700; border-radius: 3px; padding: 0 5px; }
+.vs.up { color: var(--good); background: var(--good-bg); } .vs.dn { color: var(--bad); background: var(--bad-bg); } .vs.eq { color: var(--muted); background: var(--line); }
+.exambox { font-size: 12.5px; display: grid; gap: 4px; border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; background: var(--panel); }
+.exambox label { display: inline-flex; gap: 4px; align-items: center; }
+.exambox input { width: 72px; }
+.ok { color: var(--good); font-weight: 700; } .bad { color: var(--bad); font-weight: 700; }
+.acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+details.more { font-size: 12.5px; color: var(--muted); }
+details.more > summary { cursor: pointer; width: fit-content; }
+.opts { display: grid; gap: 2px; margin-top: 4px; }
+.opt { display: grid; grid-template-columns: 18px 1fr auto; gap: 6px; align-items: start; border: 1px solid transparent; border-radius: 5px; padding: 3px 6px; cursor: pointer; }
+.opt input { margin: 2px 0 0; accent-color: var(--accent); }
+.opt:has(input:checked) { border-color: var(--accent); background: var(--tint); color: var(--ink); }
+.opt .oc { font-weight: 700; color: var(--ink); }
+.opt .on { font-family: var(--mono); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.need { color: var(--exam); }
+.cfoot { padding: 8px 16px 12px; font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); display: grid; gap: 8px; }
+.cfoot b { font-family: var(--mono); color: var(--ink); font-weight: 500; }
+.empty { padding: 12px 16px; font-size: 13px; color: var(--muted); }
+.changed { font-size: 11px; color: var(--exam); font-weight: 700; }
+
+select, input[type=number] { font: inherit; font-size: 13px; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: 2px 6px; min-width: 0; font-variant-numeric: tabular-nums; }
+.state { display: grid; gap: 8px; padding-top: 4px; }
+.state h4 { margin: 0; font-size: 11.5px; color: var(--muted); letter-spacing: .04em; }
+.ownd { display: flex; flex-wrap: wrap; gap: 6px; }
+.ownd label { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px 1px 6px; cursor: pointer; color: var(--ink); }
+.ownd label:has(input:checked) { border-color: var(--accent); background: var(--tint); }
+.ownd input { accent-color: var(--accent); margin: 0; }
+.skg { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.skg label { display: grid; gap: 1px; font-size: 12px; }
+
+/* 规划视图 */
+.sec { padding: 10px 16px 12px; border-bottom: 1px solid var(--line); display: grid; gap: 8px; }
+.sec:last-child { border-bottom: 0; }
+.sec h4 { margin: 0; font-size: 12px; color: var(--muted); letter-spacing: .05em; font-weight: 700; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.sec h4 small { font-weight: 400; letter-spacing: 0; }
+.txt { margin: 0; font-size: 13.5px; }
+.txt .lab { font-size: 11.5px; color: var(--muted); margin-right: 6px; font-weight: 700; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; width: 100%; }
+th, td { padding: 3px 5px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+th { font-weight: 500; color: var(--muted); font-size: 11.5px; }
+td.n, th.n { text-align: right; font-family: var(--mono); }
+td.note { white-space: normal; color: var(--muted); min-width: 14em; }
+tr.exam td { background: var(--exam-bg); }
+tr.sum td { font-weight: 700; border-top: 2px solid var(--line); }
+tr.w td { color: var(--muted); }
+td.up { color: var(--good); font-weight: 700; } td.dn { color: var(--bad); font-weight: 700; }
+td.wk { background: var(--bad-bg); } td.st { background: var(--good-bg); }
+.tl { display: flex; align-items: flex-end; gap: 3px; height: 92px; padding-top: 8px; }
+.tl div { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 2px; font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tl i { display: block; width: 100%; border-radius: 2px 2px 0 0; background: var(--line); position: relative; }
+.tl i.up { background: var(--good); } .tl i.dn { background: var(--bad); } .tl i.eq { background: var(--muted); }
+.tl i.x { background: none; border: 1.5px dashed var(--exam); height: 14px !important; border-radius: 3px; }
+.tl i.done { opacity: .35; }
+.tl i b { position: absolute; left: 0; right: 0; height: 2px; background: var(--ink); opacity: .55; }
+.tl span { white-space: nowrap; overflow: hidden; max-width: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; background: var(--k); }
+ol.full { list-style: none; margin: 0; padding: 0; }
+ol.full li { display: grid; grid-template-columns: 24px 74px 1fr auto; gap: 2px 10px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 13px; align-items: start; }
+ol.full li.done { color: var(--done); }
+.fullwrap li.done { display: none; }
+.fullwrap:has(.sd:checked) li.done { display: grid; }
+.showdone { display: inline-flex; gap: 6px; align-items: center; font-size: 12.5px; color: var(--muted); margin: 4px 0 6px; cursor: pointer; }
+ol.full li.done .opts { display: none; }
+ol.full li.isx { background: color-mix(in srgb, var(--exam-bg) 60%, transparent); }
+ol.full input[type=checkbox] { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--accent); }
+ol.full .lvl { font-family: var(--mono); font-size: 12.5px; }
+ol.full .sc { font-family: var(--mono); text-align: right; }
+@media (max-width: 560px) {
+  ol.full li { grid-template-columns: 24px 1fr auto; }
+  ol.full li > .body { grid-column: 2 / 4; }
+  .skg { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+details.char { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+details.char > summary { list-style: none; cursor: pointer; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+details.char > summary::-webkit-details-marker { display: none; }
+details.char > summary h3 { margin: 0; font-family: var(--serif); font-size: 18px; }
+details.char > summary span { font-size: 12.5px; color: var(--muted); }
+details.char[open] > summary { border-bottom: 1px solid var(--line); }
+.foot { font-size: 12px; color: var(--muted); max-width: 90ch; }
+
+/* 长线观星 */
+.lvsum { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 10px 0; }
+.lvsum div { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+.lvsum b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+.lvsum small { color: var(--muted); font-size: 12px; }
+.lvsum .hi b { color: var(--good); } .lvsum .lo b { color: var(--bad); }
+.strip { display: flex; flex-wrap: wrap; gap: 2px; margin: 6px 0; }
+.strip span { width: 22px; height: 26px; border-radius: 3px; font-size: 10px; display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; color: var(--ink); background: var(--line); }
+.strip span.g3 { background: var(--good-bg); color: var(--good); font-weight: 700; } .strip span.g1 { background: var(--bad-bg); color: var(--bad); }
+.strip span.sk { outline: 2px solid var(--exam); text-decoration: line-through; opacity: .75; }
+.strip span.out { opacity: .35; }
+.skctl { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; margin: 8px 0; }
+.skctl input { width: 180px; }
+.adv { margin: 6px 0 0; padding-left: 18px; font-size: 13.5px; } .adv li { margin: 3px 0; }
+.hgrid { display: inline-flex; flex-direction: column; gap: 2px; font-size: 12px; }
+.hrow { display: flex; align-items: center; gap: 2px; } .hk { width: 34px; color: var(--muted); } .hn { width: 26px; text-align: right; font-variant-numeric: tabular-nums; }
+.hrow i { width: 11px; height: 14px; border-radius: 2px; background: var(--line); } .hrow i.on { background: var(--accent, #6a5acd); } .hrow i.s { margin-left: 5px; }
+td.n.up { color: var(--good); } td.n.dn { color: var(--bad); }
+.hrow i.w { width: 11px; font-size: 7px; font-style: normal; line-height: 14px; text-align: center; overflow: hidden; color: var(--muted); }
+.hrow i.w.g { background: var(--good-bg); color: var(--good); } .hrow i.w.b { background: var(--bad-bg); color: var(--bad); }
+th.grp { text-align: center; border-bottom: 1px solid var(--line); } td.cur, th.cur { background: var(--tint); font-weight: 700; }
+</style>
+
+<header class="top gut">
+  <div class="in">
+    <div class="hrow">
+      <h1>万紫千红成长路线</h1>
+      <span class="live" id="live"><i></i><span id="status">正在读取记录…</span></span>
+      <span class="sp"><span id="syncStatus"></span><button class="btn pri" id="syncBtn" type="button">同步到 Google Sheet</button></span>
+    </div>
+    <nav class="tabs" aria-label="视图">
+      <a href="#meal" data-v="meal">吃饭<small>谁一起吃能 perfect</small></a>
+      <a href="#next" data-v="next">下一步<small>今天升级前看</small></a>
+      <a href="#plan" data-v="plan">到 Lv35<small>中长期规划</small></a>
+      <a href="#past" data-v="past">回顾<small>入队到现在</small></a>
+      <a href="#l45" data-v="l45">到 Lv45<small>可转一次上级</small></a>
+      <a href="#long" data-v="long">长线观星<small>未来 40 级</small></a>
+      <a href="#mine" data-v="mine">我的决定<small>所有确认和规则</small></a>
+    </nav>
+  </div>
+</header>
+<div class="gut"><div class="in">
+  <div class="who" id="who" role="group" aria-label="只看某个角色"></div>
+  <main id="view"></main>
+  <p class="foot" id="foot">数据：种子反推（levelup/rng）、11-05 截图、fire-emblem-fw.site / global.fireemblem.top 的初始能力和职业补正。考试成败由种子决定：游戏显示的成功率高于判定值才能过。勾选、选择、成功率、等级都实时保存，所有打开这页的人看到同一份；Google Sheet 只在点「同步」时更新。平均对比、考试收益、长期选择是按推荐路线算的，在页面上改了选择后它们不会跟着变。</p>
+</div></div>
+
+<script>
+const DATA = /*ROUTE_DATA*/{};
+const SHEET_ID = "1sNlvXfRDNIhF0cVGieTvqqBEfn10JgG6mM0dOzOm0cg", SHEET_TAB = "成长进度", SERVER = "Google Sheets";
+const RANKS = ["E", "E+", "D", "D+", "C", "C+", "B", "B+", "A", "A+", "S", "S+"];
+const SLUG = { "迪托利希": "dietrich", "法毕欧": "fabio", "米迦艾拉": "michaela", "杨界": "yokai", "努蒂奴": "nutino", "乌尔坦德": "urtand",
+  "艾丝梅拉尔达": "esmeralda", "伊欧": "io", "奇洛伊卡": "chiloica" };
+const SHORT = { "迪托利希": "迪", "法毕欧": "法毕欧", "米迦艾拉": "米迦", "杨界": "杨界", "努蒂奴": "努蒂奴", "乌尔坦德": "乌尔坦德", "艾丝梅拉尔达": "艾丝", "伊欧": "伊欧", "奇洛伊卡": "奇洛" };
+const CH = DATA.chars, ST = DATA.stats, DECISIONS = DATA.decisions || [];
+const slug = c => SLUG[c.name] || "c" + CH.indexOf(c);
+const keyOf = (c, s) => slug(c) + "-" + s.key;
+const stepName = s => examName(s) ? `考试（到 ${examName(s)}${s.train ? "，先练 " + s.train.join("、") : ""}）` : "跳过";   // 11-09 术语；11-11 考前要练的技能
+let prog = {}, info = {}, db = null, writing = false, pending = false;
+const dirty = new Map();
+let view = "next", focus = "";
+
+const esc = t => String(t ?? "").replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+const sgn = v => (v > 0 ? "+" : "") + v;
+const wsum = (g, w) => g.reduce((a, v, i) => a + v * (w[i] || 0), 0);
+const psum = g => g.reduce((a, v) => a + v, 0);
+const PW = (p, w) => `${p} 点 · ${w} 分`;
+const charInfo = c => { const i = info[slug(c)] || {}; return { level: i.level ?? c.level, owned: i.owned ?? [...c.owned], skills: { ...c.skills, ...(i.skills || {}) } }; };
+const recOf = s => s.exam ? "exam" : s.cls;
+const choiceOf = (c, s) => (prog[keyOf(c, s)] || {}).choice || recOf(s);
+function resultOf(s, choice) {
+  if (choice === "exam") return { exam: true };
+  const g = s.opts.find(o => o.classes.includes(choice));
+  if (g) return g;
+  if (choice === s.cls || choice === s.seenCls) return { classes: [choice], gains: s.gains, cnt: s.cnt, score: s.score };
+  return { classes: [choice], gains: [], cnt: 0, score: 0 };
+}
+const chip = g => `<span>${esc(g.includes("+") ? g : g + "+1")}</span>`;
+const statVec = gains => { const v = Array(9).fill(0); for (const g of gains) { const [k, n] = g.split("+"); const i = ST.indexOf(k); if (i >= 0) v[i] += n ? +n : 1; } return v; };
+const gtxt = g => g.map((v, i) => v ? ST[i] + sgn(v) : "").filter(Boolean).join(" ") || "—";
+const vsTag = (sc, es) => { if (es == null) return ""; const d = Math.round((sc - es) * 10) / 10; const k = d >= 2 ? "up" : d <= -2 ? "dn" : "eq"; return `<span class="vs ${k}" title="平均运气这一级约 ${es} 分">${d >= 2 ? "好于平均" : d <= -2 ? "低于平均" : "平均"} ${sgn(d)}</span>`; };
+const examName = s => s.exam && s.cls ? s.cls : "";
+
+const notesBox = items => `<details class="notes"><summary>说明（规则和名词解释）</summary><ul>${items.map(x => `<li>${x}</li>`).join("")}</ul></details>`;
+const N_PTS = "<b>点数</b> = 不加权的加点总数；<b>加权分</b> = 每项加点 × 该角色的能力权重（权重在每张卡名字下面）。所有合计都同时给这两个数。";
+function walk(c) {
+  const ci = charInfo(c), out = [];
+  let lv = c.steps.length ? (c.steps[0].frm ?? c.planFrom) : ci.level;
+  for (const s of c.steps) {
+    const choice = choiceOf(c, s), r = resultOf(s, choice);
+    out.push({ s, choice, r, frm: lv, to: r.exam ? null : lv + 1 });
+    if (!r.exam) lv++;
+  }
+  let laterDone = false;
+  for (let i = out.length - 1; i >= 0; i--) {
+    const row = out[i], auto = row.r.exam ? (laterDone || !!row.s.autoDone) : row.to <= ci.level;
+    if (!row.r.exam) laterDone = auto;
+    const p = prog[keyOf(c, row.s)] || {};
+    row.auto = auto; row.done = p.done === undefined ? auto : p.done;
+  }
+  // 后面要用的职业，前面必须已经考到：按顺序累计已有职业（考试按估计/填的成功率判断过不过）
+  const have = new Set(ci.owned);
+  for (const row of out) {
+    const s = row.s;
+    if (row.r.exam) {
+      if (s.exam && s.cls) {
+        const ch = (prog[keyOf(c, s)] || {}).chance;
+        const pass = ch != null ? s.roll < ch : (s.pct == null || s.roll < s.pct);
+        if (pass) have.add(s.cls);
+        row.fail = !pass;
+      }
+    } else if (!row.done && s.src === "plan" && !have.has(row.choice)) row.missing = true;
+  }
+  // 当前职业：最后一个已完成的升级用的职业
+  let cur = c.curClass;
+  // 截图那一级的职业以截图为准；只有截图之后做完的升级才改当前职业
+  for (const row of out) if (row.done && !row.r.exam && (c.level == null || row.to > c.level)) cur = row.choice;
+  return { rows: out, endLevel: lv, ci, cur };
+}
+function remain(c, w) {
+  const add = Array(9).fill(0); let cnt = 0, sc = 0, lv = 0;
+  // 11-11：合计也算体格加分（力每跨过一个 5 的倍数 +3），和规划器一致
+  let str = c.str0 ?? null, tg = 0;
+  for (const row of w.rows) {
+    if (row.r.exam) continue;
+    const v = statVec(row.r.gains);
+    if (row.s.src === "plan" && str != null) {
+      const b = 3 * (Math.floor((str + v[1]) / 5) - Math.floor(str / 5));
+      str += v[1];
+      if (!row.done) tg += b;
+    }
+    if (!row.done) { v.forEach((x, i) => add[i] += x); cnt += row.r.cnt; sc += row.r.score; lv++; }
+  }
+  return { add, cnt, sc: sc + tg, tg, lv };
+}
+function examVerdict(c, s) {
+  const ch = (prog[keyOf(c, s)] || {}).chance;
+  return { ch, pass: ch == null ? null : s.roll < ch };
+}
+
+// ---------- 下一步 ----------
+function alerts() {
+  const out = [];
+  for (const c of CH) {
+    if (focus && slug(c) !== focus) continue;
+    const w = walk(c), nx = w.rows.filter(r => !r.done);
+    if (!nx.length) continue;
+    const a = `<a href="#next" data-go="${slug(c)}">${esc(SHORT[c.name])}</a>`;
+    const first = nx[0];
+    if (first.r.exam) {
+      const n = examName(first.s), v = examVerdict(c, first.s);
+      if (v.pass === false && n) out.push(["bad", `${a}：考${esc(n)}会失败（游戏 ${v.ch}% ≤ 判定值 ${first.s.roll}%）。先把技能练上去再考，或者告诉我重算。`]);
+      else out.push(["warn", `${a}：先${n ? "考试（到 " + esc(n) + "）" : "跳过"}，做完再升级。先升级的话种子会错位，后面的路线全要重算。`]);
+    }
+    const miss = nx.find(r => r.missing);
+    if (miss) out.push(["bad", `${a}：Lv${miss.frm}→${miss.to} 要用${esc(miss.choice)}，但前面没有考到它（或那场考试估计过不了）。在这之前加一场考试，或者换个职业。`]);
+    for (const row of nx.slice(0, 4)) {
+      if (!row.r.exam || !examName(row.s)) continue;
+      const v = examVerdict(c, row.s);
+      if (v.pass == null && row.s.pct != null && row.s.pct < 100 && row.s.roll >= row.s.pct - 20) out.push([row.s.roll >= row.s.pct ? "bad" : "warn", `${a}：${esc(row.s.cls)} 判定值 ${row.s.roll}%，按现在的技能估计显示 ${row.s.pct}%${row.s.roll >= row.s.pct ? "，过不了" : "，很险"}。先练技能，或把游戏里看到的成功率填进来。`]);
+    }
+  }
+  if (!out.length) out.push(["ok", "最近几步没有要特别注意的。"]);
+  return `<section class="alerts" aria-label="要注意"><h2>升级前先看</h2><ul>${out.map(([k, t]) => `<li><span class="sev ${k}">${k === "bad" ? "会失败" : k === "warn" ? "注意" : "正常"}</span><span>${t}</span></li>`).join("")}</ul></section>`;
+}
+function optsHtml(c, s, row, idp) {
+  const name = idp + "o-" + keyOf(c, s);
+  const groups = s.opts.length ? s.opts : (s.seenCls ? [{ classes: [s.seenCls], owned: [true], gains: s.gains, cnt: s.cnt, score: s.score }] : []);
+  const o = groups.map(g => {
+    const val = g.classes.includes(s.cls) ? s.cls : (g.classes.find((x, i) => g.owned[i]) || g.classes[0]);
+    const have = s.src === "record" ? g.classes : g.classes.filter((x, i) => g.owned[i]);
+    const need = s.src === "record" ? [] : g.classes.filter((x, i) => !g.owned[i]);
+    const label = esc(have.join(" / ")) + (need.length ? `<span class="need">${have.length ? "　" : ""}要先考试：${esc(need.join(" "))}</span>` : "");
+    const on = row.choice === val || (!row.r.exam && row.r.classes && resultOf(s, val) === row.r);
+    return `<label class="opt"><input type="radio" name="${name}" value="${esc(val)}" data-f="pick"${have.length ? "" : ' data-need="1"'}${on ? " checked" : ""}><span><span class="oc">${label}</span>　${esc(g.gains.join(" ") || "—")}</span><span class="on">${g.cnt}点 · ${g.score}分</span></label>`;
+  }).join("");
+  const ex = `<label class="opt"><input type="radio" name="${name}" value="exam" data-f="pick"${row.r.exam ? " checked" : ""}><span><span class="oc">${examName(s) ? "考试（到 " + esc(examName(s)) + "）" : "跳过"}</span>　这一步不升级${s.roll != null ? `（判定值 ${s.roll}%）` : ""}</span><span class="on"></span></label>`;
+  return `<div class="opts" role="radiogroup" aria-label="这一步的选择">${o}${ex}</div><button type="button" class="btn pri" data-apply data-cur="${esc(row.r.exam ? "exam" : row.choice)}" data-lv="${s.exam ? "这一步" : `Lv${row.frm}→${row.to}`}" style="display:none">确认更改</button>`;
+}
+function examBox(c, s) {
+  const v = examVerdict(c, s), n = examName(s);
+  const verdict = v.pass == null ? "" : v.pass ? `<span class="ok">✓ 能过${n ? "，拿到" + esc(n) : ""}</span>`
+    : `<span class="bad">✗ 会失败${n ? "，拿不到" + esc(n) + "，后面用它的步骤要改，告诉我重算" : "，没关系，只当跳过"}</span>`;
+  return `<div class="exambox"><div>判定值 <b>${s.roll}%</b>：游戏里显示的成功率要<b>高于</b>它才能过。过不过种子都前进一步。${s.pct != null ? ` 按 11-05 技能和考试时的等级估计显示 <b>${s.pct}%</b>${s.pct > s.roll ? "，能过" : "，过不了"}。` : ""}</div>
+    <div><label>游戏显示 <input type="number" min="0" max="100" step="0.01" data-f="chance" id="ch-${keyOf(c, s)}" value="${v.ch ?? ""}" aria-label="游戏显示的考试成功率">%</label> ${verdict}</div></div>`;
+}
+function routesBox(c, w, row) {
+  const s = row.s, rt = s.routes;
+  if (!rt || !s.opts || !s.opts.length) return "";
+  const idx = w.rows.indexOf(row);
+  let prev = w.cur;
+  for (let i = idx - 1; i >= 0; i--) { const x = w.rows[i]; if (!x.r.exam) { prev = x.choice; break; } }
+  const own = s.opts.filter(g => g.owned.some(Boolean));
+  const g1 = own.find(g => g.classes.includes(prev));
+  const g2 = own.filter(g => g !== g1).sort((a, b) => b.score - a.score)[0];
+  const best = Math.max(...own.map(g => g.score));
+  const pick = row.r.exam ? (examName(s) ? 3 : 4) : (g1 && g1.classes.includes(row.choice) ? 1 : 2);
+  const prob = e => e.pct == null ? `成功率未知（游戏显示要高于 ${rt.roll}% 才过）`
+    : `成功率 <b>${e.pct}%</b>（估计）· 这个种子<b class="${e.pass ? "ok" : "bad"}">${e.pass ? "过" : "不过"}</b>`;
+  const gtxt = g => g ? `${esc(g.gains.join(" ") || "—")}（${PW(g.cnt, g.score)}）` : "—";
+  const pn = examName(s) || "", ex = [...rt.exams.filter(e => e.cls === pn), ...rt.exams.filter(e => e.cls !== pn)];
+  const basic = rt.exams.find(e => e.tier === "初级");
+  const gap = Math.round((rt.avg15 - best) * 10) / 10;
+  const li = (n, t, body) => `<li class="${pick === n ? "pk" : ""}"><span class="rn">${n}</span><div><b>${t}</b>${pick === n ? ' <span class="tag">规划</span>' : ""}<div>${body}</div></div></li>`;
+  return `<details class="more routes"${row === w.rows.find(r => !r.done) ? " open" : ""}><summary>这一级的四种走法</summary><ol class="rts">
+    ${li(1, `正常（${esc(prev || "现在的职业")}）`, g1 ? gtxt(g1) : "现在的职业不在已有职业里")}
+    ${li(2, "转职（换已有职业再升级）", g2 ? `${esc(g2.classes.filter((x, i) => g2.owned[i]).join(" / "))}：${gtxt(g2)}${g1 && g2.score <= g1.score ? "，不比正常好" : ""}` : "没有别的已有职业")}
+    ${li(3, "考试（考新职业，这一级不升级）", ex.length ? ex.map(e => `${e.cls === pn ? "<b>" : ""}${esc(e.cls)}${e.cls === pn ? "</b>" : ""}（${esc(e.tier)}）：${prob(e)}`).join("<br>") : "没有能考的新职业")}
+    ${li(4, "跳过（300G 初级手形，这一级不升级）", `${basic ? `用${esc(basic.cls)}的考试：${prob(basic)}，过不过都行` : `随便考一场：判定值 ${rt.roll}%，过不过都行`}<br>这一级最高 ${best} 分，未来 15 级平均 ${rt.avg15}（10 级 ${rt.avg10}），${gap > 0 ? `低 ${gap} 分（${Math.round(100 * gap / rt.avg15)}%）` : `高 ${-gap} 分`}；现在的跳过阈值 ${rt.thr} 分`)}
+  </ol></details>`;
+}
+function nextItem(c, w, row, i) {
+  const s = row.s, r = row.r, first = i === 0;
+  const changed = row.choice !== recOf(s) ? ` <span class="changed">已改（原来：${esc(s.exam ? stepName(s) : s.cls)}）</span>` : "";
+  const src = s.src === "record" ? (s.hidden ? "没记录的一步" : "观星已记录") : "规划";
+  let body;
+  if (r.exam) {
+    const n = examName(s);
+    const curG = s.opts.find(g => g.classes.includes(w.cur));
+    body = `<div class="what"><b>${n ? "考试（到 " + esc(n) + "）" : s.src === "record" ? "跳过（观星记录里这步没有升级）" : "跳过"}</b>${changed}</div>
+      ${curG ? `<div class="hint">考前先观星确认种子：用${esc(w.cur)}升级应看到 <b>${esc(curG.gains.join(" ") || "—")}</b>（${PW(curG.cnt, curG.score)}）。对上了再去考。</div>` : ""}
+      ${s.roll != null ? examBox(c, s) : ""}`;
+  } else {
+    body = `<div class="what"><b>升 Lv${row.frm}→${row.to}，用${esc(eqName(row))}</b>${changed}${row.missing ? ` <span class="changed">还没考到${esc(row.choice)}，这一级前要先考</span>` : ""}<span class="sc">${PW(r.cnt, r.score)} ${vsTag(r.score, s.es)}</span></div>
+      <div class="chips">${r.gains.map(chip).join("") || '<span>—</span>'}</div>
+      ${s.why && !/^已有职业里分最高/.test(s.why) ? `<div class="hint">${esc(s.why)}</div>` : ""}
+      ${r.classes && r.classes.length > 1 ? `<div class="hint">加点相同的职业：${esc(r.classes.filter(x => x !== row.choice).join(" "))}</div>` : ""}`;
+  }
+  return `<li class="${r.exam ? "exam " : ""}${first ? "first" : ""}" data-key="${s.key}">
+    <div class="when"><span>${first ? "现在做" : i === 1 ? "然后" : "再然后"}</span><span class="src">${src}</span></div>
+    ${body}
+    ${routesBox(c, w, row)}
+    <div class="acts">${first ? `<button class="btn pri" type="button" data-do="done">✓ 做完了</button>` : ""}
+      <details class="more"><summary>换个选择（这一步所有职业）</summary>${optsHtml(c, s, row, "n")}</details></div>
+  </li>`;
+}
+function stateHtml(c, w) {
+  const ci = w.ci, all = [...new Set([...c.owned, ...c.classChoices])];
+  return `<details class="more"><summary>更新等级、职业、技能</summary><div class="state">
+    <label>当前 Lv <input type="number" min="1" max="99" data-f="level" id="lv-${slug(c)}" value="${ci.level ?? ""}" style="width:64px"></label>
+    <div><h4>已有职业</h4><div class="ownd">${all.map(k => `<label><input type="checkbox" data-f="owned" value="${esc(k)}"${ci.owned.includes(k) ? " checked" : ""}>${esc(k)}</label>`).join("")}</div></div>
+    <div><h4>技能等级</h4><div class="skg">${DATA.skills.map(k => `<label>${esc(k)}<select data-f="skill" data-k="${esc(k)}" id="sk-${slug(c)}-${esc(k)}"><option value="">—</option>${RANKS.map(r => `<option${ci.skills[k] === r ? " selected" : ""}>${r}</option>`).join("")}</select></label>`).join("")}</div></div>
+  </div></details>`;
+}
+function head(c, w, right) {
+  const n = w.rows.filter(r => r.done).length;
+  return `<div class="ch"><div class="ct"><h3>${esc(c.name)}</h3><span class="lv">Lv${w.ci.level ?? "?"} ${esc(w.cur || "")}</span><span class="r">${right}</span></div>
+    ${c.steps.length ? `<div class="meter" title="完成 ${n} / ${c.steps.length}"><i style="width:${100 * n / c.steps.length}%"></i></div>` : ""}
+    ${c.weights ? `<div class="wts" title="能力权重（主表「能力权重」），加权分 = 每项加点 × 权重">${ST.map((k, i) => `<span class="w${c.weights[i]}">${k}<b>${c.weights[i]}</b></span>`).join("")}</div>` : ""}
+    ${c.text ? `<p class="intro">${esc(c.text.intro)}</p>` : ""}${c.text && c.text.note ? `<p class="intro note2">${esc(c.text.note)}</p>` : ""}${c.guide ? `<p class="intro note2"><b>攻略评价 ${esc(c.guide.tier)}</b>（憨色 Ver1.0）：${esc(c.guide.t)}</p>` : ""}</div>`;
+}
+function gateBox() {
+  const stop = [], go = [];
+  for (const c of CH) {
+    if (focus && slug(c) !== focus) continue;
+    const w = walk(c), first = w.rows.find(r => !r.done);
+    if (!first) continue;
+    const a = `<a href="#next" data-go="${slug(c)}">${esc(SHORT[c.name])}</a>`;
+    const s = first.s;
+    if (first.r.exam) {
+      const n = examName(s);
+      stop.push([n ? "exam" : "skip", a, n ? `先考<b>${esc(n)}</b>（判定值 ${s.roll}%${s.pct != null ? `，估计显示 ${s.pct}%` : ""}）` : `先<b>跳过</b>一级（随便考一场，判定值 ${s.roll}%，过不过都行）`]);
+    } else if (first.missing) {
+      stop.push(["miss", a, `要用<b>${esc(first.choice)}</b>，但还没考到，先考`]);
+    } else if (w.cur && first.choice !== w.cur) {
+      stop.push(["cls", a, `先转职 ${esc(w.cur)} → <b>${esc(first.choice)}</b>，再升 Lv${first.frm}→${first.to}`]);
+    } else go.push(`${a} 用${esc(eqName(first))}升 Lv${first.frm}→${first.to}`);
+  }
+  const tag = { exam: ["warn", "考试"], skip: ["warn", "跳过"], miss: ["bad", "缺职业"], cls: ["ok", "转职"] };
+  return `<section class="alerts"><h2>暂时不能直接升级</h2><ul>${stop.length ? stop.map(([k, a, t]) => `<li><span class="sev ${tag[k][0]}">${tag[k][1]}</span><span>${a}：${t}</span></li>`).join("") : `<li><span class="sev ok">无</span><span>所有人都可以直接升级</span></li>`}</ul>
+    ${go.length ? `<p class="txt" style="font-size:13px"><span class="lab">可以直接升级</span>${go.join("；")}</p>` : ""}</section>`;
+}
+function viewMine() {
+  const rows = [];
+  for (const c of CH) {
+    if (focus && slug(c) !== focus) continue;
+    const w = walk(c);
+    for (const row of w.rows) {
+      const s = row.s, p = prog[keyOf(c, s)]; if (!p) continue;
+      const what = [];
+      if (p.ok) what.push(`确认用 <b>${esc(row.choice)}</b>（${esc(row.r.gains.join(" ") || "—")}）`);
+      if (p.choice) what.push(`改成 <b>${esc(p.choice === "exam" ? stepName(s) : p.choice)}</b>（推荐是 ${esc(recOf(s) || "—")}）`);
+      if (p.chance != null) what.push(`游戏显示成功率 <b>${p.chance}%</b>`);
+      if (!what.length) continue;
+      const lv = s.exam ? `${stepName(s)}（Lv${row.frm}）` : `Lv${row.frm}→${row.to}`;
+      rows.push([p.at || "", `<tr><td><a href="#plan" data-go="${slug(c)}">${esc(SHORT[c.name])}</a></td><td class="n">${lv}</td><td class="note">${what.join("；")}</td><td class="n">${p.at ? esc(p.at.slice(5, 16).replace("T", " ")) : "—"}</td></tr>`]);
+    }
+  }
+  rows.sort((a, b) => b[0].localeCompare(a[0]));
+  const live = rows.length ? `<div class="scroll"><table><tr><th>角色</th><th class="n">哪一步</th><th>你的决定</th><th class="n">时间（UTC）</th></tr>${rows.map(r => r[1]).join("")}</table></div>`
+    : `<p class="txt">${focus ? "这个角色" : "页面上"}还没有确认或改过的选择。</p>`;
+  const rules = DECISIONS.filter(d => !focus || d[1] === "全部" || d[1] === SHORT[CH.find(c => slug(c) === focus).name]).slice().reverse();
+  return `<p class="lede">你做过的所有决定都在这里：上面是在页面上点的（实时保存，所有设备同步），下面是你定下的规划规则（我每次改规则都会加一条）。</p>
+  <section class="alerts"><h2>页面上的选择（${rows.length}）</h2>${live}</section>
+  <section class="alerts"><h2>规划规则（${rules.length}）</h2><div class="scroll"><table><tr><th class="n">日期</th><th>范围</th><th>规则</th></tr>${rules.map(d => `<tr><td class="n">${esc(d[0])}</td><td>${esc(d[1])}</td><td class="note">${esc(d[2])}</td></tr>`).join("")}</table></div></section>`;
+}
+
+// ---------- 吃饭（11-08）：选 1～2 个主角，找每道菜都 perfect 的同桌 ----------
+const MEAL = DATA.meals || { dishes: [], people: [], lords: [] };
+const MP = [...MEAL.people, ...MEAL.lords];
+const mshort = n => SHORT[n] || n;
+let mealLead = ["迪托利希"], mealPool = "todo";
+try { const v = JSON.parse(localStorage.getItem("meal-lead") || "null"); if (Array.isArray(v) && v.length && v.every(n => MP.some(p => p.name === n))) mealLead = v.slice(0, 2); mealPool = localStorage.getItem("meal-pool") || "todo"; } catch (_) {}
+const SPK = ["讨厌", "普通", "喜欢", "最爱"];
+function mealPerfect(vals) {   // 闪光：最爱2 喜欢1 普通0；讨厌不带；1+1+1 或 2+2+0 才算
+  if (vals.some(v => v === 0)) return false;
+  const sp = vals.map(v => v - 1).sort((a, b) => a - b);
+  return sp[0] >= 1 || (sp[0] === 0 && sp[1] === 2 && sp[2] === 2);
+}
+function viewMeal() {
+  const leads = mealLead.map(n => MP.find(p => p.name === n));
+  const leadOpts = MP.filter(p => p.in || p.tier === "领主");
+  const poolAll = MEAL.people.filter(p => !mealLead.includes(p.name));
+  const pool = poolAll.filter(p => mealPool === "all" || (mealPool === "in" ? p.in : !p.in));
+  const pri = p => pool.indexOf(p);
+  const need = 3 - leads.length;
+  const per = MEAL.dishes.map((d, i) => {
+    const lv = leads.map(p => p.pref[i]);
+    if (lv.includes(0)) return { d, lv, hate: true, list: [] };
+    const list = [];
+    if (need === 2) { for (let a = 0; a < pool.length; a++) for (let b = a + 1; b < pool.length; b++) { const v = [...lv, pool[a].pref[i], pool[b].pref[i]]; if (mealPerfect(v)) list.push({ who: [pool[a], pool[b]], v }); } }
+    else for (const a of pool) { const v = [...lv, a.pref[i]]; if (mealPerfect(v)) list.push({ who: [a], v }); }
+    list.sort((x, y) => { const px = x.who.map(pri).sort((a, b) => a - b), py = y.who.map(pri).sort((a, b) => a - b);
+      for (let k = 0; k < px.length; k++) if (px[k] !== py[k]) return px[k] - py[k]; return y.v.reduce((a, b) => a + b) - x.v.reduce((a, b) => a + b); });
+    return { d, lv, list };
+  });
+  const spk = v => v.map(x => x - 1).join("+");
+  const names = w => w.map(p => esc(mshort(p.name))).join(" + ");
+  const leadTxt = leads.map(p => mshort(p.name)).join(" + ");
+  const rows = per.map(r => `<tr><td><b>${esc(r.d)}</b></td><td class="note">${r.lv.map(v => SPK[v]).join(" / ")}</td>` + (r.hate
+    ? `<td colspan="3" class="note">主角里有人讨厌这道菜，别点</td>`
+    : r.list.length ? `<td class="pick"><b>${names(r.list[0].who)}</b></td><td class="n">${spk(r.list[0].v)}</td><td class="note">${r.list.slice(1, 5).map(x => `${names(x.who)}（${spk(x.v)}）`).join("；") || "—"}</td>`
+    : `<td colspan="3" class="note">${need === 2 ? "这批人里没有两人" : "这批人里没有人"}能和主角一起 perfect</td>`) + `</tr>`).join("");
+  const rev = pool.map(p => { const ds = per.filter(r => r.list.some(x => x.who.includes(p))).map(r => r.d);
+    return `<tr><td>${esc(mshort(p.name))}${p.in ? "" : ` <small class="note">${esc(p.tier)}</small>`}</td><td class="note">${ds.length ? esc(ds.join("、")) : "没有能 perfect 的菜"}</td></tr>`; }).join("");
+  const chip = (attr, val, on, t) => `<button type="button" class="btn${on ? " pri" : " ghost"}" data-${attr}="${esc(val)}" aria-pressed="${on}">${esc(t)}</button>`;
+  return `<p class="lede">选 1～2 个主角，下面列出每道菜和谁一起吃能 perfect。现在的主角：<b>${esc(leadTxt)}</b>，${need === 2 ? "再带两个人" : "再带一个人"}。</p>
+  <section class="alerts"><h2>主角（选一到两个）</h2><p class="txt">点一下选上，再点取消；已经选了两个时再点别人，会换掉先选的那个。</p>
+    <div class="chips">${leadOpts.map(p => chip("lead", p.name, mealLead.includes(p.name), mshort(p.name) + (p.tier === "领主" ? "（领主）" : ""))).join("")}</div>
+    <h2>同桌从哪些人里找</h2><div class="chips">${[["todo", "还没入队的目标（刷支援）"], ["in", "已经入队的"], ["all", "全部"]].map(([k, t]) => chip("pool", k, mealPool === k, t)).join("")}</div></section>
+  <section class="alerts"><h2>每道菜带谁（${per.filter(r => r.list.length).length}/12 道能 perfect）</h2><div class="scroll"><table><tr><th>菜</th><th>主角好感</th><th>首选</th><th class="n">闪光</th><th>备选（按优先级）</th></tr>${rows}</table></div></section>
+  <section class="alerts"><h2>从人查菜</h2><div class="scroll"><table><tr><th>同桌</th><th>能和${esc(leadTxt)}一起 perfect 的菜</th></tr>${rev}</table></div></section>` + notesBox([
+    "规则（你 11-08 定的）：闪光 最爱 2、喜欢 1、普通 0；三人是 1+1+1 或 2+2+0 才算 perfect。讨厌的人不带。2+1+0 还没确认，所以不算。",
+    "优先级按迪线招募表「Recruit - Diet」的行顺序（必招 → 满足 → 可选）。首选是优先级最高的组合，同样优先级时闪光多的在前。",
+    "还没入队的人要先送过一次礼物才能请吃饭。领主的好感来自 fortunesweave 的 meals 页；西提司、波拿帕尔特、托比亚斯没有数据。"]);
+}
+
+// ---------- 到 Lv45（11-08）：可转一次上级；和到 35 级的最优分开算 ----------
+function compactRoute(steps) {   // 连续用同一职业的级并成一段
+  const out = []; let cur = null;
+  for (const x of steps) {
+    if (x.exam) { cur = null; out.push(x.exam === "跳过" ? `<span class="need">Lv${x.lv} 跳过</span>` : `<b>Lv${x.lv} 考试（到 ${esc(x.exam)}）</b>`); continue; }
+    if (cur && cur.cls === x.cls && cur.to === x.lv) { cur.to = x.lv + 1; cur.sc += x.score; out[out.length - 1] = cur; continue; }
+    cur = { cls: x.cls, from: x.lv, to: x.lv + 1, sc: x.score }; out.push(cur);
+  }
+  return out.map(x => typeof x === "string" ? x : `Lv${x.from}→${x.to} ${esc(x.cls)}`).join(" → ");
+}
+function l45Box(c) {
+  const L = c.l45; if (!L) return "";
+  const d = L.diffs || [];
+  const body = !d.length
+    ? `<p class="txt">35 级前的考试安排和到 45 级的最优路线一样，按 35 级路线走不影响 45 级。</p>`
+    : `<p class="txt">到 45 级的最优路线在 35 级前的考试和跳过安排不同：</p><ul class="plain"><li>到 35 级的路线：${esc(d[0].r35.join("、") || "不考试")}</li><li>到 45 级的路线：${esc(d[0].r45.join("、") || "不考试")}</li></ul>
+       <p class="txt">按 35 级路线走、35 级后再最优，到 45 级是 ${PW(L.follow.pts, L.follow.total)}；直接按 45 级最优走是 ${PW(L.pts, L.total)}。${L.loss <= 0 ? `扣掉手形金币后，按 35 级路线走反而不差（${L.loss}）。` : `扣掉手形金币后差 <b>${L.loss}</b> 分${L.loss <= 3 ? "，差得很少，按 35 级路线走就行" : "，要不要改看你更看重 35 还是 45"}。`}</p>`;
+  return `<div class="sec"><h4>会影响 Lv45 的选择</h4>${body}<p class="hint" style="margin:4px 0 0">只有考试和跳过（时机、次数、拿到哪些职业）会影响以后；同一级换已有职业只影响那一级。<a href="#l45" data-go="${slug(c)}">看到 Lv45 的路线</a></p></div>`;
+}
+function viewL45() {
+  const list = CH.filter(c => c.l45 && (!focus || slug(c) === focus));
+  const rows = list.map(c => { const L = c.l45; return `<tr><td><a href="#l45" data-go="${slug(c)}">${esc(SHORT[c.name])}</a></td><td class="n">Lv${L.from}→45</td><td class="n">${L.pts}</td><td class="n"><b>${L.total}</b></td><td>${L.adv ? `${esc(L.adv.exam)}（Lv${L.adv.lv}）` : "不转上级更好"}</td><td class="n ${L.loss > 3 ? "dn" : ""}">${L.diffs.length ? L.loss : "—"}</td></tr>`; }).join("");
+  const cards = list.map(c => { const L = c.l45;
+    return `<article class="card" data-slug="${slug(c)}" id="${slug(c)}"><div class="ch"><div class="ct"><h3>${esc(c.name)}</h3><span class="lv">Lv${L.from}→45</span><span class="r">${PW(L.pts, L.total)} · 到 35 级路线 ${L.plan35.total} 分</span></div></div>
+      <div class="sec"><h4>上级职业</h4><p class="txt">${L.adv ? `转 <b>${esc(L.adv.exam)}</b>（Lv${L.adv.lv}）` : "最优路线里不转上级（转了加点也不更好）"}。能转的上级：${esc(L.advOptions.join("、") || "没有（技能差太多）")}。</p></div>
+      <div class="sec"><h4>路线</h4><p class="txt route45">${compactRoute(L.steps)}</p></div>
+      <div class="sec"><h4>和到 Lv35 的路线比</h4>${L.diffs.length ? `<p class="txt">35 级前的考试安排不同。按 35 级路线走、之后再最优：${PW(L.follow.pts, L.follow.total)}${L.follow.adv ? `（上级 ${esc(L.follow.adv.exam)}）` : ""}；扣掉转职门槛后比 45 最优少 <b>${L.loss}</b> 分。</p>` : `<p class="txt">35 级前的考试安排一样，没影响。</p>`}</div>
+      <div class="sec"><h4>Lv45 时比现在多</h4><p class="txt">${esc(L.add.map((v, i) => v ? ST[i] + "+" + v : "").filter(Boolean).join(" "))}</p></div>
+    </article>`; }).join("");
+  return `<p class="lede">到 Lv45 的最优路线，和到 Lv35 的分开算：可以转上级职业，但每人只转一次。</p>
+  <section class="alerts"><h2>一览</h2><div class="scroll"><table><tr><th>角色</th><th class="n">等级</th><th class="n">点数</th><th class="n">加权分</th><th>上级</th><th class="n">按 35 走少几分</th></tr>${rows}</table></div></section>
+  <div class="grid one">${cards}</div>` + notesBox([N_PTS,
+    "上级职业只算现在技能离要求差 2 段以内的（到 35 级练得到）；考试成功率按等级算：Lv35 起 100%，34 级 50%，33 级 32%。技能其实没练到的话要告诉我重算。",
+    "跳过和考试的规则和到 35 级一样（见「到 Lv35」页说明）；上级手形按 3000G 算，每人最多考一次上级。",
+    "「按 35 走少几分」：35 级前按到 35 级的路线走，35 级后再最优，和直接按 45 级最优走相比，扣掉手形金币折算的分后少的分。"]);
+}
+function viewNext() {
+  const cards = CH.filter(c => !focus || slug(c) === focus).map(c => {
+    const w = walk(c), nx = w.rows.filter(r => !r.done).slice(0, 3), rm = remain(c, w);
+    const left = w.rows.filter(r => !r.done).length;
+    return `<article class="card" data-slug="${slug(c)}" id="${slug(c)}">${head(c, w, `还剩 ${left} 步 → Lv${w.endLevel}`)}
+      ${nx.length ? `<ol class="next">${nx.map((r, i) => nextItem(c, w, r, i)).join("")}</ol>` : `<div class="empty">${c.steps.length ? "路线上的步骤都完成了。" : "还没有观星记录和种子，暂时没有路线。"}</div>`}
+      <div class="cfoot">${c.steps.length ? `<span>按现在的选择到 Lv${w.endLevel} 还会升 <b>${rm.lv}</b> 级、涨 <b>${rm.cnt}</b> 点，加权分 <b>${rm.sc}</b>。<a href="#plan" data-go="${slug(c)}">看完整路线</a></span>` : ""}${stateHtml(c, w)}</div>
+    </article>`;
+  }).join("");
+  return `<p class="lede">每人最近 3 步，第一步是现在要做的。</p>${gateBox()}${alerts()}<div class="grid">${cards}</div>` + notesBox([
+    "做完一步点「✓ 做完了」，等级和已完成会自动往后推。",
+    "考试步骤把游戏里显示的成功率填进来，页面会直接判断能不能过：<b>判定值</b>低于游戏显示的成功率才过（等于也算失败）。考试不管过不过都消耗一个种子。",
+    N_PTS]);
+}
+
+// ---------- 到 Lv35 ----------
+function timeline(c, w) {
+  const rows = w.rows.filter(r => r.s.src === "plan" || !r.done);
+  if (!rows.length) return "";
+  const mx = Math.max(20, ...rows.map(r => r.r.exam ? 0 : r.r.score));
+  return `<div class="tl" role="img" aria-label="每一步的加权分，和平均运气比">${rows.map(r => {
+    if (r.r.exam) return `<div title="${esc(stepName(r.s))}"><i class="x${r.done ? " done" : ""}"></i><span>${examName(r.s) ? "转" : "跳"}</span></div>`;
+    const es = r.s.es, d = es == null ? null : r.r.score - es, k = d == null ? "" : d >= 2 ? "up" : d <= -2 ? "dn" : "eq";
+    const h = Math.max(4, 64 * r.r.score / mx);
+    return `<div title="Lv${r.frm}→${r.to} ${esc(r.choice)}：${PW(r.r.cnt, r.r.score)}${es != null ? `（平均 ${es} 分）` : ""}　${esc(r.r.gains.join(" "))}"><i class="${k}${r.done ? " done" : ""}" style="height:${h}px">${es != null ? `<b style="bottom:${64 * es / mx}px"></b>` : ""}</i><span>${r.to}</span></div>`;
+  }).join("")}</div>
+  <div class="legend"><span style="--k:var(--good)">好于平均 2 分以上</span><span style="--k:var(--bad)">低于平均 2 分以上</span><span style="--k:var(--muted)">差不多</span><span style="--k:var(--exam)">考试或跳过（不升级的一步）</span><span>横线 = 平均运气</span></div>`;
+}
+function statTable(c, w) {
+  const rm = remain(c, w), base = c.stats || Array(9).fill(null), wt = c.weights || [];
+  const exp = c.avg ? c.avg.exp : null, act = c.hist ? c.hist.total : null;
+  const cmp = i => exp && act ? (act[i] - exp[i] >= 1.5 ? "st" : act[i] - exp[i] <= -1.5 ? "wk" : "") : "";
+  const has = base.every(v => v != null), end = has ? base.map((v, i) => v + rm.add[i]) : null;
+  const two = (p, q) => `<td class="n">${p}</td><td class="n">${q}</td>`;
+  return `<div class="scroll"><table><tr><th></th>${ST.map(k => `<th class="n">${k}</th>`).join("")}<th class="n">点数</th><th class="n">加权分</th></tr>
+    <tr class="w"><td>能力权重</td>${ST.map((k, i) => `<td class="n">${wt[i] ?? ""}</td>`).join("")}<td></td><td></td></tr>
+    <tr><td>现在（截图）</td>${ST.map((k, i) => `<td class="n">${base[i] ?? "?"}</td>`).join("")}${has ? two(psum(base), wsum(base, wt)) : "<td></td><td></td>"}</tr>
+    <tr><td>还会涨（从截图起，再升 ${rm.lv} 级）</td>${ST.map((k, i) => `<td class="n ${rm.add[i] ? "up" : ""}">${rm.add[i] ? "+" + rm.add[i] : "·"}</td>`).join("")}${two("+" + rm.cnt, "+" + rm.sc)}</tr>
+    <tr class="sum"><td>Lv${w.endLevel}</td>${ST.map((k, i) => `<td class="n">${base[i] == null ? "?" : base[i] + rm.add[i]}</td>`).join("")}${has ? two(psum(end), wsum(end, wt)) : "<td></td><td></td>"}</tr>
+    ${exp && act ? `<tr><td>推荐路线比平均运气</td>${ST.map((k, i) => { const d = Math.round((act[i] - exp[i]) * 10) / 10; return `<td class="n ${cmp(i)}" title="推荐路线 +${act[i]}，平均 +${exp[i]}">${sgn(d)}</td>`; }).join("")}${two(sgn(Math.round((psum(act) - psum(exp)) * 10) / 10), sgn(Math.round(wsum(act, wt) - wsum(exp, wt))))}</tr>` : ""}
+  </table></div>
+`;
+}
+function decisions() {
+  const out = [];
+  for (const c of CH) {
+    if (focus && slug(c) !== focus) continue;   // 选了某个角色时只显示他的
+    const w = walk(c);
+    for (const row of w.rows) {
+      const s = row.s;
+      if (s.src !== "plan" || s.exam || row.done || !s.opts || !s.opts.length) continue;
+      const own = s.opts.filter(g => g.owned.some(Boolean));
+      const rec = own.find(g => g.classes.includes(recOf(s))); if (!rec) continue;
+      const max = Math.max(...own.map(g => g.score));
+      const alts = own.filter(g => g !== rec && (g.score === rec.score || (rec.score < max && g.score === max)));
+      if (!alts.length) continue;
+      out.push({ c, s, row, rec, alts, kind: rec.score < max ? "推荐分低一点，有原因" : "加权分一样，加点不同" });
+    }
+  }
+  return out;
+}
+function decBox() {
+  const ds = decisions();
+  if (!ds.length) return `<section class="alerts"><h2>需要你决定</h2><p class="txt">${focus ? "这个角色" : "现在"}没有「加权分一样、加点不同」的级，全部按推荐走就行。</p></section>`;
+  const pend = ds.filter(d => !(prog[keyOf(d.c, d.s)] || {}).ok);
+  const items = ds.map(({ c, s, row, rec, alts, kind }) => {
+    if ((prog[keyOf(c, s)] || {}).ok) return `<li data-slug="${slug(c)}"><div data-key="${s.key}" class="dh"><b>${esc(SHORT[c.name])} Lv${row.frm}→${row.to}</b><span class="ok">✓ 已确认：${esc(row.choice)}（${esc(row.r.gains.join(" ") || "—")}）</span><button type="button" class="btn ghost" data-dec="undo">重新选</button></div></li>`;
+    const name = "dec-" + keyOf(c, s);
+    const opt = g => { const val = g.classes.includes(s.cls) ? s.cls : g.classes.find((x, i) => g.owned[i]);
+      const on = row.choice === val || (row.r.classes && row.r.classes.includes(val)) || (g.classes.includes(row.choice));
+      return `<label class="opt"><input type="radio" name="${name}" value="${esc(val)}" data-f="pick"${on ? " checked" : ""}><span><span class="oc">${esc(g.classes.filter((x, i) => g.owned[i]).join(" / "))}${g === rec ? "（推荐）" : ""}${g.classes.some((x, i) => !g.owned[i]) && !g.owned.some(Boolean) ? `<span class="need">　要先考试：${esc(g.classes.filter((x, i) => !g.owned[i]).join(" "))}</span>` : ""}</span>　${esc(g.gains.join(" ") || "—")}</span><span class="on">${g.cnt}点 · ${g.score}分</span></label>`; };
+    return `<li data-slug="${slug(c)}"><div data-key="${s.key}"><div class="dh"><b>${esc(SHORT[c.name])} Lv${row.frm}→${row.to}</b><small>${kind}</small></div>${s.note ? `<div class="note">${esc(s.note)}</div>` : ""}<div class="opts" role="radiogroup" aria-label="这一步选哪个">${[rec, ...alts].map(opt).join("")}</div><button type="button" class="btn" data-dec="ok">确认：用 ${esc(row.choice)}</button></div></li>`;
+  }).join("");
+  return `<section class="alerts"><h2>需要你决定（${pend.length ? `还剩 ${pend.length} 处` : "都确认了"}）</h2><p class="txt">这些级换职业加权分一样（或只差一点），但涨的能力不同。点一下就改，下面的路线和总分跟着变。</p><ul class="decs">${items}</ul></section>`;
+}
+function examTable(c) {
+  const eb = c.hist && c.hist.exam_benefit; if (!eb || !eb.length) return `<p class="txt">推荐路线不考试。</p>${midTable(c)}`;
+  return `<div class="scroll"><table><tr><th>考试</th><th class="n">判定值</th><th>到 Lv35 比不考它的最好路线</th><th class="n">点数</th><th class="n">加权分</th><th class="n">多花</th><th class="n">净值差</th></tr>${eb.map(e => `<tr><td>${esc(e.cls.replace("（随便考，当跳过）", "跳过"))}${e.req ? " · 必考" : ""}</td><td class="n">${e.roll}%</td><td>${esc(gtxt(e.diff))}${e.alt_exams ? `<span class="hint">（对比路线：${esc(e.alt_exams.join("、") || "不考")}）</span>` : ""}</td><td class="n">${sgn(psum(e.diff))}</td><td class="n">${sgn(e.wdiff)}</td><td class="n">${e.dgold == null ? "—" : e.dgold + "G"}</td><td class="n ${e.net > 0 ? "up" : e.net < 0 ? "dn" : ""}">${e.net == null ? "—" : sgn(e.net)}</td></tr>`).join("")}</table></div>
+  <p class="hint" style="margin:4px 0 0">考试 0～4 次的最高加权分：${c.hist.plan_scores.map(v => v ?? "—").join(" / ")}。</p>${midTable(c)}`;
+}
+function midTable(c) {   // 11-08 晚（规则式）：硬加一个中级考试，净值变多少
+  const mg = c.midGain || [];
+  const head = `<h4 style="margin:12px 0 4px">多转一个中级值多少</h4><p class="txt">现在要转的职业：${esc((c.targets || []).join("、") || "无")}；手形 ${c.planGold ?? 0}G，净值 ${c.planNet ?? "—"}（加权分 − 金币 ÷ 每分 ${c.gpp}G）。</p>`;
+  if (!mg.length) return head + `<p class="hint" style="margin:4px 0 0">没有能转过、而且会用来升级的其他中级职业。</p>`;
+  const rows = mg.map(r => `<tr><td>${esc(r.cls)}</td><td class="n">${r.used}</td><td class="note">${esc(r.diff || "")}</td><td class="n">${r.dpts == null ? "—" : sgn(r.dpts)}</td><td class="n">${r.total}</td><td class="n">${sgn(r.dsc)}</td><td class="n">${r.gold}G</td><td class="n ${r.dnet > 0 ? "up" : "dn"}"><b>${r.dnet > 0 ? "+" : ""}${r.dnet}</b></td><td class="note">${r.dnet > 0 ? "按净值更好，但规划没选（逐个加时被别的职业挡住了），值得看看" : "不划算"}</td></tr>`).join("");
+  return head + `<div class="scroll"><table><tr><th>多转</th><th class="n">用它升几级</th><th>能力差</th><th class="n">点数差</th><th class="n">加权分</th><th class="n">比现在</th><th class="n">手形</th><th class="n">净值变化</th><th>说明</th></tr>${rows}</table></div>
+  <p class="hint" style="margin:4px 0 0">把这个中级硬加进「要转的职业」，按同样的规则重新走一遍；净值 = 加权分 − 手形金币 ÷ 每分金币。</p>`;
+}
+// 11-11：推荐职业和别的同级职业加点一样时，全部列出
+const eqName = row => (row.choice === row.s.cls && row.s.eq && row.s.eq.length > 1) ? [row.s.cls, ...row.s.eq.filter(k => k !== row.s.cls)].join(" / ") : row.choice;
+function fullList(c, w) {
+  // 11-11 Yizhuo：默认不显示已经走过的步骤，勾选才显示
+  const nd = w.rows.filter(r => r.done).length;
+  return `<div class="fullwrap">${nd ? `<label class="showdone"><input type="checkbox" class="sd"> 显示已经走过的 ${nd} 步</label>` : ""}<ol class="full">${w.rows.map(row => {
+    const s = row.s, r = row.r;
+    return `<li class="${row.done ? "done" : ""} ${r.exam ? "isx" : ""}" data-key="${s.key}">
+      <input type="checkbox" data-f="done" id="d-${keyOf(c, s)}"${row.done ? " checked" : ""} aria-label="已完成">
+      <label class="lvl" for="d-${keyOf(c, s)}">${r.exam ? (examName(s) ? "考试" : "跳过") : `Lv${row.frm}→${row.to}`}</label>
+      <div class="body">${r.exam ? `${examName(s) ? "考试（到 " + esc(examName(s)) + "）" : "跳过"}${s.train && examName(s) ? ` <span class="changed">先练：${esc(s.train.join("、"))}</span>` : ""}${s.use && examName(s) ? `<span class="hint">　之后到 Lv${c.planTo} 用它升 ${s.use[0]} 级${s.use[0] ? `：${esc(s.use[1])}（${sgn(s.use[2])} 分）` : ""}</span>` : ""}` : `<b>${esc(eqName(row))}</b>　${esc(r.gains.join(" ") || "—")}`}${row.choice !== recOf(s) ? ` <span class="changed">已改</span>` : ""}${row.missing ? ` <span class="changed">还没考到</span>` : ""}${row.fail ? ` <span class="changed">估计考不过</span>` : ""}
+        ${row.done ? "" : `<details class="more"><summary>选择</summary>${optsHtml(c, s, row, "f")}</details>`}</div>
+      <span class="sc">${r.exam ? "—" : PW(r.cnt, r.score)}</span></li>`;
+  }).join("")}</ol></div>`;
+}
+function choiceTable(c) {
+  const o = c.choices; if (!o || !o.length) return "";
+  const cls = r => r.startsWith("推荐") ? "r0" : r === "建议" ? "r1" : r === "可选" ? "r2" : "r3";
+  return `<div class="scroll"><table class="cho"><tr><th>选择</th><th>成本</th><th class="n">点数</th><th class="n">加权分</th><th class="n">净值差</th><th>能力变化（和现在的路线比）</th><th>建议</th></tr>${o.map(x => `<tr class="${x.cur ? "cur" : ""}">
+    <td class="note" style="color:var(--ink)">${esc(x.title)}</td><td class="note">${esc(x.cost)}</td>
+    <td class="n ${x.kind === "risk" ? "" : x.pts > 0 ? "up" : x.pts < 0 ? "dn" : ""}">${x.kind === "risk" ? (x.pts ? "保住 " + x.pts : "—") : x.cur ? x.tpts : sgn(x.pts)}</td>
+    <td class="n ${x.kind === "risk" ? "" : x.gain > 0 ? "up" : x.gain < 0 ? "dn" : ""}">${x.kind === "risk" ? (x.gain ? "保住 " + x.gain : "—") : x.cur ? x.total : sgn(x.gain)}</td>
+    <td class="n ${x.dnet > 0 ? "up" : x.dnet < 0 ? "dn" : ""}">${x.cur ? "—" : x.dnet == null ? "—" : sgn(x.dnet)}</td>
+    <td class="note">${esc(x.diff)}</td><td class="note"><span class="rec ${cls(x.rec)}">${esc(x.rec)}</span> ${esc(x.why)}</td></tr>`).join("")}</table></div>`;
+}
+function changesHtml(c) {
+  if (!c.route) return "";
+  const items = []; let cur = null;
+  const owned = new Set(c.owned);
+  for (const x of c.route) {
+    if (x[0] === "exam") {
+      if (x[1]) items.push(`考试（到 <b>${esc(x[1])}</b>）（${owned.has(x[1]) ? "已有" : "新职业"}；判定值 ${x[2]}%${x[3] == null ? "" : `，估计显示 ${x[3]}%`}）${x[4] != null ? `<div class="hint" style="margin:2px 0 0">之后到 Lv${c.planTo} 用它升 <b>${x[4]}</b> 级${x[4] ? `，比每级改用已有职业里最好的：<b>${esc(x[5])}</b>（${sgn(x[6])} 分）` : "（只为拿到职业或精通，不用来升级）"}</div>` : ""}`);
+      else items.push(`跳过一级（判定值 ${x[2]}%，过不过都行）`);
+      if (x[1]) owned.add(x[1]);
+      continue;
+    }
+    if (cur === null) items.push(`Lv${x[2]} 起用 <b>${esc(x[1])}</b>${c.curClass && x[1] !== c.curClass ? `（现在是${esc(c.curClass)}，先转职）` : ""}`);
+    else if (x[1] !== cur) items.push(`Lv${x[2]} 转职 ${esc(cur)} → <b>${esc(x[1])}</b>`);
+    cur = x[1];
+  }
+  const news = [...new Set(c.route.filter(x => x[0] === "exam" && x[1]).map(x => x[1]))];
+  return `<p class="txt"><span class="lab">要考的职业</span>${news.length ? news.map(esc).join("、") : "不用考新职业"}　<span class="lab">已有</span>${esc(c.owned.join("、"))}</p><ol class="chg">${items.map(t => `<li>${t}</li>`).join("")}</ol>`;
+}
+function routeTxt(c) {
+  if (!c.route) return "";
+  return c.route.map(x => x[0] === "up" ? `<span class="rt">Lv${x[2]}→${x[3]} ${esc(x[1])}</span>`
+    : `<span class="rt x">${x[1] ? "考试（到 " + esc(x[1]) + "）" : "跳过"} · 判定值 ${x[2]}%${x[1] ? (x[3] == null ? "" : ` · 估计显示 ${x[3]}%`) : ""}</span>`).join('<span class="ar">→</span>');
+}
+function trendHtml(c) {
+  const t = c.trend; if (!t || !c.hist) return "";
+  const wt = c.weights || [], exp = c.avg ? c.avg.exp : null, rec = c.hist.total;
+  const rows = [];
+  if (exp) rows.push(["平均运气", exp.map(v => Math.round(v * 10) / 10), "w"]);
+  rows.push([`一直用${t.cur}（不转职、不考试）`, t.stay, ""]);
+  if (t.best0 && t.best0.join() !== t.stay.join()) rows.push(["只转职（换已有职业）、不考试", t.best0, ""]);
+  rows.push(["推荐路线（转职＋考试）", rec, "sum"]);
+  const top = g => ST.map((k, i) => [k, g[i]]).sort((a, b) => b[1] - a[1]);
+  const hi = top(t.stay).slice(0, 3).map(([k, v]) => `${k}+${v}`).join(" ");
+  const lo = top(t.stay).filter(([k, v]) => v <= Math.max(1, t.n / 8)).map(([k, v]) => `${k}+${v}`).join(" ");
+  const d = rec.map((v, i) => v - t.stay[i]);
+  const more = d.map((v, i) => v > 0 ? `${ST[i]}+${v}` : "").filter(Boolean).join(" "), less = d.map((v, i) => v < 0 ? `${ST[i]}${v}` : "").filter(Boolean).join(" ");
+  const two = g => `<td class="n">${Math.round(psum(g) * 10) / 10}</td><td class="n">${Math.round(wsum(g, wt))}</td>`;
+  const tbl = `<div class="scroll"><table><tr><th>到 Lv35 涨多少（${t.n} 级）</th>${ST.map(k => `<th class="n">${k}</th>`).join("")}<th class="n">点数</th><th class="n">加权分</th></tr>
+    ${rows.map(([n, g, k]) => `<tr class="${k}"><td>${esc(n)}</td>${g.map((v, i) => `<td class="n ${exp && k !== "w" ? (v - exp[i] >= 2.5 ? "st" : v - exp[i] <= -2 ? "wk" : "") : ""}">${v}</td>`).join("")}${two(g)}</tr>`).join("")}
+    ${(() => { const df = rec.map((v, i) => v - t.stay[i]); return `<tr class="sum"><td>推荐路线 − 一直不换</td>${df.map(v => `<td class="n ${v >= 1 ? "up" : v <= -1 ? "dn" : ""}">${sgn(v)}</td>`).join("")}<td class="n ${psum(df) >= 0 ? "up" : "dn"}">${sgn(Math.round(psum(df) * 10) / 10)}</td><td class="n ${wsum(df, wt) >= 0 ? "up" : "dn"}">${sgn(Math.round(wsum(df, wt)))}</td></tr>`; })()}
+    <tr class="w"><td>能力权重</td>${wt.map(v => `<td class="n">${v}</td>`).join("")}<td></td><td></td></tr></table></div>`;
+  const txt = `<p class="txt"><span class="lab">观星趋势</span>一直用${esc(t.cur)}升到 35：共 ${PW(psum(t.stay), wsum(t.stay, wt))}，主要涨 ${esc(hi)}${lo ? `，几乎不涨 ${esc(lo)}` : ""}。</p>
+    <p class="txt"><span class="lab">结合路线</span>推荐路线 ${PW(psum(rec), wsum(rec, wt))}，比一直不换 ${sgn(psum(d))} 点 · ${sgn(wsum(d, wt))} 分${more ? `：多 ${esc(more)}` : ""}${less ? `，少 ${esc(less)}` : ""}。</p>`;
+  const fl = (t.flags || []).map(f => `<li><span class="sev ${f.lv === "bad" ? "bad" : f.lv === "good" ? "ok" : "warn"}">${f.lv === "bad" ? "偏低" : f.lv === "good" ? "偏高" : "注意"}</span><span>${esc(f.t)}</span></li>`).join("");
+  return `<div class="sec"><h4>发展趋势</h4>${txt}${tbl}${fl ? `<ul class="flags">${fl}</ul>` : ""}</div>`;
+}
+function viewPlan() {
+  const acts = [];
+  for (const c of CH) { if (focus && slug(c) !== focus) continue; for (const x of c.choices || []) if (x.rec === "建议" && !x.cur) acts.push(`<li><span class="sev ok">建议</span><span><a href="#plan" data-go="${slug(c)}">${esc(SHORT[c.name])}</a>：${esc(x.title)}（${x.kind === "risk" ? (x.gain ? "保住 " + x.pts + " 点、" + x.gain + " 分" : "保险") : sgn(x.pts) + " 点、" + sgn(x.gain) + " 分"}）。成本：${esc(x.cost)}</span></li>`); }
+  const odd = [];
+  const short = t => t.replace(/到 Lv35 (只)?涨 /, " +").replace(/，平均 ([\d.]+)/, "（平均 $1").replace(/（权重 (\d)）/, "，权重 $1").replace(/，明显偏(高|低).*$/, "）");
+  for (const c of CH) {
+    if (focus && slug(c) !== focus) continue;
+    const fs = ((c.trend && c.trend.flags) || []).filter(f => f.lv !== "warn"); if (!fs.length) continue;
+    const hi = fs.filter(f => f.lv === "good").map(f => esc(short(f.t))), lo = fs.filter(f => f.lv === "bad").map(f => esc(short(f.t)));
+    odd.push(`<li class="oddc"><a href="#plan" data-go="${slug(c)}">${esc(SHORT[c.name])}</a><span>${hi.length ? `<span class="sev ok">偏高</span> ${hi.join("、")}` : ""}${hi.length && lo.length ? "　" : ""}${lo.length ? `<span class="sev bad">偏低</span> ${lo.join("、")}` : ""}</span></li>`);
+  }
+  const oddBox = odd.length ? `<section class="alerts"><h2>明显异常的能力（不管权重高低）</h2><ul>${odd.join("")}</ul></section>` : "";
+  const actBox = oddBox + (acts.length ? `<section class="alerts"><h2>值得做的改动</h2><ul>${acts.join("")}</ul></section>` : "");
+  const balRows = CH.filter(c => !focus || slug(c) === focus).flatMap(c => (c.balance || []).map(b => `<li><span class="sev warn">均衡</span><span><a href="#plan" data-go="${slug(c)}">${esc(SHORT[c.name])}</a> <b>${esc(b.lv)}</b>：用 <b>${esc(b.pick)}</b> 换 ${esc(b.orig)}（多 ${esc(b.more)}、少 ${esc(b.less)}；这一级加权 ${b.dsc > 0 ? "+" : ""}${b.dsc}）。原因：${esc(b.why)}</span></li>`));
+  const none = CH.filter(c => (!focus || slug(c) === focus) && !(c.balance || []).length).map(c => SHORT[c.name]);
+  const balBox = `<section class="alerts" style="margin-top:18px"><h2>均衡加点换了职业的等级</h2>${balRows.length ? `<ul>${balRows.join("")}</ul>` : ""}<p class="hint" style="margin:6px 0 0">${none.length ? esc(none.join("、")) + "：没有。" : ""}</p></section>`;
+  const ovRows = CH.filter(c => !focus || slug(c) === focus).map(c => {
+    const a = c.avg; if (!a) return "";
+    const ap = psum(a.act), ep = Math.round(psum(a.exp)), dv = Math.round(a.ws - a.wexp);
+    const ex = []; let lv = null;
+    for (const x of c.route || []) { if (x[0] === "up") { lv = x[3]; continue; } ex.push(x[1] ? `${esc(x[1])}（Lv${lv ?? c.planFrom}，判定 ${x[2]}%）` : ""); }
+    const skips = (c.route || []).filter(x => x[0] === "exam" && !x[1]).length;
+    const exs = ex.filter(Boolean);
+    return `<tr><td><a href="#plan" data-go="${slug(c)}">${esc(SHORT[c.name])}</a>${c.tier ? ` <span class="rec ${c.tier === "P0" ? "r1" : c.tier === "P1" ? "r2" : "r3"}">${c.tier}</span>` : ""}</td><td class="n">Lv${c.planFrom}→${c.planTo}</td><td class="n"><b>${a.ws}</b></td><td class="n">${ap}</td><td class="n ${dv >= 3 ? "up" : dv <= -3 ? "dn" : ""}">${sgn(dv)}</td><td class="note">${exs.length ? exs.join("、") : "不转新职业"}${skips ? `；跳过 ${skips} 次` : ""}</td></tr>`;
+  }).join("");
+  const ovBox = `<section class="alerts"><h2>路线一览（到 Lv35）</h2><div class="scroll"><table class="ovt"><tr><th>角色</th><th class="n">等级</th><th class="n">加权分</th><th class="n">点数</th><th class="n">比平均</th><th>要考的职业</th></tr>${ovRows}</table></div></section>`;
+  const team = decBox() + ovBox + actBox;
+  const cards = CH.filter(c => !focus || slug(c) === focus).map(c => {
+    const w = walk(c), rm = remain(c, w), a = c.avg;
+    const ap = psum(a ? a.act : []), ep = Math.round(psum(a ? a.exp : []));
+    const right = a ? `推荐路线 ${PW(ap, a.ws)} · 平均 ${PW(ep, a.wexp.toFixed(0))}（${sgn(ap - ep)} 点 · ${sgn(Math.round(a.ws - a.wexp))} 分）` : "";
+    return `<article class="card" data-slug="${slug(c)}" id="${slug(c)}">${head(c, w, right)}
+      <details class="more cbody"${focus ? " open" : ""}><summary>展开：路线、能力、考试和每一步</summary>
+      ${c.examWarn ? `<div class="sec"><p class="txt"><span class="sev warn">注意</span> 这条路线考试 + 跳过一共 ${c.exams} 次，比较多（手形 ${c.planGold}G）。</p></div>` : ""}
+      ${c.route ? `<div class="sec"><h4>推荐路线</h4>${changesHtml(c)}<details class="more"><summary>逐级一览</summary><div class="route">${routeTxt(c)}</div></details></div>` : ""}
+      ${l45Box(c)}
+      <div class="sec"><h4>能力到 Lv${w.endLevel}</h4>${statTable(c, w)}</div>
+      ${c.choices ? `<div class="sec"><h4>长期选择：成本、收益、建议</h4>${choiceTable(c)}</div>` : ""}
+      ${c.hist ? `<div class="sec"><h4>每次考试值不值</h4>${examTable(c)}</div>` : ""}
+      ${trendHtml(c)}
+      ${c.steps.length ? `<div class="sec"><h4>每一步的加权分<small>按现在的选择，剩 ${PW(rm.cnt, rm.sc)}</small></h4>${timeline(c, w)}</div>` : ""}
+      ${c.steps.length ? `<div class="sec"><details class="more" open><summary>逐级路线和所有选择（可以改）</summary>${fullList(c, w)}</details></div>` : ""}
+      </details>
+    </article>`;
+  }).join("");
+  return `<p class="lede">每人到 Lv35 的推荐路线、终点能力和考试安排。改了某一步的职业，下面的数字会马上更新。</p>${team}<div class="grid one">${cards}</div>${balBox}` + notesBox([
+    N_PTS,
+    "<b>体格阈值</b>（所有人）：力量每涨到 5 的倍数，体格 +1，那一级额外 +3 分，已算进加权分和路线选择，该级说明里会写「体格」。",
+    `<b>跳过条件</b>（11-09 定）：① 这一级最好的分 ≤ 分数线（P0 8、P1 8、P2 6）；② 比未来 15 级平均低 ≥ 百分比（P0 35%、P1 50%、P2 60%）。P0 满足其一就跳，P1、P2 两个都满足才跳。分数含均衡和体格加分。跳过不学会新职业，按初级手形 300G 算。P0 = 迪、法毕欧、艾丝、米迦、伊欧；P1 = 杨界、奇洛；P2 = 努蒂奴、乌尔坦德。（11-11 起不再要求每人考进一个新中级职业。）`,
+    "<b>判定值</b>：考试成败由种子决定，判定值低于游戏显示的成功率才过。<b>估计显示</b> = 按 11-05 的技能等级和考试时的等级估的成功率。",
+    "<b>均衡加点</b>：只看权重 5 的能力，而且换职业要真的补上落后那项才换。某项比其中最低的那项多 3 点以上时，每多 1 点，它的权重 −0.5、落后那项 +0.5（各最多 ±2）。只用来决定「这一级用哪个职业」，不改考试的时间和次数。",
+    "<b>比平均</b> = 推荐路线加权分 − 平均运气的加权分。能力表里红底 = 比平均少，绿底 = 比平均多；截图数值含职业补正和▲。",
+    "<b>长期选择</b>：现在的路线那一行是到 Lv35 的总数，其他行是和它的差。换路线告诉我，我重算逐级步骤。",
+    "<b>每次考试值不值</b>：和「不考这一次」的最好路线比。",
+    "<b>发展趋势</b>：一直用现在的职业升会怎样、推荐路线改善了什么；绿底 / 红底 = 比平均运气明显多 / 少，权重低的项也会提醒。"]);
+}
+
+// ---------- 回顾 ----------
+const cells = (g, mark) => g.map(v => `<td class="n ${mark && v > 0 ? "up" : ""} ${mark && v < 0 ? "dn" : ""}">${v === 0 && mark ? "" : (mark && v > 0 ? "+" + v : v)}</td>`).join("");
+const sum8 = a => a.slice(1).reduce((x, y) => x + y, 0);
+function pastTable(h, wt) {
+  let cur = h.join.stats.slice(), tp = 0, tw = 0;
+  const th = ST.map(k => `<th class="n">${k}</th>`).join("");
+  const pw = g => `<td class="n">${psum(g)}</td><td class="n">${wsum(g, wt)}</td>`;
+  let t = `<table><tr><th>等级</th><th>职业</th>${th}<th class="n">点数</th><th class="n">加权分</th><th>说明</th></tr>`;
+  t += `<tr><td>Lv${h.join.lv} 入队</td><td>${esc(h.join.cls)}</td>${cells(cur)}<td class="n">${psum(cur)}</td><td class="n">${wsum(cur, wt)}</td><td class="note">${esc(h.join.note || "初始能力（不含职业补正）")}；点数、加权分是能力总和</td></tr>`;
+  if (h.gap) { tp += psum(h.gap.g); tw += wsum(h.gap.g, wt); t += `<tr><td>Lv${h.gap.frm}→${h.gap.to}</td><td>${h.gap.n} 级合计</td>${cells(h.gap.g, true)}${pw(h.gap.g)}<td class="note">这段没有观星记录，只知道合计</td></tr>`; }
+  for (const r of h.past) {
+    if (r.kind === "考试") { t += `<tr class="exam"><td>${esc(r.lv)}</td><td>考试 ${esc(r.cls)}</td>${ST.map(() => "<td></td>").join("")}<td></td><td></td><td class="note">${esc(r.note)}</td></tr>`; continue; }
+    tp += psum(r.g); tw += wsum(r.g, wt);
+    t += `<tr><td>${esc(r.lv)}</td><td>${esc(r.cls)}</td>${cells(r.g, true)}${pw(r.g)}<td class="note">${esc(r.note)}</td></tr>`;
+  }
+  const gained = h.now.raw.map((v, i) => v - h.join.stats[i]);
+  t += `<tr class="sum"><td colspan="2">入队以来合计涨</td>${cells(gained, true)}${pw(gained)}<td class="note">每级平均 ${(psum(gained) / Math.max(1, h.now.lv - h.join.lv)).toFixed(1)} 点 · ${(wsum(gained, wt) / Math.max(1, h.now.lv - h.join.lv)).toFixed(1)} 分</td></tr>`;
+  return t + `<tr class="sum"><td colspan="2">截图时裸能力</td>${cells(h.now.raw)}<td class="n">${psum(h.now.raw)}</td><td class="n">${wsum(h.now.raw, wt)}</td><td class="note">能力总和</td></tr></table>`;
+}
+function nowTable(h) {
+  const n = h.now, th = ST.map(k => `<th class="n">${k}</th>`).join("");
+  let t = `<table><tr><th></th>${th}<th>说明</th></tr><tr><td>11-05 截图 Lv${n.lv} ${esc(n.cls)}</td>${cells(n.shot)}<td class="note">游戏里显示的</td></tr>
+    <tr><td>− 职业补正</td>${cells(n.bonus.map(v => -v), true)}<td class="note">${esc(n.cls)}自带</td></tr>
+    <tr><td>− ▲加成</td>${cells(n.boost.map(v => -v), true)}<td class="note">${esc(n.boost_note)}</td></tr>
+    <tr class="sum"><td>= 裸能力</td>${cells(n.raw)}<td></td></tr>`;
+  if (n.after.some(v => v)) t += `<tr><td>+ 截图后已升</td>${cells(n.after, true)}<td class="note">观星记录里截图之后的升级</td></tr><tr class="sum"><td>= 规划起点 Lv${n.start_lv}</td>${cells(n.raw_start)}<td></td></tr>`;
+  return t + "</table>";
+}
+function viewPast() {
+  const list = CH.filter(c => c.hist && (!focus || slug(c) === focus));
+  return `<p class="lede">从入队到现在每一级涨了什么，以及现在的裸能力。</p>` +
+    list.map((c, i) => { const h = c.hist; return `<details class="char" id="${slug(c)}"${focus || i === 0 ? " open" : ""}><summary><h3>${esc(c.name)}</h3><span>Lv${h.join.lv} ${esc(h.join.cls)} → Lv${h.now.lv} ${esc(h.now.cls)} · 裸能力总和 ${psum(h.join.stats)} → ${psum(h.now.raw)} 点 · 加权 ${wsum(h.join.stats, c.weights || [])} → ${wsum(h.now.raw, c.weights || [])} 分</span></summary>
+      <div class="sec"><h4>每一级</h4><div class="scroll">${pastTable(h, c.weights || [])}</div></div>
+      <div class="sec"><h4>现在：截图 → 裸能力</h4><div class="scroll">${nowTable(h)}</div></div></details>`; }).join("") + notesBox([
+    "迪从 Lv1 起逐级反推（全部对上）；其他人从第一条观星记录开始，之前只有合计。",
+    "<b>裸能力</b> = 截图数值去掉职业补正和▲。",
+    N_PTS]);
+}
+
+
+// ---------- 长线观星 ----------
+const longS = {};
+const LONG_DEF = 5;
+const f1 = v => (v > 0 ? "+" : "") + (Math.round(v * 10) / 10);
+const dc = v => v >= 3 ? "up" : v <= -3 ? "dn" : "eq";
+const lvTxt = arr => { const m = {}; arr.forEach(v => m[v] = (m[v] || 0) + 1); return Object.keys(m).map(Number).sort((a, b) => a - b).map(v => "Lv" + v + (m[v] > 1 ? "×" + m[v] : "")).join(" ") || "—"; };
+function viewLong() {
+  const list = CH.filter(c => c.long && (!focus || slug(c) === focus));
+  const rows = CH.filter(c => c.long).map(c => { const L = c.long, st = L.stats, td = L.got - L.exp, wc = L.wcur, r = L.wrec;
+    const srt = [...st].sort((a, b) => a.diff - b.diff || a.got - b.got);
+    const s5 = st.reduce((a, x) => a + x.per[5].max, 0);
+    return `<tr><td><a href="#long" data-go="${slug(c)}">${esc(SHORT[c.name])}</a></td><td class="n">${L.got} / ${L.exp}</td><td class="n"><span class="vs ${td >= 5 ? "up" : td <= -5 ? "dn" : "eq"}">${f1(td)}</span></td>
+      <td><span class="vs ${dc(srt[8].diff)}">${esc(srt[8].k)} ${f1(srt[8].diff)}</span></td><td><span class="vs ${dc(srt[0].diff)}">${esc(srt[0].k)} ${f1(srt[0].diff)}</span></td>
+      <td class="n">${s5}</td><td class="n">${wc[0].sc}</td><td class="n up"><b>${wc[r].sc}</b></td><td class="n">${r}</td><td class="n">${wc[r].sc - wc[0].sc > 0 ? "+" : ""}${wc[r].sc - wc[0].sc}</td><td class="note">${esc(L.oneline || "")}</td></tr>`; }).join("");
+  return `<p class="lede">从现在的种子往后看 40 级：哪项长得好、哪项差，跳过能多拿多少。</p>
+  <div class="card" style="padding:12px 14px;margin:12px 0"><h4 style="margin:0 0 6px">九人对比（40 级）</h4><div class="scroll"><table>
+    <tr><th rowspan="2">角色</th><th colspan="4" class="grp">点数（不加权）</th><th class="grp">单项各跳 5</th><th colspan="4" class="grp">加权（整体跳过）</th><th rowspan="2">总结</th></tr>
+    <tr><th class="n">涨 / 期望</th><th class="n">差值</th><th>最好</th><th>最差</th><th class="n">上限之和</th><th class="n">不跳</th><th class="n">最高</th><th class="n">要跳</th><th class="n">多</th></tr>${rows}</table></div>
+    </div>` +
+  list.map((c, i) => longCard(c, i)).join("") + notesBox([
+    "<b>成长率</b> = 个人 + 统一 15%，不分职业、不算坐骑，保底 2 项。",
+    "<b>差值</b> = 实际 − 成长率×40，≥+3 绿、≤−3 红；合计 ≥±5 算整体好 / 差运。",
+    "<b>单项跳过</b>：只为某一项最多跳 5 次能到多少。「单项各跳 5 上限之和」= 每项各自为自己跳 5 次的最高值加起来，是理论天花板，九项不能同时达到。",
+    "<b>加权（整体跳过）</b>：建议跳几次 = 按「到 Lv35」同一套跳过条件（分数线 + 比后 15 级平均低的百分比；P0 满足其一，P1/P2 都满足）逐级走 40 级数出来的；表里的分数是跳过加权分最低的那几级。这里用个人成长率 + 15% 估算，没算均衡和体格。",
+    N_PTS]);
+}
+function longCard(c, i) {
+  const L = c.long, k = slug(c), S = longS[k] ?? LONG_DEF, lv0 = L.level, wt = L.w, wc = L.wcur, wl = L.wlo, r = L.wrec;
+  const skipLv = js => { const out = []; let n = 0; const set = new Set(js); for (let j = 0; j < 40 + S; j++) { if (set.has(j)) out.push(lv0 + n); else n++; } return out; };
+  const segH = L.stats[0].seg.map((_, q) => `<th class="n">Lv${lv0 + q * 10}～</th>`).join("");
+  const trs = L.stats.map((x, q) => { const p = x.per[S];
+    return `<tr><td><b>${esc(x.k)}</b></td><td class="n">${wt[q]}</td><td class="n">${x.rate}%</td><td class="n"><b>${x.got}</b></td><td class="n">${x.exp}</td><td class="n ${dc(x.diff)}">${f1(x.diff)}</td>
+      ${x.seg.map(v => `<td class="n">${v}</td>`).join("")}<td class="n up">${p.max}</td><td class="n dn">${p.min}</td><td class="note">${esc(x.note || "")}</td><td class="note">${S ? lvTxt(skipLv(p.skip)) : "—"}</td></tr>`; }).join("");
+  const sMax = L.stats.reduce((a, x) => a + x.per[S].max, 0), sMin = L.stats.reduce((a, x) => a + x.per[S].min, 0);
+  const curve = [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 18, 20].map(n => `<td class="n${n === r ? " cur" : ""}">${wc[n].sc}</td>`).join("");
+  const curveH = [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 18, 20].map(n => `<th class="n${n === r ? " cur" : ""}">${n}</th>`).join("");
+  const wrow = (name, v, cl) => `<tr class="${cl || ""}"><td>${name}</td>${ST.map((_, q) => `<td class="n">${v[q]}</td>`).join("")}<td class="n">${psum(v)}</td><td class="n">${Math.round(wsum(v, wt))}</td></tr>`;
+  const grid = L.stats.map((x, q) => `<div class="hrow"><span class="hk">${esc(x.k)}</span>${L.hits.slice(0, 40).map((h, j) => `<i class="${h[q] ? "on" : ""}${j % 10 === 0 ? " s" : ""}" title="Lv${lv0 + j}→${lv0 + j + 1}"></i>`).join("")}<span class="hn">${x.got}</span></div>`).join("")
+    + `<div class="hrow"><span class="hk">加权</span>${L.wsc.slice(0, 40).map((v, j) => `<i class="w ${v >= 22 ? "g" : v <= 10 ? "b" : ""}${j % 10 === 0 ? " s" : ""}" title="Lv${lv0 + j}→${lv0 + j + 1}：加权 ${v}">${v}</i>`).join("")}<span class="hn"></span></div>`;
+  return `<details class="char" id="${k}" data-slug="${k}"${focus || i === 0 ? " open" : ""}><summary><h3>${esc(c.name)}</h3><span>Lv${L.level}→${L.end} · 点数 ${L.got}（期望 ${L.exp}，${f1(L.got - L.exp)}）· 加权最高 ${wc[r].sc}（跳 ${r} 次）</span></summary>
+    <div class="sec">
+      <h4>总结</h4><ul class="adv">${L.summary.map(a => `<li>${esc(a)}</li>`).join("")}</ul>
+      <h4>养成建议</h4><ul class="adv">${L.advice.map(a => `<li>${esc(a)}</li>`).join("")}</ul>
+
+      <h4>加权：整体跳过</h4>
+      <div class="lvsum"><div><small>不跳过</small><b>${wc[0].sc} 分</b></div><div class="hi"><small>建议跳 ${r} 次（约 ${r * 300}G）</small><b>${wc[r].sc} 分</b></div><div class="lo"><small>同样跳 ${r} 次但跳错（跳在最好的级）</small><b>${wl[r].sc} 分</b></div><div><small>跳满 20 次</small><b>${wc[20].sc} 分</b></div><div><small>平均运气</small><b>${L.wexp} 分</b></div></div>
+      <p class="hint" style="margin:0"><b>建议跳过的级</b>（升级前考一次试）：${lvTxt(wc[r].lvs)}</p>
+      <div class="scroll"><table><tr><th>跳几次</th>${curveH}</tr><tr><td>加权最高</td>${curve}</tr></table></div>
+      <div class="scroll"><table><tr><th>40 级各项</th>${ST.map(s => `<th class="n">${s}</th>`).join("")}<th class="n">点数</th><th class="n">加权分</th></tr>
+        <tr class="w"><td>能力权重</td>${wt.map(v => `<td class="n">${v}</td>`).join("")}<td></td><td></td></tr>
+        ${wrow("期望", L.stats.map(x => x.exp))}${wrow("不跳过", wc[0].tot)}${wrow("建议跳 " + r + " 次", wc[r].tot, "sum")}</table></div>
+
+      <h4>单项：只为一项跳过</h4>
+      <div class="skctl"><label>每项最多跳过 <input type="range" min="0" max="20" value="${S}" data-long="${k}"></label><b>${S}</b> 次${S === LONG_DEF ? "" : `　<a href="#long" data-longrec="${k}">回到 ${LONG_DEF} 次</a>`}</div>
+      <div class="scroll"><table><tr><th>能力</th><th class="n">权重</th><th class="n">成长率</th><th class="n">不跳</th><th class="n">期望</th><th class="n">差值</th>${segH}<th class="n">跳 ${S} 最高</th><th class="n">跳 ${S} 最低</th><th>总结</th><th>拿最高要跳过的级</th></tr>${trs}
+        <tr class="sum"><td>合计</td><td></td><td></td><td class="n">${L.got}</td><td class="n">${L.exp}</td><td class="n">${f1(L.got - L.exp)}</td>${L.stats[0].seg.map((_, q) => `<td class="n">${L.stats.reduce((a, x) => a + x.seg[q], 0)}</td>`).join("")}<td class="n up">${sMax}</td><td class="n dn">${sMin}</td><td class="note">各项单独算再加起来，不能同时达到</td><td></td></tr></table></div>
+
+      <h4>每一级涨了哪些（深色 = 涨；最后一行是这一级的加权分）</h4><div class="scroll"><div class="hgrid">${grid}</div></div>
+    </div></details>`;
+}
+document.getElementById("view").addEventListener("change", e => { const r = e.target.closest("input[data-long]"); if (!r) return; longS[r.dataset.long] = +r.value; render(); });
+document.getElementById("view").addEventListener("click", e => {
+  const ml = e.target.closest("[data-lead]"), mq = e.target.closest("[data-pool]");
+  if (ml) { const n = ml.dataset.lead, i = mealLead.indexOf(n);
+    if (i >= 0) { if (mealLead.length > 1) mealLead.splice(i, 1); } else { mealLead.push(n); if (mealLead.length > 2) mealLead.shift(); }
+    try { localStorage.setItem("meal-lead", JSON.stringify(mealLead)); } catch (_) {} render(); return; }
+  if (mq) { mealPool = mq.dataset.pool; try { localStorage.setItem("meal-pool", mealPool); } catch (_) {} render(); return; }
+  const ap = e.target.closest("[data-apply]");
+  if (ap) { const c = CH.find(x => slug(x) === ap.closest("[data-slug]").dataset.slug), s = c.steps.find(x => x.key === ap.closest("[data-key]").dataset.key);
+    const v = ap.dataset.val; if (v != null) setProg(c, s, p => { p.choice = v === recOf(s) ? undefined : v; }); render(); return; }
+  const b = e.target.closest("[data-dec]"); if (!b) return;
+  const c = CH.find(x => slug(x) === b.closest("[data-slug]").dataset.slug), s = c.steps.find(x => x.key === b.closest("[data-key]").dataset.key);
+  const v = b.dataset.val;
+  setProg(c, s, p => { if (b.dataset.dec === "ok" && v != null) p.choice = v === recOf(s) ? undefined : v; p.ok = b.dataset.dec === "ok" ? true : undefined; });
+  render();
+});
+document.getElementById("view").addEventListener("click", e => { const a = e.target.closest("[data-longrec]"); if (!a) return; e.preventDefault(); delete longS[a.dataset.longrec]; render(); });
+
+// ---------- 渲染 ----------
+function render() {
+  const a = document.activeElement;
+  if (a && a.closest && a.closest("#view") && (a.type === "number")) { pending = true; return; }
+  pending = false;
+  const y = scrollY;
+  document.querySelectorAll("nav.tabs a").forEach(el => el.setAttribute("aria-current", el.dataset.v === view ? "page" : "false"));
+  document.getElementById("who").style.display = view === "meal" ? "none" : "";
+  document.getElementById("who").innerHTML = [["", "全部"], ...CH.map(c => [slug(c), SHORT[c.name] || c.name])]
+    .map(([k, t]) => `<button type="button" data-who="${k}" aria-pressed="${focus === k}">${esc(t)}</button>`).join("");
+  const opened = [...document.querySelectorAll("#view details[open][data-keep]")].map(d => d.dataset.keep);
+  document.getElementById("view").innerHTML = view === "plan" ? viewPlan() : view === "past" ? viewPast() : view === "long" ? viewLong() : view === "mine" ? viewMine() : view === "meal" ? viewMeal() : view === "l45" ? viewL45() : viewNext();
+  document.querySelectorAll("#view details.more").forEach((d, i) => { d.dataset.keep = (d.closest("[data-key]")?.dataset.key || "") + (d.closest("[data-slug]")?.dataset.slug || "") + i; if (opened.includes(d.dataset.keep)) d.open = true; });
+  scrollTo(0, y);
+}
+document.addEventListener("focusout", () => { if (pending) setTimeout(render, 0); });
+function setView() { const h = location.hash.slice(1); view = ["meal", "next", "plan", "l45", "past", "long", "mine"].includes(h) ? h : "meal"; render(); }
+addEventListener("hashchange", () => { setView(); scrollTo(0, 0); });
+document.getElementById("who").addEventListener("click", e => {
+  const b = e.target.closest("button[data-who]"); if (!b) return;
+  focus = b.dataset.who; try { localStorage.setItem("route-focus", focus); } catch (_) {} render();
+});
+document.getElementById("view").addEventListener("click", e => {
+  const g = e.target.closest("[data-go]");
+  if (g) { focus = g.dataset.go; try { localStorage.setItem("route-focus", focus); } catch (_) {} if (g.getAttribute("href") === "#" + view) { e.preventDefault(); render(); } return; }
+  const b = e.target.closest("[data-do=done]"); if (!b) return;
+  const card = b.closest("[data-slug]"), c = CH.find(x => slug(x) === card.dataset.slug), key = b.closest("[data-key]").dataset.key;
+  const w = walk(c), row = w.rows.find(r => r.s.key === key);
+  if (!row.r.exam) {
+    const ci = charInfo(c); ci.level = Math.max(ci.level || 0, row.to);
+    info[slug(c)] = { level: ci.level, owned: ci.owned, skills: ci.skills };
+    queue("chars/" + slug(c), { ...info[slug(c)], at: new Date().toISOString() });
+    setProg(c, row.s, p => { if (p.done === false) delete p.done; });
+  } else {
+    const n = examName(row.s), v = examVerdict(c, row.s);
+    if (n && v.pass !== false) { const ci = charInfo(c); if (!ci.owned.includes(n)) { ci.owned = [...ci.owned, n]; info[slug(c)] = { level: ci.level, owned: ci.owned, skills: ci.skills }; queue("chars/" + slug(c), { ...info[slug(c)], at: new Date().toISOString() }); } }
+    setProg(c, row.s, p => { p.done = true; });
+  }
+  render();
+});
+function setProg(c, s, fn) {
+  const key = keyOf(c, s), p = { ...(prog[key] || {}) };
+  fn(p);
+  if (p.done !== undefined) { prog[key] = p; const auto = walk(c).rows.find(r => r.s === s).auto; if (p.done === auto) delete p.done; }
+  const val = {}; if (p.done !== undefined) val.done = p.done; if (p.choice) val.choice = p.choice; if (p.chance != null) val.chance = p.chance; if (p.ok) val.ok = true;
+  if (Object.keys(val).length) { prog[key] = val; queue("progress/" + key, { ...val, at: new Date().toISOString() }); }
+  else { delete prog[key]; queue("progress/" + key, null); }
+}
+document.getElementById("view").addEventListener("change", e => {
+  const t = e.target, f = t.dataset.f; if (!f) return;
+  if (f === "pick") {   // 11-08：选了不立刻生效，点确认才改
+    const box = t.closest("[data-key]"), btn = box.querySelector("[data-apply]") || box.querySelector('[data-dec="ok"]');
+    if (!btn) return;
+    const lab = t.closest("label"), need = t.dataset.need === "1";
+    const what = t.value === "exam" ? lab.querySelector(".oc").textContent.trim() : `用 ${t.value} 升级${need ? `（要先考试到 ${t.value}）` : ""}`;
+    btn.dataset.val = t.value;
+    if (btn.dataset.apply !== undefined) {
+      if (t.value === btn.dataset.cur) { btn.style.display = "none"; return; }   // 选回现在的，不用确认
+      btn.style.display = ""; btn.textContent = `确认：${btn.dataset.lv} 改成${what}`;
+    } else btn.textContent = `确认：${what}`;
+    return;
+  }
+  const card = t.closest("[data-slug]"), c = CH.find(x => slug(x) === card.dataset.slug);
+  if (f === "done" || f === "choice" || f === "chance") {
+    const s = c.steps.find(x => x.key === t.closest("[data-key]").dataset.key);
+    if (f === "choice") setProg(c, s, p => { p.choice = t.value === recOf(s) ? undefined : t.value; });
+    if (f === "chance") setProg(c, s, p => { const v = parseFloat(t.value); p.chance = v >= 0 && v <= 100 ? v : undefined; });
+    if (f === "done") setProg(c, s, p => { p.done = t.checked; });
+  } else {
+    const ci = charInfo(c);
+    if (f === "level") { const v = parseInt(t.value, 10); if (!(v > 0)) return; ci.level = v; }
+    if (f === "owned") ci.owned = [...card.querySelectorAll('[data-f="owned"]:checked')].map(x => x.value);
+    if (f === "skill") { ci.skills = { ...ci.skills }; if (t.value) ci.skills[t.dataset.k] = t.value; else delete ci.skills[t.dataset.k]; }
+    info[slug(c)] = { level: ci.level, owned: ci.owned, skills: ci.skills };
+    queue("chars/" + slug(c), { ...info[slug(c)], at: new Date().toISOString() });
+  }
+  if (t.type === "number") t.blur();
+  render();
+});
+
+// ---------- 保存 ----------
+function setStatus(text, k) { document.getElementById("status").textContent = text; document.getElementById("live").className = "live " + (k || ""); }
+function queue(path, val) { dirty.set(path, val); if (!db) { saveLocal(); return; } flush(); }
+async function flush() {
+  if (writing) return; writing = true;
+  try {
+    while (dirty.size) {
+      const [path, val] = dirty.entries().next().value, [coll, id] = path.split("/"), ref = db.collection(coll).doc(id);
+      if (val) await ref.set(val); else await ref.delete();
+      if (dirty.get(path) === val) dirty.delete(path);
+    }
+    setStatus("实时共享 · 已保存", "on");
+  } catch (err) {
+    setStatus("没保存上：" + (err && err.code === "permission_denied" ? "你只有查看权限" : "网络或权限问题，刷新后再试"), "warn");
+  } finally { writing = false; }
+}
+function saveLocal() { try { localStorage.setItem("route-state2", JSON.stringify({ prog, info })); } catch (_) {} }
+function loadLocal() { try { const v = JSON.parse(localStorage.getItem("route-state2") || "{}"); prog = v.prog || {}; info = v.info || {}; } catch (_) {} }
+
+// ---------- 同步到 Google Sheet ----------
+function sheetValues() {
+  const now = new Date().toLocaleString("zh-CN", { hour12: false });
+  const v = [["整体成长（由成长路线页同步，别在这页手改，会被覆盖）", "", "", "同步时间", now]];
+  v.push(["角色", "当前等级", "终点等级", "还要涨（点数）", "加权分", ...ST.map(k => k + "（现在→终点）"), "已有职业", ...DATA.skills, "能力权重"]);
+  for (const c of CH) {
+    const w = walk(c), ci = w.ci, rm = remain(c, w);
+    v.push([c.name, ci.level ?? "", w.endLevel, rm.cnt, rm.sc, ...ST.map((k, i) => c.stats ? `${c.stats[i]}→${c.stats[i] + rm.add[i]}` : ""), ci.owned.join("、"), ...DATA.skills.map(k => ci.skills[k] || ""), ST.map((k, i) => k + (c.weights || [])[i]).join(" ")]);
+  }
+  v.push([""]);
+  v.push(["角色", "来源", "等级", "原定", "我的选择", "已完成", "加点", "点数", "加权分", "这一步所有选择", "游戏显示成功率", "判定值"]);
+  for (const c of CH) for (const row of walk(c).rows) {
+    const { s, r } = row, ch = (prog[keyOf(c, s)] || {}).chance;
+    v.push([c.name, s.src === "record" ? (s.hidden ? "没记录" : "观星记录") : "规划", r.exam ? (examName(s) ? "考试" : "跳过") : `${row.frm}→${row.to}`,
+      s.exam ? (s.cls ? "考试·" + s.cls : "跳过") : "升1级·" + s.cls, r.exam ? stepName(s) : "升1级·" + row.choice,
+      row.done ? "✓" : "", r.exam ? "" : r.gains.join(" "), r.exam ? "" : r.cnt, r.exam ? "" : r.score,
+      s.opts.map(o => `${o.classes.join("/")}:${o.cnt}点${o.score}分`).join("；"), ch ?? "", s.roll ?? ""]);
+  }
+  const wd = Math.max(...v.map(r => r.length));
+  return v.map(r => [...r, ...Array(wd - r.length).fill("")]);
+}
+const MCP_MSG = { server_not_connected: "没连上 Google Sheets：到 claude.ai 设置 → 连接器里添加", needs_reauth: "Google Sheets 登录过期：到 claude.ai 设置 → 连接器里重新连接",
+  approval_required: "需要你先允许这个页面使用 Google Sheets", consent_required: "需要你先允许这个页面使用 Google Sheets", cancelled: "已取消",
+  blocked_by_policy: "组织策略不允许这个页面用 Google Sheets", tool_error: "表格那边报错" };
+function setSync(t, warn) { const el = document.getElementById("syncStatus"); el.textContent = t; el.classList.toggle("warn", !!warn); }
+async function syncSheet() {
+  const btn = document.getElementById("syncBtn");
+  const mcp = window.claude?.use ? await window.claude.use("mcp").catch(() => null) : null;
+  if (!mcp) { setSync("这里用不了 Google Sheets（要在 Claude 里打开这页）", true); return; }
+  btn.disabled = true; setSync("正在写入「成长进度」…");
+  try {
+    const values = sheetValues();
+    await mcp.callTool(SERVER, "batch_clear_values", { spreadsheetId: SHEET_ID, ranges: [SHEET_TAB + "!A1:Z400"] });
+    await mcp.callTool(SERVER, "update_values", { spreadsheetId: SHEET_ID, range: SHEET_TAB + "!A1", values });
+    setSync(`已同步 ${values.length} 行`);
+  } catch (err) {
+    setSync((MCP_MSG[err?.code] || "同步失败") + (err?.code === "tool_error" && err.message ? "：" + err.message.slice(0, 160) : ""), true);
+  } finally { btn.disabled = false; }
+}
+document.getElementById("syncBtn").addEventListener("click", syncSheet);
+
+try { focus = localStorage.getItem("route-focus") || ""; } catch (_) {}
+if (focus && !CH.some(c => slug(c) === focus)) focus = "";
+setView();
+(async () => {
+  db = window.claude?.use ? await window.claude.use("db").catch(() => null) : null;
+  if (!db) { loadLocal(); render(); setStatus("只存在这台设备的浏览器里（共享保存不可用）", "warn"); return; }
+  const timer = setTimeout(() => setStatus("暂时连不上，显示的可能不是最新的", "warn"), 10000);
+  const watch = (coll, apply) => db.collection(coll).onSnapshot(snap => {
+    if (!snap.metadata.fromCache) clearTimeout(timer);
+    const next = {};
+    for (const d of snap.docs) next[d.id] = d.data();
+    for (const [path, val] of dirty) { const [cl, id] = path.split("/"); if (cl === coll) { if (val) next[id] = val; else delete next[id]; } }
+    apply(next); render();
+    if (!snap.metadata.fromCache) setStatus("实时共享 · 已同步", "on");
+  }, () => { clearTimeout(timer); setStatus("读取记录失败，刷新页面再试", "warn"); });
+  watch("progress", v => { prog = {}; for (const [k, d] of Object.entries(v)) { const p = {}; if (typeof d?.done === "boolean") p.done = d.done; if (d?.choice) p.choice = d.choice; if (typeof d?.chance === "number") p.chance = d.chance; if (Object.keys(p).length) prog[k] = p; } });
+  watch("chars", v => { info = {}; for (const [k, d] of Object.entries(v)) if (d) info[k] = { level: d.level, owned: d.owned, skills: d.skills || {} }; });
+})();
+</script>
