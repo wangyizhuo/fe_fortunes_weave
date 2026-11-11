@@ -13,6 +13,7 @@ META = {"order": ORDER, "slug": SLUG, "sum": SUM, "txt": TXT,
         "foot": "数据：种子反推（levelup/rng）、11-05 截图、fire-emblem-fw.site / global.fireemblem.top 的初始能力和职业补正。考试成败由种子决定：判定值低于游戏显示的成功率才能过；没填游戏成功率的考试按能过算。2026-11-05 生成。"}
 t = open(os.path.join(HERE, "detail_template.html"), encoding="utf-8").read()
 t = t.replace("__DATA__", json.dumps(D, ensure_ascii=False)).replace("__META__", json.dumps(META, ensure_ascii=False))
+os.makedirs(os.path.join(HERE, "..", "html"), exist_ok=True)
 out = os.path.join(HERE, "..", "html", "角色成长档案.html")
 open(out, "w", encoding="utf-8").write(t)
 open(os.path.join(OUT_DIR, "growth-detail.html"), "w", encoding="utf-8").write(t)

@@ -288,6 +288,7 @@ data_json = json.dumps({"meals": MEALS, "chars": chars, "stats": STATS, "skills"
 tpl = open(os.path.join(HERE, "app_template.html"), encoding="utf-8").read()
 out = tpl.replace("/*ROUTE_DATA*/{}", data_json)
 assert out != tpl
+os.makedirs(os.path.join(HERE, "..", "html"), exist_ok=True)
 open(os.path.join(HERE, "..", "html", "成长路线.html"), "w", encoding="utf-8").write(out)
 open(os.path.join(OUT_DIR, "growth-route.html"), "w", encoding="utf-8").write(out)
 print(len(chars), "characters", sum(len(c["steps"]) for c in chars), "steps", len(out), "bytes")

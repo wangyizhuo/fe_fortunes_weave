@@ -21,5 +21,6 @@ for n in ORDER:
 data = json.dumps({"order": ORDER, "chars": D, "st": ST, "short": SHORT}, ensure_ascii=False)
 html = open(os.path.join(HERE, "ch7_template.html"), encoding="utf-8").read().replace("/*DATA*/{}", data)
 open(os.path.join(OUT_DIR, "ch7-plan.html"), "w", encoding="utf-8").write(html)
+os.makedirs(os.path.join(HERE, "..", "html"), exist_ok=True)
 open(os.path.join(HERE, "..", "html", "第七章重开规划.html"), "w", encoding="utf-8").write(html)
 print(len(html))

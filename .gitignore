@@ -4,3 +4,4 @@ __pycache__/
 out/
 .layout_ok
 levelup/rng/csolve/brute
+levelup/html/
