@@ -1,0 +1,5645 @@
+{
+ "迪托利希": {
+  "name": "迪托利希",
+  "tier": "P0",
+  "level": 25,
+  "target": 40,
+  "owned": [
+   "剑客",
+   "斗士",
+   "士兵",
+   "平民"
+  ],
+  "required": [
+   "恶棍"
+  ],
+  "trainAllowed": true,
+  "options": [
+   {
+    "cls": "土匪",
+    "tier": "中级",
+    "ok": true,
+    "lv": 35,
+    "roll": 88.94,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 1,
+    "used45": 1,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      1,
+      0,
+      -1,
+      1,
+      0,
+      1,
+      0,
+      -1
+     ],
+     "total": 5,
+     "net": -3.0,
+     "gold": 500,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      1,
+      -1,
+      0,
+      1,
+      -1,
+      0,
+      -1,
+      0,
+      1
+     ],
+     "total": -5,
+     "net": -0.2
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "猎兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 35,
+    "roll": 88.94,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 0,
+    "used45": 0,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      0,
+      -1,
+      1,
+      0,
+      1,
+      0,
+      -1
+     ],
+     "total": 0,
+     "net": -4.8,
+     "gold": 300,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      -1,
+      0,
+      -1,
+      0,
+      1
+     ],
+     "total": 0,
+     "net": 4.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "飞鸵兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 35,
+    "roll": 88.94,
+    "pct": 100,
+    "pctNow": 50,
+    "train": [
+     "马术 E→E+"
+    ],
+    "ranks": 1,
+    "used": 0,
+    "used45": 0,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      0,
+      -1,
+      1,
+      0,
+      1,
+      0,
+      -1
+     ],
+     "total": 0,
+     "net": -4.8,
+     "gold": 300,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      -1,
+      0,
+      -1,
+      0,
+      1
+     ],
+     "total": 0,
+     "net": 4.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "战车兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 35,
+    "roll": 88.94,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "马术 E→D",
+     "箭术 D+→C"
+    ],
+    "ranks": 3,
+    "used": 3,
+    "used45": 1,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      0,
+      -1,
+      1,
+      1,
+      1,
+      0,
+      0
+     ],
+     "total": 4,
+     "net": -5.5,
+     "gold": 500,
+     "train": 3
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      -1,
+      -1,
+      -1,
+      0,
+      0
+     ],
+     "total": -4,
+     "net": 0.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "斗拳手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 35,
+    "roll": 88.94,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 2,
+    "used45": 1,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      0,
+      -1,
+      1,
+      0,
+      1,
+      0,
+      -1
+     ],
+     "total": 0,
+     "net": -8.0,
+     "gold": 500,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      -1,
+      0,
+      -1,
+      0,
+      1
+     ],
+     "total": 0,
+     "net": 4.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "弓箭手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 35,
+    "roll": 88.94,
+    "pct": 100,
+    "pctNow": 50,
+    "train": [
+     "箭术 D+→C"
+    ],
+    "ranks": 1,
+    "used": 1,
+    "used45": 0,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      0,
+      -1,
+      1,
+      0,
+      1,
+      0,
+      -1
+     ],
+     "total": 0,
+     "net": -8.5,
+     "gold": 500,
+     "train": 1
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      -1,
+      0,
+      -1,
+      0,
+      1
+     ],
+     "total": 0,
+     "net": 5.3
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "轻骑兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 35,
+    "roll": 88.94,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "马术 E→D"
+    ],
+    "ranks": 2,
+    "used": 1,
+    "used45": 0,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      0,
+      -1,
+      1,
+      0,
+      1,
+      0,
+      -1
+     ],
+     "total": 0,
+     "net": -9.0,
+     "gold": 500,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      -1,
+      0,
+      -1,
+      0,
+      1
+     ],
+     "total": 0,
+     "net": 5.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "骑甲鸵兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 35,
+    "roll": 88.94,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "马术 E→D"
+    ],
+    "ranks": 2,
+    "used": 2,
+    "used45": 0,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      0,
+      -1,
+      1,
+      0,
+      1,
+      0,
+      -1
+     ],
+     "total": 0,
+     "net": -9.0,
+     "gold": 500,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      -1,
+      0,
+      -1,
+      0,
+      1
+     ],
+     "total": 0,
+     "net": 5.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   }
+  ],
+  "recommended": []
+ },
+ "法毕欧": {
+  "name": "法毕欧",
+  "tier": "P0",
+  "level": 22,
+  "target": 37,
+  "owned": [
+   "诅咒师",
+   "平民"
+  ],
+  "required": [
+   "萨满巫师"
+  ],
+  "trainAllowed": true,
+  "options": [
+   {
+    "cls": "斗士",
+    "tier": "初级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→D（任选一项）"
+    ],
+    "ranks": 2,
+    "used": 1,
+    "used45": 5,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 1,
+     "net": 0.0,
+     "gold": 0,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      1,
+      2,
+      0,
+      0,
+      -1,
+      1,
+      0,
+      -1,
+      1
+     ],
+     "total": 2,
+     "net": 6.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "士兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "枪术 E→D（任选一项）"
+    ],
+    "ranks": 2,
+    "used": 1,
+    "used45": 2,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 1,
+     "net": 0.0,
+     "gold": 0,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "猎兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→D（任选一项）"
+    ],
+    "ranks": 2,
+    "used": 1,
+    "used45": 3,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 1,
+     "net": 0.0,
+     "gold": 0,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 2,
+     "net": 2.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "飞鸵兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "马术 E→E+",
+     "枪术 E→D（任选一项）"
+    ],
+    "ranks": 3,
+    "used": 1,
+    "used45": 3,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 1,
+     "net": -0.5,
+     "gold": 0,
+     "train": 3
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 2,
+     "net": 2.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "战车兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "马术 E→D",
+     "箭术 E→C"
+    ],
+    "ranks": 6,
+    "used": 2,
+    "used45": 7,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 3,
+     "net": -3.2,
+     "gold": 200,
+     "train": 6
+    },
+    "after": {
+     "g": [
+      2,
+      2,
+      0,
+      0,
+      -1,
+      2,
+      0,
+      -1,
+      3
+     ],
+     "total": 8,
+     "net": 12.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "牧师",
+    "tier": "中级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 0,
+    "used45": 3,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": -3.2,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      -1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      2
+     ],
+     "total": 1,
+     "net": 1.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "剑客",
+    "tier": "中级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→C"
+    ],
+    "ranks": 4,
+    "used": 1,
+    "used45": 2,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 1,
+     "net": -4.2,
+     "gold": 200,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": 3,
+     "net": 3.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "弓箭手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "箭术 E→C"
+    ],
+    "ranks": 4,
+    "used": 1,
+    "used45": 3,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 1,
+     "net": -4.2,
+     "gold": 200,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": 3,
+     "net": 3.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "恶棍",
+    "tier": "中级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→C（任选一项）"
+    ],
+    "ranks": 4,
+    "used": 1,
+    "used45": 2,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 1,
+     "net": -4.2,
+     "gold": 200,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 2,
+     "net": 2.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "土匪",
+    "tier": "中级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→C（任选一项）"
+    ],
+    "ranks": 4,
+    "used": 1,
+    "used45": 6,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 1,
+     "net": -4.2,
+     "gold": 200,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      3,
+      3,
+      0,
+      0,
+      -1,
+      1,
+      0,
+      -1,
+      2
+     ],
+     "total": 8,
+     "net": 12.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "斗拳手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "格斗术 E→C"
+    ],
+    "ranks": 4,
+    "used": 1,
+    "used45": 6,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 1,
+     "net": -4.2,
+     "gold": 200,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      3,
+      2,
+      0,
+      0,
+      -1,
+      1,
+      0,
+      -1,
+      2
+     ],
+     "total": 7,
+     "net": 11.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "重装步兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "重装术 E→E+",
+     "枪术 E→C（任选一项）"
+    ],
+    "ranks": 5,
+    "used": 1,
+    "used45": 4,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 1,
+     "net": -4.7,
+     "gold": 200,
+     "train": 5
+    },
+    "after": {
+     "g": [
+      0,
+      2,
+      0,
+      0,
+      -1,
+      2,
+      0,
+      -1,
+      1
+     ],
+     "total": 2,
+     "net": 6.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "轻骑兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "马术 E→D",
+     "剑术 E→C（任选一项）"
+    ],
+    "ranks": 6,
+    "used": 1,
+    "used45": 4,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 1,
+     "net": -5.2,
+     "gold": 200,
+     "train": 6
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2
+     ],
+     "total": 4,
+     "net": 4.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "骑甲鸵兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "马术 E→D",
+     "枪术 E→C（任选一项）"
+    ],
+    "ranks": 6,
+    "used": 1,
+    "used45": 3,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 1,
+     "net": -5.2,
+     "gold": 200,
+     "train": 6
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": 3,
+     "net": 3.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   }
+  ],
+  "recommended": []
+ },
+ "艾丝梅拉尔达": {
+  "name": "艾丝梅拉尔达",
+  "tier": "P0",
+  "level": 21,
+  "target": 36,
+  "owned": [
+   "天翼兵",
+   "飞鸵兵",
+   "斗士",
+   "士兵",
+   "平民"
+  ],
+  "required": [],
+  "trainAllowed": true,
+  "options": [
+   {
+    "cls": "猎兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 30,
+    "roll": 87.94,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 0,
+    "used45": 1,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0,
+     "gold": 0,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      -1,
+      -1,
+      0,
+      0,
+      0,
+      1,
+      -1,
+      1,
+      -1
+     ],
+     "total": -7,
+     "net": -2.2
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "重装步兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 30,
+    "roll": 87.94,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 3,
+    "used45": 4,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      -1,
+      -1,
+      1,
+      2,
+      -1,
+      -1,
+      -1
+     ],
+     "total": -4,
+     "net": -2.4,
+     "gold": -100,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      1,
+      1,
+      -1,
+      2,
+      0,
+      1,
+      -1
+     ],
+     "total": 8,
+     "net": 8.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "剑客",
+    "tier": "中级",
+    "ok": true,
+    "lv": 30,
+    "roll": 87.94,
+    "pct": 100,
+    "pctNow": 50,
+    "train": [
+     "剑术 D+→C"
+    ],
+    "ranks": 1,
+    "used": 0,
+    "used45": 2,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": -3.2,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      -1,
+      -1,
+      0,
+      1,
+      0,
+      1,
+      -1,
+      1,
+      -1
+     ],
+     "total": -2,
+     "net": 2.3
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "弓箭手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 30,
+    "roll": 87.94,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "箭术 D→C"
+    ],
+    "ranks": 2,
+    "used": 0,
+    "used45": 1,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": -3.2,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      -1,
+      -1,
+      0,
+      0,
+      0,
+      1,
+      -1,
+      1,
+      -1
+     ],
+     "total": -7,
+     "net": -3.2
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "恶棍",
+    "tier": "中级",
+    "ok": true,
+    "lv": 30,
+    "roll": 87.94,
+    "pct": 100,
+    "pctNow": 50,
+    "train": [
+     "箭术 D→C（任选一项）"
+    ],
+    "ranks": 1,
+    "used": 0,
+    "used45": 2,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": -3.2,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      -1,
+      -1,
+      0,
+      1,
+      0,
+      1,
+      -1,
+      1,
+      -1
+     ],
+     "total": -2,
+     "net": 2.3
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "土匪",
+    "tier": "中级",
+    "ok": true,
+    "lv": 30,
+    "roll": 87.94,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 0,
+    "used45": 2,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": -3.2,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      1,
+      0,
+      -1,
+      1,
+      -1,
+      0,
+      -1
+     ],
+     "total": -5,
+     "net": -0.2
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "斗拳手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 30,
+    "roll": 87.94,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "格斗术 E→C"
+    ],
+    "ranks": 4,
+    "used": 0,
+    "used45": 2,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": -3.2,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      1,
+      0,
+      -1,
+      1,
+      -1,
+      0,
+      -1
+     ],
+     "total": -5,
+     "net": -2.2
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "轻骑兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 30,
+    "roll": 87.94,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 0,
+    "used45": 1,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": -3.2,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "战车兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 30,
+    "roll": 87.94,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "箭术 D→C"
+    ],
+    "ranks": 2,
+    "used": 0,
+    "used45": 4,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": -3.2,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      -1,
+      0,
+      0,
+      1,
+      2,
+      -1,
+      1,
+      -1
+     ],
+     "total": 4,
+     "net": 7.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "骑甲鸵兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 30,
+    "roll": 87.94,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 0,
+    "used45": 0,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": -3.2,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   }
+  ],
+  "recommended": []
+ },
+ "米迦艾拉": {
+  "name": "米迦艾拉",
+  "tier": "P0",
+  "level": 22,
+  "target": 37,
+  "owned": [
+   "斗士",
+   "士兵",
+   "平民"
+  ],
+  "required": [],
+  "trainAllowed": true,
+  "options": [
+   {
+    "cls": "弓箭手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 29,
+    "roll": 17.87,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "箭术 D→C"
+    ],
+    "ranks": 2,
+    "used": 7,
+    "used45": 14,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      1,
+      2,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": 16,
+     "net": 11.8,
+     "gold": 200,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      -1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      -1,
+      2,
+      0
+     ],
+     "total": 4,
+     "net": 13.6
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "战车兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 29,
+    "roll": 17.87,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "箭术 D→C"
+    ],
+    "ranks": 2,
+    "used": 6,
+    "used45": 14,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      3,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": 16,
+     "net": 11.8,
+     "gold": 200,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      0,
+      3,
+      -2,
+      1,
+      -2,
+      0,
+      -2,
+      3,
+      0
+     ],
+     "total": 13,
+     "net": 27.4
+    },
+    "rec": true,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "猎兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 29,
+    "roll": 17.87,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 2,
+    "used45": 3,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 10,
+     "net": 10.0,
+     "gold": 0,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      -1,
+      1,
+      0,
+      1,
+      0,
+      -1,
+      0,
+      0,
+      1
+     ],
+     "total": 3,
+     "net": 7.8
+    },
+    "rec": true,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "恶棍",
+    "tier": "中级",
+    "ok": true,
+    "lv": 29,
+    "roll": 17.87,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 7,
+    "used45": 14,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      2,
+      2,
+      -1,
+      0,
+      1,
+      0
+     ],
+     "total": 17,
+     "net": 9.0,
+     "gold": 500,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      -2,
+      2,
+      0,
+      0,
+      -1,
+      0,
+      0,
+      1,
+      1
+     ],
+     "total": 5,
+     "net": 14.6
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "剑客",
+    "tier": "中级",
+    "ok": true,
+    "lv": 29,
+    "roll": 17.87,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 7,
+    "used45": 14,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": 11,
+     "net": 7.8,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      -1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      -1,
+      2,
+      0
+     ],
+     "total": 4,
+     "net": 13.6
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "飞鸵兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 29,
+    "roll": 17.87,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 2,
+    "used45": 4,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0
+     ],
+     "total": 7,
+     "net": 7.0,
+     "gold": 0,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      -1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      -1,
+      2,
+      0
+     ],
+     "total": 4,
+     "net": 13.6
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "土匪",
+    "tier": "中级",
+    "ok": true,
+    "lv": 29,
+    "roll": 17.87,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 8,
+    "used45": 14,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": 9,
+     "net": 5.8,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": 1,
+     "net": 1.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "斗拳手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 29,
+    "roll": 17.87,
+    "pct": 100,
+    "pctNow": 50,
+    "train": [
+     "格斗术 D+→C"
+    ],
+    "ranks": 1,
+    "used": 8,
+    "used45": 15,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": 9,
+     "net": 5.3,
+     "gold": 200,
+     "train": 1
+    },
+    "after": {
+     "g": [
+      -1,
+      1,
+      0,
+      1,
+      0,
+      -1,
+      0,
+      0,
+      1
+     ],
+     "total": 3,
+     "net": 7.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "轻骑兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 29,
+    "roll": 17.87,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 8,
+    "used45": 14,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1
+     ],
+     "total": 8,
+     "net": 4.8,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      -1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      -1,
+      2,
+      1
+     ],
+     "total": 5,
+     "net": 14.6
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "骑甲鸵兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 29,
+    "roll": 17.87,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 8,
+    "used45": 15,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1
+     ],
+     "total": 8,
+     "net": 4.8,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      -1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      -1,
+      2,
+      0
+     ],
+     "total": 4,
+     "net": 13.6
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "天翼兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 29,
+    "roll": 17.87,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 8,
+    "used45": 15,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1
+     ],
+     "total": 3,
+     "net": -0.2,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      -1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      -1,
+      2,
+      1
+     ],
+     "total": 6,
+     "net": 15.6
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "重装步兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 29,
+    "roll": 17.87,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 5,
+    "used45": 12,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": 1,
+     "net": -2.2,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      -1,
+      2,
+      -1,
+      0,
+      -1,
+      1,
+      -2,
+      0,
+      0
+     ],
+     "total": 5,
+     "net": 24.2
+    },
+    "rec": false,
+    "ruleBlocked": false
+   }
+  ],
+  "recommended": [
+   "猎兵",
+   "战车兵"
+  ],
+  "recRow": {
+   "toT": {
+    "g": [
+     0,
+     0,
+     0,
+     2,
+     3,
+     0,
+     0,
+     1,
+     1
+    ],
+    "total": 28,
+    "net": 19.0,
+    "gold": 500,
+    "train": 2
+   },
+   "after": {
+    "g": [
+     1,
+     2,
+     -1,
+     0,
+     -2,
+     1,
+     0,
+     2,
+     2
+    ],
+    "total": 16,
+    "net": 20.8
+   }
+  }
+ },
+ "杨界": {
+  "name": "杨界",
+  "tier": "P1",
+  "level": 21,
+  "target": 36,
+  "owned": [
+   "诅咒师",
+   "平民"
+  ],
+  "required": [],
+  "trainAllowed": false,
+  "options": [
+   {
+    "cls": "猎兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 23,
+    "roll": 92.64,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 3,
+    "used45": 6,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      -1,
+      1,
+      2,
+      2,
+      -1,
+      0,
+      1
+     ],
+     "total": 14,
+     "net": 6.8,
+     "gold": 300,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      -1
+     ],
+     "total": 11,
+     "net": 11.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "士兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 23,
+    "roll": 92.64,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 3,
+    "used45": 5,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      -1,
+      1,
+      0,
+      3,
+      -1,
+      0,
+      1
+     ],
+     "total": 10,
+     "net": 2.8,
+     "gold": 300,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      -1,
+      1,
+      1,
+      0,
+      0,
+      -1
+     ],
+     "total": 7,
+     "net": 7.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "弓箭手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 21,
+    "roll": 90.62,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "箭术 E→C"
+    ],
+    "ranks": 4,
+    "used": 12,
+    "used45": 20,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      3,
+      1,
+      -1,
+      -1,
+      1
+     ],
+     "total": 19,
+     "net": -1.0,
+     "gold": 500,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      -1,
+      1,
+      1,
+      1,
+      0,
+      1,
+      -1
+     ],
+     "total": 13,
+     "net": 13.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "萨满巫师",
+    "tier": "中级",
+    "ok": true,
+    "lv": 21,
+    "roll": 90.62,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 13,
+    "used45": 20,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      2,
+      0,
+      -1,
+      -1,
+      1
+     ],
+     "total": 11,
+     "net": -1.0,
+     "gold": 500,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      2,
+      -1
+     ],
+     "total": 12,
+     "net": 12.0
+    },
+    "rec": true,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "剑客",
+    "tier": "中级",
+    "ok": true,
+    "lv": 21,
+    "roll": 90.62,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "剑术 D→C"
+    ],
+    "ranks": 2,
+    "used": 12,
+    "used45": 20,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      2,
+      1,
+      -1,
+      -1,
+      1
+     ],
+     "total": 14,
+     "net": -2.0,
+     "gold": 500,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      -1,
+      2,
+      1,
+      0,
+      0,
+      1,
+      -1
+     ],
+     "total": 15,
+     "net": 15.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "恶棍",
+    "tier": "中级",
+    "ok": true,
+    "lv": 21,
+    "roll": 90.62,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "剑术 D→C（任选一项）"
+    ],
+    "ranks": 2,
+    "used": 12,
+    "used45": 20,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      2,
+      1,
+      -1,
+      -1,
+      1
+     ],
+     "total": 14,
+     "net": -2.0,
+     "gold": 500,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      -1,
+      2,
+      1,
+      0,
+      0,
+      1,
+      -1
+     ],
+     "total": 15,
+     "net": 15.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "牧师",
+    "tier": "中级",
+    "ok": true,
+    "lv": 21,
+    "roll": 90.62,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 13,
+    "used45": 21,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      -1,
+      1,
+      1
+     ],
+     "total": 9,
+     "net": -3.0,
+     "gold": 500,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      2,
+      -1
+     ],
+     "total": 12,
+     "net": 12.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "斗士",
+    "tier": "初级",
+    "ok": true,
+    "lv": 23,
+    "roll": 92.64,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 1,
+    "used45": 3,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      -1,
+      1,
+      0,
+      1,
+      -1,
+      0,
+      1
+     ],
+     "total": 4,
+     "net": -3.2,
+     "gold": 300,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      -1,
+      1,
+      0,
+      0,
+      0,
+      -1
+     ],
+     "total": 4,
+     "net": 4.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "重装步兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 21,
+    "roll": 90.62,
+    "pct": 100,
+    "pctNow": 50,
+    "train": [
+     "枪术 D→C（任选一项）"
+    ],
+    "ranks": 1,
+    "used": 11,
+    "used45": 17,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      1,
+      0,
+      1,
+      0,
+      2,
+      -1,
+      -1,
+      1
+     ],
+     "total": 10,
+     "net": -4.0,
+     "gold": 500,
+     "train": 1
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      -1,
+      1,
+      3,
+      0,
+      0,
+      -1
+     ],
+     "total": 13,
+     "net": 13.0
+    },
+    "rec": true,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "斗拳手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 21,
+    "roll": 90.62,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "格斗术 D→C"
+    ],
+    "ranks": 2,
+    "used": 11,
+    "used45": 17,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      1,
+      0,
+      1,
+      0,
+      2,
+      -1,
+      -1,
+      1
+     ],
+     "total": 10,
+     "net": -6.0,
+     "gold": 500,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      -1
+     ],
+     "total": 12,
+     "net": 12.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "飞鸵兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 23,
+    "roll": 92.64,
+    "pct": 100,
+    "pctNow": 50,
+    "train": [
+     "马术 E→E+"
+    ],
+    "ranks": 1,
+    "used": 0,
+    "used45": 4,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      -1,
+      1,
+      0,
+      1,
+      -1,
+      0,
+      1
+     ],
+     "total": 1,
+     "net": -6.2,
+     "gold": 300,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      -1,
+      1,
+      1,
+      0,
+      0,
+      1,
+      -1
+     ],
+     "total": 10,
+     "net": 8.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "土匪",
+    "tier": "中级",
+    "ok": true,
+    "lv": 21,
+    "roll": 90.62,
+    "pct": 100,
+    "pctNow": 50,
+    "train": [
+     "剑术 D→C（任选一项）"
+    ],
+    "ranks": 1,
+    "used": 10,
+    "used45": 15,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      2,
+      0,
+      1,
+      0,
+      0,
+      -1,
+      -1,
+      1
+     ],
+     "total": 7,
+     "net": -7.0,
+     "gold": 500,
+     "train": 1
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      -1,
+      1,
+      1,
+      0,
+      0,
+      -1
+     ],
+     "total": 7,
+     "net": 7.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "骑甲鸵兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 21,
+    "roll": 90.62,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "马术 E→D",
+     "枪术 D→C（任选一项）"
+    ],
+    "ranks": 3,
+    "used": 11,
+    "used45": 19,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      0,
+      2,
+      -1,
+      -1,
+      1
+     ],
+     "total": 7,
+     "net": -11.0,
+     "gold": 500,
+     "train": 3
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      -2,
+      1,
+      1,
+      1,
+      0,
+      1,
+      -1
+     ],
+     "total": 8,
+     "net": 8.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "轻骑兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 21,
+    "roll": 90.62,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "马术 E→D",
+     "剑术 D→C（任选一项）"
+    ],
+    "ranks": 4,
+    "used": 10,
+    "used45": 17,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      -1,
+      -1,
+      1
+     ],
+     "total": 4,
+     "net": -16.0,
+     "gold": 500,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      -2,
+      0,
+      1,
+      1,
+      0,
+      1,
+      -1
+     ],
+     "total": 6,
+     "net": 6.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   }
+  ],
+  "recommended": [
+   "萨满巫师",
+   "重装步兵"
+  ],
+  "recRow": {
+   "toT": {
+    "g": [
+     0,
+     1,
+     0,
+     1,
+     3,
+     2,
+     -1,
+     0,
+     2
+    ],
+    "total": 28,
+    "net": 2.0,
+    "gold": 1000,
+    "train": 1
+   },
+   "after": {
+    "g": [
+     1,
+     0,
+     -1,
+     0,
+     1,
+     2,
+     0,
+     2,
+     -2
+    ],
+    "total": 17,
+    "net": 17.0
+   }
+  }
+ },
+ "伊欧": {
+  "name": "伊欧",
+  "tier": "P0",
+  "level": 23,
+  "target": 38,
+  "owned": [
+   "战车兵",
+   "轻骑兵",
+   "平民"
+  ],
+  "required": [],
+  "trainAllowed": true,
+  "options": [
+   {
+    "cls": "飞鸵兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 24,
+    "roll": 67.22,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 2,
+    "used45": 2,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 2,
+     "net": 6.8,
+     "gold": -300,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      -1
+     ],
+     "total": 6,
+     "net": 1.2
+    },
+    "rec": true,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "剑客",
+    "tier": "中级",
+    "ok": true,
+    "lv": 24,
+    "roll": 67.22,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 2,
+    "used45": 2,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 2,
+     "net": 3.6,
+     "gold": -100,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      -1
+     ],
+     "total": 6,
+     "net": 1.2
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "恶棍",
+    "tier": "中级",
+    "ok": true,
+    "lv": 24,
+    "roll": 67.22,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 2,
+    "used45": 2,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 2,
+     "net": 3.6,
+     "gold": -100,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      -1
+     ],
+     "total": 6,
+     "net": 1.2
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "骑甲鸵兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 24,
+    "roll": 67.22,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 2,
+    "used45": 2,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 2,
+     "net": 3.6,
+     "gold": -100,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      -1
+     ],
+     "total": 6,
+     "net": 1.2
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "斗士",
+    "tier": "初级",
+    "ok": true,
+    "lv": 24,
+    "roll": 67.22,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 0,
+    "used45": 0,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0,
+     "gold": 0,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "士兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 24,
+    "roll": 67.22,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 0,
+    "used45": 0,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0,
+     "gold": 0,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "猎兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 24,
+    "roll": 67.22,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 0,
+    "used45": 0,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0,
+     "gold": 0,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "弓箭手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 24,
+    "roll": 67.22,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 0,
+    "used45": 0,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": -3.2,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "重装步兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 24,
+    "roll": 67.22,
+    "pct": 100,
+    "pctNow": 50,
+    "train": [
+     "重装术 E→E+"
+    ],
+    "ranks": 1,
+    "used": 0,
+    "used45": 0,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": -3.2,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "土匪",
+    "tier": "中级",
+    "ok": true,
+    "lv": 24,
+    "roll": 67.22,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 0,
+    "used45": 0,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": -3.2,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "斗拳手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 24,
+    "roll": 67.22,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "格斗术 E→C"
+    ],
+    "ranks": 4,
+    "used": 0,
+    "used45": 0,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": -3.2,
+     "gold": 200,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   }
+  ],
+  "recommended": [
+   "飞鸵兵"
+  ],
+  "recRow": {
+   "toT": {
+    "g": [
+     -1,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "total": 2,
+    "net": 6.8,
+    "gold": -300,
+    "train": 0
+   },
+   "after": {
+    "g": [
+     1,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     -1
+    ],
+    "total": 6,
+    "net": 1.2
+   }
+  }
+ },
+ "奇洛伊卡": {
+  "name": "奇洛伊卡",
+  "tier": "P1",
+  "level": 17,
+  "target": 35,
+  "owned": [
+   "猎兵",
+   "斗士",
+   "平民"
+  ],
+  "required": [],
+  "trainAllowed": false,
+  "options": [
+   {
+    "cls": "弓箭手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 82.65,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 12,
+    "used45": 20,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      0,
+      1,
+      2,
+      2,
+      0,
+      1,
+      0
+     ],
+     "total": 19,
+     "net": 7.0,
+     "gold": 500,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      -1,
+      0,
+      2,
+      1
+     ],
+     "total": 3,
+     "net": 3.0
+    },
+    "rec": true,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "战车兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 82.65,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "马术 E→D"
+    ],
+    "ranks": 2,
+    "used": 12,
+    "used45": 21,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      1,
+      0,
+      0,
+      2,
+      3,
+      0,
+      1,
+      1
+     ],
+     "total": 21,
+     "net": 5.0,
+     "gold": 500,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      2,
+      -1,
+      0,
+      -1,
+      0,
+      0,
+      0,
+      1,
+      2
+     ],
+     "total": -1,
+     "net": 6.2
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "剑客",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 82.65,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 11,
+    "used45": 19,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      1,
+      0,
+      2,
+      0,
+      1,
+      0,
+      0,
+      0
+     ],
+     "total": 14,
+     "net": 2.0,
+     "gold": 500,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      -1,
+      0,
+      2,
+      1
+     ],
+     "total": 3,
+     "net": 3.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "恶棍",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 82.65,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 10,
+    "used45": 18,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      1,
+      0,
+      2,
+      0,
+      1,
+      0,
+      0,
+      0
+     ],
+     "total": 14,
+     "net": 2.0,
+     "gold": 500,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      -1,
+      0,
+      2,
+      0
+     ],
+     "total": 2,
+     "net": 2.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "飞鸵兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 25,
+    "roll": 67.11,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "马术 E→E+",
+     "枪术 E→D（任选一项）"
+    ],
+    "ranks": 3,
+    "used": 0,
+    "used45": 1,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0,
+     "gold": 0,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+     ],
+     "total": 2,
+     "net": -4.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "土匪",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 82.65,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 14,
+    "used45": 23,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      1,
+      0,
+      1,
+      0,
+      2,
+      0,
+      0,
+      0
+     ],
+     "total": 11,
+     "net": -1.0,
+     "gold": 500,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      1,
+      -1,
+      0,
+      0,
+      -1,
+      0,
+      1,
+      0
+     ],
+     "total": 3,
+     "net": -4.2
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "轻骑兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 82.65,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "马术 E→D"
+    ],
+    "ranks": 2,
+    "used": 13,
+    "used45": 21,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      1,
+      0,
+      1,
+      0,
+      2,
+      0,
+      1,
+      2
+     ],
+     "total": 15,
+     "net": -1.0,
+     "gold": 500,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      -1,
+      0,
+      2,
+      1
+     ],
+     "total": 3,
+     "net": 3.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "士兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 25,
+    "roll": 67.11,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "枪术 E→D（任选一项）"
+    ],
+    "ranks": 2,
+    "used": 1,
+    "used45": 1,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+     ],
+     "total": 2,
+     "net": -2.0,
+     "gold": 0,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "斗拳手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 82.65,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "格斗术 E→C"
+    ],
+    "ranks": 4,
+    "used": 14,
+    "used45": 23,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      1,
+      0,
+      1,
+      1,
+      3,
+      0,
+      0,
+      0
+     ],
+     "total": 18,
+     "net": -2.0,
+     "gold": 500,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      0,
+      1,
+      -1,
+      0,
+      0,
+      -1,
+      0,
+      1,
+      0
+     ],
+     "total": 3,
+     "net": -4.2
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "骑甲鸵兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 82.65,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "马术 E→D",
+     "枪术 E→C（任选一项）"
+    ],
+    "ranks": 6,
+    "used": 10,
+    "used45": 17,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      1,
+      0,
+      1,
+      0,
+      2,
+      0,
+      0,
+      0
+     ],
+     "total": 11,
+     "net": -13.0,
+     "gold": 500,
+     "train": 6
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      -1,
+      0,
+      2,
+      1
+     ],
+     "total": 3,
+     "net": 3.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "重装步兵",
+    "tier": "中级",
+    "ok": false,
+    "why": "到目标级前没有能考过的种子"
+   }
+  ],
+  "recommended": [
+   "弓箭手"
+  ],
+  "recRow": {
+   "toT": {
+    "g": [
+     -1,
+     0,
+     0,
+     1,
+     2,
+     2,
+     0,
+     1,
+     0
+    ],
+    "total": 19,
+    "net": 7.0,
+    "gold": 500,
+    "train": 0
+   },
+   "after": {
+    "g": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     -1,
+     0,
+     2,
+     1
+    ],
+    "total": 3,
+    "net": 3.0
+   }
+  }
+ },
+ "努蒂奴": {
+  "name": "努蒂奴",
+  "tier": "P2",
+  "level": 17,
+  "target": 35,
+  "owned": [
+   "飞鸵兵",
+   "平民"
+  ],
+  "required": [],
+  "trainAllowed": false,
+  "options": [
+   {
+    "cls": "斗士",
+    "tier": "初级",
+    "ok": true,
+    "lv": 21,
+    "roll": 51.01,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 1,
+    "used45": 2,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      -1,
+      0,
+      1
+     ],
+     "total": 9,
+     "net": -0.6,
+     "gold": 300,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      2,
+      0,
+      -1
+     ],
+     "total": 12,
+     "net": 2.4
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "重装步兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 11.9,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "重装术 E→E+",
+     "枪术 D→C（任选一项）"
+    ],
+    "ranks": 2,
+    "used": 11,
+    "used45": 19,
+    "floor": [
+     "防 8→10"
+    ],
+    "toT": {
+     "g": [
+      -1,
+      1,
+      1,
+      -2,
+      3,
+      3,
+      -2,
+      0,
+      3
+     ],
+     "total": 14,
+     "net": -2.0,
+     "gold": 500,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      1,
+      -1,
+      -1
+     ],
+     "total": 11,
+     "net": 1.4
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "士兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 21,
+    "roll": 51.01,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 1,
+    "used45": 1,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      1,
+      -1,
+      2,
+      1,
+      -1,
+      0,
+      1
+     ],
+     "total": 4,
+     "net": -5.6,
+     "gold": 300,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      -1,
+      1,
+      1,
+      0,
+      -1
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "猎兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 21,
+    "roll": 51.01,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→D（任选一项）"
+    ],
+    "ranks": 2,
+    "used": 0,
+    "used45": 0,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      -1,
+      0,
+      1
+     ],
+     "total": 4,
+     "net": -5.6,
+     "gold": 300,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      -1,
+      1,
+      1,
+      0,
+      -1
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "土匪",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 11.9,
+    "pct": 100,
+    "pctNow": 50,
+    "train": [
+     "剑术 E→C（任选一项）"
+    ],
+    "ranks": 1,
+    "used": 11,
+    "used45": 18,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      1,
+      1,
+      0,
+      1,
+      0,
+      -1,
+      -1,
+      2
+     ],
+     "total": 6,
+     "net": -13.0,
+     "gold": 500,
+     "train": 1
+    },
+    "after": {
+     "g": [
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      2,
+      0,
+      -1
+     ],
+     "total": 12,
+     "net": 2.4
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "轻骑兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 11.9,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→C（任选一项）"
+    ],
+    "ranks": 2,
+    "used": 12,
+    "used45": 20,
+    "floor": [
+     "防 8→10"
+    ],
+    "toT": {
+     "g": [
+      -1,
+      -1,
+      1,
+      0,
+      1,
+      0,
+      -1,
+      -1,
+      2
+     ],
+     "total": -4,
+     "net": -20.0,
+     "gold": 500,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      2,
+      0,
+      -1
+     ],
+     "total": 9,
+     "net": -0.6
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "骑甲鸵兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 11.9,
+    "pct": 100,
+    "pctNow": 50,
+    "train": [
+     "枪术 D→C（任选一项）"
+    ],
+    "ranks": 1,
+    "used": 13,
+    "used45": 23,
+    "floor": [],
+    "toT": {
+     "g": [
+      -2,
+      -1,
+      1,
+      -1,
+      2,
+      1,
+      -1,
+      -1,
+      3
+     ],
+     "total": -3,
+     "net": -22.0,
+     "gold": 500,
+     "train": 1
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      -1,
+      1,
+      1,
+      0,
+      -1
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "天翼兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 11.9,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→C（任选一项）"
+    ],
+    "ranks": 2,
+    "used": 15,
+    "used45": 23,
+    "floor": [
+     "魔防 9→10"
+    ],
+    "toT": {
+     "g": [
+      -2,
+      -1,
+      1,
+      -1,
+      2,
+      1,
+      -1,
+      -1,
+      3
+     ],
+     "total": -3,
+     "net": -23.0,
+     "gold": 500,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      1,
+      0,
+      -1,
+      1,
+      1,
+      0,
+      -1
+     ],
+     "total": 1,
+     "net": 1.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "斗拳手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 11.9,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "格斗术 E→C"
+    ],
+    "ranks": 4,
+    "used": 12,
+    "used45": 21,
+    "floor": [],
+    "toT": {
+     "g": [
+      -2,
+      0,
+      1,
+      -1,
+      2,
+      1,
+      -1,
+      -1,
+      3
+     ],
+     "total": 2,
+     "net": -26.0,
+     "gold": 500,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      2,
+      0,
+      -1
+     ],
+     "total": 12,
+     "net": 2.4
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "弓箭手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 11.9,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "箭术 E→C"
+    ],
+    "ranks": 4,
+    "used": 15,
+    "used45": 25,
+    "floor": [],
+    "toT": {
+     "g": [
+      -2,
+      -1,
+      1,
+      -1,
+      3,
+      1,
+      -1,
+      -1,
+      3
+     ],
+     "total": 1,
+     "net": -27.0,
+     "gold": 500,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      -1
+     ],
+     "total": 4,
+     "net": 4.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "战车兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 11.9,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "箭术 E→C"
+    ],
+    "ranks": 4,
+    "used": 13,
+    "used45": 21,
+    "floor": [],
+    "toT": {
+     "g": [
+      -2,
+      -1,
+      1,
+      -2,
+      3,
+      1,
+      -1,
+      -1,
+      3
+     ],
+     "total": -4,
+     "net": -32.0,
+     "gold": 500,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      0,
+      1,
+      2,
+      1,
+      0,
+      -1
+     ],
+     "total": 13,
+     "net": 13.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "恶棍",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 11.9,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→C（任选一项）"
+    ],
+    "ranks": 4,
+    "used": 14,
+    "used45": 24,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      -1,
+      1,
+      0,
+      1,
+      0,
+      -1,
+      -1,
+      1
+     ],
+     "total": -5,
+     "net": -33.0,
+     "gold": 500,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      1,
+      -1,
+      1,
+      1,
+      0,
+      -1
+     ],
+     "total": 5,
+     "net": 5.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "剑客",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 11.9,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→C"
+    ],
+    "ranks": 4,
+    "used": 15,
+    "used45": 25,
+    "floor": [],
+    "toT": {
+     "g": [
+      -2,
+      -1,
+      1,
+      -1,
+      2,
+      0,
+      -1,
+      -1,
+      3
+     ],
+     "total": -6,
+     "net": -34.0,
+     "gold": 500,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      2,
+      0,
+      -1
+     ],
+     "total": 9,
+     "net": -0.6
+    },
+    "rec": false,
+    "ruleBlocked": true
+   }
+  ],
+  "recommended": []
+ },
+ "乌尔坦德": {
+  "name": "乌尔坦德",
+  "tier": "P2",
+  "level": 18,
+  "target": 35,
+  "owned": [
+   "诅咒师",
+   "平民"
+  ],
+  "required": [],
+  "trainAllowed": false,
+  "options": [
+   {
+    "cls": "牧师",
+    "tier": "中级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 50,
+    "pctNow": 50,
+    "train": [
+     "白魔术 D+→C"
+    ],
+    "ranks": 1,
+    "used": 12,
+    "used45": 20,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      -1,
+      0,
+      4,
+      1
+     ],
+     "total": 17,
+     "net": -2.0,
+     "gold": 500,
+     "train": 1
+    },
+    "after": {
+     "g": [
+      0,
+      -1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": -3,
+     "net": 6.6
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "士兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 5,
+    "used45": 6,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      2,
+      -1,
+      0,
+      0
+     ],
+     "total": 6,
+     "net": -3.6,
+     "gold": 300,
+     "train": 0
+    },
+    "after": {
+     "g": [
+      -1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      -1,
+      0
+     ],
+     "total": 9,
+     "net": 9.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "飞鸵兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 100,
+    "pctNow": 50,
+    "train": [
+     "马术 E→E+"
+    ],
+    "ranks": 1,
+    "used": 3,
+    "used45": 4,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      -1,
+      1,
+      0
+     ],
+     "total": 5,
+     "net": -7.6,
+     "gold": 300,
+     "train": 1
+    },
+    "after": {
+     "g": [
+      -1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      -1,
+      0
+     ],
+     "total": 9,
+     "net": 9.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "萨满巫师",
+    "tier": "中级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 50,
+    "pctNow": 0,
+    "train": [
+     "黑魔术 D→C"
+    ],
+    "ranks": 2,
+    "used": 14,
+    "used45": 23,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      1,
+      0,
+      0,
+      1,
+      -2,
+      -1,
+      3,
+      0
+     ],
+     "total": 10,
+     "net": -12.0,
+     "gold": 500,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      -1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      -1,
+      0
+     ],
+     "total": 9,
+     "net": 9.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "猎兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→D（任选一项）"
+    ],
+    "ranks": 2,
+    "used": 3,
+    "used45": 4,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      1,
+      0,
+      0,
+      1,
+      -1,
+      -1,
+      0,
+      0
+     ],
+     "total": 3,
+     "net": -12.6,
+     "gold": 300,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      -1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      -1,
+      0
+     ],
+     "total": 9,
+     "net": 9.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "重装步兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 50,
+    "pctNow": 0,
+    "train": [
+     "重装术 E→E+",
+     "斧术 E→C（任选一项）"
+    ],
+    "ranks": 2,
+    "used": 9,
+    "used45": 14,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      2,
+      0,
+      0,
+      0,
+      3,
+      -1,
+      0,
+      0
+     ],
+     "total": 9,
+     "net": -13.0,
+     "gold": 500,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      0,
+      -1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": -3,
+     "net": 6.6
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "斗士",
+    "tier": "初级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→D（任选一项）"
+    ],
+    "ranks": 2,
+    "used": 3,
+    "used45": 4,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      2,
+      0,
+      0,
+      0,
+      -1,
+      -1,
+      0,
+      0
+     ],
+     "total": 1,
+     "net": -14.6,
+     "gold": 300,
+     "train": 2
+    },
+    "after": {
+     "g": [
+      -1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      -1,
+      0
+     ],
+     "total": 9,
+     "net": 9.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "天翼兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 50,
+    "pctNow": 0,
+    "train": [
+     "飞行术 E→D",
+     "剑术 E→C（任选一项）"
+    ],
+    "ranks": 3,
+    "used": 14,
+    "used45": 21,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      2,
+      -1,
+      1,
+      1
+     ],
+     "total": 10,
+     "net": -15.0,
+     "gold": 500,
+     "train": 3
+    },
+    "after": {
+     "g": [
+      0,
+      -1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1
+     ],
+     "total": -1,
+     "net": 8.6
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "斗拳手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 50,
+    "pctNow": 0,
+    "train": [
+     "格斗术 E→C"
+    ],
+    "ranks": 4,
+    "used": 10,
+    "used45": 15,
+    "floor": [],
+    "toT": {
+     "g": [
+      2,
+      2,
+      0,
+      0,
+      0,
+      2,
+      -1,
+      0,
+      0
+     ],
+     "total": 9,
+     "net": -19.0,
+     "gold": 500,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      0,
+      -1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": -3,
+     "net": 6.6
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "恶棍",
+    "tier": "中级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 50,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→C（任选一项）"
+    ],
+    "ranks": 4,
+    "used": 13,
+    "used45": 17,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      -1,
+      1,
+      0
+     ],
+     "total": 8,
+     "net": -20.0,
+     "gold": 500,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      -1,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      -1,
+      0
+     ],
+     "total": 9,
+     "net": 9.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "土匪",
+    "tier": "中级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 50,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→C（任选一项）"
+    ],
+    "ranks": 4,
+    "used": 10,
+    "used45": 15,
+    "floor": [],
+    "toT": {
+     "g": [
+      2,
+      2,
+      0,
+      0,
+      0,
+      1,
+      -1,
+      0,
+      0
+     ],
+     "total": 7,
+     "net": -21.0,
+     "gold": 500,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      0,
+      -1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": -3,
+     "net": 6.6
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "骑甲鸵兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 50,
+    "pctNow": 0,
+    "train": [
+     "马术 E→D",
+     "斧术 E→C（任选一项）"
+    ],
+    "ranks": 3,
+    "used": 12,
+    "used45": 17,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      2,
+      -1,
+      0,
+      0,
+      3,
+      -2,
+      1,
+      0
+     ],
+     "total": 3,
+     "net": -22.0,
+     "gold": 500,
+     "train": 3
+    },
+    "after": {
+     "g": [
+      0,
+      -1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": -3,
+     "net": 6.6
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "弓箭手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 50,
+    "pctNow": 0,
+    "train": [
+     "箭术 E→C"
+    ],
+    "ranks": 4,
+    "used": 13,
+    "used45": 18,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      2,
+      -1,
+      0,
+      1,
+      2,
+      -2,
+      1,
+      0
+     ],
+     "total": 4,
+     "net": -24.0,
+     "gold": 500,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      0,
+      -1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": 0,
+     "net": 9.6
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "轻骑兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 50,
+    "pctNow": 0,
+    "train": [
+     "马术 E→D",
+     "剑术 E→C（任选一项）"
+    ],
+    "ranks": 3,
+    "used": 12,
+    "used45": 17,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      2,
+      -1,
+      0,
+      0,
+      2,
+      -2,
+      1,
+      0
+     ],
+     "total": 1,
+     "net": -24.0,
+     "gold": 500,
+     "train": 3
+    },
+    "after": {
+     "g": [
+      0,
+      -1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": -3,
+     "net": 6.6
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "剑客",
+    "tier": "中级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 50,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→C"
+    ],
+    "ranks": 4,
+    "used": 13,
+    "used45": 18,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      2,
+      -1,
+      0,
+      1,
+      0,
+      -2,
+      1,
+      0
+     ],
+     "total": 0,
+     "net": -28.0,
+     "gold": 500,
+     "train": 4
+    },
+    "after": {
+     "g": [
+      0,
+      -1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": -3,
+     "net": 6.6
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "战车兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 50,
+    "pctNow": 0,
+    "train": [
+     "马术 E→D",
+     "箭术 E→C"
+    ],
+    "ranks": 6,
+    "used": 11,
+    "used45": 17,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      2,
+      -1,
+      0,
+      1,
+      2,
+      -2,
+      1,
+      0
+     ],
+     "total": 4,
+     "net": -30.0,
+     "gold": 500,
+     "train": 6
+    },
+    "after": {
+     "g": [
+      1,
+      -1,
+      -1,
+      0,
+      1,
+      1,
+      0,
+      0,
+      1
+     ],
+     "total": -1,
+     "net": 8.6
+    },
+    "rec": false,
+    "ruleBlocked": true
+   }
+  ],
+  "recommended": []
+ }
+}
