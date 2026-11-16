@@ -153,9 +153,29 @@ def test_renown_requirement_parsed():
 
 
 @pytest.mark.parametrize("name", NAMES)
-def test_skip_rows_offer_free_basic_class(name):
-    """跳过时如果有还没有、能考过的初级职业，就写出来（同样 300G，白拿职业）。"""
+def test_skip_does_not_gain_a_class(name):
+    """Yizhuo 11-16：跳过多拿职业不是好事（以后能跳过的考试变少）→ 有会考不过的初级考试就用它；
+    每次跳过都要有考试可用（职业池不能用完）。"""
     p, pl = plan(name)
     for r in pl.rows:
-        if r.action != "升级" and r.cls == "跳过" and r.skip_class:
-            assert r.skip_class not in p.owned and R._TIER_OF(r.skip_class) == "初级"
+        if r.action != "升级" and r.cls == "跳过":
+            assert not r.skip_none, f"Lv{r.level_at} 没有初级考试可以拿来跳过"
+            if r.skip_fail:
+                assert r.skip_class is None
+                for c in r.skip_fail:
+                    assert c not in p.owned
+                    pc = p.skip_pct(c, r.level_at)
+                    assert pc is None or p.exam_value(r.step) >= pc
+
+
+def test_skip_pool_shrinks_only_when_forced():
+    p = make_planner("艾丝梅拉尔达", TARGET["艾丝梅拉尔达"])
+    pl = p.rule_plan()
+    lefts = [r.skip_left for r in pl.rows if r.action != "升级" and r.cls == "跳过"]
+    assert lefts and min(lefts) >= 1
+
+
+def test_renown_is_6_and_blocks_higher():
+    assert R.RENOWN == 6
+    p = make_planner("迪托利希")
+    assert all(v <= R.RENOWN for v in p.renown_req.values())   # 初级/中级都要 ≤ 4

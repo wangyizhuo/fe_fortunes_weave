@@ -342,7 +342,7 @@ TRAIN_PTS = {"P0": 0.5, "P1": 2.0, "P2": 3.0}   # 每段训练扣的加权分（
 # 11-16：单独加一场考试，净值至少多这么多分才考（米迦战车兵 +0.8 那种不考）
 MIN_EXAM_GAIN = 2.0
 # 11-16：玩家当前名声等级（游戏里「名声 Lv」）。None = 没录入，考试只提示要求不判断
-RENOWN = None
+RENOWN = 6   # 11-16 Yizhuo：名声 Lv6
 MAX_EXAMS = 4
 
 
@@ -381,6 +381,10 @@ def make_planner(name, target=None):
             if RENOWN < r:
                 p.exam_chance = dict(p.exam_chance or {}, **{c: 0})
     p.exam_train_ranks = {}
+    # 11-16：跳过用的初级考试池（不受个人排除/法系限制，只看性别），按真实技能估成功率
+    p.skip_pool = [c for c, x in _CLASSES.items() if x.get("tier") == "初级"
+                   and not (x.get("limit") == "女性" and _SEX.get(name) != "女")]
+    p.skip_req = {c: q for c in p.skip_pool if (q := exam_req(name, c))}
     p.exam_train = {c: t for c in p.exam_req if (t := train_need(name, c))}   # 要练什么（不练的档位也列出来，页面提示）
     if TRAIN_TO_PASS and TRAIN_ALLOWED[tier_of(name)]:
         # 技能差当 0（提前训练）；游戏里记下的低成功率也是练之前的数，同样不再用

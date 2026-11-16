@@ -40,7 +40,10 @@ class PlanRow:
     bonus: int = 0            # 体格阈值加分：力量涨到 5 的倍数（体格 +1）时额外加的分
     str_note: str = ""
     floor: list = None        # 11-16：考进新职业时保底补上的项 [(能力, 原值, 补到)]
-    skip_class: str = None    # 11-16：跳过时顺手考的免费初级职业
+    skip_class: str = None    # 跳过时只能用会考过的初级考试 → 用掉的职业（11-16 Yizhuo：多拿职业不是好事）
+    skip_fail: list = None    # 跳过时可以用、会考不过（不拿职业）的初级考试
+    skip_left: int = None     # 跳过之后还剩几个没拿到的初级职业可以拿来跳过
+    skip_none: bool = False   # 没有任何初级考试可以拿来跳过
     level_at: int = None      # 考试/跳过发生时的等级
 
 
@@ -500,10 +503,25 @@ class Planner:
         self.annotate(pl)
         return pl
 
+    def skip_pct(self, cls, level):
+        """跳过用的初级考试：按现在的真实技能估成功率（不假设先练）。"""
+        req = (getattr(self, "skip_req", {}) or {}).get(cls)
+        if req is None:
+            return None
+        rec_lv, gap = req
+        pct = 100 if gap <= 0 else 50 if gap == 1 else 0
+        d = rec_lv - level
+        cap = 100 if d <= 0 else 50 if d == 1 else 32 if d == 2 else 0
+        return min(pct, cap)
+
     def annotate(self, pl):
-        """11-16：每个考试/跳过行写上保底收益、跳过时可以顺手考的免费初级职业。"""
+        """11-16：每个考试/跳过行写上保底收益；跳过用哪场初级考试。
+        Yizhuo 11-16：跳过时多拿一个职业不是好事（以后能拿来跳过的考试就少一个）→ 优先选这一步会「考不过」的初级考试，
+        职业池不变；只有都会考过时才用掉一个，并记下还剩几个。"""
         lifts = self.floor_lifts(pl.raw_actions)
         owned, done = set(self.owned), 0
+        pool = [c for c in (getattr(self, "skip_pool", None) or []) if c not in owned]
+        roll_of = lambda st: exam_roll(self.seed_at(st))
         for r, (a, c) in zip(pl.rows, pl.raw_actions):
             lv = self.level + done
             if a == "升级":
@@ -512,13 +530,20 @@ class Planner:
             r.level_at = lv
             r.floor = [(STATS[i], x, v) for i, x, v in lifts.get(r.step, [])]
             if c == "跳过":
-                # 跳过本来就要考一场初级考试（同样 300G）：挑一个还没有、这一步能考过的初级职业，白拿职业
-                free = [x for x in self.exam_options if _TIER.get(x) == "初级" and x not in owned and self.exam_ok(r.step, x, lv)]
-                r.skip_class = free[0] if free else None
-                if r.skip_class:
-                    owned.add(r.skip_class)
+                fail, pas = [], []
+                for x in pool:
+                    pc = self.skip_pct(x, lv)
+                    (pas if pc is not None and roll_of(r.step) < pc * 10_000 else fail).append(x)
+                r.skip_fail, r.skip_class = fail, None
+                if not fail and pas:
+                    r.skip_class = pas[0]        # 只能用会考过的：用掉一个职业
+                    pool.remove(pas[0])
+                r.skip_none = not fail and not pas
+                r.skip_left = len(pool)
             else:
                 owned.add(c)
+                if c in pool and self.exam_ok(r.step, c, lv):
+                    pool.remove(c)
 
     def balanced_weights(self, stats):
         """按当前能力算出调整后的权重和说明。"""
