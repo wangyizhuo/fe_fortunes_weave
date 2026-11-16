@@ -62,7 +62,8 @@ PHYSICAL = PHYSICAL + MOUNTED
 MAGIC = ["诅咒师", "萨满巫师", "牧师"]
 # 11-11 Yizhuo：所有角色用同一套逻辑 → 每个人都考虑全部初级 + 中级职业（考不考得过由技能/等级/种子决定），只保留 Yizhuo 明确说的个人排除。
 ALL_CLASSES = PHYSICAL + MAGIC
-EXCLUDE = {"迪托利希": ["重装步兵"]}   # 11-11 Yizhuo：迪不需要重装步兵
+EXCLUDE = {"迪托利希": ["重装步兵"],   # 11-11 Yizhuo：迪不需要重装步兵
+           "奇洛伊卡": ["牧师"]}      # 11-16 Yizhuo：奇洛不考牧师
 EXAM_OPTIONS = {n: [c for c in ALL_CLASSES if c not in EXCLUDE.get(n, [])]
                 for n in ["迪托利希", "米迦艾拉", "努蒂奴", "法毕欧", "杨界", "乌尔坦德", "艾丝梅拉尔达", "伊欧", "奇洛伊卡"]}
 

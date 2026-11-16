@@ -12,7 +12,7 @@
 | [米迦艾拉](characters/米迦艾拉.md) | P0 | Lv22 | 斗士 | 234 | 367 |
 | [杨界](characters/杨界.md) | P1 | Lv21 | 诅咒师 | 211 | 417 |
 | [伊欧](characters/伊欧.md) | P0 | Lv23 | 战车兵 | 207 | 372 |
-| [奇洛伊卡](characters/奇洛伊卡.md) | P1 | Lv17 | 猎兵 | 255 | 397 |
+| [奇洛伊卡](characters/奇洛伊卡.md) | P1 | Lv17 | 猎兵 | 254 | 390 |
 | [努蒂奴](characters/努蒂奴.md) | P2 | Lv17 | 飞鸵兵 | 217 | 373 |
 | [乌尔坦德](characters/乌尔坦德.md) | P2 | Lv18 | 诅咒师 | 252 | 397 |
 
