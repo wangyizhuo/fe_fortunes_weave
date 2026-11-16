@@ -62,8 +62,26 @@ PHYSICAL = PHYSICAL + MOUNTED
 MAGIC = ["诅咒师", "萨满巫师", "牧师"]
 # 11-11 Yizhuo：所有角色用同一套逻辑 → 每个人都考虑全部初级 + 中级职业（考不考得过由技能/等级/种子决定），只保留 Yizhuo 明确说的个人排除。
 ALL_CLASSES = PHYSICAL + MAGIC
-EXCLUDE = {"迪托利希": ["重装步兵"]}   # 11-11 Yizhuo：迪不需要重装步兵
-EXAM_OPTIONS = {n: [c for c in ALL_CLASSES if c not in EXCLUDE.get(n, [])]
+EXCLUDE = {"迪托利希": ["重装步兵"],   # 11-11 Yizhuo：迪不需要重装步兵
+           "奇洛伊卡": ["牧师"],       # 11-16 Yizhuo：奇洛不考牧师
+           "杨界": ["战车兵"]}         # 11-16 Yizhuo：杨界不考战车兵（练技能不划算）
+_SEX = {c["name"]: c.get("sex") for c in json.load(open(os.path.join(HERE, "fw_characters.json"), encoding="utf-8"))}
+_CLASS_LIMIT = {c["name"]: c.get("limit") for c in json.load(open(os.path.join(HERE, "fw_classes.json"), encoding="utf-8"))}
+# 11-16 Yizhuo：没用的能力不该决定考什么（米迦曾因魔力被排去萨满）→ 魔力权重 ≤ 1 的角色不考法系职业
+MAGIC_MIN_WEIGHT = 2
+
+
+def _allowed(name, cls):
+    if cls in EXCLUDE.get(name, []):
+        return False
+    if _CLASS_LIMIT.get(cls) == "女性" and _SEX.get(name) != "女":   # 11-16：天翼兵女性限定
+        return False
+    if cls in MAGIC and W[name][2] < MAGIC_MIN_WEIGHT:
+        return False
+    return True
+
+
+EXAM_OPTIONS = {n: [c for c in ALL_CLASSES if _allowed(n, c)]
                 for n in ["迪托利希", "米迦艾拉", "努蒂奴", "法毕欧", "杨界", "乌尔坦德", "艾丝梅拉尔达", "伊欧", "奇洛伊卡"]}
 
 # 一定要考到的职业（拿精通技能等）
@@ -190,6 +208,52 @@ def start_stats(name):
     return st
 
 
+_CLASSES = {c["name"]: c for c in json.load(open(os.path.join(HERE, "fw_classes.json"), encoding="utf-8"))}
+_KEYS = ["hp", "str", "mag", "spd", "dex", "def", "res", "lck", "cha"]
+# 11-16：职业最低能力（保底），来源 Yuphas Temple（fw_classes.json 的 minStats）。考进新职业时，裸能力低于保底的项补到保底。
+FLOORS = {n: [(c.get("minStats") or {}).get(k, 0) for k in _KEYS] for n, c in _CLASSES.items()}
+
+
+def class_bonus(cls):
+    b = (_CLASSES.get(cls) or {}).get("baseStats") or {}
+    return [b.get(k, 0) for k in _KEYS]
+
+
+# 截图里不属于职业加成的额外加成（特技、坐骑等），算裸能力时要减掉
+BOOST = {
+    "迪托利希": ([0, 1, 0, 0, 5, 0, 0, 0, 0], "力+1 攻击的基本；技+5 披风（Lv25 截图 9 项和种子推算全对上，已证实）"),
+    "法毕欧": ([0, 0, 1, 0, 0, 0, 1, 0, 0], "魔+1 魔防+1 魔道的基本（估计）"),
+    "杨界": ([0, 0, 1, 0, 0, 0, 1, 0, 0], "魔+1 魔防+1 魔道的基本（估计）"),
+    "米迦艾拉": ([0, 1, 0, 0, 0, 1, 0, 0, 0], "力+1 攻击的基本、防+1 防卫的基本（估计）"),
+    "伊欧": ([3, 0, 0, 1, 2, 2, 0, 0, 0], "HP+3 体力强化；速+1 技+2 防+2 罗西南 4 级属性（估计）"),
+    "艾丝梅拉尔达": ([0, 1, 1, 0, 0, 0, 0, 0, 0], "力+1 魔+1 攻势的基本（估计）"),
+}
+
+
+def raw_start(name):
+    """规划起点的裸能力（截图 − 当前职业加成 − 额外加成 + 截图后的记录加点），保底和它比。"""
+    shot = CURRENT.get(name, {}).get("shot_1105")
+    if not shot:
+        return None
+    boost = BOOST.get(name, ([0] * 9, ""))[0]
+    raw = [s - b - x for s, b, x in zip(shot["stats"], class_bonus(shot["class"]), boost)]
+    for r in records(name) if name in units else []:
+        if r["ok"] and r["to"] and r["to"] > shot["level"]:
+            raw = [a + b for a, b in zip(raw, r["gains"])]
+    return raw
+
+
+def _TIER_OF(cls):
+    return (_CLASSES.get(cls) or {}).get("tier")
+
+
+def renown_req(cls):
+    """考 cls 要的名声等级（fw_classes 要求文字里的「名声 LvN」），没有就 None。"""
+    import re
+    m = re.search(r"名声 ?Lv(\d+)", (_CLASSES.get(cls) or {}).get("requirement") or "")
+    return int(m.group(1)) if m else None
+
+
 # 游戏里考试画面显示的成功率（%），按角色、职业填。考试成败由种子决定（模拟器 Ver1.1）。
 _ec = os.path.join(HERE, "exam_chance.json")
 EXAM_CHANCE = {k: v for k, v in json.load(open(_ec, encoding="utf-8")).items() if not k.startswith("说明")} if os.path.exists(_ec) else {}
@@ -269,7 +333,16 @@ P2 = {"努蒂奴", "乌尔坦德"}   # 11-08 乌也是 P2；杨界 = P1（其他
 
 # 与主表「成长记录」的角色顺序一致（全项目共用，别处不要再写一份）
 ORDER = ["迪托利希", "法毕欧", "艾丝梅拉尔达", "米迦艾拉", "杨界", "伊欧", "奇洛伊卡", "努蒂奴", "乌尔坦德"]
-TARGET = collections.defaultdict(lambda: 35)   # 2026-11-05：所有人都规划到 35 级（Lv45 由 plan45 另算）
+# 11-16 Yizhuo：规划到 Lv35 或「当前 +15 级」里更远的那个（至少覆盖未来 15 级）。Lv45 由 plan45 另算。
+HORIZON_MIN_LEVEL, HORIZON_MIN_STEPS = 35, 15
+TARGET = {n: max(HORIZON_MIN_LEVEL, current_state(n)[1] + HORIZON_MIN_STEPS) for n in ORDER}
+# 11-16 Yizhuo：练技能要花时间。按档位：P0 可以为考试练技能（每段扣分）；P1/P2 不练，只考技能已经够的职业（按实际成功率）
+TRAIN_ALLOWED = {"P0": True, "P1": False, "P2": False}
+TRAIN_PTS = {"P0": 0.5, "P1": 2.0, "P2": 3.0}   # 每段训练扣的加权分（P1/P2 只在开关打开时用）
+# 11-16：单独加一场考试，净值至少多这么多分才考（米迦战车兵 +0.8 那种不考）
+MIN_EXAM_GAIN = 2.0
+# 11-16：玩家当前名声等级（游戏里「名声 Lv」）。None = 没录入，考试只提示要求不判断
+RENOWN = None
 MAX_EXAMS = 4
 
 
@@ -298,7 +371,18 @@ def make_planner(name, target=None):
     p.skip_rule = SKIP_RULE[tier]
     p.no_skip_seeds = NO_SKIP_SEEDS.get(name, set())
     p.exam_req = {c: r for c in EXAM_OPTIONS.get(name, []) if (r := exam_req(name, c))}
-    if TRAIN_TO_PASS:
+    p.TRAIN_PTS_PER_RANK = TRAIN_PTS[tier_of(name)]
+    p.min_exam_gain = MIN_EXAM_GAIN
+    p.raw_stats = raw_start(name)
+    p.floors = FLOORS
+    p.renown_req = {c: r for c in EXAM_OPTIONS.get(name, []) if (r := renown_req(c))}
+    if RENOWN is not None:
+        for c, r in p.renown_req.items():
+            if RENOWN < r:
+                p.exam_chance = dict(p.exam_chance or {}, **{c: 0})
+    p.exam_train_ranks = {}
+    p.exam_train = {c: t for c in p.exam_req if (t := train_need(name, c))}   # 要练什么（不练的档位也列出来，页面提示）
+    if TRAIN_TO_PASS and TRAIN_ALLOWED[tier_of(name)]:
         # 技能差当 0（提前训练）；游戏里记下的低成功率也是练之前的数，同样不再用
         p.exam_train = {c: t for c in p.exam_req if (t := train_need(name, c))}
         p.exam_train_ranks = {c: r[1] for c, r in p.exam_req.items() if r[1] > 0}   # 要练几段（训练成本按段算）

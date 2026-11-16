@@ -3,7 +3,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;800&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-/* 布局：顶部固定的视图切换（下一步 / 到 Lv35 / 回顾）+ 角色筛选；每个视图里每人一张卡。下一步卡片只放最近 3 步和要做的动作 */
+/* 布局：顶部固定的视图切换（下一步 / 到目标级 / 回顾）+ 角色筛选；每个视图里每人一张卡。下一步卡片只放最近 3 步和要做的动作 */
 :root {
   --bg: #f2f3f6; --panel: #ffffff; --ink: #1c2233; --muted: #5d6680; --line: #dde1ea;
   --accent: #b0802a; --accent-ink: #7a5614; --tint: #fff6e2;
@@ -245,7 +245,7 @@ th.grp { text-align: center; border-bottom: 1px solid var(--line); } td.cur, th.
     <nav class="tabs" aria-label="视图">
       <a href="#meal" data-v="meal">吃饭<small>谁一起吃能 perfect</small></a>
       <a href="#next" data-v="next">下一步<small>今天升级前看</small></a>
-      <a href="#plan" data-v="plan">到 Lv35<small>中长期规划</small></a>
+      <a href="#plan" data-v="plan">到目标级<small>Lv35 或 +15 级</small></a>
       <a href="#past" data-v="past">回顾<small>入队到现在</small></a>
       <a href="#l45" data-v="l45">到 Lv45<small>可转一次上级</small></a>
       <a href="#long" data-v="long">长线观星<small>未来 40 级</small></a>
@@ -585,14 +585,14 @@ function viewL45() {
     return `<article class="card" data-slug="${slug(c)}" id="${slug(c)}"><div class="ch"><div class="ct"><h3>${esc(c.name)}</h3><span class="lv">Lv${L.from}→45</span><span class="r">${PW(L.pts, L.total)} · 到 35 级路线 ${L.plan35.total} 分</span></div></div>
       <div class="sec"><h4>上级职业</h4><p class="txt">${L.adv ? `转 <b>${esc(L.adv.exam)}</b>（Lv${L.adv.lv}）` : "最优路线里不转上级（转了加点也不更好）"}。能转的上级：${esc(L.advOptions.join("、") || "没有（技能差太多）")}。</p></div>
       <div class="sec"><h4>路线</h4><p class="txt route45">${compactRoute(L.steps)}</p></div>
-      <div class="sec"><h4>和到 Lv35 的路线比</h4>${L.diffs.length ? `<p class="txt">35 级前的考试安排不同。按 35 级路线走、之后再最优：${PW(L.follow.pts, L.follow.total)}${L.follow.adv ? `（上级 ${esc(L.follow.adv.exam)}）` : ""}；扣掉转职门槛后比 45 最优少 <b>${L.loss}</b> 分。</p>` : `<p class="txt">35 级前的考试安排一样，没影响。</p>`}</div>
+      <div class="sec"><h4>和到目标级 的路线比</h4>${L.diffs.length ? `<p class="txt">35 级前的考试安排不同。按 35 级路线走、之后再最优：${PW(L.follow.pts, L.follow.total)}${L.follow.adv ? `（上级 ${esc(L.follow.adv.exam)}）` : ""}；扣掉转职门槛后比 45 最优少 <b>${L.loss}</b> 分。</p>` : `<p class="txt">35 级前的考试安排一样，没影响。</p>`}</div>
       <div class="sec"><h4>Lv45 时比现在多</h4><p class="txt">${esc(L.add.map((v, i) => v ? ST[i] + "+" + v : "").filter(Boolean).join(" "))}</p></div>
     </article>`; }).join("");
-  return `<p class="lede">到 Lv45 的最优路线，和到 Lv35 的分开算：可以转上级职业，但每人只转一次。</p>
+  return `<p class="lede">到 Lv45 的最优路线，和到目标级 的分开算：可以转上级职业，但每人只转一次。</p>
   <section class="alerts"><h2>一览</h2><div class="scroll"><table><tr><th>角色</th><th class="n">等级</th><th class="n">点数</th><th class="n">加权分</th><th>上级</th><th class="n">按 35 走少几分</th></tr>${rows}</table></div></section>
   <div class="grid one">${cards}</div>` + notesBox([N_PTS,
     "上级职业只算现在技能离要求差 2 段以内的（到 35 级练得到）；考试成功率按等级算：Lv35 起 100%，34 级 50%，33 级 32%。技能其实没练到的话要告诉我重算。",
-    "跳过和考试的规则和到 35 级一样（见「到 Lv35」页说明）；上级手形按 3000G 算，每人最多考一次上级。",
+    "跳过和考试的规则和到 35 级一样（见「到目标级」页说明）；上级手形按 3000G 算，每人最多考一次上级。",
     "「按 35 走少几分」：35 级前按到 35 级的路线走，35 级后再最优，和直接按 45 级最优走相比，扣掉手形金币折算的分后少的分。"]);
 }
 function viewNext() {
@@ -610,7 +610,7 @@ function viewNext() {
     N_PTS]);
 }
 
-// ---------- 到 Lv35 ----------
+// ---------- 到目标级 ----------
 function timeline(c, w) {
   const rows = w.rows.filter(r => r.s.src === "plan" || !r.done);
   if (!rows.length) return "";
@@ -672,7 +672,7 @@ function decBox() {
 }
 function examTable(c) {
   const eb = c.hist && c.hist.exam_benefit; if (!eb || !eb.length) return `<p class="txt">推荐路线不考试。</p>${midTable(c)}`;
-  return `<div class="scroll"><table><tr><th>考试</th><th class="n">判定值</th><th>到 Lv35 比不考它的最好路线</th><th class="n">点数</th><th class="n">加权分</th><th class="n">多花</th><th class="n">净值差</th></tr>${eb.map(e => `<tr><td>${esc(e.cls)}${e.req ? " · 必考" : ""}</td><td class="n">${e.roll}%</td><td>${esc(gtxt(e.diff))}${e.alt_exams ? `<span class="hint">（对比路线：${esc(e.alt_exams.join("、") || "不考")}）</span>` : ""}</td><td class="n">${sgn(psum(e.diff))}</td><td class="n">${sgn(e.wdiff)}</td><td class="n">${e.dgold == null ? "—" : e.dgold + "G"}</td><td class="n ${e.net > 0 ? "up" : e.net < 0 ? "dn" : ""}">${e.net == null ? "—" : sgn(e.net)}</td></tr>`).join("")}</table></div>
+  return `<div class="scroll"><table><tr><th>考试</th><th class="n">判定值</th><th>到目标级 比不考它的最好路线</th><th class="n">点数</th><th class="n">加权分</th><th class="n">多花</th><th class="n">净值差</th></tr>${eb.map(e => `<tr><td>${esc(e.cls)}${e.req ? " · 必考" : ""}</td><td class="n">${e.roll}%</td><td>${esc(gtxt(e.diff))}${e.alt_exams ? `<span class="hint">（对比路线：${esc(e.alt_exams.join("、") || "不考")}）</span>` : ""}</td><td class="n">${sgn(psum(e.diff))}</td><td class="n">${sgn(e.wdiff)}</td><td class="n">${e.dgold == null ? "—" : e.dgold + "G"}</td><td class="n ${e.net > 0 ? "up" : e.net < 0 ? "dn" : ""}">${e.net == null ? "—" : sgn(e.net)}</td></tr>`).join("")}</table></div>
   <p class="hint" style="margin:4px 0 0">考试 0～4 次的最高加权分：${c.hist.plan_scores.map(v => v ?? "—").join(" / ")}。</p>${midTable(c)}`;
 }
 function midTable(c) {   // 11-08 晚（规则式）：硬加一个中级考试，净值变多少
@@ -693,7 +693,7 @@ function fullList(c, w) {
     return `<li class="${row.done ? "done" : ""} ${r.exam ? "isx" : ""}" data-key="${s.key}">
       <input type="checkbox" data-f="done" id="d-${keyOf(c, s)}"${row.done ? " checked" : ""} aria-label="已完成">
       <label class="lvl" for="d-${keyOf(c, s)}">${r.exam ? (examName(s) ? "考试" : "跳过") : `Lv${row.frm}→${row.to}`}</label>
-      <div class="body">${r.exam ? `${examName(s) ? "考试（到 " + esc(examName(s)) + "）" : "跳过"}${s.train && examName(s) ? ` <span class="changed">先练：${esc(s.train.join("、"))}</span>` : ""}${s.use && examName(s) ? `<span class="hint">　之后到 Lv${c.planTo} 用它升 ${s.use[0]} 级${s.use[0] ? `：${esc(s.use[1])}（${sgn(s.use[2])} 分）` : ""}</span>` : ""}` : `<b>${esc(eqName(row))}</b>　${esc(r.gains.join(" ") || "—")}`}${row.choice !== recOf(s) ? ` <span class="changed">已改</span>` : ""}${row.missing ? ` <span class="changed">还没考到</span>` : ""}${row.fail ? ` <span class="changed">估计考不过</span>` : ""}
+      <div class="body">${r.exam ? `${examName(s) ? "考试（到 " + esc(examName(s)) + "）" : (s.skipCls ? `跳过（顺手考 ${esc(s.skipCls)}，同样 300G，白拿职业）` : "跳过")}${s.train && examName(s) ? (s.trainOk ? ` <span class="changed">先练：${esc(s.train.join("、"))}</span>` : ` <span class="changed">技能差：${esc(s.train.join("、"))}（不练，按实际成功率）</span>`) : ""}<span class="hint">　判定值 ${s.roll}%${examName(s) && s.pct != null ? `｜估计成功率 ${s.pct}%${s.train && s.trainOk ? "（练够之后）" : ""}` : ""}${s.renown && examName(s) ? `｜要名声 Lv${s.renown}` : ""}</span>${s.floor && s.floor.length ? ` <span class="changed">保底：${esc(s.floor.join("、"))}</span>` : ""}${s.use && examName(s) ? `<span class="hint">　之后到 Lv${c.planTo} 用它升 ${s.use[0]} 级${s.use[0] ? `：${esc(s.use[1])}（${sgn(s.use[2])} 分）` : ""}</span>` : ""}` : `<b>${esc(eqName(row))}</b>　${esc(r.gains.join(" ") || "—")}`}${row.choice !== recOf(s) ? ` <span class="changed">已改</span>` : ""}${row.missing ? ` <span class="changed">还没考到</span>` : ""}${row.fail ? ` <span class="changed">估计考不过</span>` : ""}
         ${row.done ? "" : `<details class="more"><summary>选择</summary>${optsHtml(c, s, row, "f")}</details>`}</div>
       <span class="sc">${r.exam ? "—" : PW(r.cnt, r.score)}</span></li>`;
   }).join("")}</ol></div>`;
@@ -745,7 +745,7 @@ function trendHtml(c) {
   const d = rec.map((v, i) => v - t.stay[i]);
   const more = d.map((v, i) => v > 0 ? `${ST[i]}+${v}` : "").filter(Boolean).join(" "), less = d.map((v, i) => v < 0 ? `${ST[i]}${v}` : "").filter(Boolean).join(" ");
   const two = g => `<td class="n">${Math.round(psum(g) * 10) / 10}</td><td class="n">${Math.round(wsum(g, wt))}</td>`;
-  const tbl = `<div class="scroll"><table><tr><th>到 Lv35 涨多少（${t.n} 级）</th>${ST.map(k => `<th class="n">${k}</th>`).join("")}<th class="n">点数</th><th class="n">加权分</th></tr>
+  const tbl = `<div class="scroll"><table><tr><th>到目标级 涨多少（${t.n} 级）</th>${ST.map(k => `<th class="n">${k}</th>`).join("")}<th class="n">点数</th><th class="n">加权分</th></tr>
     ${rows.map(([n, g, k]) => `<tr class="${k}"><td>${esc(n)}</td>${g.map((v, i) => `<td class="n ${exp && k !== "w" ? (v - exp[i] >= 2.5 ? "st" : v - exp[i] <= -2 ? "wk" : "") : ""}">${v}</td>`).join("")}${two(g)}</tr>`).join("")}
     ${(() => { const df = rec.map((v, i) => v - t.stay[i]); return `<tr class="sum"><td>推荐路线 − 一直不换</td>${df.map(v => `<td class="n ${v >= 1 ? "up" : v <= -1 ? "dn" : ""}">${sgn(v)}</td>`).join("")}<td class="n ${psum(df) >= 0 ? "up" : "dn"}">${sgn(Math.round(psum(df) * 10) / 10)}</td><td class="n ${wsum(df, wt) >= 0 ? "up" : "dn"}">${sgn(Math.round(wsum(df, wt)))}</td></tr>`; })()}
     <tr class="w"><td>能力权重</td>${wt.map(v => `<td class="n">${v}</td>`).join("")}<td></td><td></td></tr></table></div>`;
@@ -779,7 +779,7 @@ function viewPlan() {
     const exs = ex.filter(Boolean);
     return `<tr><td><a href="#plan" data-go="${slug(c)}">${esc(SHORT[c.name])}</a>${c.tier ? ` <span class="rec ${c.tier === "P0" ? "r1" : c.tier === "P1" ? "r2" : "r3"}">${c.tier}</span>` : ""}</td><td class="n">Lv${c.planFrom}→${c.planTo}</td><td class="n"><b>${a.ws}</b></td><td class="n">${ap}</td><td class="n ${dv >= 3 ? "up" : dv <= -3 ? "dn" : ""}">${sgn(dv)}</td><td class="note">${exs.length ? exs.join("、") : "不转新职业"}${skips ? `；跳过 ${skips} 次` : ""}</td></tr>`;
   }).join("");
-  const ovBox = `<section class="alerts"><h2>路线一览（到 Lv35）</h2><div class="scroll"><table class="ovt"><tr><th>角色</th><th class="n">等级</th><th class="n">加权分</th><th class="n">点数</th><th class="n">比平均</th><th>要考的职业</th></tr>${ovRows}</table></div></section>`;
+  const ovBox = `<section class="alerts"><h2>路线一览（到目标级）</h2><div class="scroll"><table class="ovt"><tr><th>角色</th><th class="n">等级</th><th class="n">加权分</th><th class="n">点数</th><th class="n">比平均</th><th>要考的职业</th></tr>${ovRows}</table></div></section>`;
   const team = decBox() + ovBox + actBox;
   const cards = CH.filter(c => !focus || slug(c) === focus).map(c => {
     const w = walk(c), rm = remain(c, w), a = c.avg;
@@ -799,14 +799,14 @@ function viewPlan() {
       </details>
     </article>`;
   }).join("");
-  return `<p class="lede">每人到 Lv35 的推荐路线、终点能力和考试安排。改了某一步的职业，下面的数字会马上更新。</p>${team}<div class="grid one">${cards}</div>${balBox}` + notesBox([
+  return `<p class="lede">每人到目标级 的推荐路线、终点能力和考试安排。改了某一步的职业，下面的数字会马上更新。</p>${team}<div class="grid one">${cards}</div>${balBox}` + notesBox([
     N_PTS,
     "<b>体格阈值</b>（所有人）：力量每涨到 5 的倍数，体格 +1，那一级额外 +3 分，已算进加权分和路线选择，该级说明里会写「体格」。",
     `<b>跳过条件</b>（11-09 定）：① 这一级最好的分 ≤ 分数线（P0 8、P1 8、P2 6）；② 比未来 15 级平均低 ≥ 百分比（P0 35%、P1 50%、P2 60%）。P0 满足其一就跳，P1、P2 两个都满足才跳。分数含均衡和体格加分。跳过不学会新职业，按初级手形 300G 算。P0 = 迪、法毕欧、艾丝、米迦、伊欧；P1 = 杨界、奇洛；P2 = 努蒂奴、乌尔坦德。（11-11 起不再要求每人考进一个新中级职业。）`,
     "<b>判定值</b>：考试成败由种子决定，判定值低于游戏显示的成功率才过。<b>估计显示</b> = 按 11-05 的技能等级和考试时的等级估的成功率。",
     "<b>均衡加点</b>：只看权重 5 的能力，而且换职业要真的补上落后那项才换。某项比其中最低的那项多 3 点以上时，每多 1 点，它的权重 −0.5、落后那项 +0.5（各最多 ±2）。只用来决定「这一级用哪个职业」，不改考试的时间和次数。",
     "<b>比平均</b> = 推荐路线加权分 − 平均运气的加权分。能力表里红底 = 比平均少，绿底 = 比平均多；截图数值含职业补正和▲。",
-    "<b>长期选择</b>：现在的路线那一行是到 Lv35 的总数，其他行是和它的差。换路线告诉我，我重算逐级步骤。",
+    "<b>长期选择</b>：现在的路线那一行是到目标级 的总数，其他行是和它的差。换路线告诉我，我重算逐级步骤。",
     "<b>每次考试值不值</b>：和「不考这一次」的最好路线比。",
     "<b>发展趋势</b>：一直用现在的职业升会怎样、推荐路线改善了什么；绿底 / 红底 = 比平均运气明显多 / 少，权重低的项也会提醒。"]);
 }
@@ -874,7 +874,7 @@ function viewLong() {
     "<b>成长率</b> = 个人 + 统一 15%，不分职业、不算坐骑，保底 2 项。",
     "<b>差值</b> = 实际 − 成长率×40，≥+3 绿、≤−3 红；合计 ≥±5 算整体好 / 差运。",
     "<b>单项跳过</b>：只为某一项最多跳 5 次能到多少。「单项各跳 5 上限之和」= 每项各自为自己跳 5 次的最高值加起来，是理论天花板，九项不能同时达到。",
-    "<b>加权（整体跳过）</b>：建议跳几次 = 按「到 Lv35」同一套跳过条件（分数线 + 比后 15 级平均低的百分比；P0 满足其一，P1/P2 都满足）逐级走 40 级数出来的；表里的分数是跳过加权分最低的那几级。这里用个人成长率 + 15% 估算，没算均衡和体格。",
+    "<b>加权（整体跳过）</b>：建议跳几次 = 按「到目标级」同一套跳过条件（分数线 + 比后 15 级平均低的百分比；P0 满足其一，P1/P2 都满足）逐级走 40 级数出来的；表里的分数是跳过加权分最低的那几级。这里用个人成长率 + 15% 估算，没算均衡和体格。",
     N_PTS]);
 }
 function longCard(c, i) {

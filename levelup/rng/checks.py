@@ -250,7 +250,7 @@ def p_same_class_pool():
         if _TIER.get(c) not in ("初级", "中级"):
             bad.append(f"{c} 在职业表里不是初级/中级（是 {_TIER.get(c)}）")
     for n in ORDER:
-        want = allc - set(R.EXCLUDE.get(n, []))
+        want = {c for c in allc if R._allowed(n, c)}   # 11-16：个人排除 + 天翼兵女性限定 + 魔力权重 ≤1 不考法系
         if set(R.EXAM_OPTIONS[n]) != want:
             bad.append(f"{n}：可考职业和统一清单不一样，多 {set(R.EXAM_OPTIONS[n]) - want}，少 {want - set(R.EXAM_OPTIONS[n])}")
     return bad
@@ -536,7 +536,7 @@ def snapshot():
                 pts = [a + b for a, b in zip(pts, r.gains)]
         out[n] = {"from": p.level, "to": TARGET[n], "加权分": pl.total, "点数": sum(pts),
                   "各项": dict(zip(STATS, pts)), "净值": round(p.plan_net(pl.raw_actions, pl.total, pl.gold), 2),
-                  "手形金币": pl.gold, "路线": " ".join(f"{r.level_from}{r.cls}" if r.action == "升级" else f"[{r.cls}]" for r in pl.rows)}
+                  "手形金币": pl.gold, "训练段": p.train_ranks(pl.raw_actions), "保底分": p.floor_value(pl.raw_actions), "路线": " ".join(f"{r.level_from}{r.cls}" if r.action == "升级" else f"[{r.cls}]" for r in pl.rows)}
     return out
 
 
@@ -549,12 +549,16 @@ def golden_diff(old, new):
         if a is None:
             lines.append(f"{n}：新加入")
             continue
-        ch = [f"{k} {a[k]}→{b[k]}" for k in ("from", "加权分", "点数", "净值", "手形金币") if a.get(k) != b.get(k)]
+        # 11-16 Yizhuo：报收益，不报改了什么 → 收益（净值/加权分/能力）在前，成本（金币/训练）在后，路线放最后
+        d = lambda k: (b.get(k) or 0) - (a.get(k) or 0)
         st = [f"{s}{b['各项'][s] - a['各项'][s]:+d}" for s in STATS if a["各项"].get(s) != b["各项"].get(s)]
-        if st:
-            ch.append("能力 " + " ".join(st))
+        rng = "" if (a.get("from"), a.get("to")) == (b.get("from"), b.get("to")) else \
+            f"（范围 Lv{a.get('from')}→{a.get('to')} 变成 Lv{b.get('from')}→{b.get('to')}，不同范围的总数不能直接比）"
+        ch = [f"收益：净值 {d('净值'):+.1f}（加权分 {d('加权分'):+d}，点数 {d('点数'):+d}"
+              + (f"，保底 {d('保底分'):+d}" if d('保底分') else "") + "）" + (f"，能力 {' '.join(st)}" if st else ""),
+              f"成本：手形金币 {d('手形金币'):+d}G，训练 {d('训练段'):+d} 段" + rng]
         if a["路线"] != b["路线"]:
-            ch.append(f"路线变了：{b['路线']}")
+            ch.append(f"新路线：{b['路线']}")
         lines.append(f"{n}：" + "；".join(ch))
     return lines
 

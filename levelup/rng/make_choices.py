@@ -1,7 +1,7 @@
 """每个角色的中长期选择：成本 + 收益 + 建议 → choices.json（make_html.py 嵌进页面「到 Lv35」）。"""
 import json, os, copy
 from planner import plan_all
-from run_plans import make_planner, EXAM_OPTIONS, EXAM_CHANCE
+from run_plans import TARGET, make_planner, EXAM_OPTIONS, EXAM_CHANCE
 import run_plans
 from run_plans import ORDER
 
@@ -55,7 +55,7 @@ def run(name, chance_override=None):
     if chance_override is not None:
         run_plans.EXAM_CHANCE[name] = chance_override
     try:
-        p = make_planner(name, 35)
+        p = make_planner(name, TARGET[name])
         if chance_override is not None:
             # make_planner 会把「要先练技能」的考试的成功率去掉（假定练够了）；这里要模拟「不练直接考」，所以直接覆盖
             p.exam_chance = dict(chance_override)
@@ -157,7 +157,7 @@ for name in ORDER:
         sv_r, sv_o = list(run_plans.REQUIRED.get(name, [])), list(EXAM_OPTIONS[name])
         run_plans.REQUIRED[name] = []; EXAM_OPTIONS[name][:] = ex_only
         try:
-            p3 = make_planner(name, 35); pl3, _ = plan_all(p3, 4)
+            p3 = make_planner(name, TARGET[name]); pl3, _ = plan_all(p3, 4)
         finally:
             run_plans.REQUIRED[name] = sv_r; EXAM_OPTIONS[name][:] = sv_o
         prev3 = None
