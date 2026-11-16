@@ -8,7 +8,7 @@ os.makedirs(OUT_DIR, exist_ok=True)
 from fe_growth import STATS, level_up, exam_roll
 from planner import plan_all, score
 from run_plans import OWNED, EXAM_OPTIONS, REQUIRED, CURRENT, W, data, make_planner, records, units
-from run_plans import TARGET, MAX_EXAMS, ORDER, P0, tier_of  # noqa: F401
+from run_plans import TARGET, MAX_EXAMS, ORDER, P0, tier_of, TRAIN_ALLOWED  # noqa: F401
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SKILLS = ["剑术", "枪术", "斧术", "箭术", "格斗术", "黑魔术", "白魔术", "指挥术", "步兵术", "马术", "重装术", "飞行术"]
@@ -214,6 +214,11 @@ for name in ORDER:
                                "roll": round(p.exam_value(r.step), 2),
                                "use": use_info.get(r.cls) if exam else None,
                                "train": (getattr(p, "exam_train", {}) or {}).get(r.cls) if exam else None,
+                               # 11-16：P1/P2 不练技能（按实际成功率）；保底补的项；跳过顺手考的免费初级职业；名声要求
+                               "trainOk": TRAIN_ALLOWED[tier_of(name)],
+                               "floor": [f"{a} {x}→{v}" for a, x, v in (r.floor or [])] if exam else None,
+                               "skipCls": r.skip_class if exam else None,
+                               "renown": (getattr(p, "renown_req", {}) or {}).get(r.cls) if exam else None,
                                # 11-11 Yizhuo：同一级里加点一样、职业等级也一样（最高级）的已有职业全部列出
                                "eq": ([k for k in have_before if _CLS_TIER.get(k) == _CLS_TIER.get(r.cls)
                                        and list(level_up(p.seed_at(r.step), data.growth(name, k, lv), 2).gains) == list(r.gains)]

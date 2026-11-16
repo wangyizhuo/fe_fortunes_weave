@@ -12,19 +12,13 @@ import os
 from fe_growth import STATS, exam_roll, level_up
 from planner import gains_text, plan_all
 from run_plans import (OWNED, EXAM_OPTIONS, REQUIRED, EXAM_CHANCE, CURRENT, data, make_planner,
-                       records, ORDER, MAX_EXAMS)
+                       records, ORDER, MAX_EXAMS, TARGET as _TARGETS, BOOST, class_bonus)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-TARGET = 35   # 这里只做 35 级明细（int）；全局 TARGET 在 run_plans
 KEYS = ["hp", "str", "mag", "spd", "dex", "def", "res", "lck", "cha"]
 
 _chars = {c["name"]: c for c in json.load(open(os.path.join(HERE, "fw_characters.json"), encoding="utf-8"))}
 _cls = {c["name"]: c for c in json.load(open(os.path.join(HERE, "fw_classes.json"), encoding="utf-8"))}
-
-
-def class_bonus(cls):
-    b = (_cls.get(cls) or {}).get("baseStats") or {}
-    return [b.get(k, 0) for k in KEYS]
 
 
 # 入队（初始能力不含职业补正）。来源 fire-emblem-fw.site，按 global.fireemblem.top / Yizhuo 确认的改。
@@ -36,14 +30,6 @@ JOIN_NOTE = {"乌尔坦德": "网站的初始能力可能不对（她现在的�
              "伊欧": "Lv20 入队，骑罗西南"}
 
 # ▲（截图里黄色上箭头）= 兵种精通技能 / 坐骑属性 / 装备，显示顺序 HP 力 魔 速 技 防 魔防 幸 魅
-BOOST = {
-    "迪托利希": ([0, 1, 0, 0, 5, 0, 0, 0, 0], "力+1 攻击的基本；技+5 披风（Lv25 截图 9 项和种子推算全对上，已证实）"),
-    "法毕欧": ([0, 0, 1, 0, 0, 0, 1, 0, 0], "魔+1 魔防+1 魔道的基本（估计）"),
-    "杨界": ([0, 0, 1, 0, 0, 0, 1, 0, 0], "魔+1 魔防+1 魔道的基本（估计）"),
-    "米迦艾拉": ([0, 1, 0, 0, 0, 1, 0, 0, 0], "力+1 攻击的基本、防+1 防卫的基本（估计）"),
-    "伊欧": ([3, 0, 0, 1, 2, 2, 0, 0, 0], "HP+3 体力强化；速+1 技+2 防+2 罗西南 4 级属性（估计）"),
-    "艾丝梅拉尔达": ([0, 1, 1, 0, 0, 0, 0, 0, 0], "力+1 魔+1 攻势的基本（估计）"),
-}
 
 # 另一个对话里按「推荐等级 + 技能等级」做的成功率预测（不是游戏显示值）
 EXAM_PRED = {("法毕欧", "牧师"): "预测 100%（白魔 C、等级够）", ("伊欧", "剑客"): "预测 100%",
@@ -122,7 +108,7 @@ def build(name):
         gap = dict(frm=join_lv, to=first_lv, g=before, n=(first_lv or join_lv) - join_lv)
 
     # ---------- 未来 ----------
-    p = make_planner(name, TARGET)
+    p = make_planner(name, _TARGETS[name])
     W = p.weights
     plans, k = plan_all(p, MAX_EXAMS)
     plan = plans[k]
@@ -178,7 +164,7 @@ def build(name):
     for f in fut:
         if f["kind"] != "考试":
             continue
-        q = make_planner(name, TARGET)
+        q = make_planner(name, _TARGETS[name])
         if not f["cls"]:
             q.no_skip_steps = {f["step"] - 1}   # 跳过的价值：这一步不跳、照常升级
         if f["cls"]:
@@ -227,6 +213,6 @@ if __name__ == "__main__":
     for n in names:
         out[n] = build(n)
         d = out[n]
-        print(n, "Lv", d["now"]["start_lv"], "→35", "考", d["exams_n"], "次", "合计", gains_text(d["total"]), d["wtotal"],
+        print(n, "Lv", d["now"]["start_lv"], "→", _TARGETS[n], "考", d["exams_n"], "次", "合计", gains_text(d["total"]), d["wtotal"],
               [(e["cls"], e["pts"], e["wdiff"]) for e in d["exam_benefit"]], flush=True)
     json.dump(out, open(path, "w"), ensure_ascii=False)

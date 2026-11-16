@@ -39,6 +39,9 @@ class PlanRow:
     balance_note: str = ""    # 均衡调整说明（为了补落后的能力，选了加权分不是最高的职业）
     bonus: int = 0            # 体格阈值加分：力量涨到 5 的倍数（体格 +1）时额外加的分
     str_note: str = ""
+    floor: list = None        # 11-16：考进新职业时保底补上的项 [(能力, 原值, 补到)]
+    skip_class: str = None    # 11-16：跳过时顺手考的免费初级职业
+    level_at: int = None      # 考试/跳过发生时的等级
 
 
 @dataclass
@@ -381,10 +384,37 @@ class Planner:
         ranks = getattr(self, "exam_train_ranks", {}) or {}
         return sum(ranks.get(c, 0) for a, c in acts if a == "考试" and c in used)
 
+    def floor_lifts(self, acts):
+        """11-16：考进新职业时的保底。返回 {步: [(能力下标, 原值, 补到)]}，按裸能力比（raw_stats + 之前的加点）。"""
+        raw = getattr(self, "raw_stats", None)
+        floors = getattr(self, "floors", None) or {}
+        if not raw or not floors:
+            return {}
+        st, owned, done, out = list(raw), set(self.owned), 0, {}
+        for step, (a, c) in enumerate(acts):
+            lv = self.level + done
+            if a == "升级":
+                st = [x + y for x, y in zip(st, self.result(step, lv, c)[1])]
+                done += 1
+            elif c not in (None, "跳过") and c not in owned and self.exam_ok(step, c, lv):
+                owned.add(c)
+                f = floors.get(c)
+                if f:
+                    lift = [(i, st[i], f[i]) for i in range(9) if f[i] > st[i]]
+                    if lift:
+                        out[step] = lift
+                        for i, _, v in lift:
+                            st[i] = v
+        return out
+
+    def floor_value(self, acts):
+        """保底补上的点按权重算分（计入净值，不计入「加权分」）。"""
+        return sum(self.weights[i] * (v - a) for lifts in self.floor_lifts(acts).values() for i, a, v in lifts)
+
     def plan_net(self, acts, total, gold):
-        """净值 = 加权分 − 手形金币 ÷ 每分金币 − 训练段数 × 每段扣分。"""
+        """净值 = 加权分 + 保底分 − 手形金币 ÷ 每分金币 − 训练段数 × 每段扣分。"""
         gpp = getattr(self, "gold_per_pt", None) or 62.5
-        return total - gold / gpp - self.train_ranks(acts) * self.TRAIN_PTS_PER_RANK
+        return total + self.floor_value(acts) - gold / gpp - self.train_ranks(acts) * self.TRAIN_PTS_PER_RANK
 
     def rule_plan(self):
         gpp = getattr(self, "gold_per_pt", None) or 62.5
@@ -407,10 +437,26 @@ class Planner:
                         sum(_TIER_RANK.get(_TIER.get(x, ""), 2) >= 3 for x in targets) >= ac:
                     continue
                 r = run(targets + [c])
-                if got(r, c) and net(r) > bv + 1e-9:
+                # 11-16：单独加这场考试至少要多 min_exam_gain 分净值（米迦战车兵 +0.8 那种不考）
+                if got(r, c) and net(r) > bv + getattr(self, "min_exam_gain", 0) + 1e-9:
                     best, bv = (c, r), net(r)
             if best is None:
-                break
+                # 11-16：单场都不够 min_exam_gain 时，再试两场一起（P12 抓到杨界「重装步兵+萨满」合起来 +7）
+                mg = getattr(self, "min_exam_gain", 0)
+                if mg <= 0:
+                    break
+                rest = [c for c in cands if c not in targets]
+                for i, c1 in enumerate(rest):
+                    for c2 in rest:
+                        if c2 == c1:
+                            continue
+                        r = run(targets + [c1, c2])
+                        if got(r, c1) and got(r, c2) and net(r) > bv + 2 * mg + 1e-9:
+                            best, bv = ((c1, c2), r), net(r)
+                if best is None:
+                    break
+                targets.extend(best[0]); cur = best[1]
+                continue
             targets.append(best[0]); cur = best[1]
         self.mid_missing = False
         if getattr(self, "require_mid", False) and not any(
@@ -451,7 +497,28 @@ class Planner:
             fixed.append((a, c))
         acts = tuple(fixed)
         pl.raw_actions, pl.gold, pl.targets = acts, gold, list(targets)
+        self.annotate(pl)
         return pl
+
+    def annotate(self, pl):
+        """11-16：每个考试/跳过行写上保底收益、跳过时可以顺手考的免费初级职业。"""
+        lifts = self.floor_lifts(pl.raw_actions)
+        owned, done = set(self.owned), 0
+        for r, (a, c) in zip(pl.rows, pl.raw_actions):
+            lv = self.level + done
+            if a == "升级":
+                done += 1
+                continue
+            r.level_at = lv
+            r.floor = [(STATS[i], x, v) for i, x, v in lifts.get(r.step, [])]
+            if c == "跳过":
+                # 跳过本来就要考一场初级考试（同样 300G）：挑一个还没有、这一步能考过的初级职业，白拿职业
+                free = [x for x in self.exam_options if _TIER.get(x) == "初级" and x not in owned and self.exam_ok(r.step, x, lv)]
+                r.skip_class = free[0] if free else None
+                if r.skip_class:
+                    owned.add(r.skip_class)
+            else:
+                owned.add(c)
 
     def balanced_weights(self, stats):
         """按当前能力算出调整后的权重和说明。"""
