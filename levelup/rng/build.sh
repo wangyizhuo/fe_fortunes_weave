@@ -4,7 +4,7 @@
 # 网络盘偶尔 I/O 错，每步自动重试 3 次；make_html 自带排版检查；checks.py 任何一项不过 → 退出码 1，不要发布。
 cd "$(dirname "$0")"
 LOG=${TMPDIR:-/tmp}
-for s in make_sheet make_detail make_summary make_choices make_longview plan45 make_html; do
+for s in make_sheet make_detail make_summary make_choices make_longview plan45 make_options make_html; do
   for i in 1 2 3; do python3 $s.py > $LOG/build_$s.log 2>&1 && break; sleep 1; done || { echo "失败：$s"; tail -5 $LOG/build_$s.log; exit 1; }
   echo "ok $s"
 done

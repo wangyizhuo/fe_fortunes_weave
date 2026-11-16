@@ -290,7 +290,8 @@ for r in _dt[1:]:
 _LORDS = {"蕾达": [2,2,0,0,2,2,2,0,2,2,2,2], "凯伊": [3,3,2,3,3,2,3,3,3,3,3,2], "赛奥朵拉": [2,2,1,2,2,1,2,2,1,0,2,1]}
 MEALS = {"dishes": [h.split(" - ")[1] for h in _dt[0][13:25]], "people": _ppl,
          "lords": [{"name": k, "tier": "领主", "pref": v, "in": False} for k, v in _LORDS.items()]}
-data_json = json.dumps({"meals": MEALS, "chars": chars, "stats": STATS, "skills": SKILLS, "decisions": json.load(open(os.path.join(HERE, "decisions.json"), encoding="utf-8"))}, ensure_ascii=False)
+OPTS = json.load(open(os.path.join(HERE, "options.json"), encoding="utf-8")) if os.path.exists(os.path.join(HERE, "options.json")) else {}
+data_json = json.dumps({"options": OPTS, "meals": MEALS, "chars": chars, "stats": STATS, "skills": SKILLS, "decisions": json.load(open(os.path.join(HERE, "decisions.json"), encoding="utf-8"))}, ensure_ascii=False)
 tpl = open(os.path.join(HERE, "app_template.html"), encoding="utf-8").read()
 out = tpl.replace("/*ROUTE_DATA*/{}", data_json)
 open(os.path.join(OUT_DIR, "page_data.json"), "w", encoding="utf-8").write(data_json)   # checks.py 读它检查页面数据

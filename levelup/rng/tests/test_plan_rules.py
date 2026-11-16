@@ -179,3 +179,15 @@ def test_renown_is_6_and_blocks_higher():
     assert R.RENOWN == 6
     p = make_planner("迪托利希")
     assert all(v <= R.RENOWN for v in p.renown_req.values())   # 初级/中级都要 ≤ 4
+
+
+def test_options_list_covers_every_allowed_class():
+    """11-16 Yizhuo：职业选择清单——每人每个没拿到的可考职业都列出，带到目标级和之后的影响。"""
+    import make_options as M
+    o = M.build("米迦艾拉")
+    listed = {x["cls"] for x in o["options"]}
+    want = {c for c in R.EXAM_OPTIONS["米迦艾拉"] if c not in R.OWNED["米迦艾拉"] and c not in R.REQUIRED.get("米迦艾拉", [])}
+    assert listed == want
+    for x in o["options"]:
+        if x["ok"]:
+            assert {"g", "total", "net", "gold"} <= set(x["toT"]) and x["roll"] >= 0
