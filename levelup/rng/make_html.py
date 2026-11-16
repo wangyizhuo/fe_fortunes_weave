@@ -218,6 +218,9 @@ for name in ORDER:
                                "trainOk": TRAIN_ALLOWED[tier_of(name)],
                                "floor": [f"{a} {x}→{v}" for a, x, v in (r.floor or [])] if exam else None,
                                "skipCls": r.skip_class if exam else None,
+                               "skipFail": r.skip_fail if exam else None,
+                               "skipLeft": r.skip_left if exam else None,
+                               "skipNone": bool(r.skip_none) if exam else False,
                                "renown": (getattr(p, "renown_req", {}) or {}).get(r.cls) if exam else None,
                                # 11-11 Yizhuo：同一级里加点一样、职业等级也一样（最高级）的已有职业全部列出
                                "eq": ([k for k in have_before if _CLS_TIER.get(k) == _CLS_TIER.get(r.cls)
