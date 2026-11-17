@@ -34,16 +34,19 @@
       1,
       0,
       -1,
-      1,
       0,
-      1,
+      -1,
+      0,
       0,
       -1
      ],
-     "total": 5,
-     "net": -3.0,
+     "total": -6,
+     "net": -14.0,
      "gold": 500,
-     "train": 0
+     "train": 0,
+     "seeds": 17,
+     "endA": 40,
+     "endB": 41
     },
     "after": {
      "g": [
@@ -51,112 +54,14 @@
       -1,
       0,
       1,
-      -1,
       0,
-      -1,
+      1,
+      0,
       0,
       1
      ],
-     "total": -5,
-     "net": -0.2
-    },
-    "rec": false,
-    "ruleBlocked": false
-   },
-   {
-    "cls": "猎兵",
-    "tier": "初级",
-    "ok": true,
-    "lv": 35,
-    "roll": 88.94,
-    "pct": 100,
-    "pctNow": 100,
-    "train": [],
-    "ranks": 0,
-    "used": 0,
-    "used45": 0,
-    "floor": [],
-    "toT": {
-     "g": [
-      -1,
-      0,
-      0,
-      -1,
-      1,
-      0,
-      1,
-      0,
-      -1
-     ],
-     "total": 0,
-     "net": -4.8,
-     "gold": 300,
-     "train": 0
-    },
-    "after": {
-     "g": [
-      1,
-      0,
-      0,
-      1,
-      -1,
-      0,
-      -1,
-      0,
-      1
-     ],
-     "total": 0,
-     "net": 4.8
-    },
-    "rec": false,
-    "ruleBlocked": false
-   },
-   {
-    "cls": "飞鸵兵",
-    "tier": "初级",
-    "ok": true,
-    "lv": 35,
-    "roll": 88.94,
-    "pct": 100,
-    "pctNow": 50,
-    "train": [
-     "马术 E→E+"
-    ],
-    "ranks": 1,
-    "used": 0,
-    "used45": 0,
-    "floor": [],
-    "toT": {
-     "g": [
-      -1,
-      0,
-      0,
-      -1,
-      1,
-      0,
-      1,
-      0,
-      -1
-     ],
-     "total": 0,
-     "net": -4.8,
-     "gold": 300,
-     "train": 0
-    },
-    "after": {
-     "g": [
-      1,
-      0,
-      0,
-      1,
-      -1,
-      0,
-      -1,
-      0,
-      1
-     ],
-     "total": 0,
-     "net": 4.8
+     "total": 6,
+     "net": 10.8
     },
     "rec": false,
     "ruleBlocked": false
@@ -183,16 +88,19 @@
       0,
       0,
       -1,
-      1,
-      1,
-      1,
+      0,
+      0,
+      0,
       0,
       0
      ],
-     "total": 4,
-     "net": -5.5,
+     "total": -7,
+     "net": -16.5,
      "gold": 500,
-     "train": 3
+     "train": 3,
+     "seeds": 17,
+     "endA": 40,
+     "endB": 41
     },
     "after": {
      "g": [
@@ -200,21 +108,21 @@
       0,
       0,
       1,
-      -1,
-      -1,
-      -1,
+      0,
+      0,
+      0,
       0,
       0
      ],
-     "total": -4,
-     "net": 0.8
+     "total": 7,
+     "net": 11.8
     },
     "rec": false,
     "ruleBlocked": false
    },
    {
-    "cls": "斗拳手",
-    "tier": "中级",
+    "cls": "猎兵",
+    "tier": "初级",
     "ok": true,
     "lv": 35,
     "roll": 88.94,
@@ -222,8 +130,8 @@
     "pctNow": 100,
     "train": [],
     "ranks": 0,
-    "used": 2,
-    "used45": 1,
+    "used": 0,
+    "used45": 0,
     "floor": [],
     "toT": {
      "g": [
@@ -231,16 +139,19 @@
       0,
       0,
       -1,
-      1,
       0,
-      1,
+      -1,
+      0,
       0,
       -1
      ],
-     "total": 0,
-     "net": -8.0,
-     "gold": 500,
-     "train": 0
+     "total": -11,
+     "net": -15.8,
+     "gold": 300,
+     "train": 0,
+     "seeds": 17,
+     "endA": 40,
+     "endB": 41
     },
     "after": {
      "g": [
@@ -248,14 +159,14 @@
       0,
       0,
       1,
-      -1,
       0,
-      -1,
+      1,
+      0,
       0,
       1
      ],
-     "total": 0,
-     "net": 4.8
+     "total": 11,
+     "net": 15.8
     },
     "rec": false,
     "ruleBlocked": false
@@ -281,16 +192,19 @@
       0,
       0,
       -1,
-      1,
       0,
-      1,
+      -1,
+      0,
       0,
       -1
      ],
-     "total": 0,
-     "net": -8.5,
+     "total": -11,
+     "net": -19.5,
      "gold": 500,
-     "train": 1
+     "train": 1,
+     "seeds": 17,
+     "endA": 40,
+     "endB": 41
     },
     "after": {
      "g": [
@@ -298,14 +212,118 @@
       0,
       0,
       1,
-      -1,
       0,
-      -1,
+      1,
+      0,
       0,
       1
      ],
-     "total": 0,
-     "net": 5.3
+     "total": 11,
+     "net": 16.3
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "斗拳手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 35,
+    "roll": 88.94,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 2,
+    "used45": 1,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      0,
+      -1,
+      0,
+      -1,
+      0,
+      0,
+      -1
+     ],
+     "total": -11,
+     "net": -19.0,
+     "gold": 500,
+     "train": 0,
+     "seeds": 17,
+     "endA": 40,
+     "endB": 41
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1
+     ],
+     "total": 11,
+     "net": 15.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "飞鸵兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 35,
+    "roll": 88.94,
+    "pct": 100,
+    "pctNow": 50,
+    "train": [
+     "马术 E→E+"
+    ],
+    "ranks": 1,
+    "used": 0,
+    "used45": 0,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      0,
+      -1,
+      0,
+      -1,
+      0,
+      0,
+      -1
+     ],
+     "total": -11,
+     "net": -15.8,
+     "gold": 300,
+     "train": 0,
+     "seeds": 17,
+     "endA": 40,
+     "endB": 41
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1
+     ],
+     "total": 11,
+     "net": 15.8
     },
     "rec": false,
     "ruleBlocked": false
@@ -331,16 +349,19 @@
       0,
       0,
       -1,
-      1,
       0,
-      1,
+      -1,
+      0,
       0,
       -1
      ],
-     "total": 0,
-     "net": -9.0,
+     "total": -11,
+     "net": -20.0,
      "gold": 500,
-     "train": 2
+     "train": 2,
+     "seeds": 17,
+     "endA": 40,
+     "endB": 41
     },
     "after": {
      "g": [
@@ -348,14 +369,14 @@
       0,
       0,
       1,
-      -1,
       0,
-      -1,
+      1,
+      0,
       0,
       1
      ],
-     "total": 0,
-     "net": 5.8
+     "total": 11,
+     "net": 16.8
     },
     "rec": false,
     "ruleBlocked": false
@@ -381,16 +402,19 @@
       0,
       0,
       -1,
-      1,
       0,
-      1,
+      -1,
+      0,
       0,
       -1
      ],
-     "total": 0,
-     "net": -9.0,
+     "total": -11,
+     "net": -20.0,
      "gold": 500,
-     "train": 2
+     "train": 2,
+     "seeds": 17,
+     "endA": 40,
+     "endB": 41
     },
     "after": {
      "g": [
@@ -398,14 +422,14 @@
       0,
       0,
       1,
-      -1,
       0,
-      -1,
+      1,
+      0,
       0,
       1
      ],
-     "total": 0,
-     "net": 5.8
+     "total": 11,
+     "net": 16.8
     },
     "rec": false,
     "ruleBlocked": false
@@ -427,6 +451,60 @@
   ],
   "trainAllowed": true,
   "options": [
+   {
+    "cls": "战车兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "马术 E→D",
+     "箭术 E→C"
+    ],
+    "ranks": 6,
+    "used": 2,
+    "used45": 8,
+    "floor": [],
+    "toT": {
+     "g": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 3,
+     "net": -3.2,
+     "gold": 200,
+     "train": 6,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
+    },
+    "after": {
+     "g": [
+      3,
+      2,
+      0,
+      0,
+      0,
+      3,
+      1,
+      0,
+      4
+     ],
+     "total": 23,
+     "net": 27.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
    {
     "cls": "斗士",
     "tier": "初级",
@@ -457,22 +535,25 @@
      "total": 1,
      "net": 0.0,
      "gold": 0,
-     "train": 2
+     "train": 2,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
-      1,
       2,
-      0,
-      0,
-      -1,
+      2,
       1,
       0,
-      -1,
+      0,
+      1,
+      1,
+      0,
       1
      ],
-     "total": 2,
-     "net": 6.8
+     "total": 18,
+     "net": 22.8
     },
     "rec": false,
     "ruleBlocked": false
@@ -507,7 +588,10 @@
      "total": 1,
      "net": 0.0,
      "gold": 0,
-     "train": 2
+     "train": 2,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
@@ -557,7 +641,10 @@
      "total": 1,
      "net": 0.0,
      "gold": 0,
-     "train": 2
+     "train": 2,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
@@ -573,156 +660,6 @@
      ],
      "total": 2,
      "net": 2.0
-    },
-    "rec": false,
-    "ruleBlocked": false
-   },
-   {
-    "cls": "飞鸵兵",
-    "tier": "初级",
-    "ok": true,
-    "lv": 34,
-    "roll": 54.09,
-    "pct": 100,
-    "pctNow": 0,
-    "train": [
-     "马术 E→E+",
-     "枪术 E→D（任选一项）"
-    ],
-    "ranks": 3,
-    "used": 1,
-    "used45": 3,
-    "floor": [],
-    "toT": {
-     "g": [
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "total": 1,
-     "net": -0.5,
-     "gold": 0,
-     "train": 3
-    },
-    "after": {
-     "g": [
-      1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "total": 2,
-     "net": 2.0
-    },
-    "rec": false,
-    "ruleBlocked": false
-   },
-   {
-    "cls": "战车兵",
-    "tier": "中级",
-    "ok": true,
-    "lv": 34,
-    "roll": 54.09,
-    "pct": 100,
-    "pctNow": 0,
-    "train": [
-     "马术 E→D",
-     "箭术 E→C"
-    ],
-    "ranks": 6,
-    "used": 2,
-    "used45": 7,
-    "floor": [],
-    "toT": {
-     "g": [
-      1,
-      1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "total": 3,
-     "net": -3.2,
-     "gold": 200,
-     "train": 6
-    },
-    "after": {
-     "g": [
-      2,
-      2,
-      0,
-      0,
-      -1,
-      2,
-      0,
-      -1,
-      3
-     ],
-     "total": 8,
-     "net": 12.8
-    },
-    "rec": false,
-    "ruleBlocked": false
-   },
-   {
-    "cls": "牧师",
-    "tier": "中级",
-    "ok": true,
-    "lv": 34,
-    "roll": 54.09,
-    "pct": 100,
-    "pctNow": 100,
-    "train": [],
-    "ranks": 0,
-    "used": 0,
-    "used45": 3,
-    "floor": [],
-    "toT": {
-     "g": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "total": 0,
-     "net": -3.2,
-     "gold": 200,
-     "train": 0
-    },
-    "after": {
-     "g": [
-      0,
-      0,
-      -1,
-      0,
-      0,
-      0,
-      0,
-      1,
-      2
-     ],
-     "total": 1,
-     "net": 1.0
     },
     "rec": false,
     "ruleBlocked": false
@@ -757,7 +694,10 @@
      "total": 1,
      "net": -4.2,
      "gold": 200,
-     "train": 4
+     "train": 4,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
@@ -807,7 +747,10 @@
      "total": 1,
      "net": -4.2,
      "gold": 200,
-     "train": 4
+     "train": 4,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
@@ -857,7 +800,10 @@
      "total": 1,
      "net": -4.2,
      "gold": 200,
-     "train": 4
+     "train": 4,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
@@ -873,106 +819,6 @@
      ],
      "total": 2,
      "net": 2.0
-    },
-    "rec": false,
-    "ruleBlocked": false
-   },
-   {
-    "cls": "土匪",
-    "tier": "中级",
-    "ok": true,
-    "lv": 34,
-    "roll": 54.09,
-    "pct": 100,
-    "pctNow": 0,
-    "train": [
-     "剑术 E→C（任选一项）"
-    ],
-    "ranks": 4,
-    "used": 1,
-    "used45": 6,
-    "floor": [],
-    "toT": {
-     "g": [
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "total": 1,
-     "net": -4.2,
-     "gold": 200,
-     "train": 4
-    },
-    "after": {
-     "g": [
-      3,
-      3,
-      0,
-      0,
-      -1,
-      1,
-      0,
-      -1,
-      2
-     ],
-     "total": 8,
-     "net": 12.8
-    },
-    "rec": false,
-    "ruleBlocked": false
-   },
-   {
-    "cls": "斗拳手",
-    "tier": "中级",
-    "ok": true,
-    "lv": 34,
-    "roll": 54.09,
-    "pct": 100,
-    "pctNow": 0,
-    "train": [
-     "格斗术 E→C"
-    ],
-    "ranks": 4,
-    "used": 1,
-    "used45": 6,
-    "floor": [],
-    "toT": {
-     "g": [
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "total": 1,
-     "net": -4.2,
-     "gold": 200,
-     "train": 4
-    },
-    "after": {
-     "g": [
-      3,
-      2,
-      0,
-      0,
-      -1,
-      1,
-      0,
-      -1,
-      2
-     ],
-     "total": 7,
-     "net": 11.8
     },
     "rec": false,
     "ruleBlocked": false
@@ -1008,22 +854,185 @@
      "total": 1,
      "net": -4.7,
      "gold": 200,
-     "train": 5
+     "train": 5,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
+      1,
+      2,
+      1,
+      0,
       0,
       2,
+      1,
       0,
-      0,
-      -1,
-      2,
-      0,
-      -1,
       1
      ],
+     "total": 18,
+     "net": 22.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "土匪",
+    "tier": "中级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→C（任选一项）"
+    ],
+    "ranks": 4,
+    "used": 1,
+    "used45": 6,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 1,
+     "net": -4.2,
+     "gold": 200,
+     "train": 4,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
+    },
+    "after": {
+     "g": [
+      4,
+      3,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      2
+     ],
+     "total": 24,
+     "net": 28.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "斗拳手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "格斗术 E→C"
+    ],
+    "ranks": 4,
+    "used": 1,
+    "used45": 6,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 1,
+     "net": -4.2,
+     "gold": 200,
+     "train": 4,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
+    },
+    "after": {
+     "g": [
+      4,
+      2,
+      1,
+      0,
+      0,
+      1,
+      1,
+      0,
+      2
+     ],
+     "total": 23,
+     "net": 27.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "飞鸵兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "马术 E→E+",
+     "枪术 E→D（任选一项）"
+    ],
+    "ranks": 3,
+    "used": 1,
+    "used45": 3,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 1,
+     "net": -0.5,
+     "gold": 0,
+     "train": 3,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
      "total": 2,
-     "net": 6.8
+     "net": 2.0
     },
     "rec": false,
     "ruleBlocked": false
@@ -1059,7 +1068,10 @@
      "total": 1,
      "net": -5.2,
      "gold": 200,
-     "train": 6
+     "train": 6,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
@@ -1110,7 +1122,10 @@
      "total": 1,
      "net": -5.2,
      "gold": 200,
-     "train": 6
+     "train": 6,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
@@ -1126,6 +1141,57 @@
      ],
      "total": 3,
      "net": 3.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "牧师",
+    "tier": "中级",
+    "ok": true,
+    "lv": 34,
+    "roll": 54.09,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 0,
+    "used45": 3,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": -3.2,
+     "gold": 200,
+     "train": 0,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      -1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      2
+     ],
+     "total": 1,
+     "net": 1.0
     },
     "rec": false,
     "ruleBlocked": false
@@ -1148,6 +1214,57 @@
   "required": [],
   "trainAllowed": true,
   "options": [
+   {
+    "cls": "重装步兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 30,
+    "roll": 87.94,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 3,
+    "used45": 4,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      0,
+      1,
+      3,
+      0,
+      0,
+      -1
+     ],
+     "total": 18,
+     "net": 19.6,
+     "gold": -100,
+     "train": 0,
+     "seeds": 19,
+     "endA": 37,
+     "endB": 36
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+     ],
+     "total": 3,
+     "net": 3.0
+    },
+    "rec": true,
+    "ruleBlocked": false
+   },
    {
     "cls": "猎兵",
     "tier": "初级",
@@ -1176,70 +1293,25 @@
      "total": 0,
      "net": 0.0,
      "gold": 0,
-     "train": 0
-    },
-    "after": {
-     "g": [
-      -1,
-      -1,
-      0,
-      0,
-      0,
-      1,
-      -1,
-      1,
-      -1
-     ],
-     "total": -7,
-     "net": -2.2
-    },
-    "rec": false,
-    "ruleBlocked": false
-   },
-   {
-    "cls": "重装步兵",
-    "tier": "中级",
-    "ok": true,
-    "lv": 30,
-    "roll": 87.94,
-    "pct": 100,
-    "pctNow": 100,
-    "train": [],
-    "ranks": 0,
-    "used": 3,
-    "used45": 4,
-    "floor": [],
-    "toT": {
-     "g": [
-      -1,
-      0,
-      -1,
-      -1,
-      1,
-      2,
-      -1,
-      -1,
-      -1
-     ],
-     "total": -4,
-     "net": -2.4,
-     "gold": -100,
-     "train": 0
+     "train": 0,
+     "seeds": 19,
+     "endA": 36,
+     "endB": 36
     },
     "after": {
      "g": [
       0,
       0,
-      1,
-      1,
-      -1,
-      2,
+      0,
       0,
       1,
-      -1
+      1,
+      0,
+      1,
+      0
      ],
-     "total": 8,
-     "net": 8.0
+     "total": 10,
+     "net": 14.8
     },
     "rec": false,
     "ruleBlocked": false
@@ -1274,22 +1346,25 @@
      "total": 0,
      "net": -3.2,
      "gold": 200,
-     "train": 0
+     "train": 0,
+     "seeds": 19,
+     "endA": 36,
+     "endB": 36
     },
     "after": {
      "g": [
-      -1,
-      -1,
+      0,
+      0,
       0,
       1,
+      1,
+      1,
       0,
       1,
-      -1,
-      1,
-      -1
+      0
      ],
-     "total": -2,
-     "net": 2.3
+     "total": 15,
+     "net": 19.3
     },
     "rec": false,
     "ruleBlocked": false
@@ -1324,22 +1399,25 @@
      "total": 0,
      "net": -3.2,
      "gold": 200,
-     "train": 0
+     "train": 0,
+     "seeds": 19,
+     "endA": 36,
+     "endB": 36
     },
     "after": {
      "g": [
-      -1,
-      -1,
+      0,
       0,
       0,
       0,
       1,
-      -1,
       1,
-      -1
+      0,
+      1,
+      0
      ],
-     "total": -7,
-     "net": -3.2
+     "total": 10,
+     "net": 13.8
     },
     "rec": false,
     "ruleBlocked": false
@@ -1374,22 +1452,25 @@
      "total": 0,
      "net": -3.2,
      "gold": 200,
-     "train": 0
+     "train": 0,
+     "seeds": 19,
+     "endA": 36,
+     "endB": 36
     },
     "after": {
      "g": [
-      -1,
-      -1,
+      0,
+      0,
       0,
       1,
+      1,
+      1,
       0,
       1,
-      -1,
-      1,
-      -1
+      0
      ],
-     "total": -2,
-     "net": 2.3
+     "total": 15,
+     "net": 19.3
     },
     "rec": false,
     "ruleBlocked": false
@@ -1422,22 +1503,25 @@
      "total": 0,
      "net": -3.2,
      "gold": 200,
-     "train": 0
+     "train": 0,
+     "seeds": 19,
+     "endA": 36,
+     "endB": 36
     },
     "after": {
      "g": [
+      1,
+      1,
+      1,
       0,
       0,
       1,
       0,
-      -1,
-      1,
-      -1,
       0,
-      -1
+      0
      ],
-     "total": -5,
-     "net": -0.2
+     "total": 12,
+     "net": 16.8
     },
     "rec": false,
     "ruleBlocked": false
@@ -1472,22 +1556,25 @@
      "total": 0,
      "net": -3.2,
      "gold": 200,
-     "train": 0
+     "train": 0,
+     "seeds": 19,
+     "endA": 36,
+     "endB": 36
     },
     "after": {
      "g": [
+      1,
+      1,
+      1,
       0,
       0,
       1,
       0,
-      -1,
-      1,
-      -1,
       0,
-      -1
+      0
      ],
-     "total": -5,
-     "net": -2.2
+     "total": 12,
+     "net": 14.8
     },
     "rec": false,
     "ruleBlocked": false
@@ -1520,7 +1607,10 @@
      "total": 0,
      "net": -3.2,
      "gold": 200,
-     "train": 0
+     "train": 0,
+     "seeds": 19,
+     "endA": 36,
+     "endB": 36
     },
     "after": {
      "g": [
@@ -1553,7 +1643,7 @@
     ],
     "ranks": 2,
     "used": 0,
-    "used45": 4,
+    "used45": 5,
     "floor": [],
     "toT": {
      "g": [
@@ -1570,22 +1660,25 @@
      "total": 0,
      "net": -3.2,
      "gold": 200,
-     "train": 0
+     "train": 0,
+     "seeds": 19,
+     "endA": 36,
+     "endB": 36
     },
     "after": {
      "g": [
-      0,
-      -1,
-      0,
-      0,
       1,
+      0,
+      0,
+      0,
       2,
-      -1,
+      3,
+      0,
       1,
-      -1
+      0
      ],
-     "total": 4,
-     "net": 7.8
+     "total": 24,
+     "net": 27.8
     },
     "rec": false,
     "ruleBlocked": false
@@ -1618,7 +1711,10 @@
      "total": 0,
      "net": -3.2,
      "gold": 200,
-     "train": 0
+     "train": 0,
+     "seeds": 19,
+     "endA": 36,
+     "endB": 36
     },
     "after": {
      "g": [
@@ -1639,7 +1735,46 @@
     "ruleBlocked": false
    }
   ],
-  "recommended": []
+  "recommended": [
+   "重装步兵"
+  ],
+  "recRow": {
+   "toT": {
+    "g": [
+     0,
+     1,
+     0,
+     0,
+     1,
+     3,
+     0,
+     0,
+     -1
+    ],
+    "total": 18,
+    "net": 19.6,
+    "gold": -100,
+    "train": 0,
+    "seeds": 19,
+    "endA": 37,
+    "endB": 36
+   },
+   "after": {
+    "g": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0
+    ],
+    "total": 3,
+    "net": 3.0
+   }
+  }
  },
  "米迦艾拉": {
   "name": "米迦艾拉",
@@ -1667,7 +1802,7 @@
     ],
     "ranks": 2,
     "used": 7,
-    "used45": 14,
+    "used45": 16,
     "floor": [],
     "toT": {
      "g": [
@@ -1684,24 +1819,27 @@
      "total": 16,
      "net": 11.8,
      "gold": 200,
-     "train": 2
+     "train": 2,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
-      -1,
+      0,
+      2,
+      0,
       1,
       0,
-      0,
-      0,
-      0,
-      -1,
-      2,
-      0
+      1,
+      1,
+      3,
+      2
      ],
-     "total": 4,
-     "net": 13.6
+     "total": 33,
+     "net": 42.6
     },
-    "rec": false,
+    "rec": true,
     "ruleBlocked": false
    },
    {
@@ -1717,7 +1855,7 @@
     ],
     "ranks": 2,
     "used": 6,
-    "used45": 14,
+    "used45": 16,
     "floor": [],
     "toT": {
      "g": [
@@ -1734,24 +1872,78 @@
      "total": 16,
      "net": 11.8,
      "gold": 200,
-     "train": 2
+     "train": 2,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
+    },
+    "after": {
+     "g": [
+      2,
+      4,
+      -1,
+      1,
+      -1,
+      2,
+      0,
+      4,
+      2
+     ],
+     "total": 48,
+     "net": 57.6
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "剑客",
+    "tier": "中级",
+    "ok": true,
+    "lv": 29,
+    "roll": 17.87,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 7,
+    "used45": 16,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1
+     ],
+     "total": 11,
+     "net": 7.8,
+     "gold": 200,
+     "train": 0,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
       0,
-      3,
-      -2,
-      1,
-      -2,
+      2,
       0,
-      -2,
+      1,
+      0,
+      1,
+      1,
       3,
-      0
+      2
      ],
-     "total": 13,
-     "net": 27.4
+     "total": 33,
+     "net": 42.6
     },
-    "rec": true,
+    "rec": false,
     "ruleBlocked": false
    },
    {
@@ -1782,166 +1974,25 @@
      "total": 10,
      "net": 10.0,
      "gold": 0,
-     "train": 0
+     "train": 0,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
-      -1,
-      1,
       0,
       1,
       0,
-      -1,
+      1,
       0,
+      0,
+      1,
       0,
       1
      ],
-     "total": 3,
-     "net": 7.8
-    },
-    "rec": true,
-    "ruleBlocked": false
-   },
-   {
-    "cls": "恶棍",
-    "tier": "中级",
-    "ok": true,
-    "lv": 29,
-    "roll": 17.87,
-    "pct": 100,
-    "pctNow": 100,
-    "train": [],
-    "ranks": 0,
-    "used": 7,
-    "used45": 14,
-    "floor": [],
-    "toT": {
-     "g": [
-      0,
-      0,
-      0,
-      2,
-      2,
-      -1,
-      0,
-      1,
-      0
-     ],
-     "total": 17,
-     "net": 9.0,
-     "gold": 500,
-     "train": 0
-    },
-    "after": {
-     "g": [
-      -2,
-      2,
-      0,
-      0,
-      -1,
-      0,
-      0,
-      1,
-      1
-     ],
-     "total": 5,
-     "net": 14.6
-    },
-    "rec": false,
-    "ruleBlocked": false
-   },
-   {
-    "cls": "剑客",
-    "tier": "中级",
-    "ok": true,
-    "lv": 29,
-    "roll": 17.87,
-    "pct": 100,
-    "pctNow": 100,
-    "train": [],
-    "ranks": 0,
-    "used": 7,
-    "used45": 14,
-    "floor": [],
-    "toT": {
-     "g": [
-      0,
-      0,
-      0,
-      1,
-      1,
-      0,
-      0,
-      0,
-      1
-     ],
-     "total": 11,
-     "net": 7.8,
-     "gold": 200,
-     "train": 0
-    },
-    "after": {
-     "g": [
-      -1,
-      1,
-      0,
-      0,
-      0,
-      0,
-      -1,
-      2,
-      0
-     ],
-     "total": 4,
-     "net": 13.6
-    },
-    "rec": false,
-    "ruleBlocked": false
-   },
-   {
-    "cls": "飞鸵兵",
-    "tier": "初级",
-    "ok": true,
-    "lv": 29,
-    "roll": 17.87,
-    "pct": 100,
-    "pctNow": 100,
-    "train": [],
-    "ranks": 0,
-    "used": 2,
-    "used45": 4,
-    "floor": [],
-    "toT": {
-     "g": [
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      1,
-      0
-     ],
-     "total": 7,
-     "net": 7.0,
-     "gold": 0,
-     "train": 0
-    },
-    "after": {
-     "g": [
-      -1,
-      1,
-      0,
-      0,
-      0,
-      0,
-      -1,
-      2,
-      0
-     ],
-     "total": 4,
-     "net": 13.6
+     "total": 13,
+     "net": 17.8
     },
     "rec": false,
     "ruleBlocked": false
@@ -1974,7 +2025,10 @@
      "total": 9,
      "net": 5.8,
      "gold": 200,
-     "train": 0
+     "train": 0,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
@@ -2007,7 +2061,7 @@
     ],
     "ranks": 1,
     "used": 8,
-    "used45": 15,
+    "used45": 16,
     "floor": [],
     "toT": {
      "g": [
@@ -2024,22 +2078,25 @@
      "total": 9,
      "net": 5.3,
      "gold": 200,
-     "train": 1
+     "train": 1,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
-      -1,
-      1,
       0,
       1,
       0,
-      -1,
+      1,
       0,
       0,
-      1
+      1,
+      0,
+      2
      ],
-     "total": 3,
-     "net": 7.8
+     "total": 14,
+     "net": 18.8
     },
     "rec": false,
     "ruleBlocked": false
@@ -2055,7 +2112,7 @@
     "train": [],
     "ranks": 0,
     "used": 8,
-    "used45": 14,
+    "used45": 15,
     "floor": [],
     "toT": {
      "g": [
@@ -2072,22 +2129,25 @@
      "total": 8,
      "net": 4.8,
      "gold": 200,
-     "train": 0
+     "train": 0,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
-      -1,
+      0,
       1,
       0,
       0,
       0,
+      1,
       0,
-      -1,
-      2,
-      1
+      3,
+      2
      ],
-     "total": 5,
-     "net": 14.6
+     "total": 18,
+     "net": 22.8
     },
     "rec": false,
     "ruleBlocked": false
@@ -2103,7 +2163,7 @@
     "train": [],
     "ranks": 0,
     "used": 8,
-    "used45": 15,
+    "used45": 17,
     "floor": [],
     "toT": {
      "g": [
@@ -2120,22 +2180,76 @@
      "total": 8,
      "net": 4.8,
      "gold": 200,
-     "train": 0
+     "train": 0,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
-      -1,
+      0,
+      2,
+      0,
+      1,
+      0,
+      1,
+      1,
+      3,
+      2
+     ],
+     "total": 33,
+     "net": 42.6
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "飞鸵兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 29,
+    "roll": 17.87,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 2,
+    "used45": 6,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
       1,
       0,
       0,
       0,
-      0,
-      -1,
-      2,
+      1,
       0
      ],
-     "total": 4,
-     "net": 13.6
+     "total": 7,
+     "net": 7.0,
+     "gold": 0,
+     "train": 0,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
+    },
+    "after": {
+     "g": [
+      0,
+      2,
+      0,
+      1,
+      0,
+      1,
+      1,
+      3,
+      1
+     ],
+     "total": 32,
+     "net": 41.6
     },
     "rec": false,
     "ruleBlocked": false
@@ -2151,7 +2265,7 @@
     "train": [],
     "ranks": 0,
     "used": 8,
-    "used45": 15,
+    "used45": 16,
     "floor": [],
     "toT": {
      "g": [
@@ -2168,22 +2282,76 @@
      "total": 3,
      "net": -0.2,
      "gold": 200,
-     "train": 0
+     "train": 0,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
-      -1,
+      0,
       1,
       1,
       0,
       0,
+      1,
       0,
+      3,
+      2
+     ],
+     "total": 19,
+     "net": 23.8
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "恶棍",
+    "tier": "中级",
+    "ok": true,
+    "lv": 29,
+    "roll": 17.87,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 7,
+    "used45": 15,
+    "floor": [],
+    "toT": {
+     "g": [
       -1,
+      0,
+      0,
+      1,
+      1,
+      -1,
+      0,
+      0,
+      0
+     ],
+     "total": 2,
+     "net": -6.0,
+     "gold": 500,
+     "train": 0,
+     "seeds": 18,
+     "endA": 37,
+     "endB": 38
+    },
+    "after": {
+     "g": [
+      0,
       2,
+      0,
+      1,
+      0,
+      1,
+      1,
+      3,
       1
      ],
-     "total": 6,
-     "net": 15.6
+     "total": 32,
+     "net": 41.6
     },
     "rec": false,
     "ruleBlocked": false
@@ -2199,7 +2367,7 @@
     "train": [],
     "ranks": 0,
     "used": 5,
-    "used45": 12,
+    "used45": 14,
     "floor": [],
     "toT": {
      "g": [
@@ -2216,30 +2384,32 @@
      "total": 1,
      "net": -2.2,
      "gold": 200,
-     "train": 0
+     "train": 0,
+     "seeds": 17,
+     "endA": 37,
+     "endB": 37
     },
     "after": {
      "g": [
-      -1,
-      2,
-      -1,
-      0,
-      -1,
       1,
-      -2,
+      2,
       0,
-      0
+      0,
+      0,
+      3,
+      0,
+      0,
+      1
      ],
-     "total": 5,
-     "net": 24.2
+     "total": 32,
+     "net": 41.6
     },
     "rec": false,
     "ruleBlocked": false
    }
   ],
   "recommended": [
-   "猎兵",
-   "战车兵"
+   "弓箭手"
   ],
   "recRow": {
    "toT": {
@@ -2247,32 +2417,35 @@
      0,
      0,
      0,
-     2,
-     3,
-     0,
-     0,
      1,
+     2,
+     0,
+     0,
+     0,
      1
     ],
-    "total": 28,
-    "net": 19.0,
-    "gold": 500,
-    "train": 2
+    "total": 16,
+    "net": 11.8,
+    "gold": 200,
+    "train": 2,
+    "seeds": 17,
+    "endA": 37,
+    "endB": 37
    },
    "after": {
     "g": [
-     1,
-     2,
-     -1,
-     0,
-     -2,
-     1,
      0,
      2,
+     0,
+     1,
+     0,
+     1,
+     1,
+     3,
      2
     ],
-    "total": 16,
-    "net": 20.8
+    "total": 33,
+    "net": 42.6
    }
   }
  },
@@ -2288,102 +2461,6 @@
   "required": [],
   "trainAllowed": false,
   "options": [
-   {
-    "cls": "猎兵",
-    "tier": "初级",
-    "ok": true,
-    "lv": 23,
-    "roll": 92.64,
-    "pct": 100,
-    "pctNow": 100,
-    "train": [],
-    "ranks": 0,
-    "used": 3,
-    "used45": 6,
-    "floor": [],
-    "toT": {
-     "g": [
-      0,
-      0,
-      -1,
-      1,
-      2,
-      2,
-      -1,
-      0,
-      1
-     ],
-     "total": 14,
-     "net": 6.8,
-     "gold": 300,
-     "train": 0
-    },
-    "after": {
-     "g": [
-      1,
-      0,
-      0,
-      1,
-      1,
-      0,
-      0,
-      0,
-      -1
-     ],
-     "total": 11,
-     "net": 11.0
-    },
-    "rec": false,
-    "ruleBlocked": false
-   },
-   {
-    "cls": "士兵",
-    "tier": "初级",
-    "ok": true,
-    "lv": 23,
-    "roll": 92.64,
-    "pct": 100,
-    "pctNow": 100,
-    "train": [],
-    "ranks": 0,
-    "used": 3,
-    "used45": 5,
-    "floor": [],
-    "toT": {
-     "g": [
-      0,
-      1,
-      -1,
-      1,
-      0,
-      3,
-      -1,
-      0,
-      1
-     ],
-     "total": 10,
-     "net": 2.8,
-     "gold": 300,
-     "train": 0
-    },
-    "after": {
-     "g": [
-      1,
-      0,
-      0,
-      -1,
-      1,
-      1,
-      0,
-      0,
-      -1
-     ],
-     "total": 7,
-     "net": 7.0
-    },
-    "rec": false,
-    "ruleBlocked": false
-   },
    {
     "cls": "弓箭手",
     "tier": "中级",
@@ -2401,85 +2478,91 @@
     "floor": [],
     "toT": {
      "g": [
-      1,
       0,
       0,
-      1,
+      0,
+      0,
       3,
-      1,
+      0,
       -1,
       -1,
-      1
+      0
      ],
-     "total": 19,
-     "net": -1.0,
+     "total": 8,
+     "net": -12.0,
      "gold": 500,
-     "train": 4
+     "train": 4,
+     "seeds": 16,
+     "endA": 36,
+     "endB": 37
     },
     "after": {
      "g": [
       1,
       0,
       -1,
-      1,
-      1,
+      2,
+      0,
       1,
       0,
       1,
-      -1
+      0
      ],
-     "total": 13,
-     "net": 13.0
+     "total": 14,
+     "net": 14.0
     },
     "rec": false,
     "ruleBlocked": true
    },
    {
-    "cls": "萨满巫师",
-    "tier": "中级",
+    "cls": "猎兵",
+    "tier": "初级",
     "ok": true,
-    "lv": 21,
-    "roll": 90.62,
+    "lv": 23,
+    "roll": 92.64,
     "pct": 100,
     "pctNow": 100,
     "train": [],
     "ranks": 0,
-    "used": 13,
-    "used45": 20,
+    "used": 3,
+    "used45": 6,
     "floor": [],
     "toT": {
      "g": [
-      1,
+      -1,
       0,
+      -1,
       0,
-      1,
       2,
+      1,
+      -1,
       0,
-      -1,
-      -1,
-      1
+      0
      ],
-     "total": 11,
-     "net": -1.0,
-     "gold": 500,
-     "train": 0
+     "total": 3,
+     "net": -4.2,
+     "gold": 300,
+     "train": 0,
+     "seeds": 16,
+     "endA": 36,
+     "endB": 37
     },
     "after": {
      "g": [
-      0,
-      0,
-      0,
-      0,
       1,
       0,
       0,
       2,
-      -1
+      0,
+      0,
+      0,
+      0,
+      0
      ],
      "total": 12,
      "net": 12.0
     },
-    "rec": true,
+    "rec": false,
     "ruleBlocked": false
    },
    {
@@ -2499,35 +2582,38 @@
     "floor": [],
     "toT": {
      "g": [
-      1,
       0,
       0,
-      1,
+      0,
+      0,
       2,
-      1,
+      0,
       -1,
       -1,
-      1
+      0
      ],
-     "total": 14,
-     "net": -2.0,
+     "total": 3,
+     "net": -13.0,
      "gold": 500,
-     "train": 2
+     "train": 2,
+     "seeds": 16,
+     "endA": 36,
+     "endB": 37
     },
     "after": {
      "g": [
       1,
       0,
       -1,
-      2,
-      1,
+      3,
       0,
       0,
+      0,
       1,
-      -1
+      0
      ],
-     "total": 15,
-     "net": 15.0
+     "total": 16,
+     "net": 16.0
     },
     "rec": false,
     "ruleBlocked": true
@@ -2549,41 +2635,44 @@
     "floor": [],
     "toT": {
      "g": [
-      1,
       0,
       0,
-      1,
+      0,
+      0,
       2,
-      1,
+      0,
       -1,
       -1,
-      1
+      0
      ],
-     "total": 14,
-     "net": -2.0,
+     "total": 3,
+     "net": -13.0,
      "gold": 500,
-     "train": 2
+     "train": 2,
+     "seeds": 16,
+     "endA": 36,
+     "endB": 37
     },
     "after": {
      "g": [
       1,
       0,
       -1,
-      2,
-      1,
+      3,
       0,
       0,
+      0,
       1,
-      -1
+      0
      ],
-     "total": 15,
-     "net": 15.0
+     "total": 16,
+     "net": 16.0
     },
     "rec": false,
     "ruleBlocked": true
    },
    {
-    "cls": "牧师",
+    "cls": "萨满巫师",
     "tier": "中级",
     "ok": true,
     "lv": 21,
@@ -2593,45 +2682,48 @@
     "train": [],
     "ranks": 0,
     "used": 13,
-    "used45": 21,
+    "used45": 20,
     "floor": [],
     "toT": {
      "g": [
-      1,
       0,
       0,
-      1,
       0,
       0,
+      2,
       -1,
-      1,
-      1
+      -1,
+      -1,
+      0
      ],
-     "total": 9,
-     "net": -3.0,
+     "total": 0,
+     "net": -12.0,
      "gold": 500,
-     "train": 0
+     "train": 0,
+     "seeds": 16,
+     "endA": 36,
+     "endB": 37
     },
     "after": {
      "g": [
       0,
       0,
       0,
-      0,
       1,
       0,
       0,
+      0,
       2,
-      -1
+      0
      ],
-     "total": 12,
-     "net": 12.0
+     "total": 13,
+     "net": 13.0
     },
     "rec": false,
     "ruleBlocked": false
    },
    {
-    "cls": "斗士",
+    "cls": "士兵",
     "tier": "初级",
     "ok": true,
     "lv": 23,
@@ -2640,40 +2732,43 @@
     "pctNow": 100,
     "train": [],
     "ranks": 0,
-    "used": 1,
-    "used45": 3,
+    "used": 3,
+    "used45": 5,
     "floor": [],
     "toT": {
      "g": [
-      0,
-      1,
       -1,
-      1,
-      0,
       1,
       -1,
       0,
-      1
+      0,
+      2,
+      -1,
+      0,
+      0
      ],
-     "total": 4,
-     "net": -3.2,
+     "total": -1,
+     "net": -8.2,
      "gold": 300,
-     "train": 0
+     "train": 0,
+     "seeds": 16,
+     "endA": 36,
+     "endB": 37
     },
     "after": {
      "g": [
       1,
       0,
       0,
-      -1,
+      0,
+      0,
       1,
       0,
       0,
-      0,
-      -1
+      0
      ],
-     "total": 4,
-     "net": 4.0
+     "total": 8,
+     "net": 8.0
     },
     "rec": false,
     "ruleBlocked": false
@@ -2695,35 +2790,38 @@
     "floor": [],
     "toT": {
      "g": [
-      1,
-      1,
       0,
       1,
       0,
-      2,
+      0,
+      0,
+      1,
       -1,
       -1,
-      1
+      0
      ],
-     "total": 10,
-     "net": -4.0,
+     "total": -1,
+     "net": -15.0,
      "gold": 500,
-     "train": 1
+     "train": 1,
+     "seeds": 16,
+     "endA": 36,
+     "endB": 37
     },
     "after": {
      "g": [
       1,
       0,
       0,
-      -1,
-      1,
+      0,
+      0,
       3,
       0,
       0,
-      -1
+      0
      ],
-     "total": 13,
-     "net": 13.0
+     "total": 14,
+     "net": 14.0
     },
     "rec": true,
     "ruleBlocked": true
@@ -2745,88 +2843,92 @@
     "floor": [],
     "toT": {
      "g": [
-      1,
-      1,
       0,
       1,
       0,
-      2,
+      0,
+      0,
+      1,
       -1,
       -1,
-      1
+      0
      ],
-     "total": 10,
-     "net": -6.0,
+     "total": -1,
+     "net": -17.0,
      "gold": 500,
-     "train": 2
+     "train": 2,
+     "seeds": 16,
+     "endA": 36,
+     "endB": 37
     },
     "after": {
      "g": [
       1,
       0,
       0,
-      0,
-      1,
       1,
       0,
+      1,
       0,
-      -1
+      0,
+      0
      ],
-     "total": 12,
-     "net": 12.0
+     "total": 13,
+     "net": 13.0
     },
     "rec": false,
     "ruleBlocked": true
    },
    {
-    "cls": "飞鸵兵",
-    "tier": "初级",
+    "cls": "牧师",
+    "tier": "中级",
     "ok": true,
-    "lv": 23,
-    "roll": 92.64,
+    "lv": 21,
+    "roll": 90.62,
     "pct": 100,
-    "pctNow": 50,
-    "train": [
-     "马术 E→E+"
-    ],
-    "ranks": 1,
-    "used": 0,
-    "used45": 4,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 13,
+    "used45": 21,
     "floor": [],
     "toT": {
      "g": [
       0,
       0,
+      0,
+      0,
+      0,
+      -1,
       -1,
       1,
-      0,
-      1,
-      -1,
-      0,
-      1
+      0
      ],
-     "total": 1,
-     "net": -6.2,
-     "gold": 300,
-     "train": 0
+     "total": -2,
+     "net": -14.0,
+     "gold": 500,
+     "train": 0,
+     "seeds": 16,
+     "endA": 36,
+     "endB": 37
     },
     "after": {
      "g": [
-      1,
       0,
-      -1,
-      1,
-      1,
       0,
       0,
       1,
-      -1
+      0,
+      0,
+      0,
+      2,
+      0
      ],
-     "total": 10,
-     "net": 8.0
+     "total": 13,
+     "net": 13.0
     },
     "rec": false,
-    "ruleBlocked": true
+    "ruleBlocked": false
    },
    {
     "cls": "土匪",
@@ -2845,35 +2947,38 @@
     "floor": [],
     "toT": {
      "g": [
-      1,
+      0,
       2,
       0,
-      1,
       0,
       0,
       -1,
       -1,
-      1
+      -1,
+      0
      ],
-     "total": 7,
-     "net": -7.0,
+     "total": -4,
+     "net": -18.0,
      "gold": 500,
-     "train": 1
+     "train": 1,
+     "seeds": 16,
+     "endA": 36,
+     "endB": 37
     },
     "after": {
      "g": [
       1,
       0,
       0,
-      -1,
-      1,
+      0,
+      0,
       1,
       0,
       0,
-      -1
+      0
      ],
-     "total": 7,
-     "net": 7.0
+     "total": 8,
+     "net": 8.0
     },
     "rec": false,
     "ruleBlocked": true
@@ -2896,38 +3001,92 @@
     "floor": [],
     "toT": {
      "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
       1,
-      0,
-      0,
-      1,
-      0,
-      2,
       -1,
       -1,
-      1
+      0
      ],
-     "total": 7,
-     "net": -11.0,
+     "total": -4,
+     "net": -22.0,
      "gold": 500,
-     "train": 3
+     "train": 3,
+     "seeds": 16,
+     "endA": 36,
+     "endB": 37
     },
     "after": {
      "g": [
       1,
       0,
       -2,
-      1,
-      1,
+      2,
+      0,
       1,
       0,
       1,
-      -1
+      0
      ],
-     "total": 8,
-     "net": 8.0
+     "total": 9,
+     "net": 9.0
     },
     "rec": false,
     "ruleBlocked": true
+   },
+   {
+    "cls": "斗士",
+    "tier": "初级",
+    "ok": true,
+    "lv": 23,
+    "roll": 92.64,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 1,
+    "used45": 3,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      1,
+      -1,
+      0,
+      0,
+      0,
+      -1,
+      0,
+      0
+     ],
+     "total": -7,
+     "net": -14.2,
+     "gold": 300,
+     "train": 0,
+     "seeds": 16,
+     "endA": 36,
+     "endB": 37
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 5,
+     "net": 5.0
+    },
+    "rec": false,
+    "ruleBlocked": false
    },
    {
     "cls": "轻骑兵",
@@ -2947,42 +3106,97 @@
     "floor": [],
     "toT": {
      "g": [
-      1,
-      1,
       0,
       1,
+      0,
       0,
       0,
       -1,
       -1,
-      1
+      -1,
+      0
      ],
-     "total": 4,
-     "net": -16.0,
+     "total": -7,
+     "net": -27.0,
      "gold": 500,
-     "train": 4
+     "train": 4,
+     "seeds": 16,
+     "endA": 36,
+     "endB": 37
     },
     "after": {
      "g": [
       1,
       0,
       -2,
-      0,
-      1,
       1,
       0,
       1,
-      -1
+      0,
+      1,
+      0
      ],
-     "total": 6,
-     "net": 6.0
+     "total": 7,
+     "net": 7.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "飞鸵兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 23,
+    "roll": 92.64,
+    "pct": 100,
+    "pctNow": 50,
+    "train": [
+     "马术 E→E+"
+    ],
+    "ranks": 1,
+    "used": 0,
+    "used45": 4,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      -1,
+      0,
+      0,
+      0,
+      -1,
+      0,
+      0
+     ],
+     "total": -10,
+     "net": -17.2,
+     "gold": 300,
+     "train": 0,
+     "seeds": 16,
+     "endA": 36,
+     "endB": 37
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      -1,
+      2,
+      0,
+      0,
+      0,
+      1,
+      0
+     ],
+     "total": 11,
+     "net": 9.0
     },
     "rec": false,
     "ruleBlocked": true
    }
   ],
   "recommended": [
-   "萨满巫师",
    "重装步兵"
   ],
   "recRow": {
@@ -2991,32 +3205,35 @@
      0,
      1,
      0,
-     1,
-     3,
-     2,
-     -1,
      0,
-     2
+     0,
+     1,
+     -1,
+     -1,
+     0
     ],
-    "total": 28,
-    "net": 2.0,
-    "gold": 1000,
-    "train": 1
+    "total": -1,
+    "net": -15.0,
+    "gold": 500,
+    "train": 1,
+    "seeds": 16,
+    "endA": 36,
+    "endB": 37
    },
    "after": {
     "g": [
      1,
      0,
-     -1,
      0,
-     1,
-     2,
      0,
-     2,
-     -2
+     0,
+     3,
+     0,
+     0,
+     0
     ],
-    "total": 17,
-    "net": 17.0
+    "total": 14,
+    "net": 14.0
    }
   }
  },
@@ -3034,54 +3251,6 @@
   "trainAllowed": true,
   "options": [
    {
-    "cls": "飞鸵兵",
-    "tier": "初级",
-    "ok": true,
-    "lv": 24,
-    "roll": 67.22,
-    "pct": 100,
-    "pctNow": 100,
-    "train": [],
-    "ranks": 0,
-    "used": 2,
-    "used45": 2,
-    "floor": [],
-    "toT": {
-     "g": [
-      -1,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      0
-     ],
-     "total": 2,
-     "net": 6.8,
-     "gold": -300,
-     "train": 0
-    },
-    "after": {
-     "g": [
-      1,
-      1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      -1
-     ],
-     "total": 6,
-     "net": 1.2
-    },
-    "rec": true,
-    "ruleBlocked": false
-   },
-   {
     "cls": "剑客",
     "tier": "中级",
     "ok": true,
@@ -3096,35 +3265,38 @@
     "floor": [],
     "toT": {
      "g": [
-      -1,
-      0,
       0,
       1,
       0,
-      0,
+      2,
+      1,
+      1,
       0,
       0,
       0
      ],
-     "total": 2,
-     "net": 3.6,
+     "total": 23,
+     "net": 24.6,
      "gold": -100,
-     "train": 0
+     "train": 0,
+     "seeds": 18,
+     "endA": 39,
+     "endB": 38
     },
     "after": {
      "g": [
-      1,
-      1,
       0,
       0,
       0,
-      0,
+      -1,
+      -1,
+      -1,
       0,
       0,
       -1
      ],
-     "total": 6,
-     "net": 1.2
+     "total": -15,
+     "net": -19.8
     },
     "rec": false,
     "ruleBlocked": false
@@ -3144,37 +3316,91 @@
     "floor": [],
     "toT": {
      "g": [
-      -1,
-      0,
       0,
       1,
       0,
-      0,
+      2,
+      1,
+      1,
       0,
       0,
       0
      ],
-     "total": 2,
-     "net": 3.6,
+     "total": 23,
+     "net": 24.6,
      "gold": -100,
-     "train": 0
+     "train": 0,
+     "seeds": 18,
+     "endA": 39,
+     "endB": 38
     },
     "after": {
      "g": [
-      1,
-      1,
       0,
       0,
       0,
-      0,
+      -1,
+      -1,
+      -1,
       0,
       0,
       -1
      ],
-     "total": 6,
-     "net": 1.2
+     "total": -15,
+     "net": -19.8
     },
     "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "飞鸵兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 24,
+    "roll": 67.22,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 2,
+    "used45": 2,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      2,
+      1,
+      1,
+      0,
+      0,
+      0
+     ],
+     "total": 23,
+     "net": 27.8,
+     "gold": -300,
+     "train": 0,
+     "seeds": 18,
+     "endA": 39,
+     "endB": 38
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      -1,
+      -1,
+      -1,
+      0,
+      0,
+      -1
+     ],
+     "total": -15,
+     "net": -19.8
+    },
+    "rec": true,
     "ruleBlocked": false
    },
    {
@@ -3192,35 +3418,38 @@
     "floor": [],
     "toT": {
      "g": [
-      -1,
-      0,
       0,
       1,
       0,
-      0,
+      2,
+      1,
+      1,
       0,
       0,
       0
      ],
-     "total": 2,
-     "net": 3.6,
+     "total": 23,
+     "net": 24.6,
      "gold": -100,
-     "train": 0
+     "train": 0,
+     "seeds": 18,
+     "endA": 39,
+     "endB": 38
     },
     "after": {
      "g": [
-      1,
-      1,
       0,
       0,
       0,
-      0,
+      -1,
+      -1,
+      -1,
       0,
       0,
       -1
      ],
-     "total": 6,
-     "net": 1.2
+     "total": -15,
+     "net": -19.8
     },
     "rec": false,
     "ruleBlocked": false
@@ -3253,7 +3482,10 @@
      "total": 0,
      "net": 0.0,
      "gold": 0,
-     "train": 0
+     "train": 0,
+     "seeds": 18,
+     "endA": 38,
+     "endB": 38
     },
     "after": {
      "g": [
@@ -3301,7 +3533,10 @@
      "total": 0,
      "net": 0.0,
      "gold": 0,
-     "train": 0
+     "train": 0,
+     "seeds": 18,
+     "endA": 38,
+     "endB": 38
     },
     "after": {
      "g": [
@@ -3349,7 +3584,10 @@
      "total": 0,
      "net": 0.0,
      "gold": 0,
-     "train": 0
+     "train": 0,
+     "seeds": 18,
+     "endA": 38,
+     "endB": 38
     },
     "after": {
      "g": [
@@ -3397,7 +3635,10 @@
      "total": 0,
      "net": -3.2,
      "gold": 200,
-     "train": 0
+     "train": 0,
+     "seeds": 18,
+     "endA": 38,
+     "endB": 38
     },
     "after": {
      "g": [
@@ -3447,7 +3688,10 @@
      "total": 0,
      "net": -3.2,
      "gold": 200,
-     "train": 0
+     "train": 0,
+     "seeds": 18,
+     "endA": 38,
+     "endB": 38
     },
     "after": {
      "g": [
@@ -3495,7 +3739,10 @@
      "total": 0,
      "net": -3.2,
      "gold": 200,
-     "train": 0
+     "train": 0,
+     "seeds": 18,
+     "endA": 38,
+     "endB": 38
     },
     "after": {
      "g": [
@@ -3545,7 +3792,10 @@
      "total": 0,
      "net": -3.2,
      "gold": 200,
-     "train": 0
+     "train": 0,
+     "seeds": 18,
+     "endA": 38,
+     "endB": 38
     },
     "after": {
      "g": [
@@ -3572,35 +3822,38 @@
   "recRow": {
    "toT": {
     "g": [
-     -1,
-     0,
      0,
      1,
      0,
-     0,
+     2,
+     1,
+     1,
      0,
      0,
      0
     ],
-    "total": 2,
-    "net": 6.8,
+    "total": 23,
+    "net": 27.8,
     "gold": -300,
-    "train": 0
+    "train": 0,
+    "seeds": 18,
+    "endA": 39,
+    "endB": 38
    },
    "after": {
     "g": [
-     1,
-     1,
      0,
      0,
      0,
-     0,
+     -1,
+     -1,
+     -1,
      0,
      0,
      -1
     ],
-    "total": 6,
-    "net": 1.2
+    "total": -15,
+    "net": -19.8
    }
   }
  },
@@ -3617,54 +3870,6 @@
   "required": [],
   "trainAllowed": false,
   "options": [
-   {
-    "cls": "弓箭手",
-    "tier": "中级",
-    "ok": true,
-    "lv": 20,
-    "roll": 82.65,
-    "pct": 100,
-    "pctNow": 100,
-    "train": [],
-    "ranks": 0,
-    "used": 12,
-    "used45": 20,
-    "floor": [],
-    "toT": {
-     "g": [
-      -1,
-      0,
-      0,
-      1,
-      2,
-      2,
-      0,
-      1,
-      0
-     ],
-     "total": 19,
-     "net": 7.0,
-     "gold": 500,
-     "train": 0
-    },
-    "after": {
-     "g": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      -1,
-      0,
-      2,
-      1
-     ],
-     "total": 3,
-     "net": 3.0
-    },
-    "rec": true,
-    "ruleBlocked": false
-   },
    {
     "cls": "战车兵",
     "tier": "中级",
@@ -3683,40 +3888,43 @@
     "toT": {
      "g": [
       -1,
+      0,
+      0,
+      -1,
       1,
-      0,
-      0,
       2,
-      3,
       0,
       1,
       1
      ],
-     "total": 21,
-     "net": 5.0,
+     "total": 5,
+     "net": -11.0,
      "gold": 500,
-     "train": 2
+     "train": 2,
+     "seeds": 20,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
       2,
-      -1,
-      0,
-      -1,
       0,
       0,
       0,
       1,
+      1,
+      0,
+      1,
       2
      ],
-     "total": -1,
-     "net": 6.2
+     "total": 15,
+     "net": 22.2
     },
     "rec": false,
     "ruleBlocked": true
    },
    {
-    "cls": "剑客",
+    "cls": "弓箭手",
     "tier": "中级",
     "ok": true,
     "lv": 20,
@@ -3725,25 +3933,28 @@
     "pctNow": 100,
     "train": [],
     "ranks": 0,
-    "used": 11,
-    "used45": 19,
+    "used": 12,
+    "used45": 20,
     "floor": [],
     "toT": {
      "g": [
       -1,
+      -1,
+      0,
+      0,
+      1,
       1,
       0,
-      2,
-      0,
       1,
-      0,
-      0,
       0
      ],
-     "total": 14,
-     "net": 2.0,
+     "total": 3,
+     "net": -9.0,
      "gold": 500,
-     "train": 0
+     "train": 0,
+     "seeds": 20,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
@@ -3752,46 +3963,51 @@
       0,
       0,
       0,
-      -1,
       0,
-      2,
+      0,
+      1,
       1
      ],
      "total": 3,
      "net": 3.0
     },
-    "rec": false,
+    "rec": true,
     "ruleBlocked": false
    },
    {
-    "cls": "恶棍",
-    "tier": "中级",
+    "cls": "士兵",
+    "tier": "初级",
     "ok": true,
-    "lv": 20,
-    "roll": 82.65,
+    "lv": 25,
+    "roll": 67.11,
     "pct": 100,
-    "pctNow": 100,
-    "train": [],
-    "ranks": 0,
-    "used": 10,
-    "used45": 18,
+    "pctNow": 0,
+    "train": [
+     "枪术 E→D（任选一项）"
+    ],
+    "ranks": 2,
+    "used": 1,
+    "used45": 1,
     "floor": [],
     "toT": {
      "g": [
-      -1,
-      1,
       0,
-      2,
+      0,
+      0,
+      0,
       0,
       1,
       0,
       0,
       0
      ],
-     "total": 14,
-     "net": 2.0,
-     "gold": 500,
-     "train": 0
+     "total": 2,
+     "net": -2.0,
+     "gold": 0,
+     "train": 2,
+     "seeds": 19,
+     "endA": 35,
+     "endB": 35
     },
     "after": {
      "g": [
@@ -3800,16 +4016,69 @@
       0,
       0,
       0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "斗拳手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 82.65,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "格斗术 E→C"
+    ],
+    "ranks": 4,
+    "used": 14,
+    "used45": 23,
+    "floor": [],
+    "toT": {
+     "g": [
       -1,
       0,
+      0,
+      0,
+      0,
       2,
+      0,
+      0,
       0
      ],
      "total": 2,
-     "net": 2.0
+     "net": -18.0,
+     "gold": 500,
+     "train": 4,
+     "seeds": 20,
+     "endA": 35,
+     "endB": 36
+    },
+    "after": {
+     "g": [
+      -1,
+      0,
+      -1,
+      -1,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": -8,
+     "net": -15.2
     },
     "rec": false,
-    "ruleBlocked": false
+    "ruleBlocked": true
    },
    {
     "cls": "飞鸵兵",
@@ -3842,7 +4111,10 @@
      "total": 0,
      "net": 0.0,
      "gold": 0,
-     "train": 0
+     "train": 0,
+     "seeds": 19,
+     "endA": 35,
+     "endB": 35
     },
     "after": {
      "g": [
@@ -3863,54 +4135,6 @@
     "ruleBlocked": true
    },
    {
-    "cls": "土匪",
-    "tier": "中级",
-    "ok": true,
-    "lv": 20,
-    "roll": 82.65,
-    "pct": 100,
-    "pctNow": 100,
-    "train": [],
-    "ranks": 0,
-    "used": 14,
-    "used45": 23,
-    "floor": [],
-    "toT": {
-     "g": [
-      -1,
-      1,
-      0,
-      1,
-      0,
-      2,
-      0,
-      0,
-      0
-     ],
-     "total": 11,
-     "net": -1.0,
-     "gold": 500,
-     "train": 0
-    },
-    "after": {
-     "g": [
-      0,
-      1,
-      -1,
-      0,
-      0,
-      -1,
-      0,
-      1,
-      0
-     ],
-     "total": 3,
-     "net": -4.2
-    },
-    "rec": false,
-    "ruleBlocked": false
-   },
-   {
     "cls": "轻骑兵",
     "tier": "中级",
     "ok": true,
@@ -3928,19 +4152,22 @@
     "toT": {
      "g": [
       -1,
-      1,
       0,
-      1,
       0,
-      2,
+      0,
+      -1,
+      1,
       0,
       1,
       2
      ],
-     "total": 15,
-     "net": -1.0,
+     "total": -1,
+     "net": -17.0,
      "gold": 500,
-     "train": 2
+     "train": 2,
+     "seeds": 20,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
@@ -3949,9 +4176,9 @@
       0,
       0,
       0,
-      -1,
       0,
-      2,
+      0,
+      1,
       1
      ],
      "total": 3,
@@ -3961,36 +4188,37 @@
     "ruleBlocked": true
    },
    {
-    "cls": "士兵",
-    "tier": "初级",
+    "cls": "剑客",
+    "tier": "中级",
     "ok": true,
-    "lv": 25,
-    "roll": 67.11,
+    "lv": 20,
+    "roll": 82.65,
     "pct": 100,
-    "pctNow": 0,
-    "train": [
-     "枪术 E→D（任选一项）"
-    ],
-    "ranks": 2,
-    "used": 1,
-    "used45": 1,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 11,
+    "used45": 19,
     "floor": [],
     "toT": {
      "g": [
-      0,
-      0,
-      0,
+      -1,
       0,
       0,
       1,
+      -1,
+      0,
       0,
       0,
       0
      ],
-     "total": 2,
-     "net": -2.0,
-     "gold": 0,
-     "train": 2
+     "total": -2,
+     "net": -14.0,
+     "gold": 500,
+     "train": 0,
+     "seeds": 20,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
@@ -4001,64 +4229,116 @@
       0,
       0,
       0,
-      0,
-      0
+      1,
+      1
      ],
-     "total": 0,
-     "net": 0.0
+     "total": 3,
+     "net": 3.0
     },
     "rec": false,
-    "ruleBlocked": true
+    "ruleBlocked": false
    },
    {
-    "cls": "斗拳手",
+    "cls": "恶棍",
     "tier": "中级",
     "ok": true,
     "lv": 20,
     "roll": 82.65,
     "pct": 100,
-    "pctNow": 0,
-    "train": [
-     "格斗术 E→C"
-    ],
-    "ranks": 4,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 10,
+    "used45": 18,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      0,
+      0,
+      1,
+      -1,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": -2,
+     "net": -14.0,
+     "gold": 500,
+     "train": 0,
+     "seeds": 20,
+     "endA": 35,
+     "endB": 36
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0
+     ],
+     "total": 2,
+     "net": 2.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "土匪",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 82.65,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
     "used": 14,
     "used45": 23,
     "floor": [],
     "toT": {
      "g": [
       -1,
-      1,
       0,
+      0,
+      0,
+      -1,
       1,
-      1,
-      3,
       0,
       0,
       0
      ],
-     "total": 18,
-     "net": -2.0,
+     "total": -5,
+     "net": -17.0,
      "gold": 500,
-     "train": 4
+     "train": 0,
+     "seeds": 20,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
+      -1,
       0,
-      1,
+      -1,
       -1,
       0,
       0,
-      -1,
       0,
-      1,
+      0,
       0
      ],
-     "total": 3,
-     "net": -4.2
+     "total": -8,
+     "net": -15.2
     },
     "rec": false,
-    "ruleBlocked": true
+    "ruleBlocked": false
    },
    {
     "cls": "骑甲鸵兵",
@@ -4079,19 +4359,22 @@
     "toT": {
      "g": [
       -1,
-      1,
       0,
-      1,
       0,
-      2,
+      0,
+      -1,
+      1,
       0,
       0,
       0
      ],
-     "total": 11,
-     "net": -13.0,
+     "total": -5,
+     "net": -29.0,
      "gold": 500,
-     "train": 6
+     "train": 6,
+     "seeds": 20,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
@@ -4100,9 +4383,9 @@
       0,
       0,
       0,
-      -1,
       0,
-      2,
+      0,
+      1,
       1
      ],
      "total": 3,
@@ -4125,19 +4408,22 @@
    "toT": {
     "g": [
      -1,
+     -1,
      0,
      0,
      1,
-     2,
-     2,
+     1,
      0,
      1,
      0
     ],
-    "total": 19,
-    "net": 7.0,
+    "total": 3,
+    "net": -9.0,
     "gold": 500,
-    "train": 0
+    "train": 0,
+    "seeds": 20,
+    "endA": 35,
+    "endB": 36
    },
    "after": {
     "g": [
@@ -4146,9 +4432,9 @@
      0,
      0,
      0,
-     -1,
      0,
-     2,
+     0,
+     1,
      1
     ],
     "total": 3,
@@ -4168,54 +4454,6 @@
   "required": [],
   "trainAllowed": false,
   "options": [
-   {
-    "cls": "斗士",
-    "tier": "初级",
-    "ok": true,
-    "lv": 21,
-    "roll": 51.01,
-    "pct": 100,
-    "pctNow": 100,
-    "train": [],
-    "ranks": 0,
-    "used": 1,
-    "used45": 2,
-    "floor": [],
-    "toT": {
-     "g": [
-      0,
-      1,
-      1,
-      0,
-      1,
-      0,
-      -1,
-      0,
-      1
-     ],
-     "total": 9,
-     "net": -0.6,
-     "gold": 300,
-     "train": 0
-    },
-    "after": {
-     "g": [
-      0,
-      1,
-      1,
-      0,
-      0,
-      0,
-      2,
-      0,
-      -1
-     ],
-     "total": 12,
-     "net": 2.4
-    },
-    "rec": false,
-    "ruleBlocked": false
-   },
    {
     "cls": "重装步兵",
     "tier": "中级",
@@ -4238,35 +4476,142 @@
      "g": [
       -1,
       1,
-      1,
-      -2,
-      3,
+      0,
+      -3,
+      2,
       3,
       -2,
       0,
-      3
+      2
      ],
-     "total": 14,
-     "net": -2.0,
+     "total": 3,
+     "net": -13.0,
      "gold": 500,
-     "train": 2
+     "train": 2,
+     "seeds": 19,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
-      0,
-      1,
-      1,
-      0,
-      0,
-      1,
-      1,
       -1,
-      -1
+      1,
+      0,
+      0,
+      0,
+      0,
+      -1,
+      -1,
+      0
      ],
-     "total": 11,
-     "net": 1.4
+     "total": 2,
+     "net": -7.6
     },
     "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "斗士",
+    "tier": "初级",
+    "ok": true,
+    "lv": 21,
+    "roll": 51.01,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 1,
+    "used45": 2,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      -1,
+      0,
+      0,
+      -1,
+      0,
+      0
+     ],
+     "total": -2,
+     "net": -11.6,
+     "gold": 300,
+     "train": 0,
+     "seeds": 19,
+     "endA": 35,
+     "endB": 36
+    },
+    "after": {
+     "g": [
+      -1,
+      1,
+      0,
+      0,
+      0,
+      -1,
+      0,
+      0,
+      0
+     ],
+     "total": 3,
+     "net": -6.6
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "土匪",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 11.9,
+    "pct": 100,
+    "pctNow": 50,
+    "train": [
+     "剑术 E→C（任选一项）"
+    ],
+    "ranks": 1,
+    "used": 11,
+    "used45": 18,
+    "floor": [],
+    "toT": {
+     "g": [
+      -1,
+      1,
+      0,
+      -1,
+      0,
+      0,
+      -1,
+      -1,
+      1
+     ],
+     "total": -5,
+     "net": -24.0,
+     "gold": 500,
+     "train": 1,
+     "seeds": 19,
+     "endA": 35,
+     "endB": 36
+    },
+    "after": {
+     "g": [
+      -1,
+      1,
+      0,
+      0,
+      0,
+      -1,
+      0,
+      0,
+      0
+     ],
+     "total": 3,
+     "net": -6.6
+    },
+    "rec": true,
     "ruleBlocked": true
    },
    {
@@ -4286,18 +4631,21 @@
      "g": [
       -1,
       0,
+      0,
+      -2,
       1,
-      -1,
-      2,
       1,
       -1,
       0,
-      1
+      0
      ],
-     "total": 4,
-     "net": -5.6,
+     "total": -7,
+     "net": -16.6,
      "gold": 300,
-     "train": 0
+     "train": 0,
+     "seeds": 19,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
@@ -4305,11 +4653,11 @@
       0,
       0,
       0,
-      -1,
-      1,
-      1,
       0,
-      -1
+      0,
+      0,
+      0,
+      0
      ],
      "total": 0,
      "net": 0.0
@@ -4336,18 +4684,21 @@
      "g": [
       0,
       0,
-      1,
-      0,
-      1,
       0,
       -1,
       0,
-      1
+      0,
+      -1,
+      0,
+      0
      ],
-     "total": 4,
-     "net": -5.6,
+     "total": -7,
+     "net": -16.6,
      "gold": 300,
-     "train": 0
+     "train": 0,
+     "seeds": 19,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
@@ -4355,11 +4706,11 @@
       0,
       0,
       0,
-      -1,
-      1,
-      1,
       0,
-      -1
+      0,
+      0,
+      0,
+      0
      ],
      "total": 0,
      "net": 0.0
@@ -4368,57 +4719,7 @@
     "ruleBlocked": true
    },
    {
-    "cls": "土匪",
-    "tier": "中级",
-    "ok": true,
-    "lv": 20,
-    "roll": 11.9,
-    "pct": 100,
-    "pctNow": 50,
-    "train": [
-     "剑术 E→C（任选一项）"
-    ],
-    "ranks": 1,
-    "used": 11,
-    "used45": 18,
-    "floor": [],
-    "toT": {
-     "g": [
-      -1,
-      1,
-      1,
-      0,
-      1,
-      0,
-      -1,
-      -1,
-      2
-     ],
-     "total": 6,
-     "net": -13.0,
-     "gold": 500,
-     "train": 1
-    },
-    "after": {
-     "g": [
-      0,
-      1,
-      1,
-      0,
-      0,
-      0,
-      2,
-      0,
-      -1
-     ],
-     "total": 12,
-     "net": 2.4
-    },
-    "rec": false,
-    "ruleBlocked": true
-   },
-   {
-    "cls": "轻骑兵",
+    "cls": "斗拳手",
     "tier": "中级",
     "ok": true,
     "lv": 20,
@@ -4426,45 +4727,99 @@
     "pct": 100,
     "pctNow": 0,
     "train": [
-     "剑术 E→C（任选一项）"
+     "格斗术 E→C"
     ],
-    "ranks": 2,
+    "ranks": 4,
     "used": 12,
-    "used45": 20,
-    "floor": [
-     "防 8→10"
-    ],
+    "used45": 21,
+    "floor": [],
     "toT": {
      "g": [
-      -1,
-      -1,
-      1,
+      -2,
       0,
-      1,
       0,
+      -2,
+      1,
+      1,
       -1,
       -1,
       2
      ],
-     "total": -4,
-     "net": -20.0,
+     "total": -9,
+     "net": -37.0,
      "gold": 500,
-     "train": 2
+     "train": 4,
+     "seeds": 19,
+     "endA": 35,
+     "endB": 36
+    },
+    "after": {
+     "g": [
+      -1,
+      1,
+      0,
+      0,
+      0,
+      -1,
+      0,
+      0,
+      0
+     ],
+     "total": 3,
+     "net": -6.6
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "弓箭手",
+    "tier": "中级",
+    "ok": true,
+    "lv": 20,
+    "roll": 11.9,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "箭术 E→C"
+    ],
+    "ranks": 4,
+    "used": 15,
+    "used45": 25,
+    "floor": [],
+    "toT": {
+     "g": [
+      -2,
+      -1,
+      0,
+      -2,
+      2,
+      1,
+      -1,
+      -1,
+      2
+     ],
+     "total": -10,
+     "net": -38.0,
+     "gold": 500,
+     "train": 4,
+     "seeds": 19,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
       0,
+      0,
+      0,
+      0,
       1,
-      1,
       0,
       0,
       0,
-      2,
-      0,
-      -1
+      0
      ],
-     "total": 9,
-     "net": -0.6
+     "total": 4,
+     "net": 4.0
     },
     "rec": false,
     "ruleBlocked": true
@@ -4488,18 +4843,21 @@
      "g": [
       -2,
       -1,
+      0,
+      -2,
+      1,
       1,
       -1,
-      2,
-      1,
       -1,
-      -1,
-      3
+      2
      ],
-     "total": -3,
-     "net": -22.0,
+     "total": -14,
+     "net": -33.0,
      "gold": 500,
-     "train": 1
+     "train": 1,
+     "seeds": 19,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
@@ -4507,11 +4865,11 @@
       0,
       0,
       0,
-      -1,
-      1,
-      1,
       0,
-      -1
+      0,
+      0,
+      0,
+      0
      ],
      "total": 0,
      "net": 0.0
@@ -4540,18 +4898,21 @@
      "g": [
       -2,
       -1,
+      0,
+      -2,
+      1,
       1,
       -1,
-      2,
-      1,
       -1,
-      -1,
-      3
+      2
      ],
-     "total": -3,
-     "net": -23.0,
+     "total": -14,
+     "net": -34.0,
      "gold": 500,
-     "train": 2
+     "train": 2,
+     "seeds": 19,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
@@ -4559,11 +4920,11 @@
       0,
       1,
       0,
-      -1,
-      1,
-      1,
       0,
-      -1
+      0,
+      0,
+      0,
+      0
      ],
      "total": 1,
      "net": 1.0
@@ -4572,7 +4933,7 @@
     "ruleBlocked": true
    },
    {
-    "cls": "斗拳手",
+    "cls": "轻骑兵",
     "tier": "中级",
     "ok": true,
     "lv": 20,
@@ -4580,93 +4941,48 @@
     "pct": 100,
     "pctNow": 0,
     "train": [
-     "格斗术 E→C"
+     "剑术 E→C（任选一项）"
     ],
-    "ranks": 4,
+    "ranks": 2,
     "used": 12,
-    "used45": 21,
-    "floor": [],
-    "toT": {
-     "g": [
-      -2,
-      0,
-      1,
-      -1,
-      2,
-      1,
-      -1,
-      -1,
-      3
-     ],
-     "total": 2,
-     "net": -26.0,
-     "gold": 500,
-     "train": 4
-    },
-    "after": {
-     "g": [
-      0,
-      1,
-      1,
-      0,
-      0,
-      0,
-      2,
-      0,
-      -1
-     ],
-     "total": 12,
-     "net": 2.4
-    },
-    "rec": false,
-    "ruleBlocked": true
-   },
-   {
-    "cls": "弓箭手",
-    "tier": "中级",
-    "ok": true,
-    "lv": 20,
-    "roll": 11.9,
-    "pct": 100,
-    "pctNow": 0,
-    "train": [
-     "箭术 E→C"
+    "used45": 20,
+    "floor": [
+     "防 8→10"
     ],
-    "ranks": 4,
-    "used": 15,
-    "used45": 25,
-    "floor": [],
     "toT": {
      "g": [
-      -2,
-      -1,
-      1,
-      -1,
-      3,
-      1,
       -1,
       -1,
-      3
+      0,
+      -1,
+      0,
+      0,
+      -1,
+      -1,
+      1
      ],
-     "total": 1,
-     "net": -27.0,
+     "total": -15,
+     "net": -31.0,
      "gold": 500,
-     "train": 4
+     "train": 2,
+     "seeds": 19,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      1,
+      -1,
       1,
       0,
-      -1
+      0,
+      0,
+      -1,
+      0,
+      0,
+      0
      ],
-     "total": 4,
-     "net": 4.0
+     "total": 0,
+     "net": -9.6
     },
     "rec": false,
     "ruleBlocked": true
@@ -4690,18 +5006,21 @@
      "g": [
       -2,
       -1,
-      1,
-      -2,
-      3,
+      0,
+      -3,
+      2,
       1,
       -1,
       -1,
-      3
+      2
      ],
-     "total": -4,
-     "net": -32.0,
+     "total": -15,
+     "net": -43.0,
      "gold": 500,
-     "train": 4
+     "train": 4,
+     "seeds": 19,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
@@ -4709,11 +5028,11 @@
       0,
       0,
       0,
-      1,
       2,
       1,
       0,
-      -1
+      0,
+      0
      ],
      "total": 13,
      "net": 13.0
@@ -4740,18 +5059,21 @@
      "g": [
       -1,
       -1,
-      1,
       0,
-      1,
+      -1,
+      0,
       0,
       -1,
       -1,
-      1
+      0
      ],
-     "total": -5,
-     "net": -33.0,
+     "total": -16,
+     "net": -44.0,
      "gold": 500,
-     "train": 4
+     "train": 4,
+     "seeds": 19,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
@@ -4759,11 +5081,11 @@
       0,
       0,
       1,
-      -1,
-      1,
-      1,
       0,
-      -1
+      0,
+      0,
+      0,
+      0
      ],
      "total": 5,
      "net": 5.0
@@ -4790,39 +5112,81 @@
      "g": [
       -2,
       -1,
+      0,
+      -2,
       1,
-      -1,
-      2,
       0,
       -1,
       -1,
-      3
+      2
      ],
-     "total": -6,
-     "net": -34.0,
+     "total": -17,
+     "net": -45.0,
      "gold": 500,
-     "train": 4
+     "train": 4,
+     "seeds": 19,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
+      -1,
       0,
       0,
       1,
-      1,
+      0,
+      -1,
       0,
       0,
-      2,
-      0,
-      -1
+      0
      ],
-     "total": 9,
-     "net": -0.6
+     "total": 0,
+     "net": -9.6
     },
     "rec": false,
     "ruleBlocked": true
    }
   ],
-  "recommended": []
+  "recommended": [
+   "土匪"
+  ],
+  "recRow": {
+   "toT": {
+    "g": [
+     -1,
+     1,
+     0,
+     -1,
+     0,
+     0,
+     -1,
+     -1,
+     1
+    ],
+    "total": -5,
+    "net": -24.0,
+    "gold": 500,
+    "train": 1,
+    "seeds": 19,
+    "endA": 35,
+    "endB": 36
+   },
+   "after": {
+    "g": [
+     -1,
+     1,
+     0,
+     0,
+     0,
+     -1,
+     0,
+     0,
+     0
+    ],
+    "total": 3,
+    "net": -6.6
+   }
+  }
  },
  "乌尔坦德": {
   "name": "乌尔坦德",
@@ -4853,133 +5217,92 @@
     "floor": [],
     "toT": {
      "g": [
-      1,
-      1,
+      0,
+      0,
       0,
       0,
       0,
       -1,
       0,
-      4,
+      3,
       1
      ],
-     "total": 17,
-     "net": -2.0,
+     "total": 8,
+     "net": -11.0,
      "gold": 500,
-     "train": 1
+     "train": 1,
+     "seeds": 18,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
-      0,
-      -1,
-      0,
+      1,
       0,
       0,
       0,
       0,
       0,
+      0,
+      1,
       1
      ],
-     "total": -3,
-     "net": 6.6
+     "total": 6,
+     "net": 15.6
     },
-    "rec": false,
+    "rec": true,
     "ruleBlocked": true
    },
    {
-    "cls": "士兵",
-    "tier": "初级",
+    "cls": "天翼兵",
+    "tier": "中级",
     "ok": true,
     "lv": 19,
     "roll": 45.18,
-    "pct": 100,
-    "pctNow": 100,
-    "train": [],
-    "ranks": 0,
-    "used": 5,
-    "used45": 6,
+    "pct": 50,
+    "pctNow": 0,
+    "train": [
+     "飞行术 E→D",
+     "剑术 E→C（任选一项）"
+    ],
+    "ranks": 3,
+    "used": 14,
+    "used45": 21,
     "floor": [],
     "toT": {
      "g": [
-      1,
-      1,
+      0,
+      0,
       0,
       0,
       0,
       2,
       -1,
       0,
-      0
+      1
      ],
-     "total": 6,
-     "net": -3.6,
-     "gold": 300,
-     "train": 0
+     "total": 1,
+     "net": -24.0,
+     "gold": 500,
+     "train": 3,
+     "seeds": 18,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
-      -1,
+      1,
+      0,
+      0,
+      0,
       0,
       1,
+      0,
       1,
-      1,
-      1,
-      1,
-      -1,
-      0
+      1
      ],
-     "total": 9,
-     "net": 9.0
-    },
-    "rec": false,
-    "ruleBlocked": false
-   },
-   {
-    "cls": "飞鸵兵",
-    "tier": "初级",
-    "ok": true,
-    "lv": 19,
-    "roll": 45.18,
-    "pct": 100,
-    "pctNow": 50,
-    "train": [
-     "马术 E→E+"
-    ],
-    "ranks": 1,
-    "used": 3,
-    "used45": 4,
-    "floor": [],
-    "toT": {
-     "g": [
-      1,
-      1,
-      0,
-      0,
-      0,
-      0,
-      -1,
-      1,
-      0
-     ],
-     "total": 5,
-     "net": -7.6,
-     "gold": 300,
-     "train": 1
-    },
-    "after": {
-     "g": [
-      -1,
-      0,
-      1,
-      1,
-      1,
-      1,
-      1,
-      -1,
-      0
-     ],
-     "total": 9,
-     "net": 9.0
+     "total": 8,
+     "net": 17.6
     },
     "rec": false,
     "ruleBlocked": true
@@ -5001,85 +5324,38 @@
     "floor": [],
     "toT": {
      "g": [
-      1,
-      1,
+      0,
+      0,
       0,
       0,
       1,
       -2,
       -1,
-      3,
+      2,
       0
      ],
-     "total": 10,
-     "net": -12.0,
+     "total": 1,
+     "net": -21.0,
      "gold": 500,
-     "train": 2
+     "train": 2,
+     "seeds": 18,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
-      -1,
-      0,
-      1,
-      1,
-      1,
-      1,
-      1,
-      -1,
-      0
-     ],
-     "total": 9,
-     "net": 9.0
-    },
-    "rec": false,
-    "ruleBlocked": true
-   },
-   {
-    "cls": "猎兵",
-    "tier": "初级",
-    "ok": true,
-    "lv": 19,
-    "roll": 45.18,
-    "pct": 100,
-    "pctNow": 0,
-    "train": [
-     "剑术 E→D（任选一项）"
-    ],
-    "ranks": 2,
-    "used": 3,
-    "used45": 4,
-    "floor": [],
-    "toT": {
-     "g": [
-      1,
-      1,
       0,
       0,
-      1,
-      -1,
-      -1,
+      0,
+      0,
+      0,
+      0,
+      0,
       0,
       0
      ],
-     "total": 3,
-     "net": -12.6,
-     "gold": 300,
-     "train": 2
-    },
-    "after": {
-     "g": [
-      -1,
-      0,
-      1,
-      1,
-      1,
-      1,
-      1,
-      -1,
-      0
-     ],
-     "total": 9,
-     "net": 9.0
+     "total": 0,
+     "net": 0.0
     },
     "rec": false,
     "ruleBlocked": true
@@ -5102,136 +5378,38 @@
     "floor": [],
     "toT": {
      "g": [
+      0,
       1,
-      2,
       0,
       0,
       0,
       3,
       -1,
-      0,
+      -1,
       0
      ],
-     "total": 9,
-     "net": -13.0,
+     "total": 0,
+     "net": -22.0,
      "gold": 500,
-     "train": 2
+     "train": 2,
+     "seeds": 18,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
-      0,
-      -1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1
-     ],
-     "total": -3,
-     "net": 6.6
-    },
-    "rec": false,
-    "ruleBlocked": true
-   },
-   {
-    "cls": "斗士",
-    "tier": "初级",
-    "ok": true,
-    "lv": 19,
-    "roll": 45.18,
-    "pct": 100,
-    "pctNow": 0,
-    "train": [
-     "剑术 E→D（任选一项）"
-    ],
-    "ranks": 2,
-    "used": 3,
-    "used45": 4,
-    "floor": [],
-    "toT": {
-     "g": [
-      1,
-      2,
-      0,
-      0,
-      0,
-      -1,
-      -1,
-      0,
-      0
-     ],
-     "total": 1,
-     "net": -14.6,
-     "gold": 300,
-     "train": 2
-    },
-    "after": {
-     "g": [
-      -1,
-      0,
-      1,
-      1,
-      1,
-      1,
-      1,
-      -1,
-      0
-     ],
-     "total": 9,
-     "net": 9.0
-    },
-    "rec": false,
-    "ruleBlocked": true
-   },
-   {
-    "cls": "天翼兵",
-    "tier": "中级",
-    "ok": true,
-    "lv": 19,
-    "roll": 45.18,
-    "pct": 50,
-    "pctNow": 0,
-    "train": [
-     "飞行术 E→D",
-     "剑术 E→C（任选一项）"
-    ],
-    "ranks": 3,
-    "used": 14,
-    "used45": 21,
-    "floor": [],
-    "toT": {
-     "g": [
-      1,
       1,
       0,
       0,
       0,
-      2,
-      -1,
-      1,
-      1
-     ],
-     "total": 10,
-     "net": -15.0,
-     "gold": 500,
-     "train": 3
-    },
-    "after": {
-     "g": [
-      0,
-      -1,
       0,
       0,
       0,
       1,
-      0,
-      0,
       1
      ],
-     "total": -1,
-     "net": 8.6
+     "total": 6,
+     "net": 15.6
     },
     "rec": false,
     "ruleBlocked": true
@@ -5253,35 +5431,38 @@
     "floor": [],
     "toT": {
      "g": [
-      2,
-      2,
+      1,
+      1,
       0,
       0,
       0,
       2,
       -1,
-      0,
+      -1,
       0
      ],
-     "total": 9,
-     "net": -19.0,
+     "total": 0,
+     "net": -28.0,
      "gold": 500,
-     "train": 4
+     "train": 4,
+     "seeds": 18,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
-      0,
-      -1,
-      0,
+      1,
       0,
       0,
       0,
       0,
       0,
+      0,
+      1,
       1
      ],
-     "total": -3,
-     "net": 6.6
+     "total": 6,
+     "net": 15.6
     },
     "rec": false,
     "ruleBlocked": true
@@ -5303,35 +5484,38 @@
     "floor": [],
     "toT": {
      "g": [
-      1,
-      1,
+      0,
+      0,
       0,
       0,
       1,
       0,
       -1,
-      1,
+      0,
       0
      ],
-     "total": 8,
-     "net": -20.0,
+     "total": -1,
+     "net": -29.0,
      "gold": 500,
-     "train": 4
+     "train": 4,
+     "seeds": 18,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
-      -1,
       0,
-      1,
-      1,
-      1,
-      1,
-      1,
-      -1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
       0
      ],
-     "total": 9,
-     "net": 9.0
+     "total": 0,
+     "net": 0.0
     },
     "rec": false,
     "ruleBlocked": true
@@ -5353,86 +5537,142 @@
     "floor": [],
     "toT": {
      "g": [
-      2,
-      2,
+      1,
+      1,
       0,
       0,
       0,
       1,
       -1,
-      0,
+      -1,
       0
      ],
-     "total": 7,
-     "net": -21.0,
+     "total": -2,
+     "net": -30.0,
      "gold": 500,
-     "train": 4
+     "train": 4,
+     "seeds": 18,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
-      0,
-      -1,
-      0,
+      1,
       0,
       0,
       0,
       0,
       0,
+      0,
+      1,
       1
      ],
-     "total": -3,
-     "net": 6.6
+     "total": 6,
+     "net": 15.6
     },
     "rec": false,
     "ruleBlocked": true
    },
    {
-    "cls": "骑甲鸵兵",
-    "tier": "中级",
+    "cls": "士兵",
+    "tier": "初级",
     "ok": true,
     "lv": 19,
     "roll": 45.18,
-    "pct": 50,
-    "pctNow": 0,
-    "train": [
-     "马术 E→D",
-     "斧术 E→C（任选一项）"
-    ],
-    "ranks": 3,
-    "used": 12,
-    "used45": 17,
+    "pct": 100,
+    "pctNow": 100,
+    "train": [],
+    "ranks": 0,
+    "used": 5,
+    "used45": 6,
     "floor": [],
     "toT": {
      "g": [
-      1,
+      0,
+      0,
+      0,
+      0,
+      0,
       2,
       -1,
-      0,
-      0,
-      3,
-      -2,
-      1,
+      -1,
       0
      ],
-     "total": 3,
-     "net": -22.0,
-     "gold": 500,
-     "train": 3
+     "total": -3,
+     "net": -12.6,
+     "gold": 300,
+     "train": 0,
+     "seeds": 18,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
       0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": false
+   },
+   {
+    "cls": "飞鸵兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 100,
+    "pctNow": 50,
+    "train": [
+     "马术 E→E+"
+    ],
+    "ranks": 1,
+    "used": 3,
+    "used45": 4,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
       -1,
       0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1
+      0
      ],
-     "total": -3,
-     "net": 6.6
+     "total": -4,
+     "net": -16.6,
+     "gold": 300,
+     "train": 1,
+     "seeds": 18,
+     "endA": 35,
+     "endB": 36
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0
     },
     "rec": false,
     "ruleBlocked": true
@@ -5454,136 +5694,38 @@
     "floor": [],
     "toT": {
      "g": [
+      0,
       1,
-      2,
       -1,
       0,
       1,
       2,
       -2,
-      1,
+      0,
       0
      ],
-     "total": 4,
-     "net": -24.0,
+     "total": -5,
+     "net": -33.0,
      "gold": 500,
-     "train": 4
+     "train": 4,
+     "seeds": 18,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
+      1,
       0,
-      -1,
       0,
       0,
       1,
       0,
       0,
-      0,
+      1,
       1
      ],
-     "total": 0,
-     "net": 9.6
-    },
-    "rec": false,
-    "ruleBlocked": true
-   },
-   {
-    "cls": "轻骑兵",
-    "tier": "中级",
-    "ok": true,
-    "lv": 19,
-    "roll": 45.18,
-    "pct": 50,
-    "pctNow": 0,
-    "train": [
-     "马术 E→D",
-     "剑术 E→C（任选一项）"
-    ],
-    "ranks": 3,
-    "used": 12,
-    "used45": 17,
-    "floor": [],
-    "toT": {
-     "g": [
-      1,
-      2,
-      -1,
-      0,
-      0,
-      2,
-      -2,
-      1,
-      0
-     ],
-     "total": 1,
-     "net": -24.0,
-     "gold": 500,
-     "train": 3
-    },
-    "after": {
-     "g": [
-      0,
-      -1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1
-     ],
-     "total": -3,
-     "net": 6.6
-    },
-    "rec": false,
-    "ruleBlocked": true
-   },
-   {
-    "cls": "剑客",
-    "tier": "中级",
-    "ok": true,
-    "lv": 19,
-    "roll": 45.18,
-    "pct": 50,
-    "pctNow": 0,
-    "train": [
-     "剑术 E→C"
-    ],
-    "ranks": 4,
-    "used": 13,
-    "used45": 18,
-    "floor": [],
-    "toT": {
-     "g": [
-      1,
-      2,
-      -1,
-      0,
-      1,
-      0,
-      -2,
-      1,
-      0
-     ],
-     "total": 0,
-     "net": -28.0,
-     "gold": 500,
-     "train": 4
-    },
-    "after": {
-     "g": [
-      0,
-      -1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1
-     ],
-     "total": -3,
-     "net": 6.6
+     "total": 9,
+     "net": 18.6
     },
     "rec": false,
     "ruleBlocked": true
@@ -5606,40 +5748,349 @@
     "floor": [],
     "toT": {
      "g": [
+      0,
       1,
-      2,
       -1,
       0,
       1,
       2,
       -2,
-      1,
+      0,
       0
      ],
-     "total": 4,
-     "net": -30.0,
+     "total": -5,
+     "net": -39.0,
      "gold": 500,
-     "train": 6
+     "train": 6,
+     "seeds": 18,
+     "endA": 35,
+     "endB": 36
+    },
+    "after": {
+     "g": [
+      2,
+      0,
+      -1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      1
+     ],
+     "total": 8,
+     "net": 17.6
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "猎兵",
+    "tier": "初级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→D（任选一项）"
+    ],
+    "ranks": 2,
+    "used": 3,
+    "used45": 4,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      1,
+      -1,
+      -1,
+      -1,
+      0
+     ],
+     "total": -6,
+     "net": -21.6,
+     "gold": 300,
+     "train": 2,
+     "seeds": 18,
+     "endA": 35,
+     "endB": 36
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "骑甲鸵兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 50,
+    "pctNow": 0,
+    "train": [
+     "马术 E→D",
+     "斧术 E→C（任选一项）"
+    ],
+    "ranks": 3,
+    "used": 12,
+    "used45": 17,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      -1,
+      0,
+      0,
+      3,
+      -2,
+      0,
+      0
+     ],
+     "total": -6,
+     "net": -31.0,
+     "gold": 500,
+     "train": 3,
+     "seeds": 18,
+     "endA": 35,
+     "endB": 36
     },
     "after": {
      "g": [
       1,
-      -1,
-      -1,
+      0,
+      0,
+      0,
+      0,
+      0,
       0,
       1,
-      1,
-      0,
-      0,
       1
      ],
-     "total": -1,
-     "net": 8.6
+     "total": 6,
+     "net": 15.6
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "斗士",
+    "tier": "初级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 100,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→D（任选一项）"
+    ],
+    "ranks": 2,
+    "used": 3,
+    "used45": 4,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      -1,
+      -1,
+      -1,
+      0
+     ],
+     "total": -8,
+     "net": -23.6,
+     "gold": 300,
+     "train": 2,
+     "seeds": 18,
+     "endA": 35,
+     "endB": 36
+    },
+    "after": {
+     "g": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "total": 0,
+     "net": 0.0
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "轻骑兵",
+    "tier": "中级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 50,
+    "pctNow": 0,
+    "train": [
+     "马术 E→D",
+     "剑术 E→C（任选一项）"
+    ],
+    "ranks": 3,
+    "used": 12,
+    "used45": 17,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      -1,
+      0,
+      0,
+      2,
+      -2,
+      0,
+      0
+     ],
+     "total": -8,
+     "net": -33.0,
+     "gold": 500,
+     "train": 3,
+     "seeds": 18,
+     "endA": 35,
+     "endB": 36
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1
+     ],
+     "total": 6,
+     "net": 15.6
+    },
+    "rec": false,
+    "ruleBlocked": true
+   },
+   {
+    "cls": "剑客",
+    "tier": "中级",
+    "ok": true,
+    "lv": 19,
+    "roll": 45.18,
+    "pct": 50,
+    "pctNow": 0,
+    "train": [
+     "剑术 E→C"
+    ],
+    "ranks": 4,
+    "used": 13,
+    "used45": 18,
+    "floor": [],
+    "toT": {
+     "g": [
+      0,
+      1,
+      -1,
+      0,
+      1,
+      0,
+      -2,
+      0,
+      0
+     ],
+     "total": -9,
+     "net": -37.0,
+     "gold": 500,
+     "train": 4,
+     "seeds": 18,
+     "endA": 35,
+     "endB": 36
+    },
+    "after": {
+     "g": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1
+     ],
+     "total": 6,
+     "net": 15.6
     },
     "rec": false,
     "ruleBlocked": true
    }
   ],
-  "recommended": []
+  "recommended": [
+   "牧师"
+  ],
+  "recRow": {
+   "toT": {
+    "g": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     -1,
+     0,
+     3,
+     1
+    ],
+    "total": 8,
+    "net": -11.0,
+    "gold": 500,
+    "train": 1,
+    "seeds": 18,
+    "endA": 35,
+    "endB": 36
+   },
+   "after": {
+    "g": [
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     1
+    ],
+    "total": 6,
+    "net": 15.6
+   }
+  }
  }
 }

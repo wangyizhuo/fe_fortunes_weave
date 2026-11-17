@@ -490,9 +490,9 @@ function viewOpts() {
   const O = DATA.options || {};
   const cards = CH.filter(c => !focus || slug(c) === focus).map(c => {
     const o = O[c.name]; if (!o) return "";
-    const diffCell = d => d ? `<td>${esc(gtxt(d.g))}</td><td class="n">${sgn(d.total)}</td><td class="n ${d.net > 0 ? "up" : d.net < 0 ? "dn" : ""}">${sgn(d.net)}</td>` : `<td>—</td><td class="n">—</td><td class="n">—</td>`;
+    const diffCell = d => d ? `<td>${esc(gtxt(d.g))}</td><td class="n">${sgn(psum(d.g))}</td><td class="n ${d.total > 0 ? "up" : d.total < 0 ? "dn" : ""}">${sgn(d.total)}</td>` : `<td>—</td><td class="n">—</td><td class="n">—</td>`;
     const rows = o.options.map(x => x.ok ? `<tr${x.rec ? ' class="cur"' : ""}><td><b>${esc(x.cls)}</b> <small>${esc(x.tier || "")}</small>${x.rec ? ' <span class="rec r1">现在推荐</span>' : ""}${x.ruleBlocked ? ' <span class="rec r3">规则默认不练</span>' : ""}</td>
-      <td class="n">Lv${x.lv}</td><td class="n">${x.roll}%</td><td class="n">${x.pct ?? "—"}%${x.ranks ? `<br><small>不练 ${x.pctNow ?? "—"}%</small>` : ""}</td>
+      <td class="n">Lv${x.lv}</td><td class="n">${x.roll}%</td><td class="n">${o.trainAllowed ? `${x.pct ?? "—"}%${x.ranks ? `<br><small>不练 ${x.pctNow ?? "—"}%</small>` : ""}` : `${x.pctNow ?? "—"}%${x.ranks ? `<br><small>练后 ${x.pct ?? "—"}%</small>` : ""}`}</td>
       <td class="note">${x.train.length ? esc(x.train.join("、")) : "—"}${x.floor.length ? `<br>保底 ${esc(x.floor.join("、"))}` : ""}</td>
       <td class="n">${x.used}/${x.used45}</td>
       ${diffCell(x.toT)}<td class="n">${sgn(x.toT.gold)}G</td>${diffCell(x.after)}</tr>`
@@ -500,9 +500,9 @@ function viewOpts() {
     const rr = o.recRow ? `<tr class="sum"><td>现在推荐的组合：${esc(o.recommended.join(" + "))}</td><td colspan="5"></td>${diffCell(o.recRow.toT)}<td class="n">${sgn(o.recRow.toT.gold)}G</td>${diffCell(o.recRow.after)}</tr>` : "";
     return `<details class="char" data-slug="${slug(c)}"${focus ? " open" : ""}><summary><h3>${esc(c.name)}</h3><span>${o.tier} · Lv${o.level}→${o.target} · 已有 ${esc(o.owned.join("、"))}${o.required.length ? ` · 必考 ${esc(o.required.join("、"))}（已算进基准）` : ""}${o.recommended.length ? ` · 现在推荐 ${esc(o.recommended.join("、"))}` : " · 现在推荐：不考新职业"}</span></summary>
       <div class="sec"><div class="scroll"><table><tr><th rowspan="2">职业</th><th class="n" rowspan="2">考的时机</th><th class="n" rowspan="2">判定值</th><th class="n" rowspan="2">成功率</th><th rowspan="2">要练 / 保底</th><th class="n" rowspan="2">用它升级<br><small>到目标/到45</small></th><th colspan="4" class="grp">到 Lv${o.target}（和不考比）</th><th colspan="3" class="grp">Lv${o.target}→45 另外的影响</th></tr>
-      <tr><th>能力</th><th class="n">加权分</th><th class="n">净值</th><th class="n">金币</th><th>能力</th><th class="n">加权分</th><th class="n">净值</th></tr>${rows}${rr}</table></div></div></details>`;
+      <tr><th>能力</th><th class="n">点数</th><th class="n">加权分</th><th class="n">金币</th><th>能力</th><th class="n">点数</th><th class="n">加权分</th></tr>${rows}${rr}</table></div></div></details>`;
   }).join("");
-  return `<p class="lede">每个可考职业单独算：一定考到它、其余照规则走，和「只考必考职业」的路线比。净值 = 加权分 + 保底分 − 手形金币折分 − 训练扣分（每段扣分按档位，P0 最低）。清单里所有人都按「先练够技能」算，规则默认不练的标出来；成功率下面小字是不练的估计。</p><div class="grid one">${cards}</div>` + notesBox([
+  return `<p class="lede">每个可考职业单独算：一定考到它、其余照规则走，和「只考必考职业」的路线比。点数、加权分、金币、要练的技能分开列，不合成一个数（Yizhuo 11-17）。点数和加权分按「先练够技能」算；P1/P2 默认不练，成功率写不练的估计，小字是练后的。</p><div class="grid one">${cards}</div>` + notesBox([
     "<b>考的时机</b>：规划器替这个职业挑的第一个能考过的种子；判定值低于游戏显示的成功率才能过。",
     "<b>Lv目标→45 另外的影响</b>：到 Lv45 的差 − 到目标级的差（不含上级职业）。",
     "多选几个职业时效果不是简单相加，挑好以后告诉我，我按你的组合重算整条路线。"]);
@@ -695,16 +695,16 @@ function decBox() {
 }
 function examTable(c) {
   const eb = c.hist && c.hist.exam_benefit; if (!eb || !eb.length) return `<p class="txt">推荐路线不考试。</p>${midTable(c)}`;
-  return `<div class="scroll"><table><tr><th>考试</th><th class="n">判定值</th><th>到目标级 比不考它的最好路线</th><th class="n">点数</th><th class="n">加权分</th><th class="n">多花</th><th class="n">净值差</th></tr>${eb.map(e => `<tr><td>${esc(e.cls)}${e.req ? " · 必考" : ""}</td><td class="n">${e.roll}%</td><td>${esc(gtxt(e.diff))}${e.alt_exams ? `<span class="hint">（对比路线：${esc(e.alt_exams.join("、") || "不考")}）</span>` : ""}</td><td class="n">${sgn(psum(e.diff))}</td><td class="n">${sgn(e.wdiff)}</td><td class="n">${e.dgold == null ? "—" : e.dgold + "G"}</td><td class="n ${e.net > 0 ? "up" : e.net < 0 ? "dn" : ""}">${e.net == null ? "—" : sgn(e.net)}</td></tr>`).join("")}</table></div>
+  return `<div class="scroll"><table><tr><th>考试</th><th class="n">判定值</th><th>到目标级 比不考它的最好路线</th><th class="n">点数</th><th class="n">加权分</th><th class="n">多花</th></tr>${eb.map(e => `<tr><td>${esc(e.cls)}${e.req ? " · 必考" : ""}</td><td class="n">${e.roll}%</td><td>${esc(gtxt(e.diff))}${e.alt_exams ? `<span class="hint">（对比路线：${esc(e.alt_exams.join("、") || "不考")}）</span>` : ""}</td><td class="n">${sgn(psum(e.diff))}</td><td class="n">${sgn(e.wdiff)}</td><td class="n">${e.dgold == null ? "—" : e.dgold + "G"}</td></tr>`).join("")}</table></div>
   <p class="hint" style="margin:4px 0 0">考试 0～4 次的最高加权分：${c.hist.plan_scores.map(v => v ?? "—").join(" / ")}。</p>${midTable(c)}`;
 }
 function midTable(c) {   // 11-08 晚（规则式）：硬加一个中级考试，净值变多少
   const mg = c.midGain || [];
-  const head = `<h4 style="margin:12px 0 4px">多转一个中级值多少</h4><p class="txt">现在要转的职业：${esc((c.targets || []).join("、") || "无")}；手形 ${c.planGold ?? 0}G，净值 ${c.planNet ?? "—"}（加权分 − 金币 ÷ 每分 ${c.gpp}G）。</p>`;
+  const head = `<h4 style="margin:12px 0 4px">多转一个中级值多少</h4><p class="txt">现在要转的职业：${esc((c.targets || []).join("、") || "无")}；手形 ${c.planGold ?? 0}G。</p>`;
   if (!mg.length) return head + `<p class="hint" style="margin:4px 0 0">没有能转过、而且会用来升级的其他中级职业。</p>`;
-  const rows = mg.map(r => `<tr><td>${esc(r.cls)}</td><td class="n">${r.used}</td><td class="note">${esc(r.diff || "")}</td><td class="n">${r.dpts == null ? "—" : sgn(r.dpts)}</td><td class="n">${r.total}</td><td class="n">${sgn(r.dsc)}</td><td class="n">${r.gold}G</td><td class="n ${r.dnet > 0 ? "up" : "dn"}"><b>${r.dnet > 0 ? "+" : ""}${r.dnet}</b></td><td class="note">${r.dnet > 0 ? "按净值更好，但规划没选（逐个加时被别的职业挡住了），值得看看" : "不划算"}</td></tr>`).join("");
-  return head + `<div class="scroll"><table><tr><th>多转</th><th class="n">用它升几级</th><th>能力差</th><th class="n">点数差</th><th class="n">加权分</th><th class="n">比现在</th><th class="n">手形</th><th class="n">净值变化</th><th>说明</th></tr>${rows}</table></div>
-  <p class="hint" style="margin:4px 0 0">把这个中级硬加进「要转的职业」，按同样的规则重新走一遍；净值 = 加权分 − 手形金币 ÷ 每分金币。</p>`;
+  const rows = mg.map(r => `<tr><td>${esc(r.cls)}</td><td class="n">${r.used}</td><td class="note">${esc(r.diff || "")}</td><td class="n">${r.dpts == null ? "—" : sgn(r.dpts)}</td><td class="n">${r.total}</td><td class="n">${sgn(r.dsc)}</td><td class="n">${r.gold}G</td><td class="note">${r.dnet > 0 ? "规划综合金币后觉得更好，但没选（逐个加时被别的职业挡住了），值得看看" : "规划综合金币后不选"}</td></tr>`).join("");
+  return head + `<div class="scroll"><table><tr><th>多转</th><th class="n">用它升几级</th><th>能力差</th><th class="n">点数差</th><th class="n">加权分</th><th class="n">比现在</th><th class="n">手形</th><th>说明</th></tr>${rows}</table></div>
+  <p class="hint" style="margin:4px 0 0">把这个中级硬加进「要转的职业」，按同样的规则重新走一遍；金币单独列。</p>`;
 }
 // 11-11：推荐职业和别的同级职业加点一样时，全部列出
 const eqName = row => (row.choice === row.s.cls && row.s.eq && row.s.eq.length > 1) ? [row.s.cls, ...row.s.eq.filter(k => k !== row.s.cls)].join(" / ") : row.choice;
@@ -724,11 +724,10 @@ function fullList(c, w) {
 function choiceTable(c) {
   const o = c.choices; if (!o || !o.length) return "";
   const cls = r => r.startsWith("推荐") ? "r0" : r === "建议" ? "r1" : r === "可选" ? "r2" : "r3";
-  return `<div class="scroll"><table class="cho"><tr><th>选择</th><th>成本</th><th class="n">点数</th><th class="n">加权分</th><th class="n">净值差</th><th>能力变化（和现在的路线比）</th><th>建议</th></tr>${o.map(x => `<tr class="${x.cur ? "cur" : ""}">
+  return `<div class="scroll"><table class="cho"><tr><th>选择</th><th>成本</th><th class="n">点数</th><th class="n">加权分</th><th>能力变化（和现在的路线比）</th><th>建议</th></tr>${o.map(x => `<tr class="${x.cur ? "cur" : ""}">
     <td class="note" style="color:var(--ink)">${esc(x.title)}</td><td class="note">${esc(x.cost)}</td>
     <td class="n ${x.kind === "risk" ? "" : x.pts > 0 ? "up" : x.pts < 0 ? "dn" : ""}">${x.kind === "risk" ? (x.pts ? "保住 " + x.pts : "—") : x.cur ? x.tpts : sgn(x.pts)}</td>
     <td class="n ${x.kind === "risk" ? "" : x.gain > 0 ? "up" : x.gain < 0 ? "dn" : ""}">${x.kind === "risk" ? (x.gain ? "保住 " + x.gain : "—") : x.cur ? x.total : sgn(x.gain)}</td>
-    <td class="n ${x.dnet > 0 ? "up" : x.dnet < 0 ? "dn" : ""}">${x.cur ? "—" : x.dnet == null ? "—" : sgn(x.dnet)}</td>
     <td class="note">${esc(x.diff)}</td><td class="note"><span class="rec ${cls(x.rec)}">${esc(x.rec)}</span> ${esc(x.why)}</td></tr>`).join("")}</table></div>`;
 }
 function changesHtml(c) {

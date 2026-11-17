@@ -131,7 +131,7 @@ for name in ORDER:
             opts.append({"kind": "risk", "title": f"{e['cls']}考试：先练技能再考", "cost": (f"{g[0]}：{g[1]}；{g[2]}" if g else "练技能"),
                          "gain": loss, "pts": sum(gdiff(bt, tot(best))), "diff": f"不练直接考：成功率{RISKY[key]}，判定值 {e['roll']}%；挂了以后最好的路线到 Lv35：点数 {sum(gdiff(tot(best), bt)):+d}、加权分 {-loss:+d}（{gtxt(gdiff(tot(best), bt))}）",
                          "total": base.total, "rec": "建议" if loss >= 8 else "可选", "dnet": dnet,
-                         "why": f"不练直接考会挂：少 {loss} 分、净值 {dnet:+}" + ("，值得先练" if loss >= 8 else "，损失不大"), "cur": False})
+                         "why": f"不练直接考会挂：少 {loss} 加权分" + ("，值得先练" if loss >= 8 else "，损失不大"), "cur": False})
         elif key in GRIND:
             g = GRIND[key]
             opts.append({"kind": "risk", "title": f"{e['cls']}考试：确认技能", "cost": f"{g[0]}：{g[1]}；{g[2]}", "gain": 0, "pts": 0,
@@ -181,10 +181,10 @@ for name in ORDER:
             o["dnet"] = round(o["gain"] - (o["money"] - bm) / gpp, 1)
             if o["kind"] == "budget" and not o["cur"]:
                 o["rec"] = "可选" if o["dnet"] > 0 else "不建议"
-                o["why"] = f"加权分 {o['gain']:+d}，多花 {o['money'] - bm:+d}G，净值 {o['dnet']:+.1f}"
+                o["why"] = f"加权分 {o['gain']:+d}，金币 {o['money'] - bm:+d}G"
             elif o["kind"] == "grind":   # 11-11：和其他选项一样按净值给建议（以前是旧的「多 8 分」门槛）
                 o["rec"] = "可选" if o["dnet"] > 0 else "不建议"
-                o["why"] += f"；多花 {o['money'] - bm:+d}G，净值 {o['dnet']:+.1f}（还没扣练技能的回合）"
+                o["why"] += f"；金币 {o['money'] - bm:+d}G（练技能的回合另算）"
         if o.get("cur"):
             o["why"] = "按跳过条件逐级走出来的路线"
     out[name] = {"base": base.total, "k": k, "opts": opts}

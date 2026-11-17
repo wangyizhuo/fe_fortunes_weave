@@ -4,17 +4,17 @@
 改数据请改 `levelup/rng/` 下的源文件（current_stats.json、run_plans.py 等，见 docs/ARCHITECTURE.md）。
 `python3 levelup/rng/checks.py` 的 D5～D8 会检查这里是不是最新、种子链是否连续、能力和技能是否合理。
 
-| 角色 | 优先级 | 规划起点 | 截图职业 | Lv35 加权分 | Lv45 加权分 |
+| 角色 | 优先级 | 规划起点 | 截图职业 | 到目标级 加权分 | Lv45 加权分 |
 |---|---|---|---|---|---|
 | [迪托利希](characters/迪托利希.md) | P0 | Lv25 | 剑客 | 256 | 342 |
-| [法毕欧](characters/法毕欧.md) | P0 | Lv22 | 诅咒师 | 194 | 307 |
-| [艾丝梅拉尔达](characters/艾丝梅拉尔达.md) | P0 | Lv21 | 天翼兵 | 265 | 423 |
-| [米迦艾拉](characters/米迦艾拉.md) | P0 | Lv22 | 斗士 | 263 | 361 |
-| [杨界](characters/杨界.md) | P1 | Lv21 | 诅咒师 | 228 | 393 |
+| [法毕欧](characters/法毕欧.md) | P0 | Lv22 | 诅咒师 | 194 | 308 |
+| [艾丝梅拉尔达](characters/艾丝梅拉尔达.md) | P0 | Lv21 | 天翼兵 | 261 | 423 |
+| [米迦艾拉](characters/米迦艾拉.md) | P0 | Lv22 | 斗士 | 251 | 361 |
+| [杨界](characters/杨界.md) | P1 | Lv21 | 诅咒师 | 210 | 371 |
 | [伊欧](characters/伊欧.md) | P0 | Lv23 | 战车兵 | 257 | 374 |
-| [奇洛伊卡](characters/奇洛伊卡.md) | P1 | Lv17 | 猎兵 | 242 | 378 |
-| [努蒂奴](characters/努蒂奴.md) | P2 | Lv17 | 飞鸵兵 | 217 | 336 |
-| [乌尔坦德](characters/乌尔坦德.md) | P2 | Lv18 | 诅咒师 | 235 | 397 |
+| [奇洛伊卡](characters/奇洛伊卡.md) | P1 | Lv17 | 猎兵 | 230 | 368 |
+| [努蒂奴](characters/努蒂奴.md) | P2 | Lv17 | 飞鸵兵 | 227 | 341 |
+| [乌尔坦德](characters/乌尔坦德.md) | P2 | Lv18 | 诅咒师 | 252 | 385 |
 
 - `characters/<角色>.json / .md`：种子、观星记录（过去的成长）、等级、职业、能力、技能、权重、规划、吃饭喜好
 - `classes.json`：职业数据和可考清单；`rules.json`：优先级、跳过条件等规则常数

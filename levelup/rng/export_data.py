@@ -135,7 +135,7 @@ def to_md(c):
     L += ["", "## 规划"]
     p = c["规划"]["到Lv35"]
     if p:
-        L.append(f"- 到 Lv35：加权分 {p['加权分']}，点数 {p['点数']}，净值 {p['净值']}，手形金币 {p['手形金币']}G")
+        L.append(f"- 到 Lv{p.get('to', 35)}：点数 {p['点数']}，加权分 {p['加权分']}；手形金币 {p['手形金币']}G；训练 {p.get('训练段', 0)} 段")
         L.append(f"  - 路线：{p['路线']}")
     p = c["规划"]["到Lv45"]
     if p:
@@ -170,7 +170,7 @@ def build():
         "由 `levelup/rng/export_data.py` 生成，`bash levelup/rng/build.sh` 最后会自动更新；",
         "改数据请改 `levelup/rng/` 下的源文件（current_stats.json、run_plans.py 等，见 docs/ARCHITECTURE.md）。",
         "`python3 levelup/rng/checks.py` 的 D5～D8 会检查这里是不是最新、种子链是否连续、能力和技能是否合理。", "",
-        "| 角色 | 优先级 | 规划起点 | 截图职业 | Lv35 加权分 | Lv45 加权分 |", "|---|---|---|---|---|---|", *index, "",
+        "| 角色 | 优先级 | 规划起点 | 截图职业 | 到目标级 加权分 | Lv45 加权分 |", "|---|---|---|---|---|---|", *index, "",
         "- `characters/<角色>.json / .md`：种子、观星记录（过去的成长）、等级、职业、能力、技能、权重、规划、吃饭喜好",
         "- `classes.json`：职业数据和可考清单；`rules.json`：优先级、跳过条件等规则常数",
         "- 装备、友好度：目前程序和表格里都没有，字段留空（null）待补", ""])
