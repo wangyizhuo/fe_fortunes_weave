@@ -277,7 +277,8 @@ class Planner:
         cur_str = self.str_start
         acts, notes, step, done, gold = [], {}, 0, 0, 0
         reasons = notes["why"] = {}   # 每一步为什么这样走（检查和页面用）：step -> {s, avg15, c1, c2, want_skip, pick}
-        while done < self.n_levels and step < 400:
+        budget = getattr(self, "seed_budget", None)   # 11-17 Yizhuo：按用掉的乱数个数比，不按等级
+        while (done < self.n_levels if budget is None else step < budget) and step < 400:
             lv = self.level + done
             if step < len(forced):
                 a, c = forced[step]
@@ -420,6 +421,48 @@ class Planner:
         return total + self.floor_value(acts) - gold / gpp - self.train_ranks(acts) * self.TRAIN_PTS_PER_RANK
 
     def rule_plan(self):
+        """11-17 Yizhuo：比较路线要按「用掉同样多的乱数」比，不按到同一级比（考试/跳过都会用掉一个乱数，
+        按等级比时多考一次的路线会多算/少算边界上的一个种子）。做法：先照旧规划到目标级，记下用掉几个乱数 S；
+        再在「前 S 个乱数」这个窗口里挑要考的职业；窗口跟着选出的路线更新，最多 3 轮；最后把选好的职业照常走到目标级。"""
+        if not getattr(self, "equal_seeds", False):
+            self.seed_budget = None
+            return self._rule_plan()
+        self.seed_budget = None
+        pl = self._rule_plan()
+        seen = set()
+        for _ in range(3):
+            if pl is None:
+                break
+            S = len(pl.raw_actions)
+            if S in seen:
+                break
+            seen.add(S)
+            self.seed_budget = S
+            sel = self._rule_plan()
+            self.seed_budget = None
+            if sel is None:
+                break
+            pl = self._rule_plan(fixed=list(sel.targets), mid=getattr(self, "mid_trained", None))
+        self.window = len(pl.raw_actions) if pl else None
+        self.seed_budget = None
+        mt = getattr(self, "mid_train", None) or {}
+        pt = getattr(self, "_mid_patched", set())
+        self.mid_trained = next((c for c in (pl.targets if pl else []) if c in pt), None)
+        return pl
+
+    def window_value(self, targets, S=None, must=()):
+        """同一个乱数窗口（前 S 个）里，按 targets 走的 (动作, 加权分, 金币, 净值)。"""
+        sv = getattr(self, "seed_budget", None)
+        self.seed_budget = S or getattr(self, "window", None)
+        try:
+            r = self.rule_run(list(targets), tuple(must))
+        finally:
+            self.seed_budget = sv
+        if r is None:
+            return None
+        return r[0], r[2], r[3], self.plan_net(r[0], r[2], r[3])
+
+    def _rule_plan(self, fixed=None, mid=None):
         gpp = getattr(self, "gold_per_pt", None) or 62.5
         base_t = list(dict.fromkeys(self.required))
         run = self.rule_run
@@ -431,7 +474,13 @@ class Planner:
         cur = run(targets)
         cands = [c for c in self.exam_options if c not in targets]
         ac = getattr(self, "adv_cap", None)
-        while True:
+        if fixed is not None:
+            targets = list(fixed)
+            cur = run(targets)
+            if cur is None or not all(got(cur, c) for c in targets if c not in base_t):
+                cur = run(targets, tuple(targets))
+            cands = []
+        while fixed is None:
             best, bv = None, net(cur)
             for c in cands:
                 if c in targets:
@@ -462,7 +511,7 @@ class Planner:
                 continue
             targets.append(best[0]); cur = best[1]
         self.mid_missing = False
-        if getattr(self, "require_mid", False) and not any(
+        if fixed is None and getattr(self, "require_mid", False) and not any(
                 _TIER_RANK.get(_TIER.get(c, ""), 0) >= 2 and got(cur, c) for c in targets):
             # 至少转进一个新的中级（并用它升级）：净值最高的那个，就算亏也加
             opts = []
@@ -473,11 +522,49 @@ class Planner:
                         r = run(tg, (c,))
                         if got(r, c):
                             opts.append((net(r), c, r, tg))
+            mt = getattr(self, "mid_train", None) or {}
+            if not opts and mt:
+                # 11-17 Yizhuo：每人都要考进中级。不练技能的档位（P1/P2）考不过任何中级时，
+                # 只为这一个中级破例练技能（练的段数照样按本档每段扣分），挑净值最高的那个
+                sv_req, sv_rk, sv_ch = dict(self.exam_req), dict(self.exam_train_ranks or {}), dict(self.exam_chance or {})
+                for c, (rec, rk) in mt.items():
+                    if c in targets:
+                        continue
+                    self.exam_req = dict(sv_req, **{c: (rec, 0)})
+                    self.exam_train_ranks = dict(sv_rk, **{c: rk})
+                    self.exam_chance = {k: v for k, v in sv_ch.items() if k != c}
+                    for tg in (targets + [c], list(base_t) + [c]):
+                        r = run(tg, (c,))
+                        if got(r, c):
+                            opts.append((net(r), c, r, tg))
+                self.exam_req, self.exam_train_ranks, self.exam_chance = sv_req, sv_rk, sv_ch
+                if opts:
+                    v, c, r, tg = max(opts, key=lambda x: x[0])
+                    rec, rk = mt[c]
+                    self.exam_req = dict(sv_req, **{c: (rec, 0)})
+                    self.exam_train_ranks = dict(sv_rk, **{c: rk})
+                    self.exam_chance = {k: v for k, v in sv_ch.items() if k != c}
+                    self.mid_trained = c
+                    self._mid_patched = getattr(self, "_mid_patched", set()) | {c}
             if opts:
                 v, c, r, tg = max(opts, key=lambda x: x[0])
                 targets = list(tg); cur = r
             else:
                 self.mid_missing = True
+        if fixed is None and cur is not None:
+            # 11-17：贪心先加的职业，后来别的职业加进来后可能已经没用了（米迦：猎兵+弓箭手 和 只考弓箭手 同分同金币）。
+            # 去掉不减分的那个——多拿一个职业不是好事（Yizhuo 11-16）
+            changed = True
+            while changed:
+                changed = False
+                for c in [t for t in targets if t not in base_t]:
+                    rest = [t for t in targets if t != c]
+                    r = run(rest)
+                    if r is not None and all(got(r, x) for x in rest if x not in base_t) and net(r) >= net(cur) - 1e-9 \
+                            and (not getattr(self, "require_mid", False) or any(_TIER_RANK.get(_TIER.get(x, ""), 0) == 2 and got(r, x) for x in rest)
+                                 or not any(_TIER_RANK.get(_TIER.get(x, ""), 0) == 2 and got(cur, x) for x in targets)):
+                        targets, cur, changed = rest, r, True
+                        break
         if cur is None:
             return None
         acts, notes, total, gold, pend = cur

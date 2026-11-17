@@ -356,11 +356,21 @@ SKIP_RULE = {"P0": {"cap": 8, "pct": 0.35, "or": True}, "other": {"cap": 8, "pct
 NO_SKIP_SEEDS = {"迪托利希": {2066637942, 1518001801}}   # 11-11 Yizhuo：迪 Lv25 那级（力 技 幸 魅）也保留   # 11-09 Yizhuo：迪 Lv31 那个种子（魔 防 魔防 幸 魅）保留不跳（按种子记，不按等级）
 
 
+EQUAL_SEEDS = True
+
+
+def _TIER_RANK_OF(c):
+    from planner import _TIER, _TIER_RANK
+    return _TIER_RANK.get(_TIER.get(c, ""), 0)
+
+
 def make_planner(name, target=None):
     seed, level = current_state(name)
     p = _mk(name, seed, level, target)
     p.confident = set(CONFIDENT.get(name, []))
-    p.require_mid = False   # 11-11 Yizhuo 取消「每个角色都要考进一个新中级职业」（原 11-06 规则）
+    # 11-17 Yizhuo：所有角色都要考到中级职业（上级不一定）。已经有中级职业的人算满足（迪 剑客、艾丝 天翼兵、伊欧 战车兵/轻骑兵）
+    p.require_mid = not any(_TIER_RANK_OF(c) >= 2 for c in OWNED[name])
+    p.equal_seeds = EQUAL_SEEDS   # 11-17 Yizhuo：比较按用掉同样多的乱数
     tier = "P0" if name in P0 else "P2" if name in P2 else "other"
     p.thresholds = THRESHOLDS[tier]
     p.gold_per_pt, p.permit_gold = GOLD_PER_PT[tier], dict(PERMIT_GOLD)
@@ -392,6 +402,11 @@ def make_planner(name, target=None):
         p.exam_train_ranks = {c: r[1] for c, r in p.exam_req.items() if r[1] > 0}   # 要练几段（训练成本按段算）
         p.exam_req = {c: (r[0], 0) for c, r in p.exam_req.items()}
         p.exam_chance = {c: v for c, v in (p.exam_chance or {}).items() if c not in p.exam_train}
+    # 不练技能的档位：考不过任何中级时，只为这个中级破例练（planner.rule_plan 用）
+    p.mid_train = {}
+    if p.require_mid and not TRAIN_ALLOWED[tier_of(name)]:
+        p.mid_train = {c: (r[0], r[1]) for c, r in p.exam_req.items()
+                       if _TIER_RANK_OF(c) == 2 and r[1] > 0}
     tb = TIEBREAK.get(name, [])
     if tb:
         p.tiebreak = list(tb)

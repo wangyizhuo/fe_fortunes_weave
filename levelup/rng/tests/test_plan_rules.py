@@ -5,6 +5,7 @@ import pytest
 from run_plans import make_planner, EXAM_OPTIONS, PERMIT_GOLD
 from run_plans import TARGET, MAX_EXAMS
 from planner import plan_all
+from planner import _TIER
 
 NAMES = list(EXAM_OPTIONS)
 
@@ -39,6 +40,8 @@ def test_archer_break_even_follows_training_cost():
     多花 200G = 3.2 分，所以每段训练成本 < 0.9 分时考弓箭手，> 0.9 分时考猎兵。"""
     p = make_planner("米迦艾拉", 35)
     p.min_exam_gain = 0   # 只测训练成本这一条
+    p.require_mid = False   # 11-17 起米迦必须考进中级；这里只测训练成本
+    p.equal_seeds = False
     for cost, want in ((0.5, "弓箭手"), (1.5, "猎兵")):
         p.TRAIN_PTS_PER_RANK = cost
         assert want in exams(plan_all(p, MAX_EXAMS)[0][plan_all(p, MAX_EXAMS)[1]]), cost
@@ -50,8 +53,10 @@ def test_every_trained_exam_pays_for_its_training(name):
     p, pl = plan(name)
     for c in set(exams(pl)) & set(p.exam_train_ranks):
         others = [t for t in pl.targets if t != c]
-        alt = p.rule_run(others)
-        assert p.plan_net(pl.raw_actions, pl.total, pl.gold) >= p.plan_net(alt[0], alt[2], alt[3]) - 1e-6, c
+        alt = p.window_value(others)
+        if alt is None or not _has_mid(p, alt[0]):
+            continue
+        assert p.window_value(pl.targets)[3] >= alt[3] - 1e-6, c
 
 
 @pytest.mark.parametrize("name", NAMES)
@@ -120,18 +125,27 @@ def test_training_cost_by_tier():
     assert make_planner("米迦艾拉").TRAIN_PTS_PER_RANK == R.TRAIN_PTS["P0"]
 
 
+def _has_mid(p, acts):
+    if not p.require_mid:
+        return True
+    used = {c for a, c in acts if a == "升级"}
+    return any(a == "考试" and c in used and _TIER.get(c) == "中级" for a, c in acts)
+
+
 @pytest.mark.parametrize("name", NAMES)
 def test_each_optional_exam_is_worth_min_gain(name):
     """去掉路线里任何一个非必考的考试，净值不会只差不到 MIN_EXAM_GAIN（米迦战车兵 +0.8 那种不考）。"""
     p, pl = plan(name)
-    mine = p.plan_net(pl.raw_actions, pl.total, pl.gold)
+    mine = p.window_value(pl.targets)[3]   # 11-17：同样多的乱数里比
     for c in pl.targets:
         if c in p.required:
             continue
-        r = p.rule_run([t for t in pl.targets if t != c])
+        r = p.window_value([t for t in pl.targets if t != c])
+        if r and not _has_mid(p, r[0]):
+            continue   # 11-17：这场是「每人都要考进中级」硬加的，去掉就不合规则
         if r:
             # 成对加入的考试可能单独不够，但成对必须够 2 倍
-            assert mine - p.plan_net(r[0], r[2], r[3]) > 0, c
+            assert mine - r[3] > 0, c
 
 
 def test_brigand_floor_from_yuphas():
@@ -191,3 +205,32 @@ def test_options_list_covers_every_allowed_class():
     for x in o["options"]:
         if x["ok"]:
             assert {"g", "total", "net", "gold"} <= set(x["toT"]) and x["roll"] >= 0
+
+
+# ---- 11-17 Yizhuo：所有角色都要考到中级（上级不一定） ----
+@pytest.mark.parametrize("name", NAMES)
+def test_everyone_reaches_intermediate(name):
+    p, pl = plan(name)
+    owned_mid = any(_TIER.get(c) == "中级" for c in R.OWNED[name])
+    assert p.require_mid == (not owned_mid)
+    assert _has_mid(p, pl.raw_actions), name
+
+
+def test_mid_owners_count_as_done():
+    for n in ("迪托利希", "艾丝梅拉尔达", "伊欧"):
+        assert not make_planner(n).require_mid
+
+
+def test_low_tier_may_train_only_for_required_mid():
+    p = make_planner("努蒂奴")
+    assert not R.TRAIN_ALLOWED["P2"]
+    assert all(_TIER.get(c) == "中级" for c in p.mid_train)
+
+
+def test_equal_seed_window():
+    """11-17 Yizhuo：比较按用掉同样多的乱数。窗口 = 路线到目标级用掉的乱数；窗口里的动作数正好是窗口大小。"""
+    p, pl = plan("奇洛伊卡")
+    assert p.window == len(pl.raw_actions)
+    for tg in ([], list(pl.targets)):
+        r = p.window_value(tg)
+        assert r is not None and len(r[0]) == p.window

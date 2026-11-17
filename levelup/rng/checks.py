@@ -325,16 +325,35 @@ def p_exam_used():
     return bad
 
 
+def _mid_ok(p, acts):
+    """11-17 Yizhuo：每人都要考到中级。require_mid 的人，路线里要考进并用一个中级升级。"""
+    if not getattr(p, "require_mid", False):
+        return True
+    used = {c for a, c in acts if a == "升级"}
+    return any(a == "考试" and c in used and tier_rank(c) == 2 for a, c in acts)
+
+
 @check("P9", "局部最优：去掉路线里任何一个非必考的考试（按规则重走），净值都不会更高（Yizhuo：『米迦为什么要考诅咒师，这个算法不对吧』）")
 def p_local_optimum():
     bad = []
     for n in ORDER:
         p, pl = plan(n)
-        mine = p.plan_net(pl.raw_actions, pl.total, pl.gold)
+        # 11-17 Yizhuo：按用掉同样多的乱数比（窗口 = 现在路线到目标级用掉的乱数）
+        mine = p.window_value(pl.targets)[3]
         for c in [t for t in pl.targets if t not in p.required]:
-            alt = p.rule_run([t for t in pl.targets if t != c])
-            if alt and p.plan_net(alt[0], alt[2], alt[3]) > mine + 1e-6:
-                bad.append(f"{n}：不考 {c} 净值 {p.plan_net(alt[0], alt[2], alt[3]):.1f} > 现在 {mine:.1f}")
+            alt = p.window_value([t for t in pl.targets if t != c])
+            if alt and _mid_ok(p, alt[0]) and alt[3] > mine + 1e-6:
+                bad.append(f"{n}：不考 {c} 净值 {alt[3]:.1f} > 现在 {mine:.1f}（同样 {p.window} 个乱数）")
+    return bad
+
+
+@check("P13", "每人都考到中级（Yizhuo 11-17）：已有中级职业的算满足，其他人的路线要考进一个中级并用它升级")
+def p_mid_required():
+    bad = []
+    for n in ORDER:
+        p, pl = plan(n)
+        if not _mid_ok(p, pl.raw_actions):
+            bad.append(f"{n}：路线里没有考进中级职业")
     return bad
 
 
@@ -374,16 +393,17 @@ def p_pair_search():
     bad = []
     for n in ORDER:
         p, pl = plan(n)
-        mine = p.plan_net(pl.raw_actions, pl.total, pl.gold)
+        mine = p.window_value(pl.targets)[3]
         req = list(dict.fromkeys(p.required))
         cands = [c for c in p.exam_options if c not in req]
         for k in (1, 2):
             for combo in itertools.combinations(cands, k):
                 for order in itertools.permutations(combo):
-                    r = p.rule_run(req + list(order))
-                    if r is None or not all(any(a == "升级" and x == c for a, x in r[0]) for c in combo):
+                    r = p.window_value(req + list(order))
+                    if r is None or not all(any(a == "升级" and x == c for a, x in r[0]) for c in combo) \
+                            or not _mid_ok(p, r[0]):
                         continue
-                    v = p.plan_net(r[0], r[2], r[3])
+                    v = r[3]
                     if v > mine + PAIR_TOL:
                         bad.append(f"{n}：考 {'、'.join(order)} 净值 {v:.1f}，比现在 {mine:.1f} 高")
     return bad
@@ -554,9 +574,10 @@ def golden_diff(old, new):
         st = [f"{s}{b['各项'][s] - a['各项'][s]:+d}" for s in STATS if a["各项"].get(s) != b["各项"].get(s)]
         rng = "" if (a.get("from"), a.get("to")) == (b.get("from"), b.get("to")) else \
             f"（范围 Lv{a.get('from')}→{a.get('to')} 变成 Lv{b.get('from')}→{b.get('to')}，不同范围的总数不能直接比）"
-        ch = [f"收益：净值 {d('净值'):+.1f}（加权分 {d('加权分'):+d}，点数 {d('点数'):+d}"
-              + (f"，保底 {d('保底分'):+d}" if d('保底分') else "") + "）" + (f"，能力 {' '.join(st)}" if st else ""),
-              f"成本：手形金币 {d('手形金币'):+d}G，训练 {d('训练段'):+d} 段" + rng]
+        # 11-17 Yizhuo：钱和点数分开讲，不合成净值
+        ch = [f"点数 {d('点数'):+d}，加权分 {d('加权分'):+d}"
+              + (f"，保底 {d('保底分'):+d}" if d('保底分') else "") + (f"（能力 {' '.join(st)}）" if st else ""),
+              f"金币 {d('手形金币'):+d}G", f"训练 {d('训练段'):+d} 段" + rng]
         if a["路线"] != b["路线"]:
             ch.append(f"新路线：{b['路线']}")
         lines.append(f"{n}：" + "；".join(ch))

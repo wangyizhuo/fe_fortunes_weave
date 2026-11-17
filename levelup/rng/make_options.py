@@ -2,6 +2,7 @@
 
 每个可考职业单独算一遍：一定要考到它（rule_run 的 must），其余照规则走，和「只考必考职业」的基准路线比。
   * 到目标级（Lv35 或 +15）和到 Lv45 各算一次；「35 级之后」= 到 Lv45 的差 − 到目标级的差
+  * 11-17 Yizhuo：两条路线按「用掉同样多的乱数」比（考了的那条会少升一级），不按到同一级比
   * 训练：清单里所有档位都允许先练技能（标出要练几段、按本档每段扣分），规则默认 P1/P2 不练的也列出来让 Yizhuo 自己选
   * 判定值、估计成功率、考试时等级、用它升几级、保底补的项
 """
@@ -21,8 +22,12 @@ def planner(name, target, train):
     return p
 
 
-def run(p, targets):
-    r = p.rule_run(list(dict.fromkeys(list(p.required) + targets)), tuple(targets))
+def run(p, targets, S=None):
+    p.seed_budget = S
+    try:
+        r = p.rule_run(list(dict.fromkeys(list(p.required) + targets)), tuple(targets))
+    finally:
+        p.seed_budget = None
     if r is None:
         return None
     acts, _, total, gold, _ = r
@@ -34,13 +39,23 @@ def run(p, targets):
             done += 1
         elif c not in (None, "跳过"):
             lv_exam.setdefault(c, (st, p.level + done))
-    return dict(acts=acts, total=total, gold=gold, g=g, net=p.plan_net(acts, total, gold),
+    return dict(acts=acts, total=total, gold=gold, g=g, net=p.plan_net(acts, total, gold), end=p.level + done,
                 train=p.train_ranks(acts), floor=p.floor_lifts(acts), lv_exam=lv_exam, used=used)
+
+
+def eq(p, ta, tb):
+    """11-17 Yizhuo：两条路线用掉同样多的乱数再比（窗口 = 两条到目标级用掉乱数较多的那个）。"""
+    a, b = run(p, ta), run(p, tb)
+    if a is None or b is None:
+        return a, b
+    S = max(len(a["acts"]), len(b["acts"]))
+    return run(p, ta, S), run(p, tb, S)
 
 
 def diff(a, b):
     return {"g": [x - y for x, y in zip(a["g"], b["g"])], "total": a["total"] - b["total"],
-            "net": round(a["net"] - b["net"], 1), "gold": a["gold"] - b["gold"], "train": a["train"] - b["train"]}
+            "net": round(a["net"] - b["net"], 1), "gold": a["gold"] - b["gold"], "train": a["train"] - b["train"],
+            "seeds": len(a["acts"]), "endA": a["end"], "endB": b["end"]}
 
 
 def now_pct(name, c, lv):
@@ -60,12 +75,11 @@ def build(name):
            "owned": list(R.OWNED[name]), "required": list(R.REQUIRED.get(name, [])),
            "trainAllowed": R.TRAIN_ALLOWED[R.tier_of(name)], "options": []}
     pT, p45 = planner(name, T, True), planner(name, 45, True)
-    bT, b45 = run(pT, []), run(p45, [])
     rec = R.make_planner(name, T).rule_plan()
     out["recommended"] = [c for a, c in rec.raw_actions if a == "考试" and c != "跳过" and c not in R.REQUIRED.get(name, [])]
     # 现在规划器推荐的组合，和基准比（同一套计分）
     if out["recommended"]:
-        rT, r45 = run(pT, out["recommended"]), run(p45, out["recommended"])
+        (rT, bT), (r45, b45) = eq(pT, out["recommended"], []), eq(p45, out["recommended"], [])
         dT = diff(rT, bT)
         d45 = diff(r45, b45) if r45 else None
         out["recRow"] = {"toT": dT, "after": None if d45 is None else {"g": [x - y for x, y in zip(d45["g"], dT["g"])],
@@ -73,7 +87,7 @@ def build(name):
     for c in R.EXAM_OPTIONS[name]:
         if c in R.OWNED[name] or c in R.REQUIRED.get(name, []):
             continue
-        aT, a45 = run(pT, [c]), run(p45, [c])
+        (aT, bT), (a45, b45) = eq(pT, [c], []), eq(p45, [c], [])
         if not aT or c not in aT["lv_exam"]:
             out["options"].append({"cls": c, "tier": R._TIER_OF(c), "ok": False, "why": "到目标级前没有能考过的种子"})
             continue
@@ -89,7 +103,7 @@ def build(name):
             "floor": [f"{STATS[i]} {x}→{v}" for lifts in aT["floor"].values() for i, x, v in lifts],
             "toT": dT, "after": after, "rec": c in out["recommended"],
             "ruleBlocked": bool(pT.exam_train_ranks.get(c)) and not out["trainAllowed"]})
-    out["options"].sort(key=lambda o: (not o.get("ok"), -(o.get("toT", {}).get("net", -999))))
+    out["options"].sort(key=lambda o: (not o.get("ok"), -(o.get("toT", {}).get("total", -999))))
     return out
 
 
