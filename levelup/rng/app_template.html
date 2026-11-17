@@ -492,7 +492,7 @@ function viewOpts() {
     const o = O[c.name]; if (!o) return "";
     const diffCell = d => d ? `<td>${esc(gtxt(d.g))}</td><td class="n">${sgn(psum(d.g))}</td><td class="n ${d.total > 0 ? "up" : d.total < 0 ? "dn" : ""}">${sgn(d.total)}</td>` : `<td>—</td><td class="n">—</td><td class="n">—</td>`;
     const rows = o.options.map(x => x.ok ? `<tr${x.rec ? ' class="cur"' : ""}><td><b>${esc(x.cls)}</b> <small>${esc(x.tier || "")}</small>${x.rec ? ' <span class="rec r1">现在推荐</span>' : ""}${x.ruleBlocked ? ' <span class="rec r3">规则默认不练</span>' : ""}</td>
-      <td class="n">Lv${x.lv}</td><td class="n">${x.roll}%</td><td class="n">${x.pct ?? "—"}%${x.ranks ? `<br><small>不练 ${x.pctNow ?? "—"}%</small>` : ""}</td>
+      <td class="n">Lv${x.lv}</td><td class="n">${x.roll}%</td><td class="n">${o.trainAllowed ? `${x.pct ?? "—"}%${x.ranks ? `<br><small>不练 ${x.pctNow ?? "—"}%</small>` : ""}` : `${x.pctNow ?? "—"}%${x.ranks ? `<br><small>练后 ${x.pct ?? "—"}%</small>` : ""}`}</td>
       <td class="note">${x.train.length ? esc(x.train.join("、")) : "—"}${x.floor.length ? `<br>保底 ${esc(x.floor.join("、"))}` : ""}</td>
       <td class="n">${x.used}/${x.used45}</td>
       ${diffCell(x.toT)}<td class="n">${sgn(x.toT.gold)}G</td>${diffCell(x.after)}</tr>`
@@ -502,7 +502,7 @@ function viewOpts() {
       <div class="sec"><div class="scroll"><table><tr><th rowspan="2">职业</th><th class="n" rowspan="2">考的时机</th><th class="n" rowspan="2">判定值</th><th class="n" rowspan="2">成功率</th><th rowspan="2">要练 / 保底</th><th class="n" rowspan="2">用它升级<br><small>到目标/到45</small></th><th colspan="4" class="grp">到 Lv${o.target}（和不考比）</th><th colspan="3" class="grp">Lv${o.target}→45 另外的影响</th></tr>
       <tr><th>能力</th><th class="n">点数</th><th class="n">加权分</th><th class="n">金币</th><th>能力</th><th class="n">点数</th><th class="n">加权分</th></tr>${rows}${rr}</table></div></div></details>`;
   }).join("");
-  return `<p class="lede">每个可考职业单独算：一定考到它、其余照规则走，和「只考必考职业」的路线比。点数、加权分、金币、要练的技能分开列，不合成一个数（Yizhuo 11-17）。清单里所有人都按「先练够技能」算，规则默认不练的标出来；成功率下面小字是不练的估计。</p><div class="grid one">${cards}</div>` + notesBox([
+  return `<p class="lede">每个可考职业单独算：一定考到它、其余照规则走，和「只考必考职业」的路线比。点数、加权分、金币、要练的技能分开列，不合成一个数（Yizhuo 11-17）。点数和加权分按「先练够技能」算；P1/P2 默认不练，成功率写不练的估计，小字是练后的。</p><div class="grid one">${cards}</div>` + notesBox([
     "<b>考的时机</b>：规划器替这个职业挑的第一个能考过的种子；判定值低于游戏显示的成功率才能过。",
     "<b>Lv目标→45 另外的影响</b>：到 Lv45 的差 − 到目标级的差（不含上级职业）。",
     "多选几个职业时效果不是简单相加，挑好以后告诉我，我按你的组合重算整条路线。"]);

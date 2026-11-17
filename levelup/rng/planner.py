@@ -287,10 +287,11 @@ class Planner:
                 def val(c):
                     g = self.result(step, lv, c)[1]
                     return sum(a * b for a, b in zip(g, w)) + (self.str_gain_bonus(cur_str, g) if cur_str is not None else 0) \
-                        + 1e-6 * _TIER_RANK.get(_TIER.get(c, ""), 0) - 1e-9 * self._tb(c)
+                        + 1e-6 * _TIER_RANK.get(_TIER.get(c, ""), 0) + 5e-7 * (c in self.required) - 1e-9 * self._tb(c)
                 best = max(owned, key=val)
                 sbest = val(best)
-                passable = [c for c in pend if self.exam_ok(step, c, lv)]
+                ea = getattr(self, "exam_at", None) or {}
+                passable = [c for c in pend if c not in ea.values() and self.exam_ok(step, c, lv)]
                 # 11-09 Yizhuo：跳过条件 = ①这一级 ≤ 绝对分数线 ②比未来 15 级平均低 ≥ 百分比；P0 满足其一，P1/P2 都满足
                 rule = getattr(self, "skip_rule", None)
                 if rule:
@@ -321,6 +322,10 @@ class Planner:
                     if want_skip or sbest < thr:
                         pick = c
                         break
+                # 11-17：指定在这一步考（挑了用哪个种子考，见 _retime）
+                if step in ea and ea[step] not in owned and self.exam_ok(step, ea[step], lv):
+                    pick = ea[step]
+                    pend = pend if pick in pend else pend + [pick]
                 reasons[step].update(want_skip=want_skip, keep=keep, pick=pick)
                 if pick is not None:
                     a, c = "考试", pick
@@ -452,17 +457,64 @@ class Planner:
 
     def window_value(self, targets, S=None, must=()):
         """同一个乱数窗口（前 S 个）里，按 targets 走的 (动作, 加权分, 金币, 净值)。"""
-        sv = getattr(self, "seed_budget", None)
+        sv, se = getattr(self, "seed_budget", None), getattr(self, "exam_at", None)
         self.seed_budget = S or getattr(self, "window", None)
+        self.exam_at = {k: v for k, v in (se or {}).items() if v in targets}   # 选定的考试时机只对还在的职业有效
         try:
             r = self.rule_run(list(targets), tuple(must))
         finally:
-            self.seed_budget = sv
+            self.seed_budget, self.exam_at = sv, se
         if r is None:
             return None
         return r[0], r[2], r[3], self.plan_net(r[0], r[2], r[3])
 
+    def _retime(self, targets, cur, run, net, got):
+        """11-17（审查）：考试用哪个种子考也要挑。
+        ① 每个要考的职业，试着换到窗口里别的能过的种子考，同样多的乱数下分更高就换（努蒂奴土匪别吃掉好种子）；
+        ② 考试和跳过挨着时，让跳过用判定值高的那个种子（更稳考不过，不会多拿职业），考试用低的（更稳考过），分不变才换（艾丝 Lv30）。"""
+        if cur is None:
+            return cur
+        base_t = set(self.required)
+        for c in list(targets):
+            n = len(cur[0])
+            for st in range(n):
+                trial = dict(self.exam_at or {})
+                trial = {k: v for k, v in trial.items() if v != c}
+                trial[st] = c
+                sv = self.exam_at
+                self.exam_at = trial
+                r = run(targets)
+                self.exam_at = sv
+                if r is not None and ("考试", c) in r[0] and list(r[0]).index(("考试", c)) == st \
+                        and all(got(r, x) for x in targets if x not in base_t) and net(r) > net(cur) + 1e-9:
+                    self.exam_at, cur = trial, r
+        # ② 挨着的 考试/跳过 对调
+        acts = list(cur[0])
+        for i in range(len(acts) - 1):
+            pair = (acts[i], acts[i + 1])
+            if not all(a == "考试" for a, _ in pair):
+                continue
+            (a1, c1), (a2, c2) = pair
+            if (c1 == "跳过") == (c2 == "跳过"):
+                continue
+            ex, sk = (i, i + 1) if c2 == "跳过" else (i + 1, i)
+            if self.exam_value(sk) >= self.exam_value(ex):
+                continue
+            c = acts[ex][1]
+            trial = {k: v for k, v in (self.exam_at or {}).items() if v != c}
+            trial[sk] = c
+            sv = self.exam_at
+            self.exam_at = trial
+            r = run(targets)
+            self.exam_at = sv
+            if r is not None and r[0][sk] == ("考试", c) and net(r) >= net(cur) - 1e-9:
+                self.exam_at, cur = trial, r
+                acts = list(cur[0])
+        return cur
+
     def _rule_plan(self, fixed=None, mid=None):
+        if fixed is None:
+            self.exam_at = {}
         gpp = getattr(self, "gold_per_pt", None) or 62.5
         base_t = list(dict.fromkeys(self.required))
         run = self.rule_run
@@ -565,6 +617,8 @@ class Planner:
                                  or not any(_TIER_RANK.get(_TIER.get(x, ""), 0) == 2 and got(cur, x) for x in targets)):
                         targets, cur, changed = rest, r, True
                         break
+        if fixed is None and cur is not None:
+            cur = self._retime([t for t in targets], cur, run, net, got)
         if cur is None:
             return None
         acts, notes, total, gold, pend = cur

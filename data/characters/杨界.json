@@ -760,10 +760,7 @@
    "adv": null,
    "exams": 1,
    "net": 359.0,
-   "advOptions": [
-    "先知",
-    "主教"
-   ],
+   "advOptions": [],
    "follow": {
     "total": 371,
     "pts": 101,

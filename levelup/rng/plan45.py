@@ -48,7 +48,8 @@ def best_net(p, k):
 
 def mk45(name):
     p = R.make_planner(name, 45)
-    adv = [c for c in ADV[name] if c not in p.owned and adv_ok(name, c)]
+    # 11-17（审查）：名声要求高于现在名声（R.RENOWN）的上级不考
+    adv = [c for c in ADV[name] if c not in p.owned and adv_ok(name, c) and (R.renown_req(c) or 0) <= (R.RENOWN or 99)]
     p.exam_options = tuple(p.exam_options) + tuple(adv)
     for c in adv:
         p.exam_req[c] = (35, 0)

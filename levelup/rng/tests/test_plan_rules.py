@@ -234,3 +234,23 @@ def test_equal_seed_window():
     for tg in ([], list(pl.targets)):
         r = p.window_value(tg)
         assert r is not None and len(r[0]) == p.window
+
+
+# ---- 11-17 对抗审查后加的 ----
+@pytest.mark.parametrize("name", NAMES)
+def test_adjacent_skip_uses_higher_roll(name):
+    """考试和跳过挨着时，跳过用判定值高的种子（更稳考不过），考试用低的（更稳考过）。"""
+    p, pl = plan(name)
+    acts = list(pl.raw_actions)
+    for i in range(len(acts) - 1):
+        (a1, c1), (a2, c2) = acts[i], acts[i + 1]
+        if a1 == a2 == "考试" and (c1 == "跳过") != (c2 == "跳过"):
+            sk, ex = (i, i + 1) if c1 == "跳过" else (i + 1, i)
+            if p.exam_ok(sk, acts[ex][1], None):
+                assert p.exam_value(sk) >= p.exam_value(ex), (name, i)
+
+
+def test_required_class_used_on_ties():
+    """迪：恶棍和剑客加点一样时用恶棍升级（练精通）。"""
+    p, pl = plan("迪托利希")
+    assert sum(1 for a, c in pl.raw_actions if a == "升级" and c == "恶棍") >= 5
