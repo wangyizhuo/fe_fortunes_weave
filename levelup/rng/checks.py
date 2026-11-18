@@ -481,6 +481,36 @@ def u_all_options():
     return bad
 
 
+@check("U9", "路线里每个跳过的等级都列出改考中级的全部选项（Yizhuo 11-18：『有谁要跳过的等级转职乱数好，可以转职中等职业提高数值的，都考虑进去…不区分优先级，都列出选项』）")
+def u_skip_mid():
+    pg = page()
+    if pg is None:
+        return []
+    bad = []
+    for c in _plan_chars(pg):
+        o = (pg.get("options") or {}).get(c["name"])
+        if not o or not o.get("skipMid"):
+            bad.append(f"{c['name']}：没有「跳过那一级改考中级」的数据")
+            continue
+        rows = {r["step"]: r for r in o["skipMid"][0]["skips"]}
+        mids = [x for x in R.EXAM_OPTIONS[c["name"]] if R._TIER_OF(x) == "中级" and x not in R.OWNED[c["name"]]]
+        for s in c["steps"]:
+            if s["src"] != "plan" or not s["exam"] or s.get("cls"):
+                continue
+            r = rows.get(int(s["key"]) - 1)
+            if r is None:
+                bad.append(f"{c['name']} 第 {s['key']} 步（跳过）：没有改考中级的选项")
+                continue
+            if abs(r["roll"] - s["roll"]) > 0.01:
+                bad.append(f"{c['name']} 第 {s['key']} 步：改考中级的判定值 {r['roll']} 和路线 {s['roll']} 不一样")
+            for x in r["opts"]:
+                if x["ok"] and not ("d" in x and "gold" in x["d"] and "pts" in x["d"] and "total" in x["d"]):
+                    bad.append(f"{c['name']} 第 {s['key']} 步 改考 {x['cls']}：缺点数/加权分/金币差")
+            if len(r["opts"]) < len([m for m in mids if m not in (o["skipMid"][0].get("baseExams") or [])]):
+                bad.append(f"{c['name']} 第 {s['key']} 步：中级选项不全")
+    return bad
+
+
 @check("U4", "比较都给具体数值差（每项能力 ± 和净值），不只给加权分（Yizhuo：『不讲成长率，只讲具体的数值区别』『展示具体的数值差距，包括差值和净值』）")
 def u_concrete_diffs():
     pg = page()
