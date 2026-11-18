@@ -36,7 +36,7 @@ for d, c in out.items():
     if not c:
         rows_out.append([d, "没有两人能和迪一起 perfect", "", "", "", ""]); continue
     _, _, a, b, v = c[0]
-    who = sorted({n for _, _, x, y, _ in c for n in (x, y)}, key=lambda n: rank[n])
+    who = sorted({n for _, _, x, y, _ in c for n in (x, y)}, key=lambda n: (rank[n], targets.index(n)))
     rows_out.append([d, f"迪 + {a} + {b}", " / ".join(SPK[x] for x in v), "+".join(str(x - 1) for x in v),
                      "；".join(f"迪+{x}+{y}" for _, _, x, y, _ in c[1:5]), "、".join(rn_tag(n) for n in who)])
 json.dump(rows_out, open("diet_plan_rows.json", "w"), ensure_ascii=False, indent=0)
