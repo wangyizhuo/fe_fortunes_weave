@@ -494,8 +494,9 @@ function smRow(c, s) {
 }
 function smHint(c, s) {
   const r = smRow(c, s); if (!r) return "";
-  const ok = r.opts.filter(x => x.ok);
-  if (!ok.length) return `<span class="hint">　改考中级：判定值 ${r.roll}%，没有能考过的中级</span>`;
+  // 11-23 Yizhuo：规则不练技能的档位，要先练的选项不拿来建议（表里折起来）
+  const ok = r.opts.filter(x => x.ok && !x.ruleBlocked), nb = r.opts.filter(x => x.ok && x.ruleBlocked).length;
+  if (!ok.length) return `<br><span class="hint">改考中级：判定值 ${r.roll}%，${nb ? `不练技能考不过任何中级（另有 ${nb} 个要先练，${esc(c.tier || "")} 规则不练）` : "没有能考过的中级"}</span>`;
   // 能考过、而且之后真的用它升级的里面，加权分最高的那个（考过却不用的 = 等于跳过）
   const b = ok.filter(x => x.used).sort((p, q) => q.d.total - p.d.total || q.d.pts - p.d.pts || (q.inner - p.inner))[0];
   if (!b) return `<br><span class="hint">改考中级：${ok.length} 个能考过，但考进去之后都用不上（等于跳过、多拿一个职业）→ 照跳过（见「职业选择」）</span>`;
@@ -506,11 +507,18 @@ function smTable(o) {
   if (!ws.length) return `<p class="txt" style="font-size:13px"><span class="lab">跳过那一级改考中级</span>到 Lv${o.target} 和到 Lv45 的规则路线里都没有跳过的等级。</p>`;
   return ws.map(w => `<p class="txt" style="font-size:13px"><span class="lab">跳过那一级改考中级 · ${w.target === o.target ? `到 Lv${w.target}（现在的路线）` : `到 Lv45（规则路线，不含上级）`}</span>按用掉同样多的乱数（${w.seeds} 个）和原路线比；原路线的考试：${esc(w.baseExams.join("、"))}</p>
     <div class="scroll"><table><tr><th class="n">跳过的等级</th><th class="n">判定值</th><th>改考</th><th class="n">成功率<br><small>练够 / 不练</small></th><th class="n">先练</th><th class="n">用它升级</th><th>能力差</th><th class="n">点数</th><th class="n">加权分</th><th class="n">保底</th><th class="n">金币</th><th>结论</th></tr>
-    ${w.skips.map(r => r.opts.map((x, i) => `<tr${x.worth ? ' class="cur"' : ""}>${i ? "" : `<td class="n" rowspan="${r.opts.length}">Lv${r.lv}</td><td class="n" rowspan="${r.opts.length}">${r.roll}%</td>`}<td><b>${esc(x.cls)}</b></td>
+    ${w.skips.map(r => smOpts(r).map((x, i, a) => `<tr${x.worth ? ' class="cur"' : ""}>${i ? "" : `<td class="n" rowspan="${a.length}">Lv${r.lv}</td><td class="n" rowspan="${a.length}">${r.roll}%</td>`}<td><b>${esc(x.cls)}</b></td>
       <td class="n">${x.pct ?? "—"}% / ${x.pctNow ?? "—"}%</td>
       ${x.ok ? `<td class="n">${x.ranks ? x.ranks + " 段" : "—"}</td><td class="n">${x.used} 级</td><td>${esc(gtxt(x.d.g))}</td><td class="n">${sgn(x.d.pts)}</td><td class="n ${x.d.total > 0 ? "up" : x.d.total < 0 ? "dn" : ""}">${sgn(x.d.total)}</td><td class="n">${x.d.floorPts ? sgn(x.d.floorPts) : "—"}</td><td class="n">${sgn(x.d.gold)}G</td>
       <td class="note">${x.worth ? "值得" : x.used ? "不值得" : "考过但用不上（等于跳过，多拿一个职业）"}</td>`
-      : `<td colspan="8" class="note">${esc(x.why)}</td>`}</tr>`).join("")).join("")}</table></div>`).join("");
+      : `<td colspan="8" class="note">${esc(x.why)}</td>`}</tr>`).join("")).join("")}</table></div>${smBlocked(w)}`).join("");
+}
+// 11-23 Yizhuo（「要先练 6 段的为什么需要考虑」）：P1/P2 规则不练技能，要先练的选项不进表，只在表下列名字
+const smOpts = r => { const a = r.opts.filter(x => !x.ruleBlocked); return a.length ? a : [{ cls: "—", ok: false, why: "不练技能能考的中级都没有" }]; };
+function smBlocked(w) {
+  const b = [];
+  for (const r of w.skips) for (const x of r.opts) if (x.ruleBlocked) b.push(`Lv${r.lv} ${x.cls}（${x.ranks} 段）`);
+  return b.length ? `<p class="txt" style="font-size:12px;color:var(--muted)">规则不考虑（要先练技能，这个档位不练）：${esc(b.join("、"))}</p>` : "";
 }
 // ---------- 职业选择（11-16 Yizhuo：每人可考的职业列出来，到目标级和之后的影响，自己挑） ----------
 function viewOpts() {
@@ -518,12 +526,14 @@ function viewOpts() {
   const cards = CH.filter(c => !focus || slug(c) === focus).map(c => {
     const o = O[c.name]; if (!o) return "";
     const diffCell = d => d ? `<td>${esc(gtxt(d.g))}</td><td class="n">${sgn(psum(d.g))}</td><td class="n ${d.total > 0 ? "up" : d.total < 0 ? "dn" : ""}">${sgn(d.total)}</td>` : `<td>—</td><td class="n">—</td><td class="n">—</td>`;
-    const rows = o.options.map(x => x.ok ? `<tr${x.rec ? ' class="cur"' : ""}><td><b>${esc(x.cls)}</b> <small>${esc(x.tier || "")}</small>${x.rec ? ' <span class="rec r1">现在推荐</span>' : ""}${x.ruleBlocked ? ' <span class="rec r3">规则默认不练</span>' : ""}</td>
+    const blk = o.options.filter(x => x.ok && x.ruleBlocked);
+    const rows = o.options.filter(x => !(x.ok && x.ruleBlocked)).map(x => x.ok ? `<tr${x.rec ? ' class="cur"' : ""}><td><b>${esc(x.cls)}</b> <small>${esc(x.tier || "")}</small>${x.rec ? ' <span class="rec r1">现在推荐</span>' : ""}${x.ruleBlocked ? ' <span class="rec r3">规则默认不练</span>' : ""}</td>
       <td class="n">Lv${x.lv}</td><td class="n">${x.roll}%</td><td class="n">${o.trainAllowed ? `${x.pct ?? "—"}%${x.ranks ? `<br><small>不练 ${x.pctNow ?? "—"}%</small>` : ""}` : `${x.pctNow ?? "—"}%${x.ranks ? `<br><small>练后 ${x.pct ?? "—"}%</small>` : ""}`}</td>
       <td class="note">${x.train.length ? esc(x.train.join("、")) : "—"}${x.floor.length ? `<br>保底 ${esc(x.floor.join("、"))}` : ""}</td>
       <td class="n">${x.used}/${x.used45}</td>
       ${diffCell(x.toT)}<td class="n">${sgn(x.toT.gold)}G</td>${diffCell(x.after)}</tr>`
-      : `<tr><td><b>${esc(x.cls)}</b></td><td colspan="12" class="note">${esc(x.why)}</td></tr>`).join("");
+      : `<tr><td><b>${esc(x.cls)}</b></td><td colspan="12" class="note">${esc(x.why)}</td></tr>`).join("")
+      + (blk.length ? `<tr><td colspan="13" class="note">规则不考虑（要先练技能，${esc(o.tier)} 不练）：${esc(blk.map(x => `${x.cls}（${x.ranks} 段，加权分 ${sgn(x.toT.total)}）`).join("、"))}</td></tr>` : "");
     const rr = o.recRow ? `<tr class="sum"><td>现在推荐的组合：${esc(o.recommended.join(" + "))}</td><td colspan="5"></td>${diffCell(o.recRow.toT)}<td class="n">${sgn(o.recRow.toT.gold)}G</td>${diffCell(o.recRow.after)}</tr>` : "";
     return `<details class="char" data-slug="${slug(c)}"${focus ? " open" : ""}><summary><h3>${esc(c.name)}</h3><span>${o.tier} · Lv${o.level}→${o.target} · 已有 ${esc(o.owned.join("、"))}${o.required.length ? ` · 必考 ${esc(o.required.join("、"))}（已算进基准）` : ""}${o.recommended.length ? ` · 现在推荐 ${esc(o.recommended.join("、"))}` : " · 现在推荐：不考新职业"}</span></summary>
       <div class="sec"><div class="scroll"><table><tr><th rowspan="2">职业</th><th class="n" rowspan="2">考的时机</th><th class="n" rowspan="2">判定值</th><th class="n" rowspan="2">成功率</th><th rowspan="2">要练 / 保底</th><th class="n" rowspan="2">用它升级<br><small>到目标/到45</small></th><th colspan="4" class="grp">到 Lv${o.target}（和不考比）</th><th colspan="3" class="grp">Lv${o.target}→45 另外的影响</th></tr>
