@@ -1507,31 +1507,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
+          2,
           3,
-          3,
           1,
           0,
           0,
           1,
           1,
-          0,
+          -1,
           1
          ],
-         "pts": 10,
-         "total": 21,
+         "pts": 8,
+         "total": 16,
          "floorPts": 0,
          "floorW": 0,
-         "gold": -100,
+         "gold": 200,
          "seeds": 26,
-         "endA": 46,
+         "endA": 45,
          "endB": 45
         },
         "used": 4,
         "floor": [],
         "worth": false,
-        "inner": 15.4,
+        "inner": 3.2,
         "acts": [
-         "考萨满巫师@13"
+         "考萨满巫师@0",
+         "跳过@13"
         ]
        },
        {
@@ -1547,31 +1548,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
-          3,
+          2,
           2,
           1,
           0,
           0,
           1,
           1,
-          0,
+          -1,
           1
          ],
-         "pts": 9,
-         "total": 20,
+         "pts": 7,
+         "total": 15,
          "floorPts": 0,
          "floorW": 0,
-         "gold": -100,
+         "gold": 200,
          "seeds": 26,
-         "endA": 46,
+         "endA": 45,
          "endB": 45
         },
         "used": 4,
         "floor": [],
         "worth": false,
-        "inner": 14.4,
+        "inner": 2.2,
         "acts": [
-         "考萨满巫师@13"
+         "考萨满巫师@0",
+         "跳过@13"
         ]
        },
        {
@@ -1588,31 +1590,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
-          2,
+          1,
           2,
           1,
           0,
           0,
           2,
           1,
-          0,
+          -1,
           2
          ],
-         "pts": 10,
-         "total": 21,
+         "pts": 8,
+         "total": 16,
          "floorPts": 0,
          "floorW": 0,
-         "gold": -100,
+         "gold": 200,
          "seeds": 26,
-         "endA": 46,
+         "endA": 45,
          "endB": 45
         },
         "used": 4,
         "floor": [],
         "worth": false,
-        "inner": 11.4,
+        "inner": -0.8,
         "acts": [
-         "考萨满巫师@13"
+         "考萨满巫师@0",
+         "跳过@13"
         ]
        },
        {
@@ -1629,31 +1632,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
-          1,
-          2,
-          1,
-          0,
           0,
           2,
           1,
           0,
+          0,
+          2,
+          1,
+          -1,
           1
          ],
-         "pts": 8,
-         "total": 18,
+         "pts": 6,
+         "total": 13,
          "floorPts": 0,
          "floorW": 0,
-         "gold": -100,
+         "gold": 200,
          "seeds": 26,
-         "endA": 46,
+         "endA": 45,
          "endB": 45
         },
         "used": 3,
         "floor": [],
         "worth": false,
-        "inner": 10.4,
+        "inner": -1.8,
         "acts": [
-         "考萨满巫师@13"
+         "考萨满巫师@0",
+         "跳过@13"
         ]
        },
        {
@@ -1669,31 +1673,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
-          1,
-          0,
-          1,
           0,
           0,
           1,
-          1,
           0,
+          0,
+          1,
+          1,
+          -1,
           1
          ],
-         "pts": 5,
-         "total": 11,
+         "pts": 3,
+         "total": 6,
          "floorPts": 0,
          "floorW": 0,
-         "gold": -100,
+         "gold": 200,
          "seeds": 26,
-         "endA": 46,
+         "endA": 45,
          "endB": 45
         },
         "used": 1,
         "floor": [],
         "worth": false,
-        "inner": 5.4,
+        "inner": -6.8,
         "acts": [
-         "考萨满巫师@13"
+         "考萨满巫师@0",
+         "跳过@13"
         ]
        },
        {
@@ -1709,31 +1714,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
-          1,
-          0,
-          1,
           0,
           0,
           1,
-          1,
           0,
+          0,
+          1,
+          1,
+          -1,
           1
          ],
-         "pts": 5,
-         "total": 11,
+         "pts": 3,
+         "total": 6,
          "floorPts": 0,
          "floorW": 0,
-         "gold": -100,
+         "gold": 200,
          "seeds": 26,
-         "endA": 46,
+         "endA": 45,
          "endB": 45
         },
         "used": 2,
         "floor": [],
         "worth": false,
-        "inner": 5.4,
+        "inner": -6.8,
         "acts": [
-         "考萨满巫师@13"
+         "考萨满巫师@0",
+         "跳过@13"
         ]
        },
        {
@@ -1749,31 +1755,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
-          1,
-          0,
-          1,
           0,
           0,
           1,
-          1,
           0,
+          0,
+          1,
+          1,
+          -1,
           1
          ],
-         "pts": 5,
-         "total": 11,
+         "pts": 3,
+         "total": 6,
          "floorPts": 0,
          "floorW": 0,
-         "gold": -100,
+         "gold": 200,
          "seeds": 26,
-         "endA": 46,
+         "endA": 45,
          "endB": 45
         },
         "used": 1,
         "floor": [],
         "worth": false,
-        "inner": 5.4,
+        "inner": -6.8,
         "acts": [
-         "考萨满巫师@13"
+         "考萨满巫师@0",
+         "跳过@13"
         ]
        },
        {
@@ -1790,31 +1797,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
-          1,
-          0,
-          1,
           0,
           0,
           1,
-          1,
           0,
+          0,
+          1,
+          1,
+          -1,
           2
          ],
-         "pts": 6,
-         "total": 12,
+         "pts": 4,
+         "total": 7,
          "floorPts": 0,
          "floorW": 0,
-         "gold": -100,
+         "gold": 200,
          "seeds": 26,
-         "endA": 46,
+         "endA": 45,
          "endB": 45
         },
         "used": 3,
         "floor": [],
         "worth": false,
-        "inner": 2.4,
+        "inner": -9.8,
         "acts": [
-         "考萨满巫师@13"
+         "考萨满巫师@0",
+         "跳过@13"
         ]
        },
        {
@@ -1831,31 +1839,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
-          1,
-          0,
-          1,
           0,
           0,
           1,
-          1,
           0,
+          0,
+          1,
+          1,
+          -1,
           1
          ],
-         "pts": 5,
-         "total": 11,
+         "pts": 3,
+         "total": 6,
          "floorPts": 0,
          "floorW": 0,
-         "gold": -100,
+         "gold": 200,
          "seeds": 26,
-         "endA": 46,
+         "endA": 45,
          "endB": 45
         },
         "used": 2,
         "floor": [],
         "worth": false,
-        "inner": 1.4,
+        "inner": -10.8,
         "acts": [
-         "考萨满巫师@13"
+         "考萨满巫师@0",
+         "跳过@13"
         ]
        },
        {
@@ -1869,31 +1878,32 @@
         "ruleBlocked": false,
         "d": {
          "g": [
-          0,
+          -1,
           0,
           -1,
           0,
           0,
           0,
           0,
-          1,
+          0,
           1
          ],
-         "pts": 1,
-         "total": 0,
+         "pts": -1,
+         "total": -5,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 200,
+         "gold": 500,
          "seeds": 26,
-         "endA": 45,
+         "endA": 44,
          "endB": 45
         },
         "used": 2,
         "floor": [],
         "worth": false,
-        "inner": -4.8,
+        "inner": -17.0,
         "acts": [
-         "考萨满巫师@13",
+         "考萨满巫师@0",
+         "跳过@13",
          "跳过@22"
         ]
        }
@@ -1915,31 +1925,32 @@
         "ruleBlocked": false,
         "d": {
          "g": [
-          0,
+          -1,
           0,
           -1,
           0,
           0,
           0,
           0,
-          1,
+          0,
           0
          ],
-         "pts": 0,
-         "total": -1,
+         "pts": -2,
+         "total": -6,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 200,
+         "gold": 500,
          "seeds": 26,
-         "endA": 45,
+         "endA": 44,
          "endB": 45
         },
         "used": 1,
         "floor": [],
         "worth": false,
-        "inner": -5.8,
+        "inner": -18.0,
         "acts": [
-         "考萨满巫师@13",
+         "考萨满巫师@0",
+         "跳过@13",
          "跳过@19"
         ]
        },
@@ -1956,31 +1967,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
+          -1,
           0,
           0,
           0,
           0,
           0,
           0,
-          0,
-          0,
+          -1,
           0
          ],
-         "pts": 0,
-         "total": 0,
+         "pts": -2,
+         "total": -5,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 0,
+         "gold": 300,
          "seeds": 26,
-         "endA": 45,
+         "endA": 44,
          "endB": 45
         },
         "used": 0,
         "floor": [],
         "worth": false,
-        "inner": -8.0,
+        "inner": -20.2,
         "acts": [
-         "考萨满巫师@13",
+         "考萨满巫师@0",
+         "跳过@13",
          "跳过@19"
         ]
        },
@@ -1997,31 +2009,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
+          -1,
           0,
           0,
           0,
           0,
           0,
           0,
-          0,
-          0,
+          -1,
           0
          ],
-         "pts": 0,
-         "total": 0,
+         "pts": -2,
+         "total": -5,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 0,
+         "gold": 300,
          "seeds": 26,
-         "endA": 45,
+         "endA": 44,
          "endB": 45
         },
         "used": 0,
         "floor": [],
         "worth": false,
-        "inner": -8.0,
+        "inner": -20.2,
         "acts": [
-         "考萨满巫师@13",
+         "考萨满巫师@0",
+         "跳过@13",
          "跳过@19"
         ]
        },
@@ -2038,31 +2051,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
+          0,
           1,
-          1,
           0,
           0,
           0,
           0,
           0,
-          0,
+          -1,
           0
          ],
-         "pts": 2,
-         "total": 3,
+         "pts": 0,
+         "total": -2,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 200,
+         "gold": 500,
          "seeds": 26,
-         "endA": 45,
+         "endA": 44,
          "endB": 45
         },
         "used": 2,
         "floor": [],
         "worth": false,
-        "inner": -9.8,
+        "inner": -22.0,
         "acts": [
-         "考萨满巫师@13",
+         "考萨满巫师@0",
+         "跳过@13",
          "跳过@19"
         ]
        },
@@ -2079,31 +2093,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
+          0,
           1,
-          1,
           0,
           0,
           0,
           0,
           0,
-          0,
+          -1,
           0
          ],
-         "pts": 2,
-         "total": 3,
+         "pts": 0,
+         "total": -2,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 200,
+         "gold": 500,
          "seeds": 26,
-         "endA": 45,
+         "endA": 44,
          "endB": 45
         },
         "used": 2,
         "floor": [],
         "worth": false,
-        "inner": -9.8,
+        "inner": -22.0,
         "acts": [
-         "考萨满巫师@13",
+         "考萨满巫师@0",
+         "跳过@13",
          "跳过@19"
         ]
        },
@@ -2120,31 +2135,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
+          -1,
           0,
           0,
           0,
           0,
           0,
           0,
-          0,
-          0,
+          -1,
           0
          ],
-         "pts": 0,
-         "total": 0,
+         "pts": -2,
+         "total": -5,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 200,
+         "gold": 500,
          "seeds": 26,
-         "endA": 45,
+         "endA": 44,
          "endB": 45
         },
         "used": 1,
         "floor": [],
         "worth": false,
-        "inner": -12.8,
+        "inner": -25.0,
         "acts": [
-         "考萨满巫师@13",
+         "考萨满巫师@0",
+         "跳过@13",
          "跳过@19"
         ]
        },
@@ -2162,31 +2178,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
-          0,
+          -1,
           1,
           0,
           0,
           0,
           0,
           0,
-          0,
+          -1,
           0
          ],
-         "pts": 1,
-         "total": 1,
+         "pts": -1,
+         "total": -4,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 200,
+         "gold": 500,
          "seeds": 26,
-         "endA": 45,
+         "endA": 44,
          "endB": 45
         },
         "used": 1,
         "floor": [],
         "worth": false,
-        "inner": -13.8,
+        "inner": -26.0,
         "acts": [
-         "考萨满巫师@13",
+         "考萨满巫师@0",
+         "跳过@13",
          "跳过@19"
         ]
        },
@@ -2204,31 +2221,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
-          0,
+          -1,
           1,
           0,
           0,
           0,
           0,
           0,
-          0,
+          -1,
           0
          ],
-         "pts": 1,
-         "total": 1,
+         "pts": -1,
+         "total": -4,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 200,
+         "gold": 500,
          "seeds": 26,
-         "endA": 45,
+         "endA": 44,
          "endB": 45
         },
         "used": 1,
         "floor": [],
         "worth": false,
-        "inner": -15.8,
+        "inner": -28.0,
         "acts": [
-         "考萨满巫师@13",
+         "考萨满巫师@0",
+         "跳过@13",
          "跳过@19"
         ]
        },
@@ -2246,31 +2264,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
+          -1,
           0,
           0,
           0,
           0,
           0,
           0,
-          0,
-          0,
+          -1,
           0
          ],
-         "pts": 0,
-         "total": 0,
+         "pts": -2,
+         "total": -5,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 200,
+         "gold": 500,
          "seeds": 26,
-         "endA": 45,
+         "endA": 44,
          "endB": 45
         },
         "used": 1,
         "floor": [],
         "worth": false,
-        "inner": -16.8,
+        "inner": -29.0,
         "acts": [
-         "考萨满巫师@13",
+         "考萨满巫师@0",
+         "跳过@13",
          "跳过@19"
         ]
        },
@@ -2288,31 +2307,32 @@
         "ruleBlocked": true,
         "d": {
          "g": [
+          -1,
           0,
           0,
           0,
           0,
           0,
           0,
-          0,
-          0,
+          -1,
           0
          ],
-         "pts": 0,
-         "total": 0,
+         "pts": -2,
+         "total": -5,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 200,
+         "gold": 500,
          "seeds": 26,
-         "endA": 45,
+         "endA": 44,
          "endB": 45
         },
         "used": 1,
         "floor": [],
         "worth": false,
-        "inner": -16.8,
+        "inner": -29.0,
         "acts": [
-         "考萨满巫师@13",
+         "考萨满巫师@0",
+         "跳过@13",
          "跳过@19"
         ]
        }
@@ -9191,26 +9211,27 @@
           0,
           0,
           0,
-          0,
-          0,
+          -1,
+          -1,
           0,
           0
          ],
-         "pts": 0,
-         "total": 0,
+         "pts": -2,
+         "total": -4,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 0,
+         "gold": 300,
          "seeds": 30,
-         "endA": 45,
+         "endA": 44,
          "endB": 45
         },
         "used": 0,
         "floor": [],
         "worth": false,
-        "inner": 0.0,
+        "inner": -11.2,
         "acts": [
-         "考弓箭手@8"
+         "考弓箭手@3",
+         "跳过@8"
         ]
        },
        {
@@ -9229,26 +9250,27 @@
           0,
           0,
           0,
-          0,
-          0,
+          -1,
+          -1,
           0,
           0
          ],
-         "pts": 0,
-         "total": 0,
+         "pts": -2,
+         "total": -4,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 0,
+         "gold": 300,
          "seeds": 30,
-         "endA": 45,
+         "endA": 44,
          "endB": 45
         },
         "used": 0,
         "floor": [],
         "worth": false,
-        "inner": 0.0,
+        "inner": -11.2,
         "acts": [
-         "考弓箭手@8"
+         "考弓箭手@3",
+         "跳过@8"
         ]
        },
        {
@@ -9267,26 +9289,27 @@
           0,
           0,
           0,
-          0,
-          0,
+          -1,
+          -1,
           0,
           0
          ],
-         "pts": 0,
-         "total": 0,
+         "pts": -2,
+         "total": -4,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 200,
+         "gold": 500,
          "seeds": 30,
-         "endA": 45,
+         "endA": 44,
          "endB": 45
         },
         "used": 1,
         "floor": [],
         "worth": false,
-        "inner": -4.8,
+        "inner": -16.0,
         "acts": [
-         "考弓箭手@8"
+         "考弓箭手@3",
+         "跳过@8"
         ]
        },
        {
@@ -9307,26 +9330,27 @@
           0,
           0,
           0,
-          0,
-          0,
+          -1,
+          -1,
           0,
           0
          ],
-         "pts": 0,
-         "total": 0,
+         "pts": -2,
+         "total": -4,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 200,
+         "gold": 500,
          "seeds": 30,
-         "endA": 45,
+         "endA": 44,
          "endB": 45
         },
         "used": 1,
         "floor": [],
         "worth": false,
-        "inner": -8.8,
+        "inner": -20.0,
         "acts": [
-         "考弓箭手@8"
+         "考弓箭手@3",
+         "跳过@8"
         ]
        },
        {
@@ -9348,26 +9372,27 @@
           0,
           0,
           0,
-          0,
-          0,
+          -1,
+          -1,
           0,
           0
          ],
-         "pts": 0,
-         "total": 0,
+         "pts": -2,
+         "total": -4,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 0,
+         "gold": 300,
          "seeds": 30,
-         "endA": 45,
+         "endA": 44,
          "endB": 45
         },
         "used": 0,
         "floor": [],
         "worth": false,
-        "inner": -12.0,
+        "inner": -23.2,
         "acts": [
-         "考弓箭手@8"
+         "考弓箭手@3",
+         "跳过@8"
         ]
        },
        {
@@ -9388,26 +9413,27 @@
           0,
           0,
           0,
-          0,
-          0,
+          -1,
+          -1,
           0,
           0
          ],
-         "pts": 0,
-         "total": 0,
+         "pts": -2,
+         "total": -4,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 200,
+         "gold": 500,
          "seeds": 30,
-         "endA": 45,
+         "endA": 44,
          "endB": 45
         },
         "used": 1,
         "floor": [],
         "worth": false,
-        "inner": -12.8,
+        "inner": -24.0,
         "acts": [
-         "考弓箭手@8"
+         "考弓箭手@3",
+         "跳过@8"
         ]
        },
        {
@@ -9428,26 +9454,27 @@
           -1,
           -1,
           0,
-          0,
-          0,
+          -1,
+          -1,
           0,
           0
          ],
-         "pts": -2,
-         "total": -6,
+         "pts": -4,
+         "total": -10,
          "floorPts": 0,
          "floorW": 0,
-         "gold": 500,
+         "gold": 800,
          "seeds": 30,
-         "endA": 44,
+         "endA": 43,
          "endB": 45
         },
         "used": 2,
         "floor": [],
         "worth": false,
-        "inner": -22.0,
+        "inner": -33.2,
         "acts": [
-         "考弓箭手@8",
+         "考弓箭手@3",
+         "跳过@8",
          "跳过@28"
         ]
        },

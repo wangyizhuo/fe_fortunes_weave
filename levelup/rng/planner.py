@@ -113,6 +113,9 @@ class Planner:
     UNKNOWN_CAP = 90
     STR_BONUS = 3
     EARLY_EPS = 1e-4
+    # 11-23 Yizhuo：考进新职业，早考和晚考差不多时越早越好（用它升级的级数多，熟练度更高）。
+    # 「差不多」= 点数不少、金币不多、规划器内部分最多少这么多（约等于加权分 −3）
+    EARLY_EXAM_TOL = 3.0
 
     def str_gain_bonus(self, cur_str, g):
         """当前力量 cur_str，这一级加点 g：跨过 5 的倍数几次 × STR_BONUS。"""
@@ -468,6 +471,15 @@ class Planner:
             return None
         return r[0], r[2], r[3], self.plan_net(r[0], r[2], r[3])
 
+    def _pts(self, acts):
+        """路线的总加点数（不加权）。"""
+        done, n = 0, 0
+        for st, (a, c) in enumerate(acts):
+            if a == "升级":
+                n += sum(self.result(st, self.level + done, c)[1])
+                done += 1
+        return n
+
     def _retime(self, targets, cur, run, net, got):
         """11-17（审查）：考试用哪个种子考也要挑。
         ① 每个要考的职业，试着换到窗口里别的能过的种子考，同样多的乱数下分更高就换（努蒂奴土匪别吃掉好种子）；
@@ -488,6 +500,35 @@ class Planner:
                 if r is not None and ("考试", c) in r[0] and list(r[0]).index(("考试", c)) == st \
                         and all(got(r, x) for x in targets if x not in base_t) and net(r) > net(cur) + 1e-9:
                     self.exam_at, cur = trial, r
+        # ③ 11-23 Yizhuo：差不多时早考（熟练度更高）。每个要考的职业，从最早的种子开始试，第一个「差不多」的就用
+        tol = getattr(self, "early_exam_tol", self.EARLY_EXAM_TOL)
+        for c in list(targets):
+            acts0 = list(cur[0])
+            if ("考试", c) not in acts0:
+                continue
+            i = acts0.index(("考试", c))
+            for st in range(i):
+                if acts0[st][0] == "考试":
+                    continue
+                trial = {k: v for k, v in (self.exam_at or {}).items() if v != c}
+                trial[st] = c
+                sv, nk0 = self.exam_at, set(getattr(self, "no_skip_seeds", ()) or ())
+                self.exam_at = trial
+                r = run(targets)
+                nk = nk0
+                if r is not None and r[3] > cur[3]:
+                    # 早考后规则又多跳过一次（多花钱）：再试「原来不跳的那几级照样不跳」，金币不变才算差不多
+                    extra = {self.seed_at(k) for k, (a, x) in enumerate(r[0]) if a == "考试" and x == "跳过"
+                             and k < len(cur[0]) and cur[0][k] != ("考试", "跳过")}
+                    nk = nk0 | extra
+                    self.no_skip_seeds = nk
+                    r = run(targets)
+                self.exam_at, self.no_skip_seeds = sv, nk0
+                if r is not None and ("考试", c) in r[0] and list(r[0]).index(("考试", c)) == st \
+                        and all(got(r, x) for x in targets if x not in base_t) and r[3] <= cur[3] \
+                        and self._pts(r[0]) >= self._pts(cur[0]) and net(r) >= net(cur) - tol - 1e-9:
+                    self.exam_at, self.no_skip_seeds, cur = trial, nk, r
+                    break
         # ② 挨着的 考试/跳过 对调
         acts = list(cur[0])
         for i in range(len(acts) - 1):
@@ -515,6 +556,10 @@ class Planner:
     def _rule_plan(self, fixed=None, mid=None):
         if fixed is None:
             self.exam_at = {}
+            # ③ 早考时为了不多花钱锁住的「不跳」种子只属于那一次规划，重新规划时恢复原样
+            if not hasattr(self, "_base_no_skip"):
+                self._base_no_skip = set(getattr(self, "no_skip_seeds", ()) or ())
+            self.no_skip_seeds = set(self._base_no_skip)
         gpp = getattr(self, "gold_per_pt", None) or 62.5
         base_t = list(dict.fromkeys(self.required))
         run = self.rule_run
