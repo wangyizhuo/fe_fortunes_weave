@@ -194,6 +194,7 @@ ol.full li.done { color: var(--done); }
 .fullwrap li.done { display: none; }
 .fullwrap:has(.sd:checked) li.done { display: grid; }
 .showdone { display: inline-flex; gap: 6px; align-items: center; font-size: 12.5px; color: var(--muted); margin: 4px 0 6px; cursor: pointer; }
+.fullwrap > .acts { margin: 4px 0 6px; }
 ol.full li.done .opts { display: none; }
 ol.full li.isx { background: color-mix(in srgb, var(--exam-bg) 60%, transparent); }
 ol.full input[type=checkbox] { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--accent); }
@@ -751,7 +752,8 @@ const eqName = row => (row.choice === row.s.cls && row.s.eq && row.s.eq.length >
 function fullList(c, w) {
   // 11-11 Yizhuo：默认不显示已经走过的步骤，勾选才显示
   const nd = w.rows.filter(r => r.done).length;
-  return `<div class="fullwrap">${nd ? `<label class="showdone"><input type="checkbox" class="sd"> 显示已经走过的 ${nd} 步</label>` : ""}<ol class="full">${w.rows.map(row => {
+  // 11-24 Yizhuo：一键展开所有等级（含已走过的步骤和每级的「选择」）
+  return `<div class="fullwrap"><div class="acts"><button type="button" class="btn ghost" data-expand-all>展开所有等级</button>${nd ? `<label class="showdone"><input type="checkbox" class="sd"> 显示已经走过的 ${nd} 步</label>` : ""}</div><ol class="full">${w.rows.map(row => {
     const s = row.s, r = row.r;
     return `<li class="${row.done ? "done" : ""} ${r.exam ? "isx" : ""}" data-key="${s.key}">
       <input type="checkbox" data-f="done" id="d-${keyOf(c, s)}"${row.done ? " checked" : ""} aria-label="已完成">
@@ -1129,6 +1131,14 @@ async function syncSheet() {
     setSync((MCP_MSG[err?.code] || "同步失败") + (err?.code === "tool_error" && err.message ? "：" + err.message.slice(0, 160) : ""), true);
   } finally { btn.disabled = false; }
 }
+document.getElementById("view").addEventListener("click", e => {
+  const b = e.target.closest("[data-expand-all]"); if (!b) return;
+  const w = b.closest(".fullwrap"), open = b.textContent === "展开所有等级";
+  const sd = w.querySelector(".sd"); if (sd) sd.checked = open;
+  w.querySelectorAll("ol.full details").forEach(d => { d.open = open; });
+  w.querySelectorAll("ol.full li.done .opts").forEach(o => { o.style.display = open ? "grid" : ""; });
+  b.textContent = open ? "收起所有等级" : "展开所有等级";
+});
 document.getElementById("syncBtn").addEventListener("click", syncSheet);
 
 try { focus = localStorage.getItem("route-focus") || ""; } catch (_) {}
