@@ -587,7 +587,8 @@ function viewMeal() {
   const leads = mealLead.map(n => MP.find(p => p.name === n));
   const leadOpts = MP.filter(p => p.in || p.tier === "领主");
   const poolAll = MEAL.people.filter(p => !mealLead.includes(p.name));
-  const pool = poolAll.filter(p => mealPool === "all" || (mealPool === "in" ? p.in : !p.in));
+  // 11-25：蕾达线的目标要蕾达同桌才刷得到蕾达的支援，主角里没有蕾达时不列
+  const pool = poolAll.filter(p => mealPool === "all" || (mealPool === "in" ? p.in : !p.in)).filter(p => p.leda == null || mealLead.includes("蕾达"));
   const pri = p => pool.indexOf(p);
   const need = 3 - leads.length;
   const per = MEAL.dishes.map((d, i) => {
@@ -596,7 +597,7 @@ function viewMeal() {
     const list = [];
     if (need === 2) { for (let a = 0; a < pool.length; a++) for (let b = a + 1; b < pool.length; b++) { const v = [...lv, pool[a].pref[i], pool[b].pref[i]]; if (mealPerfect(v)) list.push({ who: [pool[a], pool[b]], v }); } }
     else for (const a of pool) { const v = [...lv, a.pref[i]]; if (mealPerfect(v)) list.push({ who: [a], v }); }
-    const later = w => w.filter(p => !p.in && p.renown > (MEAL.renownNow || 99)).length;   // 名声还不够的人越少越前
+    const later = w => w.filter(p => !p.in && p.leda == null && p.renown > (MEAL.renownNow || 99) + 1).length;   // 11-25：迪线名声 6、7 的人优先（名声更高的往后）
     list.sort((x, y) => { if (later(x.who) !== later(y.who)) return later(x.who) - later(y.who); const px = x.who.map(pri).sort((a, b) => a - b), py = y.who.map(pri).sort((a, b) => a - b);
       for (let k = 0; k < px.length; k++) if (px[k] !== py[k]) return px[k] - py[k]; return y.v.reduce((a, b) => a + b) - x.v.reduce((a, b) => a + b); });
     return { d, lv, list };
@@ -609,7 +610,7 @@ function viewMeal() {
     : r.list.length ? `<td class="pick"><b>${names(r.list[0].who)}</b></td><td class="n">${spk(r.list[0].v)}</td><td class="note">${r.list.slice(1, 5).map(x => `${names(x.who)}（${spk(x.v)}）`).join("；") || "—"}</td>`
     : `<td colspan="3" class="note">${need === 2 ? "这批人里没有两人" : "这批人里没有人"}能和主角一起 perfect</td>`) + `</tr>`).join("");
   const rev = pool.map(p => { const ds = per.filter(r => r.list.some(x => x.who.includes(p))).map(r => r.d);
-    return `<tr><td>${esc(mshort(p.name))}${p.in ? "" : ` <small class="note">${esc(p.tier)}｜名声 ${p.renown}${p.renown <= (MEAL.renownNow || 99) ? "（现在能挖）" : ""}</small>`}</td><td class="note">${ds.length ? esc(ds.join("、")) : "没有能 perfect 的菜"}</td></tr>`; }).join("");
+    return `<tr><td>${esc(mshort(p.name))}${p.in ? "" : p.leda != null ? ` <small class="note">蕾达线｜蕾达名声 ${p.leda}（要和蕾达同桌）</small>` : ` <small class="note">${esc(p.tier)}｜名声 ${p.renown}${p.renown <= (MEAL.renownNow || 99) ? "（现在能挖）" : ""}</small>`}</td><td class="note">${ds.length ? esc(ds.join("、")) : "没有能 perfect 的菜"}</td></tr>`; }).join("");
   const chip = (attr, val, on, t) => `<button type="button" class="btn${on ? " pri" : " ghost"}" data-${attr}="${esc(val)}" aria-pressed="${on}">${esc(t)}</button>`;
   return `<p class="lede">选 1～2 个主角，下面列出每道菜和谁一起吃能 perfect。现在的主角：<b>${esc(leadTxt)}</b>，${need === 2 ? "再带两个人" : "再带一个人"}。</p>
   <section class="alerts"><h2>主角（选一到两个）</h2><p class="txt">点一下选上，再点取消；已经选了两个时再点别人，会换掉先选的那个。</p>
@@ -618,7 +619,7 @@ function viewMeal() {
   <section class="alerts"><h2>每道菜带谁（${per.filter(r => r.list.length).length}/12 道能 perfect）</h2><div class="scroll"><table><tr><th>菜</th><th>主角好感</th><th>首选</th><th class="n">闪光</th><th>备选（按优先级）</th></tr>${rows}</table></div></section>
   <section class="alerts"><h2>从人查菜</h2><div class="scroll"><table><tr><th>同桌</th><th>能和${esc(leadTxt)}一起 perfect 的菜</th></tr>${rev}</table></div></section>` + notesBox([
     "规则（你 11-08 定的）：闪光 最爱 2、喜欢 1、普通 0；三人是 1+1+1 或 2+2+0 才算 perfect。讨厌的人不带。2+1+0 还没确认，所以不算。",
-    `优先级：先排名声 ≤${MEAL.renownNow || "?"}（现在的名声）就能挖的人，再排要更高名声的；同一组里按迪线招募表「Recruit - Diet」的行顺序（必招 → 满足 → 可选）。首选是优先级最高的组合，同样优先级时闪光多的在前。`,
+    `优先级（11-25）：先排迪线名声 6、7 要挖的人（名声 6 在前），再排其他人；蕾达线名声 ≤5 能挖的人只在主角选了「迪 + 蕾达」时列出（要蕾达同桌才刷蕾达的支援）。首选是优先级最高的组合，同样优先级时闪光多的在前。`,
     ...(MEAL.maxed && MEAL.maxed.length ? [`${MEAL.maxed.join("、")} 好感已经满了（你 11-18 说的），不再列进同桌。`] : []),
     "还没入队的人要先送过一次礼物才能请吃饭。领主的好感来自 fortunesweave 的 meals 页；西提司、波拿帕尔特、托比亚斯没有数据。"]);
 }

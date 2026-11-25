@@ -283,17 +283,25 @@ for c in chars:
 # 吃饭（11-08）：迪线招募表「Recruit - Diet」tab 的好感（3 最爱 2 喜欢 1 普通 0 讨厌），加上三位领主（fortunesweave）
 _dt = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "meals", "diet_tab.json"), encoding="utf-8"))
 # Yizhuo 11-18：哥莱亚斯好感满了，吃饭不再带他；名声现在 6，名声 ≤6 能挖的人优先
-MEAL_MAXED = {"哥莱亚斯"}
+MEAL_MAXED = {"哥莱亚斯", "班迪兹"}   # 11-25 Yizhuo：班迪兹也满足了
 RENOWN_NOW = 6
 _REC = {"迪托利希","法毕欧","艾丝梅拉尔达","米迦艾拉","杨界","伊欧","奇洛伊卡","努蒂奴","乌尔坦德"}
 _ppl = []
+import re as _re
+def _route_rep(r, route):
+    m = _re.search(route + r"（名声(\d+)", (r[1] or "") + (r[2] or ""))
+    return int(m.group(1)) if m else None
+LEDA_MAX_RENOWN = 5   # 11-25 Yizhuo：加上蕾达线名声 ≤5 能挖的人（和迪 + 蕾达同桌刷蕾达的支援）
 for r in _dt[1:]:
-    if len(r) < 25 or r[0] not in ("必招", "满足", "可选"): continue
-    if r[8] in MEAL_MAXED: continue
+    if len(r) < 25 or r[8] in MEAL_MAXED: continue
+    _rd, _rl = _route_rep(r, "迪托利希"), _route_rep(r, "蕾达")
+    leda = r[0] not in ("必招", "满足", "可选") and r[8] not in _REC and _rl is not None and _rl <= LEDA_MAX_RENOWN
+    if r[0] not in ("必招", "满足", "可选") and not leda: continue
     _rn = int(str(r[6] or 0).split("–")[0] or 0)
-    _ppl.append({"name": r[8], "tier": r[0], "pref": [int(x) for x in r[13:25]], "in": r[8] in _REC, "renown": _rn})
-# 名声够了就能挖的人排在前面（Yizhuo 11-18：现在名声 6）
-_ppl.sort(key=lambda p: (0 if p["in"] or p["renown"] <= RENOWN_NOW else 1))
+    _ppl.append({"name": r[8], "tier": r[0] if r[0] in ("必招", "满足", "可选") else "蕾达线", "pref": [int(x) for x in r[13:25]],
+                 "in": r[8] in _REC, "renown": _rd if _rd is not None else _rn, "leda": _rl if leda else None})
+# 11-25 Yizhuo：优先迪自己——迪线名声 6、7 要挖的人在前（名声低的先），然后其他人，蕾达线的目标最后
+_ppl.sort(key=lambda p: (0 if p["in"] else 1 if (p["renown"] in (6, 7) and p["tier"] != "蕾达线") else 3 if p["tier"] == "蕾达线" else 2, p["renown"]))
 _LORDS = {"蕾达": [2,2,0,0,2,2,2,0,2,2,2,2], "凯伊": [3,3,2,3,3,2,3,3,3,3,3,2], "赛奥朵拉": [2,2,1,2,2,1,2,2,1,0,2,1]}
 MEALS = {"dishes": [h.split(" - ")[1] for h in _dt[0][13:25]], "people": _ppl, "renownNow": RENOWN_NOW, "maxed": sorted(MEAL_MAXED),
          "lords": [{"name": k, "tier": "领主", "pref": v, "in": False} for k, v in _LORDS.items()]}
