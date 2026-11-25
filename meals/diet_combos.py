@@ -1,46 +1,59 @@
-"""迪 + 两人，每道菜都 perfect 的组合（Yizhuo 11-08 规则：闪光 最爱2/喜欢1/普通0，1+1+1 或 2+2+0 = perfect；讨厌不带；2+1+0 未确认，不用）。
-数据：迪线招募表「Recruit - Diet」tab（贴在 diet_tab.json）。"""
-import json, itertools
-D = ["岩盐火腿","鱼酱汤","玛达津","烤山羊肉","炭烤蒜香扇贝","南瓜汤","豆炖沙猪","芝士烤小龙虾","糖浆炖梨","卤甜辣鞑古扎七节虫","炭烤鱼","特芙果酱"]
+"""吃饭 perfect 组合（迪线）。Yizhuo 11-08 规则：闪光 最爱2/喜欢1/普通0，1+1+1 或 2+2+0 = perfect；讨厌不带；2+1+0 未确认，不用。
+11-25 Yizhuo：去掉班迪兹、哥莱亚斯（都满足了）；优先迪自己——迪线名声 6、7 要挖的人（迪 + 两人）；
+另外列蕾达线名声 ≤5 能挖的人（迪 + 蕾达 + 一人，刷蕾达的支援）。数据：迪线招募表「Recruit - Diet」tab（diet_tab.json）。"""
+import json, itertools, re
 rows = json.load(open("diet_tab.json"))
-TIER = {"必招": 0, "满足": 1, "可选": 2}
-RECRUITED = {"迪托利希","法毕欧","艾丝梅拉尔达","米迦艾拉","杨界","伊欧","奇洛伊卡","努蒂奴","乌尔坦德"}
-MAXED = {"哥莱亚斯"}   # Yizhuo 11-18：好感满了，不再带
-RENOWN_NOW = 6          # Yizhuo 11-18：现在名声 6，名声 ≤6 能挖的人优先
-people = {}
-for r in rows[1:]:
-    if len(r) < 25 or r[0] not in TIER or r[8] == "迪托利希" or r[8] in MAXED: continue
-    people[r[8]] = {"tier": TIER[r[0]], "tierName": r[0], "ch": r[5], "renown": r[6], "sup": r[7], "pref": [int(x) for x in r[13:25]], "recruited": r[8] in RECRUITED}
+D = [h.split(" - ")[1] for h in rows[0][13:25]]
 di = [int(x) for x in rows[1][13:25]]
-def perfect(vals):
-    if min(vals) == 0: return False
-    sp = sorted(v - 1 for v in vals)
-    return sp[0] >= 1 or sp[1:] == [2, 2]
-targets = [n for n, p in people.items() if not p["recruited"]]
-def _rn(n): return int(str(people[n]["renown"] or 0).split("–")[0] or 0)
-rank = {n: (0 if _rn(n) <= RENOWN_NOW else 1, people[n]["tier"], _rn(n)) for n in targets}
+LEDA = [2, 2, 0, 0, 2, 2, 2, 0, 2, 2, 2, 2]   # fortunesweave meals 页
+RECRUITED = {"迪托利希", "法毕欧", "艾丝梅拉尔达", "米迦艾拉", "杨界", "伊欧", "奇洛伊卡", "努蒂奴", "乌尔坦德"}
+MAXED = {"哥莱亚斯", "班迪兹"}
+DI_RENOWN = (6, 7)
+LEDA_MAX = 5
+
+
+def rep(r, route):
+    m = re.search(route + r"（名声(\d+)", (r[1] or "") + (r[2] or ""))
+    return int(m.group(1)) if m else None
+
+
+P = {}
+for r in rows[1:]:
+    if len(r) < 25 or r[8] in RECRUITED or r[8] in MAXED:
+        continue
+    P[r[8]] = {"di": rep(r, "迪托利希"), "leda": rep(r, "蕾达"), "pref": [int(x) for x in r[13:25]], "tier": r[0]}
+DI_T = [n for n, p in P.items() if p["di"] in DI_RENOWN]
+LEDA_T = [n for n, p in P.items() if p["leda"] is not None and p["leda"] <= LEDA_MAX]
+
+
+def perfect(v):
+    if min(v) == 0:
+        return False
+    sp = sorted(x - 1 for x in v)
+    return sp[0] >= 1 or sp == [0, 2, 2]
+
+
+SPK = ["讨厌", "普通", "喜欢", "最爱"]
+spk = lambda v: "+".join(str(x - 1) for x in v)
 out = {}
 for i, d in enumerate(D):
-    combos = []
-    for a, b in itertools.combinations(targets, 2):
-        v = [di[i], people[a]["pref"][i], people[b]["pref"][i]]
-        if perfect(v):
-            combos.append(((rank[a][0] + rank[b][0], sorted([rank[a], rank[b]])), -sum(v), a, b, v))   # 先看几个人现在能挖
-    combos.sort()
-    out[d] = combos
-# 表格「迪吃饭 perfect 组合」的行（diet_plan_rows.json）
-SPK = ["讨厌", "普通", "喜欢", "最爱"]
-def rn_tag(n): return f"{n}（名声{_rn(n)}）"
-rows_out = [["菜", "首选：迪 + 两人", "好感（迪 / 两人）", "闪光", "备选（按优先级）", f"这道菜能 perfect 的目标（按优先级；名声 ≤{RENOWN_NOW} 现在能挖的在前）"]]
-for d, c in out.items():
-    if not c:
-        rows_out.append([d, "没有两人能和迪一起 perfect", "", "", "", ""]); continue
-    _, _, a, b, v = c[0]
-    who = sorted({n for _, _, x, y, _ in c for n in (x, y)}, key=lambda n: (rank[n], targets.index(n)))
-    rows_out.append([d, f"迪 + {a} + {b}", " / ".join(SPK[x] for x in v), "+".join(str(x - 1) for x in v),
-                     "；".join(f"迪+{x}+{y}" for _, _, x, y, _ in c[1:5]), "、".join(rn_tag(n) for n in who)])
+    a = sorted(((P[x]["di"] + P[y]["di"], -sum(v), x, y, v) for x, y in itertools.combinations(DI_T, 2)
+                if perfect(v := [di[i], P[x]["pref"][i], P[y]["pref"][i]])))
+    b = sorted(((P[x]["leda"], -sum(v), x, v) for x in LEDA_T if perfect(v := [di[i], LEDA[i], P[x]["pref"][i]])))
+    out[d] = {"di": [[x, y, v] for _, _, x, y, v in a], "leda": [[x, v] for _, _, x, v in b]}
+json.dump(out, open("diet_combos.json", "w"), ensure_ascii=False, indent=0)
+tag = lambda n: f"{n}（名声{P[n]['di']}）"
+rows_out = [["菜", "迪好感", "首选：迪 + 两人（迪线名声 6、7）", "闪光", "备选", "蕾达同桌：迪 + 蕾达 + 一人（蕾达线名声 ≤5）"]]
+for i, d in enumerate(D):
+    a, b = out[d]["di"], out[d]["leda"]
+    rows_out.append([d, SPK[di[i]], f"迪 + {tag(a[0][0])} + {tag(a[0][1])}" if a else "没有",
+                     spk(a[0][2]) if a else "", "；".join(f"{x}+{y}（{spk(v)}）" for x, y, v in a[1:5]),
+                     "；".join(f"{x}（蕾达名声{P[x]['leda']}，{spk(v)}）" for x, v in b) or "没有"])
 json.dump(rows_out, open("diet_plan_rows.json", "w"), ensure_ascii=False, indent=0)
-print("迪:", di)
-print("目标:", sorted(targets, key=lambda n: rank[n]))
-for d, c in out.items():
-    print(d, len(c), [(a, b, v) for _, _, a, b, v in c[:5]])
+for r in rows_out:
+    print(" | ".join(r))
+print("迪线 6/7：", "、".join(tag(n) for n in DI_T))
+print("蕾达线 ≤5：", "、".join(f"{n}（{P[n]['leda']}）" for n in LEDA_T))
+for n in DI_T + LEDA_T:
+    ds = [d for d in D if any(n in (x, y) for x, y, _ in out[d]["di"]) or any(n == x for x, _ in out[d]["leda"])]
+    print(n, "→", "、".join(ds) or "没有")
