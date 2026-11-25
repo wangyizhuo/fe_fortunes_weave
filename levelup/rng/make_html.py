@@ -282,13 +282,20 @@ for c in chars:
 
 # 吃饭（11-08）：迪线招募表「Recruit - Diet」tab 的好感（3 最爱 2 喜欢 1 普通 0 讨厌），加上三位领主（fortunesweave）
 _dt = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "meals", "diet_tab.json"), encoding="utf-8"))
+# Yizhuo 11-18：哥莱亚斯好感满了，吃饭不再带他；名声现在 6，名声 ≤6 能挖的人优先
+MEAL_MAXED = {"哥莱亚斯"}
+RENOWN_NOW = 6
 _REC = {"迪托利希","法毕欧","艾丝梅拉尔达","米迦艾拉","杨界","伊欧","奇洛伊卡","努蒂奴","乌尔坦德"}
 _ppl = []
 for r in _dt[1:]:
     if len(r) < 25 or r[0] not in ("必招", "满足", "可选"): continue
-    _ppl.append({"name": r[8], "tier": r[0], "pref": [int(x) for x in r[13:25]], "in": r[8] in _REC})
+    if r[8] in MEAL_MAXED: continue
+    _rn = int(str(r[6] or 0).split("–")[0] or 0)
+    _ppl.append({"name": r[8], "tier": r[0], "pref": [int(x) for x in r[13:25]], "in": r[8] in _REC, "renown": _rn})
+# 名声够了就能挖的人排在前面（Yizhuo 11-18：现在名声 6）
+_ppl.sort(key=lambda p: (0 if p["in"] or p["renown"] <= RENOWN_NOW else 1))
 _LORDS = {"蕾达": [2,2,0,0,2,2,2,0,2,2,2,2], "凯伊": [3,3,2,3,3,2,3,3,3,3,3,2], "赛奥朵拉": [2,2,1,2,2,1,2,2,1,0,2,1]}
-MEALS = {"dishes": [h.split(" - ")[1] for h in _dt[0][13:25]], "people": _ppl,
+MEALS = {"dishes": [h.split(" - ")[1] for h in _dt[0][13:25]], "people": _ppl, "renownNow": RENOWN_NOW, "maxed": sorted(MEAL_MAXED),
          "lords": [{"name": k, "tier": "领主", "pref": v, "in": False} for k, v in _LORDS.items()]}
 OPTS = json.load(open(os.path.join(HERE, "options.json"), encoding="utf-8")) if os.path.exists(os.path.join(HERE, "options.json")) else {}
 data_json = json.dumps({"options": OPTS, "meals": MEALS, "chars": chars, "stats": STATS, "skills": SKILLS, "decisions": json.load(open(os.path.join(HERE, "decisions.json"), encoding="utf-8"))}, ensure_ascii=False)

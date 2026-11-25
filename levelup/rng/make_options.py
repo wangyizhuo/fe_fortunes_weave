@@ -69,6 +69,92 @@ def now_pct(name, c, lv):
     return min(pct, 100 if d <= 0 else 50 if d == 1 else 32 if d == 2 else 0)
 
 
+MID = "中级"
+
+
+def _metrics(p, acts, total, gold):
+    """路线的能力加点、点数、加权分、保底（点数/加权）、金币——分开给，不合成净值（Yizhuo 11-17）。"""
+    g, done, used = [0] * 9, 0, {}
+    for st, (a, c) in enumerate(acts):
+        if a == "升级":
+            g = [x + y for x, y in zip(g, p.result(st, p.level + done, c)[1])]
+            used[c] = used.get(c, 0) + 1
+            done += 1
+    lifts = [(i, x, v) for ls in p.floor_lifts(acts).values() for i, x, v in ls]
+    return {"g": g, "total": total, "gold": gold, "end": p.level + done, "used": used,
+            "floorPts": sum(v - x for _, x, v in lifts), "floorW": sum(p.weights[i] * (v - x) for i, x, v in lifts),
+            "floor": [f"{STATS[i]} {x}→{v}" for i, x, v in lifts]}
+
+
+def skip_mid(name, target):
+    """11-18 Yizhuo：规划里要「跳过」的那一级，判定值好（能考过）的话改成考一个中级职业，能不能提高数值。
+    每个跳过的种子 × 每个没有的中级职业：这一步改考它（考过才算）、其余照规则走，和原路线按同样多的乱数比。
+    所有档位都列（不分 P0/P1/P2）；要练技能的写段数，不练的成功率也写出来。"""
+    p = R.make_planner(name, target)
+    pl = p.rule_plan()
+    if pl is None:
+        return {"target": target, "skips": []}
+    base_acts, base_at, base_tg = pl.raw_actions, dict(p.exam_at or {}), list(pl.targets)
+    S = len(base_acts)
+    # 原路线（同一个窗口）重算一遍，拿加点/保底
+    p.seed_budget, p.exam_at = S, base_at
+    try:
+        rb = p.rule_run(base_tg)
+    finally:
+        p.seed_budget = None
+    base = _metrics(p, rb[0], rb[2], rb[3])
+    base["gold"] = pl.gold          # 没用来升级的职业按跳过算钱（和路线页一致）
+    q = planner(name, target, True)   # 允许先练技能的版本（只用来判断能不能考过、算这个职业）
+    q.exam_at = {}
+    mids = [c for c in R.EXAM_OPTIONS[name] if R._TIER_OF(c) == MID and c not in R.OWNED[name] and c not in base_tg]
+    out = []
+    done = 0
+    for st, (a, c0) in enumerate(base_acts):
+        lv = p.level + done
+        if a == "升级":
+            done += 1
+            continue
+        if c0 != "跳过":
+            continue
+        row = {"step": st, "lv": lv, "roll": round(p.exam_value(st), 2), "opts": []}
+        for c in mids:
+            pct, pnow = q.exam_pct(c, lv), now_pct(name, c, lv)
+            roll = p.exam_value(st)
+            ok, oknow = pct is not None and roll < pct, pnow is not None and roll < pnow
+            o = {"cls": c, "pct": pct, "pctNow": pnow, "ok": ok, "okNow": oknow,
+                 "ranks": 0 if oknow else q.exam_train_ranks.get(c, 0), "train": [] if oknow else (q.exam_train.get(c) or [])}
+            if not ok:
+                out_why = "判定值高于成功率，考不过" if pct else "等级/技能不够，成功率 0"
+                row["opts"].append(dict(o, why=out_why))
+                continue
+            q.exam_at, q.seed_budget = {**base_at, st: c}, S
+            try:
+                r = q.rule_run(base_tg + [c], (c,))
+            finally:
+                q.seed_budget = None
+            if r is None or ("考试", c) not in r[0]:
+                row["opts"].append(dict(o, ok=False, why="照规则走不通"))
+                continue
+            m = _metrics(q, r[0], r[2], r[3])
+            # 考进去却没用来升级：页面上会显示成「跳过」，金币按初级算，但保底照拿
+            if not m["used"].get(c):
+                m["gold"] -= p.permit_gold[MID] - p.permit_gold["初级"]
+            d = {"g": [x - y for x, y in zip(m["g"], base["g"])], "pts": sum(m["g"]) - sum(base["g"]),
+                 "total": round(m["total"] - base["total"], 1),
+                 "floorPts": m["floorPts"] - base["floorPts"], "floorW": m["floorW"] - base["floorW"],
+                 "gold": m["gold"] - base["gold"], "seeds": S, "endA": m["end"], "endB": base["end"]}
+            # 只用来排序/标记：规划器内部换算（加权分 + 保底 − 金币÷每分金币 − 段×每段扣分），页面不合成一个数
+            inner = d["total"] + d["floorW"] - d["gold"] / p.gold_per_pt - o["ranks"] * R.TRAIN_PTS[R.tier_of(name)]
+            later = [(x, c2) for x, (a2, c2) in enumerate(r[0]) if a2 == "考试" and x != st]
+            o.update(d=d, used=m["used"].get(c, 0), floor=[f for f in m["floor"] if f not in base["floor"]],
+                     worth=inner >= R.MIN_EXAM_GAIN, inner=round(inner, 1),
+                     acts=[f"{'跳过' if c2 == '跳过' else '考' + c2}@{x}" for x, c2 in later])
+            row["opts"].append(o)
+        row["opts"].sort(key=lambda o: (not o["ok"], -o.get("inner", -999)))
+        out.append(row)
+    return {"target": target, "seeds": S, "skips": out, "baseExams": [c for a, c in base_acts if a == "考试"]}
+
+
 def build(name):
     T = R.TARGET[name]
     out = {"name": name, "tier": R.tier_of(name), "level": R.current_state(name)[1], "target": T,
@@ -103,6 +189,7 @@ def build(name):
             "floor": [f"{STATS[i]} {x}→{v}" for lifts in aT["floor"].values() for i, x, v in lifts],
             "toT": dT, "after": after, "rec": c in out["recommended"],
             "ruleBlocked": bool(pT.exam_train_ranks.get(c)) and not out["trainAllowed"]})
+    out["skipMid"] = [skip_mid(name, T)] + ([skip_mid(name, 45)] if T < 45 else [])
     out["options"].sort(key=lambda o: (not o.get("ok"), -(o.get("toT", {}).get("total", -999))))
     return out
 
