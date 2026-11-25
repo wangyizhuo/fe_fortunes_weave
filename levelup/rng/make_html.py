@@ -284,6 +284,8 @@ for c in chars:
 _dt = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "meals", "diet_tab.json"), encoding="utf-8"))
 # Yizhuo 11-18：哥莱亚斯好感满了，吃饭不再带他；名声现在 6，名声 ≤6 能挖的人优先
 MEAL_MAXED = {"哥莱亚斯", "班迪兹"}   # 11-25 Yizhuo：班迪兹也满足了
+MEAL_ABSENT = {"莱桑达"}      # 11-25 Yizhuo：莱桑达目前不在
+MEAL_LEDA_ONLY = {"绯亚娜"}   # 11-25 Yizhuo：迪不用刷绯亚娜，只在蕾达同桌时列
 RENOWN_NOW = 6
 _REC = {"迪托利希","法毕欧","艾丝梅拉尔达","米迦艾拉","杨界","伊欧","奇洛伊卡","努蒂奴","乌尔坦德"}
 _ppl = []
@@ -293,9 +295,9 @@ def _route_rep(r, route):
     return int(m.group(1)) if m else None
 LEDA_MAX_RENOWN = 5   # 11-25 Yizhuo：加上蕾达线名声 ≤5 能挖的人（和迪 + 蕾达同桌刷蕾达的支援）
 for r in _dt[1:]:
-    if len(r) < 25 or r[8] in MEAL_MAXED: continue
+    if len(r) < 25 or r[8] in MEAL_MAXED or r[8] in MEAL_ABSENT: continue
     _rd, _rl = _route_rep(r, "迪托利希"), _route_rep(r, "蕾达")
-    leda = r[0] not in ("必招", "满足", "可选") and r[8] not in _REC and _rl is not None and _rl <= LEDA_MAX_RENOWN
+    leda = (r[0] not in ("必招", "满足", "可选") or r[8] in MEAL_LEDA_ONLY) and r[8] not in _REC and _rl is not None and _rl <= LEDA_MAX_RENOWN
     if r[0] not in ("必招", "满足", "可选") and not leda: continue
     _rn = int(str(r[6] or 0).split("–")[0] or 0)
     _ppl.append({"name": r[8], "tier": r[0] if r[0] in ("必招", "满足", "可选") else "蕾达线", "pref": [int(x) for x in r[13:25]],

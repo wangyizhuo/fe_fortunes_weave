@@ -8,6 +8,8 @@ di = [int(x) for x in rows[1][13:25]]
 LEDA = [2, 2, 0, 0, 2, 2, 2, 0, 2, 2, 2, 2]   # fortunesweave meals 页
 RECRUITED = {"迪托利希", "法毕欧", "艾丝梅拉尔达", "米迦艾拉", "杨界", "伊欧", "奇洛伊卡", "努蒂奴", "乌尔坦德"}
 MAXED = {"哥莱亚斯", "班迪兹"}
+ABSENT = {"莱桑达"}        # 11-25 Yizhuo：莱桑达目前不在
+LEDA_ONLY = {"绯亚娜"}      # 11-25 Yizhuo：迪不用刷绯亚娜的好感，只在蕾达同桌时带（刷蕾达的支援）
 DI_RENOWN = (6, 7)
 LEDA_MAX = 5
 
@@ -19,10 +21,10 @@ def rep(r, route):
 
 P = {}
 for r in rows[1:]:
-    if len(r) < 25 or r[8] in RECRUITED or r[8] in MAXED:
+    if len(r) < 25 or r[8] in RECRUITED or r[8] in MAXED or r[8] in ABSENT:
         continue
     P[r[8]] = {"di": rep(r, "迪托利希"), "leda": rep(r, "蕾达"), "pref": [int(x) for x in r[13:25]], "tier": r[0]}
-DI_T = [n for n, p in P.items() if p["di"] in DI_RENOWN]
+DI_T = [n for n, p in P.items() if p["di"] in DI_RENOWN and n not in LEDA_ONLY]
 LEDA_T = [n for n, p in P.items() if p["leda"] is not None and p["leda"] <= LEDA_MAX]
 
 
