@@ -58,5 +58,5 @@ def test_partner_only_and_goal_coverage():
     assert any("蕾达" in t["who"] and t["perfect"] for t in pear["options"])
     ham = next(r for r in p["dishes"] if r["dish"] == "岩盐火腿")
     assert any(t["who"][0] == "蕾达" and "绯亚娜" in t["who"] and t["perfect"] for t in ham["options"])   # 不用带迪
-    lv2 = {x["target"] for x in p["weights"] if x["support"] == 2}
-    assert {"札可捏", "嘉丝敏", "大刀"} <= lv2
+    lv2 = {x["target"] for x in p["weights"] if x["support"] == 2 and x["lord"] == CFG["current_lord"]}
+    assert lv2 == {"丹提"}   # 迪线还要招、支援 2（名声 8）

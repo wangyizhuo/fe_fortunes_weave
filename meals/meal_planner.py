@@ -69,7 +69,7 @@ def pair_weights(people, cfg):
             if "tiers" in g and not any(p.get("tier", "").startswith(t) for t in g["tiers"]):
                 continue   # 招募表第一栏（迪线招募）：只要还要招的
             if "renown_weight" in g:
-                s = g["renown_weight"].get(str(r), 0)
+                s = g["renown_weight"].get(str(r), 0) or g.get("support_weight", {}).get(str(p["sup"].get(g["route"])), 0)
             else:
                 s = g.get("weight", 1) if r <= g.get("max_renown", 99) else 0
             if s:
@@ -147,8 +147,8 @@ def main():
     for r in p["dishes"]:
         print(f"{r['dish']}：" + ("；".join(fmt(t) for t in r["options"]) or "没有能用的组合"))
     print("目标：", "、".join(f"{x['lord']}–{x['target']}(分{x['score']}，要支援{x['support']})" for x in p["weights"]))
-    lv2 = [x for x in p["weights"] if x["support"] == 2]
-    print("支援 2 就能招：", "、".join(f"{x['target']}（{x['lord']}线）" for x in lv2) or "没有")
+    lv2 = [x for x in p["weights"] if x["support"] == 2 and x["lord"] == cfg.get("current_lord")]
+    print("主角线支援 2 就能招：", "、".join(x["target"] for x in lv2) or "没有")
 
 
 if __name__ == "__main__":
