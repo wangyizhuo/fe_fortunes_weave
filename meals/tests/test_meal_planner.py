@@ -33,7 +33,7 @@ def test_plan_shape_and_order():
             assert min(t["pref"]) > 0                      # 没人讨厌
             assert not t["filler"]                           # 每个座位都有用
             assert not (set(t["who"]) & set(CFG["recruited"])) - {CFG["current_lord"]}   # 已入队的不上桌
-            assert "杰斯塔" not in t["who"] and "奥琳琵娅" not in t["who"] and "莱桑达" not in t["who"]   # 迪–杰斯塔、迪–奥琳琵娅支援已经够了（11-25）
+            assert "杰斯塔" not in t["who"] and "奥琳琵娅" not in t["who"] and "莱桑达" not in t["who"] and "乌修拉" not in t["who"]   # 迪–杰斯塔、迪–奥琳琵娅支援已经够了（11-25）
             assert "古扎岚" not in t["who"]                  # 蕾达线支援 1 就能招，不用吃饭
             if CFG["current_lord"] in t["who"]:
                 assert t["who"][0] == CFG["current_lord"]   # 主角排第一
