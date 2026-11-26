@@ -26,6 +26,7 @@ def test_plan_shape_and_order():
             assert len(t["who"]) == 3 and len(set(t["who"])) == 3
             assert not out & set(t["who"])
             assert min(t["pref"]) > 0                      # 没人讨厌
+            assert all(n in CFG["recruited"] for n in t["filler"])   # 凑数只用已入队的
             assert t["perfect"] == mp.is_perfect(t["pref"])
         assert "露露蒂雅" not in t["who"] or "蕾达" in t["who"]   # 迪线不招
         if r["perfect"]:
