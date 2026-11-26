@@ -419,6 +419,8 @@ def p_pair_search():
     bad = []
     for n in ORDER:
         p, pl = plan(n)
+        if getattr(p, "first_bad_info", None):
+            continue   # 11-25 Yizhuo：P0 以外考试时机按默认/他指定，换职业、换时机的取舍列给他选（选择原因 timing），不算漏掉
         mine = p.window_value(pl.targets)[3]
         req = list(dict.fromkeys(p.required))
         cands = [c for c in p.exam_options if c not in req]
