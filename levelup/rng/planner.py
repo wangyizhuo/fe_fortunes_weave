@@ -362,7 +362,7 @@ class Planner:
                         pick = c
                         break
                 # 11-17：指定在这一步考（挑了用哪个种子考，见 _retime）
-                if step in ea and ea[step] not in owned and self.exam_ok(step, ea[step], lv):
+                if step in ea and not keep and ea[step] not in owned and self.exam_ok(step, ea[step], lv):   # 指定保留的种子不考
                     pick = ea[step]
                     pend = pend if pick in pend else pend + [pick]
                 reasons[step].update(want_skip=want_skip, keep=keep, pick=pick)
