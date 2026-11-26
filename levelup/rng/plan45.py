@@ -81,7 +81,7 @@ def summary(p, plan):
 
 res = {}
 for name in R.OWNED:
-    p35 = R.make_planner(name, 35)
+    p35 = R.make_planner(name, R.TARGET[name])   # 11-25：和主路线同一个目标（同样多的乱数）
     plans35, k35 = plan_all(p35, MAX_EXAMS)
     plan35 = plans35[k35]
     p = mk45(name)

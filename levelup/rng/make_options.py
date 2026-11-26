@@ -45,12 +45,8 @@ def run(p, targets, S=None):
 
 
 def eq(p, ta, tb):
-    """11-17 Yizhuo：两条路线用掉同样多的乱数再比（窗口 = 两条到目标级用掉乱数较多的那个）。"""
-    a, b = run(p, ta), run(p, tb)
-    if a is None or b is None:
-        return a, b
-    S = max(len(a["acts"]), len(b["acts"]))
-    return run(p, ta, S), run(p, tb, S)
+    """11-25 Yizhuo：两条路线都在同样多的乱数（p.n_seeds）里走，直接比。"""
+    return run(p, ta), run(p, tb)
 
 
 def diff(a, b):
@@ -64,10 +60,8 @@ def now_pct(name, c, lv):
     q = R.exam_req(name, c)
     if not q:
         return None
-    rec_lv, gap = q
-    pct = 100 if gap <= 0 else 50 if gap == 1 else 0
-    d = rec_lv - lv
-    return min(pct, 100 if d <= 0 else 50 if d == 1 else 32 if d == 2 else 0)
+    from planner import exam_rate
+    return exam_rate(lv - q[0], q[1])
 
 
 MID = "中级"

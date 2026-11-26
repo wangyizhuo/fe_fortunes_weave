@@ -23,6 +23,7 @@ with contextlib.redirect_stdout(io.StringIO()):
 from planner import STATS, plan_all, plan_gold, _TIER
 from fe_growth import exam_roll
 import timing
+from compare import seed_diff, explain
 
 def stats_after(p, acts):
     """按动作走完的能力（含考进新职业时的保底）和到达的等级。"""
@@ -50,6 +51,43 @@ def exam_why(p, c, mids_in_route):
     if getattr(p, "require_mid", False) and _TIER.get(c) == "中级" and mids_in_route == [c]:
         return "每人都要考进一个中级（规则），这是不练技能能考、到目标级最好的一个"
     return "规则算出来值得考（比不考多的分超过门槛）"
+
+
+def timing_part(p, acts, step, c):
+    """11-25 Yizhuo：这场考试换到别的乱数考（其余照规则走，同样多的乱数）会怎样。
+    每个能考过的乱数都算，差别按乱数对齐拆成 ①考试用掉的乱数 ②用不同职业升级 ③保底（compare.seed_diff，现在路线减另一条）。"""
+    targets = [x for a, x in acts if a == "考试" and x != "跳过"]
+    base_at = {k: v for k, v in (getattr(p, "exam_at", None) or {}).items() if v != c}
+    must = tuple(x for x in targets if x in p.keep_classes or x == c)
+    out = []
+    lv = p.level
+    for st in range(len(acts)):
+        if st != step and acts[st][0] != "考试":
+            sv = p.exam_at
+            p.exam_at = {**base_at, st: c}
+            try:
+                r = p.window_value(targets, len(acts), must)
+            finally:
+                p.exam_at = sv
+            if r is not None and st < len(r[0]) and r[0][st] == ("考试", c):
+                d = seed_diff(p, acts, r[0])
+                lv_alt = p.level + sum(1 for a, _ in r[0][:st] if a == "升级")
+                out.append({"step": st, "lv": lv_alt, "roll": round(p.exam_value(st), 2), "pct": p.exam_pct(c, lv_alt),
+                            "exam": d["examPart"], "cls": d["classPart"], "floor": d["floorPart"], "total": d["total"],
+                            "gold": plan_gold_acts(p, acts) - plan_gold_acts(p, r[0]),
+                            "explain": explain(d, "现在", f"Lv{lv_alt} 考")})
+    out.sort(key=lambda x: (x["total"]["w"], x["total"]["pts"]))
+    return out
+
+
+def plan_gold_acts(p, acts):
+    used = {x for a, x in acts if a == "升级"}
+    g = 0
+    for a, x in acts:
+        if a == "考试":
+            t = "初级" if x == "跳过" or (x not in used and x not in p.keep_classes) else _TIER.get(x, "中级")
+            g += p.permit_gold.get(t, p.permit_gold["中级"])
+    return g
 
 
 def route_part(p, pl):
@@ -92,6 +130,7 @@ def route_part(p, pl):
                      dropExams=[x for y, x in a2 if y == "考试" and x != "跳过"],
                      dropSkips=sum(1 for y, x in a2 if x == "跳过"))
             row["vsDrop"] = d
+        row["timing"] = timing_part(p, acts, step, c)
         rows.append(row)
     return {"seeds": S, "endLv": lv, "end": st, "pts": sum(st) - sum(p.stats),
             "w": sum(w * (x - y) for w, x, y in zip(p.weights, st, p.stats)),

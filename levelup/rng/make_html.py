@@ -105,7 +105,7 @@ for name in ORDER:
         p = make_planner(name, TARGET[name])
         plans, k = plan_all(p, MAX_EXAMS)
         plan = plans[k]
-        c.update({"planFrom": p.level, "planTo": p.level + p.n_levels, "planTotal": plan.total, "exams": plan.exams})
+        c.update({"planFrom": p.level, "planTo": p.level + sum(r.action == "升级" for r in plan.rows), "seeds": p.n_seeds, "planTotal": plan.total, "exams": plan.exams})
         c["thr"] = list(p.thresholds)
         # 11-08 晚（规则式）：每个还没转的中级职业，硬加进「要转的职业」后净值变多少（和现在的路线比）
         from planner import _TIER as _T, _TIER_RANK as _TR, STATS as STATS_
@@ -150,7 +150,7 @@ for name in ORDER:
         # 趋势：一直用现在的职业升到 35（不转职、不考试）；只换已有职业不考试
         cur_cls = next((st["cls"] for st in reversed(c["steps"]) if st["src"] == "record" and not st["exam"] and st["cls"]), shot.get("class"))
         stay = [0] * 9
-        for i in range(p.n_levels):
+        for i in range(p.n_seeds):
             _, g = p.result(i, p.level + i, cur_cls)
             stay = [a + b for a, b in zip(stay, g)]
         p0 = plans[0] if plans[0] is not None and plans[0].total > 0 else None
@@ -200,7 +200,7 @@ for name in ORDER:
             x.extend([n_use, txt, dsc])
         use_info = {x[1]: x[4:7] for x in seg if x[0] == "exam" and x[1] and len(x) > 4}
         c["route"] = seg
-        c["trend"] = {"cur": cur_cls, "n": p.n_levels, "stay": stay, "best0": best0}
+        c["trend"] = {"cur": cur_cls, "n": p.n_seeds, "stay": stay, "best0": best0}
         c["planTotal"] = plan.total   # 11-11：一览的加权分用规划器的合计（含体格）
         c["tier"] = tier_of(name)
         c["str0"] = p.str_start   # 11-11：页面合计也算体格 +3（力跨过 5 的倍数）

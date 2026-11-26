@@ -29,7 +29,7 @@ def main():
         p = make_planner(name, TARGET[name])
         plans, k = plan_all(p, MAX_EXAMS)
         plan = plans[k]
-        route_rows.append([f"{name}  Lv{p.level}→{p.level + p.n_levels}", "", "", "", "",
+        route_rows.append([f"{name}  Lv{p.level}→{p.level + sum(r.action == '升级' for r in plan.rows)}（{p.n_seeds} 个乱数）", "", "", "", "",
                            "、".join(OWNED[name]), *[""] * 9, "",
                            "考试上限→总分：" + "  ".join(f"{i}次 {pl.total if pl and pl.rows else '不可行'}" for i, pl in enumerate(plans)),
                            (f"必考：{'、'.join(REQUIRED[name])}（练精通，同分时优先用它升级）；" if name in REQUIRED else "") + f"建议考 {plan.exams} 次" + (f"（比不考多 {plan.total - plans[0].total} 分）" if plans[0] and plans[0].rows else "") + f"；可考：{'、'.join(c for c in EXAM_OPTIONS[name] if c not in OWNED[name])}", ""])
