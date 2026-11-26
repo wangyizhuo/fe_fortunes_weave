@@ -94,6 +94,11 @@ class Planner:
         self.str_start = self.stats[1] if self.stats else None
         self.require_mid = False    # 路线里至少要考进一个新的中级职业（Yizhuo 11-06）
 
+    @property
+    def keep_classes(self):
+        """考了但没用来升级也照样保留（不显示成跳过）的职业：必考 + 「跳过时顺便考到」的（skip_take，11-25 伊欧战车兵）。"""
+        return set(self.required) | set(getattr(self, "skip_take", ()) or ())
+
     def seed_at(self, step):
         while len(self.seeds) <= step:
             self.seeds.append(next_seed(self.seeds[-1]))
@@ -254,7 +259,7 @@ class Planner:
         actions, notes = self.rebalance(actions)
         # Yizhuo 11-08：转职到的职业后面没用来升级（也不是必考的）→ 只是为了跳过，就写「跳过」
         used = {c for a, c in actions if a == "升级"}
-        actions = tuple(("考试", "跳过") if a == "考试" and c != "跳过" and c not in used and c not in self.required else (a, c)
+        actions = tuple(("考试", "跳过") if a == "考试" and c != "跳过" and c not in used and c not in self.keep_classes else (a, c)
                         for a, c in actions)
         rows = self._rows(actions)
         for r in rows:
@@ -318,6 +323,7 @@ class Planner:
         ea = getattr(self, "exam_at", None) or {}
         rule = getattr(self, "skip_rule", None)
         nss = getattr(self, "no_skip_seeds", ()) or ()
+        skip_take = tuple(getattr(self, "skip_take", ()) or ())
         while (done < self.n_levels if budget is None else step < budget) and step < 400:
             lv = self.level + done
             if step < len(forced):
@@ -364,6 +370,11 @@ class Planner:
                     a, c = "考试", pick
                 elif want_skip and step not in no_skip:
                     a, c = "考试", "跳过"
+                    # 11-25 Yizhuo：伊欧要跳过时用「考战车兵」来跳，保证拿到这个职业（skip_take，能考过才用）
+                    for x in skip_take:
+                        if x not in owned and self.exam_ok(step, x, lv):
+                            c = x
+                            break
                 else:
                     a, c = "升级", best
                     raw_best = why and max(owned, key=lambda x: (self.result(step, lv, x)[0] + (self.str_gain_bonus(cur_str, self.result(step, lv, x)[1]) if cur_str is not None else 0), x == best))
@@ -750,7 +761,7 @@ class Planner:
         acts, notes, total, gold, pend = cur
         # 转过去后面没用来升级、也不是必转的 → 显示成「跳过」（价格按实际买的手形）
         used = {c for a, c in acts if a == "升级"}
-        shown = tuple(("考试", "跳过") if a == "考试" and c != "跳过" and c not in used and c not in self.required else (a, c) for a, c in acts)
+        shown = tuple(("考试", "跳过") if a == "考试" and c != "跳过" and c not in used and c not in self.keep_classes else (a, c) for a, c in acts)
         rows = self._rows(shown)
         for r in rows:
             r.balance_note = notes.get(r.step, "")
@@ -760,7 +771,7 @@ class Planner:
         # 11-11 Yizhuo：跳过 = 不学会新职业。考进去却从没用来升级（也不是必考）的职业，当成真正的跳过：不算学会，按初级手形算钱
         fixed = []
         for a, c in acts:
-            if a == "考试" and c not in (None, "跳过") and c not in used and c not in self.required:
+            if a == "考试" and c not in (None, "跳过") and c not in used and c not in self.keep_classes:
                 gold -= self.permit_gold.get(_TIER.get(c, "中级"), 500) - self.permit_gold["初级"]
                 targets = [t for t in targets if t != c]
                 c = "跳过"

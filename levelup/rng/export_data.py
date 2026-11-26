@@ -66,6 +66,50 @@ def _plan35():
     return checks.snapshot()
 
 
+def _reasons():
+    """make_reasons.py 生成的「为什么这样选」（11-25 Yizhuo：记下来，不临时算）。"""
+    path = os.path.join(HERE, "reasons.json")
+    return json.load(open(path, encoding="utf-8")) if os.path.exists(path) else {}
+
+
+def _d(v, unit=""):
+    return f"{'+' if v > 0 else ''}{v}{unit}"
+
+
+def _g(g):
+    return " ".join(f"{s}{_d(v)}" for s, v in zip(STATS, g) if v) or "能力一样"
+
+
+def reasons_md(r):
+    if not r:
+        return []
+    rt = r["route"]
+    L = ["", "## 选择原因（程序生成，make_reasons.py）",
+         f"- 路线到 Lv{rt['endLv']}（用 {rt['seeds']} 个乱数）：" + " ".join(f"{s}{v}" for s, v in zip(STATS, rt["end"]))
+         + f"；点数 +{rt['pts']}，加权分 +{rt['w']}；金币 {rt['gold']}G；练技能 {rt['train']} 段；跳过 {rt['skips']} 次",
+         f"- {r['tier']}：{'可以' if r['trainAllowed'] else '不'}练技能考试", "", "### 路线里的考试"]
+    for e in rt["exams"]:
+        L.append(f"- **Lv{e['lv']} {e['cls']}**（{e['tier']}，判定值 {e['roll']}，成功率 {e['pct']}%，用它升 {e['used']} 级）：{e['why']}")
+        d = e.get("vsDrop")
+        if d:
+            L.append(f"  - 和不考它比（同样多的乱数；不考时考 {'、'.join(d['dropExams']) or '无'}、跳过 {d['dropSkips']} 次）："
+                     f"{_g(d['g'])}；点数 {_d(d['pts'])}，加权分 {_d(d['w'])}；金币 {_d(d['gold'], 'G')}；练技能 {_d(d['train'], ' 段')}")
+        else:
+            L.append(f"  - {e.get('dropNote', '')}")
+    if r["mids"]:
+        L += ["", "### 没选的中级职业"]
+        for m in r["mids"]:
+            v = m.get("vsRoute")
+            tail = (f"；和现在路线比：{_g(v['g'])}，点数 {_d(v['pts'])}，加权分 {_d(v['w'])}，金币 {_d(v['gold'], 'G')}，练技能 {_d(v['train'], ' 段')}"
+                    if v else "")
+            L.append(f"- {m['cls']}：{m['why']}{tail}")
+    if r["excluded"]:
+        L += ["", "### 不考虑的职业", "、".join(f"{x['cls']}（{x['why']}）" for x in r["excluded"])]
+    if r["decisions"]:
+        L += ["", "### 你的决定"] + [f"- {x['date']}：{x['rule']}" for x in r["decisions"]]
+    return L
+
+
 def character(name, fw, meals, p35, p45):
     shot = R.shot(name)
     seed0, first = demo.KNOWN_SEEDS[name]
@@ -102,6 +146,7 @@ def character(name, fw, meals, p35, p45):
         "种子": {"第一条已知种子": seed0, "从第几条记录开始": first, "观星记录": recs,
                "往后种子链": chain, "不跳过的种子": sorted(R.NO_SKIP_SEEDS.get(name, []))},
         "规划": {"到Lv35": p35.get(name), "到Lv45": p45.get(name)},
+        "选择原因": _reasons().get(name),
         "吃饭喜好": {d: PREF_NAME[v] for d, v in meals[name].items()} if name in meals else None,
         "装备": None,
         "友好度": None,
@@ -140,6 +185,7 @@ def to_md(c):
     p = c["规划"]["到Lv45"]
     if p:
         L.append(f"- 到 Lv45：加权分 {p.get('total')}，点数 {p.get('pts')}")
+    L += reasons_md(c.get("选择原因"))
     if c["吃饭喜好"]:
         L += ["", "## 吃饭喜好", "，".join(f"{d} {v}" for d, v in c["吃饭喜好"].items())]
     L += ["", "## 装备 / 友好度", "还没有数据来源（截图或表格提供后补上）。", ""]
