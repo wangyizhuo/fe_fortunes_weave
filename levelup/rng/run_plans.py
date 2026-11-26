@@ -85,7 +85,10 @@ EXAM_OPTIONS = {n: [c for c in ALL_CLASSES if _allowed(n, c)]
                 for n in ["迪托利希", "米迦艾拉", "努蒂奴", "法毕欧", "杨界", "乌尔坦德", "艾丝梅拉尔达", "伊欧", "奇洛伊卡"]}
 
 # 一定要考到的职业（拿精通技能等）
-REQUIRED = {"迪托利希": ["恶棍"], "法毕欧": ["萨满巫师"]}   # 11-11 Yizhuo：取消米迦重装必考（原 11-08 重装优先于土匪）
+# 11-11 Yizhuo：取消米迦重装必考（原 11-08 重装优先于土匪）；11-25 Yizhuo：艾丝走天翼兵+重装步兵（重开章节后，不练格斗）
+REQUIRED = {"迪托利希": ["恶棍"], "法毕欧": ["萨满巫师"], "艾丝梅拉尔达": ["天翼兵", "重装步兵"]}
+# 11-25 Yizhuo：伊欧路线上如果要跳过，就用「考战车兵」来跳（能考过时），保证有这个职业；没跳过就不考
+SKIP_TAKE = {"伊欧": ["战车兵"]}
 # 想多用的职业：每用它升一级 +x 虚拟分（同分或差一点时优先用它，方便练兵种精通）
 PREFER = {}
 
@@ -460,9 +463,11 @@ def make_planner(name, target=None):
 
 
 def _mk(name, seed, level, target):
-    return Planner(data, name, seed, level, target or level + 10,
+    p = Planner(data, name, seed, level, target or level + 10,
                    OWNED[name], EXAM_OPTIONS[name], W[name], required=REQUIRED.get(name, []), prefer=PREFER.get(name),
                    stats=start_stats(name), exam_chance=EXAM_CHANCE.get(name))
+    p.skip_take = tuple(SKIP_TAKE.get(name, ()))
+    return p
 
 
 def print_plan(limit, plan):

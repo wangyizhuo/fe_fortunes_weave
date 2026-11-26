@@ -289,7 +289,8 @@ MEALS = _mp.plan(_MCFG)
 MEALS.update({"maxed": _MCFG.get("maxed", []), "absent": _MCFG.get("absent", []), "pairsDone": _MCFG.get("pairs_done", []), "goals": [g.get("why", "") for g in _MCFG.get("goals", [])],
               "lord": _MCFG.get("current_lord")})
 OPTS = json.load(open(os.path.join(HERE, "options.json"), encoding="utf-8")) if os.path.exists(os.path.join(HERE, "options.json")) else {}
-data_json = json.dumps({"options": OPTS, "meals": MEALS, "chars": chars, "stats": STATS, "skills": SKILLS, "decisions": json.load(open(os.path.join(HERE, "decisions.json"), encoding="utf-8"))}, ensure_ascii=False)
+REASONS = json.load(open(os.path.join(HERE, "reasons.json"), encoding="utf-8")) if os.path.exists(os.path.join(HERE, "reasons.json")) else {}
+data_json = json.dumps({"options": OPTS, "reasons": REASONS, "meals": MEALS, "chars": chars, "stats": STATS, "skills": SKILLS, "decisions": json.load(open(os.path.join(HERE, "decisions.json"), encoding="utf-8"))}, ensure_ascii=False)
 tpl = open(os.path.join(HERE, "app_template.html"), encoding="utf-8").read()
 out = tpl.replace("/*ROUTE_DATA*/{}", data_json)
 open(os.path.join(OUT_DIR, "page_data.json"), "w", encoding="utf-8").write(data_json)   # checks.py 读它检查页面数据

@@ -31,15 +31,19 @@ chain() { local s; for s in "$@"; do step $s || return 1; done; }
 
 if [ $# -gt 0 ]; then chain "$@"; exit $?; fi
 
-# 依赖：make_detail → detail.json → make_summary / make_choices；make_html 要全部 json；export_data 要 plan45.json，且要在 checks 前（D5 比对 data/）
+# 依赖：make_detail → detail.json → make_summary / make_choices；make_options → make_reasons；make_html / export_data 要全部 json
 chain make_detail make_summary make_choices & P1=$!
-chain plan45 export_data & P2=$!   # export_data 只要 plan45.json
-chain make_options & P3=$!
+chain plan45 & P2=$!
+chain make_options make_reasons & P3=$!   # make_reasons 读 options.json
 chain make_sheet make_longview & P4=$!
 fail=0
 for p in $P1 $P2 $P3 $P4; do wait $p || fail=1; done
 [ $fail = 0 ] || { echo "有步骤失败，停止"; exit 1; }
-chain make_html || exit 1
+# make_html 和 export_data 都要全部 json（export_data 读 plan45/reasons），互不依赖 → 并行；export_data 要在 checks 前（D5 比对 data/）
+chain make_html & H1=$!
+chain export_data & H2=$!
+wait $H1 || exit 1
+wait $H2 || exit 1
 tail -2 $LOG/build_make_html.log
 a=$(now)
 python3 checks.py; rc=$?

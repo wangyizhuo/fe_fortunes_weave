@@ -343,7 +343,7 @@ def p_exam_used():
         p, pl = plan(n)
         used = {r.cls for r in pl.rows if r.action == "升级"}
         bad += [f"{n}：考了 {r.cls} 却没用来升级" for r in pl.rows
-                if r.action != "升级" and r.cls != "跳过" and r.cls not in used and r.cls not in p.required]
+                if r.action != "升级" and r.cls != "跳过" and r.cls not in used and r.cls not in p.keep_classes]
     return bad
 
 
@@ -634,6 +634,26 @@ def golden_diff(old, new):
             ch.append(f"新路线：{b['路线']}")
         lines.append(f"{n}：" + "；".join(ch))
     return lines
+
+
+@check("U10", "每人路线里的每场考试都有记下的选择原因，和规划器一致（11-25 Yizhuo：选择原因记下来，不临时再算）")
+def u_reasons():
+    path = os.path.join(HERE, "reasons.json")
+    if not os.path.exists(path):
+        return ["没有 reasons.json：先跑 make_reasons.py"]
+    rs = json.load(open(path, encoding="utf-8"))
+    bad = []
+    for n in ORDER:
+        p, pl = plan(n)
+        want = [c for a, c in pl.raw_actions if a == "考试" and c != "跳过"]
+        r = rs.get(n)
+        got = [e["cls"] for e in (r or {}).get("route", {}).get("exams", [])]
+        if got != want:
+            bad.append(f"{n}：原因记录里的考试 {got} ≠ 路线 {want}（重跑 make_reasons.py）")
+        for e in (r or {}).get("route", {}).get("exams", []):
+            if not e.get("why"):
+                bad.append(f"{n}：{e['cls']} 没写原因")
+    return bad
 
 
 @check("G1", "结果快照：每人的路线、加权分、点数、净值和上次确认的一样；有意改了规则就跑 --update-golden，并把变化告诉 Yizhuo")

@@ -253,7 +253,7 @@ th.grp { text-align: center; border-bottom: 1px solid var(--line); } td.cur, th.
       <a href="#past" data-v="past">回顾<small>入队到现在</small></a>
       <a href="#l45" data-v="l45">到 Lv45<small>可转一次上级</small></a>
       <a href="#long" data-v="long">长线观星<small>未来 40 级</small></a>
-      <a href="#opts" data-v="opts">职业选择<small>每人可考的职业，自己挑</small></a>
+      <a href="#opts" data-v="opts">职业选择<small>每人可考的职业和选择原因</small></a>
       <a href="#mine" data-v="mine">我的决定<small>所有确认和规则</small></a>
     </nav>
   </div>
@@ -524,6 +524,18 @@ function smBlocked(w) {
   for (const r of w.skips) for (const x of r.opts) if (x.ruleBlocked) b.push(`Lv${r.lv} ${x.cls}（${x.ranks} 段）`);
   return b.length ? `<p class="txt" style="font-size:12px;color:var(--muted)">规则不考虑（要先练技能，这个档位不练）：${esc(b.join("、"))}</p>` : "";
 }
+// ---------- 选择原因（11-25 Yizhuo：每个选择的原因都记下来，不临时再算；数据由 make_reasons.py 生成） ----------
+function reasonsBox(name) {
+  const r = (DATA.reasons || {})[name]; if (!r) return "";
+  const rt = r.route, G = v => (v > 0 ? "+" : "") + v;
+  const dtxt = d => `${esc(gtxt(d.g))}；点数 ${G(d.pts)}，加权分 ${G(d.w)}；金币 ${G(d.gold)}G；练技能 ${G(d.train)} 段`;
+  const ex = rt.exams.map(e => `<li><b>Lv${e.lv} ${esc(e.cls)}</b> <small>${esc(e.tier || "")}｜判定值 ${e.roll}%｜成功率 ${e.pct ?? "—"}%｜用它升 ${e.used} 级</small><br>${esc(e.why)}${e.vsDrop ? `<br><span class="hint">和不考它比（同样 ${rt.seeds} 个乱数；不考时${e.vsDrop.dropExams.length ? "考 " + esc(e.vsDrop.dropExams.join("、")) + "、" : ""}跳过 ${e.vsDrop.dropSkips} 次）：${dtxt(e.vsDrop)}</span>` : `<br><span class="hint">${esc(e.dropNote || "")}</span>`}</li>`).join("") || "<li>不考新职业</li>";
+  const mids = r.mids.map(m => `<li><b>${esc(m.cls)}</b>：${esc(m.why)}${m.vsRoute ? `<br><span class="hint">和现在路线比：${dtxt(m.vsRoute)}</span>` : ""}</li>`).join("");
+  const exc = r.excluded.length ? `<p class="hint">不考虑：${esc(r.excluded.map(x => `${x.cls}（${x.why}）`).join("、"))}</p>` : "";
+  const dec = r.decisions.length ? `<h4>你的决定</h4><ul>${r.decisions.map(d => `<li><small>${esc(d.date)}</small> ${esc(d.rule)}</li>`).join("")}</ul>` : "";
+  return `<div class="sec"><h4>选择原因</h4><p class="txt">路线到 Lv${rt.endLv}（用 ${rt.seeds} 个乱数）：${esc(rt.end.map((v, i) => ST[i] + v).join(" "))}；点数 +${rt.pts}，加权分 +${rt.w}；金币 ${rt.gold}G；练技能 ${rt.train} 段；跳过 ${rt.skips} 次。${esc(r.tier)} ${r.trainAllowed ? "可以" : "不"}练技能考试。</p>
+    <h4>路线里的考试</h4><ul>${ex}</ul>${mids ? `<h4>没选的中级职业</h4><ul>${mids}</ul>` : ""}${exc}${dec}</div>`;
+}
 // ---------- 职业选择（11-16 Yizhuo：每人可考的职业列出来，到目标级和之后的影响，自己挑） ----------
 function viewOpts() {
   const O = DATA.options || {};
@@ -540,7 +552,7 @@ function viewOpts() {
       + (blk.length ? `<tr><td colspan="13" class="note">规则不考虑（要先练技能，${esc(o.tier)} 不练）：${esc(blk.map(x => `${x.cls}（${x.ranks} 段，加权分 ${sgn(x.toT.total)}）`).join("、"))}</td></tr>` : "");
     const rr = o.recRow ? `<tr class="sum"><td>现在推荐的组合：${esc(o.recommended.join(" + "))}</td><td colspan="5"></td>${diffCell(o.recRow.toT)}<td class="n">${sgn(o.recRow.toT.gold)}G</td>${diffCell(o.recRow.after)}</tr>` : "";
     return `<details class="char" data-slug="${slug(c)}"${focus ? " open" : ""}><summary><h3>${esc(c.name)}</h3><span>${o.tier} · Lv${o.level}→${o.target} · 已有 ${esc(o.owned.join("、"))}${o.required.length ? ` · 必考 ${esc(o.required.join("、"))}（已算进基准）` : ""}${o.recommended.length ? ` · 现在推荐 ${esc(o.recommended.join("、"))}` : " · 现在推荐：不考新职业"}</span></summary>
-      <div class="sec"><div class="scroll"><table><tr><th rowspan="2">职业</th><th class="n" rowspan="2">考的时机</th><th class="n" rowspan="2">判定值</th><th class="n" rowspan="2">成功率</th><th rowspan="2">要练 / 保底</th><th class="n" rowspan="2">用它升级<br><small>到目标/到45</small></th><th colspan="4" class="grp">到 Lv${o.target}（和不考比）</th><th colspan="3" class="grp">Lv${o.target}→45 另外的影响</th></tr>
+      ${reasonsBox(c.name)}<div class="sec"><div class="scroll"><table><tr><th rowspan="2">职业</th><th class="n" rowspan="2">考的时机</th><th class="n" rowspan="2">判定值</th><th class="n" rowspan="2">成功率</th><th rowspan="2">要练 / 保底</th><th class="n" rowspan="2">用它升级<br><small>到目标/到45</small></th><th colspan="4" class="grp">到 Lv${o.target}（和不考比）</th><th colspan="3" class="grp">Lv${o.target}→45 另外的影响</th></tr>
       <tr><th>能力</th><th class="n">点数</th><th class="n">加权分</th><th class="n">金币</th><th>能力</th><th class="n">点数</th><th class="n">加权分</th></tr>${rows}${rr}</table></div>${smTable(o)}</div></details>`;
   }).join("");
   return `<p class="lede">每个可考职业单独算：一定考到它、其余照规则走，和「只考必考职业」的路线比。点数、加权分、金币、要练的技能分开列，不合成一个数（Yizhuo 11-17）。点数和加权分按「先练够技能」算；P1/P2 默认不练，成功率写不练的估计，小字是练后的。</p><div class="grid one">${cards}</div>` + notesBox([
