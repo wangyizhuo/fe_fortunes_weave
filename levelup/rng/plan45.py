@@ -41,7 +41,9 @@ def net(p, plan):
 
 
 def best_net(p, k):
-    plans = [p.best_plan(i) for i in range(k + 1)]
+    # 规则式规划不看转职次数上限（best_plan(i) 每个 i 结果一样），只算一次（11-26 提速：原来同一条路线算 7 遍）
+    ks = [0] if getattr(p, "rule_based", False) else range(k + 1)
+    plans = [p.best_plan(i) for i in ks]
     plans = [x for x in plans if x is not None and x.total > 0]
     return max(plans, key=lambda x: (net(p, x), -x.exams))
 

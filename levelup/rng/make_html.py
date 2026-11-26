@@ -306,7 +306,9 @@ _stamp = os.path.join(HERE, ".layout_ok")
 if os.path.exists(_stamp) and open(_stamp).read().strip() == _h and "--check" not in sys.argv:
     print("模板没改，跳过排版检查")
 else:
-    _r = subprocess.run(["node", os.path.join(HERE, "check_layout.js"), os.path.join(OUT_DIR, "growth-route.html")], capture_output=True, text=True)
+    import timing
+    with timing.timed("排版检查 check_layout.js"):
+        _r = subprocess.run(["node", os.path.join(HERE, "check_layout.js"), os.path.join(OUT_DIR, "growth-route.html")], capture_output=True, text=True)
     print(_r.stdout.strip())
     if _r.returncode != 0:
         sys.exit("排版自检失败，先修好再发布")

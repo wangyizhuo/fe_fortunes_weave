@@ -160,6 +160,7 @@ def skip_mid(name, target):
     return {"target": target, "seeds": S, "skips": out, "baseExams": [c for a, c in base_acts if a == "考试"]}
 
 
+@__import__("timing").timed("make_options.build（每人）")
 def build(name):
     T = R.TARGET[name]
     out = {"name": name, "tier": R.tier_of(name), "level": R.current_state(name)[1], "target": T,

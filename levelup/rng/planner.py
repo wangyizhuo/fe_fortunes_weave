@@ -23,6 +23,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 
 from fe_growth import STATS, GrowthData, level_up, next_seed, exam_roll
+import timing
 
 
 @dataclass
@@ -268,6 +269,38 @@ class Planner:
     #   这一级最好的分 < 跳过阈值 → 不升级，用这个种子转职：有「要转的职业」且这一步能过就转职，否则跳过；
     #   要转的职业（必转 + 值得转的）如果一直遇不到低分级，就在「升级分 < 该职业手形价换算的分」的第一个能过的级转。
     # 要转哪些职业：从必转出发，逐个试加候选职业，净值（加权分 − 手形金币 ÷ 每分金币）变高才加。
+    def _tie_terms(self):
+        """同分时的微小偏好（阶级高 > 必考 > tiebreak 顺序），按职业记下来；required/tiebreak 变了会重算。"""
+        key = (tuple(self.required), tuple(self.tiebreak))
+        if self.__dict__.get("_tie_key") != key:
+            self._tie_key, cache = key, {}
+            def tie(c):
+                v = cache.get(c)
+                if v is None:
+                    v = cache[c] = 1e-6 * _TIER_RANK.get(_TIER.get(c, ""), 0) + 5e-7 * (c in self.required) - 1e-9 * self._tb(c)
+                return v
+            self._tie_fn = tie
+        return self._tie_fn
+
+    def _future15(self, step, lv, owned, w, cur_str):
+        """跳过条件②用的「未来 15 级」每级最好分（含均衡权重和体格加分）。
+        同一组（步、等级、已有职业、权重、力量）在一次规划里会被反复算上万次，所以记下来（性能，11-26）。"""
+        key = (step, lv, owned, w, cur_str, self.str_bonus, self.min_stats)
+        memo = self.__dict__.setdefault("_fut_memo", {})
+        hit = memo.get(key)
+        if hit is not None:
+            return hit
+        fut, fs = [], cur_str
+        for j in range(step + 1, step + 16):
+            gs = [self.result(j, lv, x)[1] for x in owned]
+            vals = [sum(a * b for a, b in zip(g, w)) + (self.str_gain_bonus(fs, g) if fs is not None else 0) for g in gs]
+            k = max(range(len(vals)), key=vals.__getitem__)   # 和 max(owned, key=...) 一样取第一个最大
+            fut.append(vals[k])
+            if fs is not None:
+                fs += gs[k][1]
+        memo[key] = fut
+        return fut
+
     def _sim(self, targets, t_class=None):
         tc = dict(t_class or {})
         gpp = getattr(self, "gold_per_pt", None) or 62.5
@@ -279,36 +312,33 @@ class Planner:
         stats = list(self.stats) if self.stats else None
         cur_str = self.str_start
         acts, notes, step, done, gold = [], {}, 0, 0, 0
+        timing.COUNTERS["模拟次数 _sim"] += 1
         reasons = notes["why"] = {}   # 每一步为什么这样走（检查和页面用）：step -> {s, avg15, c1, c2, want_skip, pick}
         budget = getattr(self, "seed_budget", None)   # 11-17 Yizhuo：按用掉的乱数个数比，不按等级
+        ea = getattr(self, "exam_at", None) or {}
+        rule = getattr(self, "skip_rule", None)
+        nss = getattr(self, "no_skip_seeds", ()) or ()
         while (done < self.n_levels if budget is None else step < budget) and step < 400:
             lv = self.level + done
             if step < len(forced):
                 a, c = forced[step]
             else:
                 w, why = self.balanced_weights(stats) if stats else ([float(x) for x in self.weights], "")
+                tie = self._tie_terms()
+                w0, w1, w2, w3, w4, w5, w6, w7, w8 = w
+                res = self.result
                 def val(c):
-                    g = self.result(step, lv, c)[1]
-                    return sum(a * b for a, b in zip(g, w)) + (self.str_gain_bonus(cur_str, g) if cur_str is not None else 0) \
-                        + 1e-6 * _TIER_RANK.get(_TIER.get(c, ""), 0) + 5e-7 * (c in self.required) - 1e-9 * self._tb(c)
+                    g = res(step, lv, c)[1]
+                    return (g[0] * w0 + g[1] * w1 + g[2] * w2 + g[3] * w3 + g[4] * w4 + g[5] * w5 + g[6] * w6 + g[7] * w7 + g[8] * w8) \
+                        + (self.str_gain_bonus(cur_str, g) if cur_str is not None else 0) + tie(c)
                 best = max(owned, key=val)
                 sbest = val(best)
-                ea = getattr(self, "exam_at", None) or {}
                 passable = [c for c in pend if c not in ea.values() and self.exam_ok(step, c, lv)]
                 # 11-09 Yizhuo：跳过条件 = ①这一级 ≤ 绝对分数线 ②比未来 15 级平均低 ≥ 百分比；P0 满足其一，P1/P2 都满足
-                rule = getattr(self, "skip_rule", None)
                 if rule:
                     # 11-11 Yizhuo：跳过判断也用含均衡和体格加分的分（和选职业同一个分）
                     s_raw = sbest
-                    fut, fs = [], cur_str
-                    for j in range(step + 1, step + 16):
-                        def fv(x, j=j, fs=fs):
-                            g = self.result(j, lv, x)[1]
-                            return sum(a * b for a, b in zip(g, w)) + (self.str_gain_bonus(fs, g) if fs is not None else 0)
-                        bx = max(owned, key=fv)
-                        fut.append(fv(bx))
-                        if fs is not None:
-                            fs += self.result(j, lv, bx)[1][1]
+                    fut = self._future15(step, lv, tuple(owned), tuple(w), cur_str)
                     c1 = s_raw <= rule["cap"] + 1e-6
                     c2 = s_raw <= sum(fut) / len(fut) * (1 - rule["pct"]) + 1e-6
                     want_skip = (c1 or c2) if rule["or"] else (c1 and c2)
@@ -316,10 +346,10 @@ class Planner:
                 else:
                     want_skip = sbest < t_skip
                     reasons[step] = {"s": round(sbest, 2)}
-                if self.seed_at(step) in getattr(self, "no_skip_seeds", ()):
+                keep = self.seed_at(step) in nss   # Yizhuo 指定保留的级：不跳也不考
+                if keep:
                     want_skip = False
                 pick = None
-                keep = self.seed_at(step) in getattr(self, "no_skip_seeds", ())   # Yizhuo 指定保留的级：不跳也不考
                 for c in ([] if keep else passable):   # 按 targets 的顺序（必转在前）
                     thr = tc.get(c, pg.get(_TIER.get(c, "中级"), 500) / gpp)
                     if want_skip or sbest < thr:
@@ -336,8 +366,8 @@ class Planner:
                     a, c = "考试", "跳过"
                 else:
                     a, c = "升级", best
-                    raw_best = max(owned, key=lambda x: (self.result(step, lv, x)[0] + (self.str_gain_bonus(cur_str, self.result(step, lv, x)[1]) if cur_str is not None else 0), x == best))
-                    if raw_best != best and why:
+                    raw_best = why and max(owned, key=lambda x: (self.result(step, lv, x)[0] + (self.str_gain_bonus(cur_str, self.result(step, lv, x)[1]) if cur_str is not None else 0), x == best))
+                    if why and raw_best != best:
                         g0, g1 = self.result(step, lv, raw_best)[1], self.result(step, lv, best)[1]
                         more = [STATS[i] for i in range(9) if g1[i] > g0[i]]
                         less = [STATS[i] for i in range(9) if g1[i] < g0[i]]
@@ -429,6 +459,10 @@ class Planner:
         return total + self.floor_value(acts) - gold / gpp - self.train_ranks(acts) * self.TRAIN_PTS_PER_RANK
 
     def rule_plan(self):
+        with timing.timed(f"规划 {self.name}"):
+            return self._rule_plan_timed()
+
+    def _rule_plan_timed(self):
         """11-17 Yizhuo：比较路线要按「用掉同样多的乱数」比，不按到同一级比（考试/跳过都会用掉一个乱数，
         按等级比时多考一次的路线会多算/少算边界上的一个种子）。做法：先照旧规划到目标级，记下用掉几个乱数 S；
         再在「前 S 个乱数」这个窗口里挑要考的职业；窗口跟着选出的路线更新，最多 3 轮；最后把选好的职业照常走到目标级。"""
@@ -779,7 +813,15 @@ class Planner:
                     pool.remove(c)
 
     def balanced_weights(self, stats):
-        """按当前能力算出调整后的权重和说明。"""
+        """按当前能力算出调整后的权重和说明。只看能力和权重设置，所以同样的输入记下来（性能，11-26）。"""
+        key = (tuple(stats) if stats else None, tuple(self.weights), self.balance_gap, self.balance_step)
+        memo = self.__dict__.setdefault("_bw_memo", {})
+        hit = memo.get(key)
+        if hit is None:
+            hit = memo[key] = self._balanced_weights(stats)
+        return list(hit[0]), hit[1]
+
+    def _balanced_weights(self, stats):
         w = [float(x) for x in self.weights]
         if not stats:
             return w, ""
