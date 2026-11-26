@@ -581,21 +581,23 @@ function viewMeal() {
   const spk = t => t.sparkle.join("+");
   const who = t => t.who.map(n => esc(mshort(n))).join(" + ");
   const tag = t => t.perfect ? `<span class="tag ok">perfect</span>` : `<span class="tag warn">非 perfect</span>`;
-  const why = t => t.pairs.map(([a, b]) => `${esc(mshort(a))}–${esc(mshort(b))}`).join("、");
+  const why = t => t.pairs.map(([a, b]) => `${esc(mshort(a))}–${esc(mshort(b))}`).join("、") + (t.filler && t.filler.length ? `（${t.filler.map(n => esc(mshort(n))).join("、")} 凑数）` : "");
   const rows = MEAL.dishes.map(r => r.options.map((t, k) => `<tr>${k ? "" : `<td rowspan="${r.options.length}"><b>${esc(r.dish)}</b>${r.perfect ? "" : `<br><small class="note">没有 perfect，下面是备选</small>`}</td>`}
     <td>${k ? "" : "<b>"}${who(t)}${k ? "" : "</b>"}</td><td>${tag(t)}</td><td class="n">${spk(t)}</td><td class="n">${t.score}</td><td class="note">${why(t)}</td></tr>`).join("")
     || `<tr><td><b>${esc(r.dish)}</b></td><td colspan="5" class="note">没有能用的组合</td></tr>`).join("");
   const tgt = MEAL.weights.map(x => { const ds = MEAL.dishes.filter(r => r.options.some(t => t.pairs.some(([a, b]) => a === x.lord && b === x.target)));
     const pf = ds.filter(r => r.options.some(t => t.perfect && t.pairs.some(([a, b]) => a === x.lord && b === x.target)));
-    return `<tr><td>${esc(mshort(x.lord))}–${esc(mshort(x.target))}</td><td class="n">${x.score}</td><td class="note">${pf.length ? esc(pf.map(r => r.dish).join("、")) : "—"}</td><td class="note">${esc(ds.filter(r => !pf.includes(r)).map(r => r.dish).join("、")) || "—"}</td></tr>`; }).join("");
+    return `<tr><td>${esc(mshort(x.lord))}–${esc(mshort(x.target))}</td><td class="n">${x.score}</td><td class="n">${x.support === 2 ? `<span class="tag ok">支援 2</span>` : x.support == null ? "—" : "支援 " + x.support}</td><td class="note">${pf.length ? esc(pf.map(r => r.dish).join("、")) : "—"}</td><td class="note">${esc(ds.filter(r => !pf.includes(r)).map(r => r.dish).join("、")) || "—"}</td></tr>`; }).join("");
   const nPf = MEAL.dishes.filter(r => r.perfect).length;
   return `<p class="lede">每道菜列三人一桌的组合：perfect 的在前，没有 perfect 的菜给备选。所有人都是候选，按「这桌能涨哪些有用的支援」打分。</p>
   <section class="alerts"><h2>每道菜带谁（${nPf}/12 道能 perfect）</h2><div class="scroll"><table><tr><th>菜</th><th>三人</th><th></th><th class="n">闪光</th><th class="n">分</th><th>涨哪些支援</th></tr>${rows}</table></div></section>
-  <section class="alerts"><h2>从目标查菜</h2><div class="scroll"><table><tr><th>支援</th><th class="n">分</th><th>perfect 的菜</th><th>只有备选的菜</th></tr>${tgt}</table></div></section>` + notesBox([
+  ${(lv2 => lv2.length ? `<section class="alerts"><h2>支援 2 就能招（${lv2.length}）</h2><p class="txt">${lv2.map(x => `${esc(mshort(x.target))}（${esc(mshort(x.lord))}线）`).join("、")}</p></section>` : "")(MEAL.weights.filter(x => x.support === 2))}
+  <section class="alerts"><h2>从目标查菜</h2><div class="scroll"><table><tr><th>支援</th><th class="n">分</th><th class="n">招募要</th><th>perfect 的菜</th><th>只有备选的菜</th></tr>${tgt}</table></div></section>` + notesBox([
     "规则（你 11-08 定的）：闪光 最爱 2、喜欢 1、普通 0；三人是 1+1+1 或 2+2+0 才算 perfect。讨厌这道菜的人不上桌。2+1+0 还没确认，只当备选。",
-    "排序：perfect 在前 → 分高 → 闪光多 → 招募表里靠前的人。每个目标组（迪线、蕾达线）每道菜至少出一桌。",
+    "凑数（不涨有用支援）的座位只用已入队的人。排序：perfect 在前 → 分高 → 闪光多 → 招募表里靠前的人。这道菜有 perfect 就只列 perfect；每个目标组（迪线、蕾达线）每道菜至少出一桌。迪线目标只算招募表里还标必招/可选的人。",
     ...MEAL.goals.map(g => "分数：" + g),
-    `还没入队的人要和${esc(mshort(MEAL.lord || "主角"))}同桌、先送过一次礼物才请得动。`,
+    "支援 1 就能招的人不列（不用吃饭）。每桌主角排第一，其他领主第二。",
+    "任何三个人都能一桌，不用带当前主角（你 11-25 确认的）。还没入队的人要先送过一次礼物才请得动。",
     ...([...MEAL.maxed, ...MEAL.absent].length ? [`不上桌：${[...MEAL.maxed.map(n => n + "（好感满了）"), ...MEAL.absent.map(n => n + "（不在）")].join("、")}。`] : []),
     "改人员状态或优先级：meals/meal_config.json；程序：meals/meal_planner.py。"]);
 }
