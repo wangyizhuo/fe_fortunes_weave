@@ -594,7 +594,7 @@ function viewMeal() {
   ${(lv2 => lv2.length ? `<section class="alerts"><h2>${esc(mshort(MEAL.lord))}线还要招、支援 2 就能招（${lv2.length}）</h2><p class="txt">${lv2.map(x => esc(mshort(x.target))).join("、")}</p></section>` : "")(MEAL.weights.filter(x => x.support === 2 && x.lord === MEAL.lord))}
   <section class="alerts"><h2>从目标查菜</h2><div class="scroll"><table><tr><th>支援</th><th class="n">分</th><th class="n">招募要</th><th>perfect 的菜</th><th>只有备选的菜</th></tr>${tgt}</table></div></section>` + notesBox([
     "规则（你 11-08 定的）：闪光 最爱 2、喜欢 1、普通 0；三人是 1+1+1 或 2+2+0 才算 perfect。讨厌这道菜的人不上桌。2+1+0 还没确认，只当备选。",
-    "凑数（不涨有用支援）的座位只用已入队的人。排序：perfect 在前 → 分高 → 闪光多 → 招募表里靠前的人。这道菜有 perfect 就只列 perfect；每个目标组（迪线、蕾达线）每道菜至少出一桌。迪线目标只算招募表里还标必招/可选的人。",
+    "只有领主和还要挖的目标上桌，每个座位都要涨有用的支援；已入队的人不上桌（吃饭是为了挖角）。排序：perfect 在前 → 分高 → 闪光多 → 招募表里靠前的人。这道菜有 perfect 就只列 perfect；每个目标组（迪线、蕾达线）每道菜至少出一桌。迪线目标只算招募表里还标必招/可选的人。",
     ...MEAL.goals.map(g => "分数：" + g),
     "支援 1 就能招的人不列（不用吃饭）。每桌主角排第一，其他领主第二。",
     "任何三个人都能一桌，不用带当前主角（你 11-25 确认的）。还没入队的人要先送过一次礼物才请得动。",
