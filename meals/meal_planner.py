@@ -55,6 +55,7 @@ def pair_weights(people, cfg):
     """{(领主, 目标): 分数}：目标还没入队、在这条线要挖、名声在范围内。"""
     rec = set(cfg.get("recruited", []))
     names = {p["name"] for p in people}
+    done = {tuple(x) for x in cfg.get("pairs_done", [])}   # 支援已经够了的 (领主, 目标)
     w, need = {}, {}
     for g in cfg.get("goals", []):
         if g["lord"] not in names:
@@ -63,6 +64,8 @@ def pair_weights(people, cfg):
         for p in people:
             n, r = p["name"], p["rep"].get(g["route"])
             if r is None or n in rec or n in skip or n == g["lord"]:
+                continue
+            if (g["lord"], n) in done:
                 continue
             if p["sup"].get(g["route"], 99) < g.get("min_support", 0):
                 continue   # 11-25：支援 1 就能招的不用吃饭

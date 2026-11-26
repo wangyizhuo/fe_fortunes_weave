@@ -598,6 +598,7 @@ function viewMeal() {
     ...MEAL.goals.map(g => "分数：" + g),
     "支援 1 就能招的人不列（不用吃饭）。每桌主角排第一，其他领主第二。",
     "任何三个人都能一桌，不用带当前主角（你 11-25 确认的）。还没入队的人要先送过一次礼物才请得动。",
+    ...((MEAL.pairsDone || []).length ? [`支援已经够了、不再刷：${MEAL.pairsDone.map(([a, b]) => esc(mshort(a)) + "–" + esc(mshort(b))).join("、")}。`] : []),
     ...([...MEAL.maxed, ...MEAL.absent].length ? [`不上桌：${[...MEAL.maxed.map(n => n + "（好感满了）"), ...MEAL.absent.map(n => n + "（不在）")].join("、")}。`] : []),
     "改人员状态或优先级：meals/meal_config.json；程序：meals/meal_planner.py。"]);
 }

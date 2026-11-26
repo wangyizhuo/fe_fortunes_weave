@@ -285,7 +285,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 import meal_planner as _mp
 _MCFG = json.load(open(os.path.join(os.path.dirname(_mp.__file__), "meal_config.json"), encoding="utf-8"))
 MEALS = _mp.plan(_MCFG)
-MEALS.update({"maxed": _MCFG.get("maxed", []), "absent": _MCFG.get("absent", []), "goals": [g.get("why", "") for g in _MCFG.get("goals", [])],
+MEALS.update({"maxed": _MCFG.get("maxed", []), "absent": _MCFG.get("absent", []), "pairsDone": _MCFG.get("pairs_done", []), "goals": [g.get("why", "") for g in _MCFG.get("goals", [])],
               "lord": _MCFG.get("current_lord")})
 OPTS = json.load(open(os.path.join(HERE, "options.json"), encoding="utf-8")) if os.path.exists(os.path.join(HERE, "options.json")) else {}
 data_json = json.dumps({"options": OPTS, "meals": MEALS, "chars": chars, "stats": STATS, "skills": SKILLS, "decisions": json.load(open(os.path.join(HERE, "decisions.json"), encoding="utf-8"))}, ensure_ascii=False)
