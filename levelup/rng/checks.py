@@ -87,12 +87,32 @@ def d_backtest():
 def d_start_matches_shot():
     bad = []
     for n in ORDER:
-        shot = R.CURRENT[n]["shot_1105"]
+        shot = R.shot(n)
         p, _ = plan(n)
         if p.level != shot["level"]:
             bad.append(f"{n}：规划从 Lv{p.level} 开始，截图是 Lv{shot['level']}")
         if shot["class"] not in R.OWNED[n]:
             bad.append(f"{n}：截图职业 {shot['class']} 不在 OWNED 里")
+    return bad
+
+
+@check("S1", "当前种子对得上重开后的观星：截图快照的 seed_index 往后连续升级，算出的加点和观星截图逐条一样（11-25 重开章节，30 张升级截图）")
+def s_snapshot_observed():
+    from fe_growth import level_up, next_seed, STATS as ST
+    bad = []
+    for n in ORDER:
+        ob = R.shot(n).get("observed")
+        if not ob:
+            continue
+        seed, lv = R.current_state(n)
+        if lv != ob["from"]:
+            bad.append(f"{n}：观星从 Lv{ob['from']} 起，规划起点是 Lv{lv}")
+        for j, g in enumerate(ob["gains"]):
+            pred = [1 if x else 0 for x in level_up(seed, R.data.growth(n, ob["class"], lv + j), 2).gains]
+            want = [1 if s in g.split() else 0 for s in ST]
+            if pred != want:
+                bad.append(f"{n} Lv{lv + j}→{lv + j + 1} {ob['class']}：观星「{g}」，种子算出「{' '.join(s for s, x in zip(ST, pred) if x)}」")
+            seed = next_seed(seed)
     return bad
 
 
@@ -108,7 +128,7 @@ def d_base_data():
         if "平民" not in R.OWNED[n]:
             bad.append(f"{n}：已有职业里没有平民")
         bad += [f"{n}：已有职业 {c} 不在职业表里" for c in R.OWNED[n] if c not in cls]
-        shot = R.CURRENT[n].get("shot_1105") or {}
+        shot = R.shot(n)
         if len(shot.get("stats", [])) != 9:
             bad.append(f"{n}：截图能力不是 9 项")
         sk = shot.get("skills", {})
@@ -162,7 +182,7 @@ def d_seed_chain():
 def d_sane_values():
     bad, cls = [], {c["name"] for c in json.load(open(os.path.join(HERE, "fw_classes.json"), encoding="utf-8"))}
     for n in ORDER:
-        shot = R.CURRENT[n]["shot_1105"]
+        shot = R.shot(n)
         st = R.start_stats(n)
         for label, v in (("截图", shot["stats"]), ("起点", st)):
             if len(v) != 9 or any(not (0 <= x <= 99) for x in v) or v[0] <= 0:

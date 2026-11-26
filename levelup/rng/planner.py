@@ -451,12 +451,59 @@ class Planner:
             if sel is None:
                 break
             pl = self._rule_plan(fixed=list(sel.targets), mid=getattr(self, "mid_trained", None))
+        pl = self._pair_polish(pl)
         self.window = len(pl.raw_actions) if pl else None
         self.seed_budget = None
         mt = getattr(self, "mid_train", None) or {}
         pt = getattr(self, "_mid_patched", set())
         self.mid_trained = next((c for c in (pl.targets if pl else []) if c in pt), None)
         return pl
+
+    PAIR_TOL = 1.0   # 和 checks.P12 同一个容差：差 1 分以内算一样
+
+    def _pair_polish(self, pl):
+        """11-25（重开后 P12 抓到艾丝、伊欧）：贪心 + 「必须考到中级」的补丁会漏掉更好的组合。
+        最后把要考的职业整体换成任意 1～2 个职业（任意顺序），在现在路线用掉的乱数窗口里比净值（和 checks.P12 同一口径），
+        高出 PAIR_TOL 以上、且完整走到目标级时每个职业都真的考到并用上，就换成最高的那个。"""
+        import itertools
+        if pl is None or getattr(self, "_polishing", False):
+            return pl
+        self._polishing = True
+        sv_at, sv_win = getattr(self, "exam_at", None), getattr(self, "window", None)
+        try:
+            def own(x):
+                self.window = len(x.raw_actions)
+                r = self.window_value(x.targets, self.window)
+                return r[3] if r else float("-inf")
+            req = list(dict.fromkeys(self.required))
+            cands = [c for c in self.exam_options if c not in req]
+            mine = own(pl)
+            best = None
+            for k in (1, 2):
+                for combo in itertools.combinations(cands, k):
+                    for order in itertools.permutations(combo):
+                        S = len(pl.raw_actions)
+                        q = self.window_value(req + list(order), S)   # 先用便宜的窗口值筛
+                        if q is None or q[3] <= mine + self.PAIR_TOL + 1e-9:
+                            continue
+                        self.exam_at = None
+                        x = self._rule_plan(fixed=req + list(order), mid=getattr(self, "mid_trained", None))
+                        if x is None or not all(any(a == "升级" and c2 == c for a, c2 in x.raw_actions) for c in combo):
+                            continue
+                        if getattr(self, "require_mid", False) and not any(
+                                a == "考试" and _TIER_RANK.get(_TIER.get(c, ""), 0) == 2 and ("升级", c) in x.raw_actions
+                                for a, c in x.raw_actions):
+                            continue
+                        v = q[3]   # 11-17 规则：和现在的路线按同样多的乱数（现在路线的窗口）比
+                        if v > (best[0] if best else mine + self.PAIR_TOL) + 1e-9:
+                            best = (v, x, dict(self.exam_at or {}))
+            if best is None:
+                self.exam_at, self.window = sv_at, sv_win
+                return pl
+            self.exam_at = best[2]
+            return best[1]
+        finally:
+            self._polishing = False
 
     def window_value(self, targets, S=None, must=()):
         """同一个乱数窗口（前 S 个）里，按 targets 走的 (动作, 加权分, 金币, 净值)。"""
