@@ -35,16 +35,16 @@ def test_mika_does_not_train_for_curse_mage():
     assert "诅咒师" not in exams(pl)
 
 
-def test_archer_break_even_follows_training_cost():
-    """弓箭手（中级 500G、练箭术 2 段）比猎兵（初级 300G、不用练）多 5 加权分。
-    多花 200G = 3.2 分，所以每段训练成本 < 0.9 分时考弓箭手，> 0.9 分时考猎兵。"""
+def test_training_cost_never_adds_training():
+    """训练成本越高，选出来的路线要练的段数不会更多（11-25 起按固定乱数个数比，旧的弓箭手/猎兵分界测试不再成立）。"""
     p = make_planner("米迦艾拉", 35)
-    p.min_exam_gain = 0   # 只测训练成本这一条
-    p.require_mid = False   # 11-17 起米迦必须考进中级；这里只测训练成本
-    p.equal_seeds = False
-    for cost, want in ((0.5, "弓箭手"), (1.5, "猎兵")):
+    p.min_exam_gain = 0
+    ranks = []
+    for cost in (0.5, 1.5, 5.0):
         p.TRAIN_PTS_PER_RANK = cost
-        assert want in exams(plan_all(p, MAX_EXAMS)[0][plan_all(p, MAX_EXAMS)[1]]), cost
+        plans, k = plan_all(p, MAX_EXAMS)
+        ranks.append(p.train_ranks(plans[k].raw_actions))
+    assert ranks == sorted(ranks, reverse=True), ranks
 
 
 @pytest.mark.parametrize("name", NAMES)
@@ -69,9 +69,10 @@ def test_every_exam_class_is_used(name):
 
 
 @pytest.mark.parametrize("name", NAMES)
-def test_plan_reaches_target_level(name):
+def test_plan_uses_fixed_seed_count(name):
+    """11-25：每条路线正好用掉 n_seeds = 到目标级的级数 + 1 个乱数（考试多的结束等级低）。"""
     p, pl = plan(name)
-    assert sum(r.action == "升级" for r in pl.rows) == TARGET[name] - p.level
+    assert len(pl.raw_actions) == p.n_seeds == TARGET[name] - p.level + p.EXTRA_SEEDS
 
 
 # ---- 11-16 Yizhuo 定的规则 ----

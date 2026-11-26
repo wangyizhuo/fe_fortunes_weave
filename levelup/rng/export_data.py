@@ -92,6 +92,13 @@ def reasons_md(r):
         L.append(f"- **Lv{e['lv']} {e['cls']}**（{e['tier']}，判定值 {e['roll']}，成功率 {e['pct']}%，用它升 {e['used']} 级）：{e['why']}")
         if e.get("trainSkills"):
             L.append(f"  - 🎯 Lv{e['lv']} 考试前练好：{'、'.join(e['trainSkills'])}（共 {e['trainRanks']} 段）")
+        tm = e.get("timing") or []
+        if tm:
+            L.append(f"  - 换到别的乱数考（现在减它，同样多的乱数；①考试用掉的乱数 ②用不同职业升级 ③保底）：")
+            for t in tm:
+                f = lambda x: f"{x['pts']:+d} 点/{x['w']:+d}"
+                L.append(f"    - Lv{t['lv']}（第 {t['step'] + 1} 个乱数，判定值 {t['roll']}，成功率 {t['pct']}%）：①{f(t['exam'])} ②{f(t['cls'])} ③{f(t['floor'])} → 合计 {f(t['total'])}，金币 {t['gold']:+d}G")
+            L.append("    - 最接近的那个：" + "；".join(tm[0]["explain"]))
         d = e.get("vsDrop")
         if d:
             L.append(f"  - 和不考它比（同样多的乱数；不考时考 {'、'.join(d['dropExams']) or '无'}、跳过 {d['dropSkips']} 次）："

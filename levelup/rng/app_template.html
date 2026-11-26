@@ -139,7 +139,8 @@ ol.next > li.exam.first { background: var(--exam-bg); box-shadow: inset 3px 0 0 
 .exambox input { width: 72px; }
 .ok { color: var(--good); font-weight: 700; } .bad { color: var(--bad); font-weight: 700; }
 .acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-details.more { font-size: 12.5px; color: var(--muted); }
+details.more { font-size: 12.5px; color: var(--muted); min-width: 0; max-width: 100%; }
+.grid > * { min-width: 0; }
 details.more > summary { cursor: pointer; width: fit-content; }
 .opts { display: grid; gap: 2px; margin-top: 4px; }
 .opt { display: grid; grid-template-columns: 18px 1fr auto; gap: 6px; align-items: start; border: 1px solid transparent; border-radius: 5px; padding: 3px 6px; cursor: pointer; }
@@ -357,6 +358,17 @@ function examVerdict(c, s) {
   return { ch, pass: ch == null ? null : s.roll < ch };
 }
 
+// 11-25 Yizhuo：考试换到别的乱数考的对比，按乱数对齐拆成 ①考试用掉的乱数 ②用不同职业升级 ③保底
+function timingBox(e) {
+  const t = e.timing || [];
+  if (!t.length) return `<br><span class="hint">考试时机：窗口里没有别的乱数能考过，只能在这一级考。</span>`;
+  const P = x => `${x.pts > 0 ? "+" : ""}${x.pts} 点 / ${x.w > 0 ? "+" : ""}${x.w}`;
+  return `<details class="more"><summary>换到别的乱数考（${t.length} 个能考过）：现在这场比它们 ${t.every(x => x.total.w >= 0) ? "都不差" : "有更好的"}</summary>
+  <div class="scroll" style="max-width:calc(100vw - 100px)"><table><tr><th>改在</th><th class="n">判定值 / 成功率</th><th>① 考试用掉的乱数</th><th>② 用不同职业升级</th><th>③ 保底</th><th>合计（现在减它）</th><th class="n">金币</th></tr>
+  ${t.map(x => `<tr><td>Lv${x.lv}（第 ${x.step + 1} 个乱数）</td><td class="n">${x.roll} / ${x.pct ?? "—"}%</td><td class="n">${P(x.exam)}</td><td class="n">${P(x.cls)}</td><td class="n">${P(x.floor)}</td><td class="n ${x.total.w > 0 ? "up" : x.total.w < 0 ? "dn" : ""}"><b>${P(x.total)}</b></td><td class="n">${x.gold > 0 ? "+" : ""}${x.gold}G</td></tr>`).join("")}</table></div>
+  <p class="hint" style="max-width:calc(100vw - 100px)">${t[0].explain.map(esc).join("<br>")}</p></details>`;
+}
+
 // 11-25 Yizhuo：要练的技能在什么等级练好（还没做的考试）
 function trainBox(c, w) {
   const done = new Set(w.rows.filter(r => r.done).map(r => r.s.key));
@@ -537,7 +549,7 @@ function reasonsBox(name) {
   const r = (DATA.reasons || {})[name]; if (!r) return "";
   const rt = r.route, G = v => (v > 0 ? "+" : "") + v;
   const dtxt = d => `${esc(gtxt(d.g))}；点数 ${G(d.pts)}，加权分 ${G(d.w)}；金币 ${G(d.gold)}G；练技能 ${G(d.train)} 段`;
-  const ex = rt.exams.map(e => `<li><b>Lv${e.lv} ${esc(e.cls)}</b> <small>${esc(e.tier || "")}｜判定值 ${e.roll}%｜成功率 ${e.pct ?? "—"}%｜用它升 ${e.used} 级</small><br>${esc(e.why)}${e.trainSkills && e.trainSkills.length ? `<br><span class="changed">🎯 Lv${e.lv} 考前练好：${esc(e.trainSkills.join("、"))}（共 ${e.trainRanks} 段）</span>` : ""}${e.vsDrop ? `<br><span class="hint">和不考它比（同样 ${rt.seeds} 个乱数；不考时${e.vsDrop.dropExams.length ? "考 " + esc(e.vsDrop.dropExams.join("、")) + "、" : ""}跳过 ${e.vsDrop.dropSkips} 次）：${dtxt(e.vsDrop)}</span>` : `<br><span class="hint">${esc(e.dropNote || "")}</span>`}</li>`).join("") || "<li>不考新职业</li>";
+  const ex = rt.exams.map(e => `<li><b>Lv${e.lv} ${esc(e.cls)}</b> <small>${esc(e.tier || "")}｜判定值 ${e.roll}%｜成功率 ${e.pct ?? "—"}%｜用它升 ${e.used} 级</small><br>${esc(e.why)}${e.trainSkills && e.trainSkills.length ? `<br><span class="changed">🎯 Lv${e.lv} 考前练好：${esc(e.trainSkills.join("、"))}（共 ${e.trainRanks} 段）</span>` : ""}${timingBox(e)}${e.vsDrop ? `<br><span class="hint">和不考它比（同样 ${rt.seeds} 个乱数；不考时${e.vsDrop.dropExams.length ? "考 " + esc(e.vsDrop.dropExams.join("、")) + "、" : ""}跳过 ${e.vsDrop.dropSkips} 次）：${dtxt(e.vsDrop)}</span>` : `<br><span class="hint">${esc(e.dropNote || "")}</span>`}</li>`).join("") || "<li>不考新职业</li>";
   const mids = r.mids.map(m => `<li><b>${esc(m.cls)}</b>：${esc(m.why)}${m.vsRoute ? `<br><span class="hint">和现在路线比：${dtxt(m.vsRoute)}</span>` : ""}</li>`).join("");
   const exc = r.excluded.length ? `<p class="hint">不考虑：${esc(r.excluded.map(x => `${x.cls}（${x.why}）`).join("、"))}</p>` : "";
   const dec = r.decisions.length ? `<h4>你的决定</h4><ul>${r.decisions.map(d => `<li><small>${esc(d.date)}</small> ${esc(d.rule)}</li>`).join("")}</ul>` : "";
@@ -809,7 +821,7 @@ function trendHtml(c) {
   const d = rec.map((v, i) => v - t.stay[i]);
   const more = d.map((v, i) => v > 0 ? `${ST[i]}+${v}` : "").filter(Boolean).join(" "), less = d.map((v, i) => v < 0 ? `${ST[i]}${v}` : "").filter(Boolean).join(" ");
   const two = g => `<td class="n">${Math.round(psum(g) * 10) / 10}</td><td class="n">${Math.round(wsum(g, wt))}</td>`;
-  const tbl = `<div class="scroll"><table><tr><th>到目标级 涨多少（${t.n} 级）</th>${ST.map(k => `<th class="n">${k}</th>`).join("")}<th class="n">点数</th><th class="n">加权分</th></tr>
+  const tbl = `<div class="scroll"><table><tr><th>用掉 ${t.n} 个乱数 涨多少</th>${ST.map(k => `<th class="n">${k}</th>`).join("")}<th class="n">点数</th><th class="n">加权分</th></tr>
     ${rows.map(([n, g, k]) => `<tr class="${k}"><td>${esc(n)}</td>${g.map((v, i) => `<td class="n ${exp && k !== "w" ? (v - exp[i] >= 2.5 ? "st" : v - exp[i] <= -2 ? "wk" : "") : ""}">${v}</td>`).join("")}${two(g)}</tr>`).join("")}
     ${(() => { const df = rec.map((v, i) => v - t.stay[i]); return `<tr class="sum"><td>推荐路线 − 一直不换</td>${df.map(v => `<td class="n ${v >= 1 ? "up" : v <= -1 ? "dn" : ""}">${sgn(v)}</td>`).join("")}<td class="n ${psum(df) >= 0 ? "up" : "dn"}">${sgn(Math.round(psum(df) * 10) / 10)}</td><td class="n ${wsum(df, wt) >= 0 ? "up" : "dn"}">${sgn(Math.round(wsum(df, wt)))}</td></tr>`; })()}
     <tr class="w"><td>能力权重</td>${wt.map(v => `<td class="n">${v}</td>`).join("")}<td></td><td></td></tr></table></div>`;

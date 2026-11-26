@@ -86,7 +86,10 @@ class Planner:
                  stats: list[int] | None = None, balance_gap: int = 3, balance_step: float = 0.5,
                  exam_chance: dict[str, float] | None = None):
         self.data, self.name, self.weights, self.min_stats = data, name, weights, min_stats
-        self.level, self.n_levels = level, target_level - level
+        # 11-25 Yizhuo：比较路线按「用掉的乱数个数」，不按到第几级。每人固定 n_seeds 个乱数 =
+        # 到目标级要升的级数 + EXTRA_SEEDS（给一场考试）；多考一场的路线结束等级低一级，不白拿一个乱数。
+        self.level, self.target_level = level, target_level
+        self.n_seeds = target_level - level + self.EXTRA_SEEDS
         self.owned = tuple(owned)
         self.exam_options = tuple(c for c in exam_options if c not in owned)
         self.required = tuple(required)   # 一定要考到的职业（例如为了拿精通技能）
@@ -134,6 +137,7 @@ class Planner:
     # 除非这个职业在 confident 里（技能、等级都够，预测 100%）。
     UNKNOWN_CAP = 90
     STR_BONUS = 3
+    EXTRA_SEEDS = 1   # 11-25：到目标级的级数 + 1 个乱数（每人都要考一个中级）
     EARLY_EPS = 1e-4
     # 11-23 Yizhuo：考进新职业，早考和晚考差不多时越早越好（用它升级的级数多，熟练度更高）。
     # 「差不多」= 点数不少、金币不多、规划器内部分最多少这么多（约等于加权分 −3）
@@ -188,7 +192,7 @@ class Planner:
         @lru_cache(maxsize=None)
         def go(step, done, extra, exams_left, m, nb=0):
             """返回 (之后能拿的最高分, 动作列表)。extra = 考到手的新职业；m = 力量 mod 5（体格阈值用）。"""
-            if done == self.n_levels:
+            if step == self.n_seeds:
                 missing = [c for c in self.required if c not in extra]
                 if self.require_mid and not any(_TIER_RANK.get(_TIER.get(c, ""), 0) >= 2 for c in extra):
                     missing.append("中级")
@@ -254,7 +258,7 @@ class Planner:
                     # Yizhuo 11-08：同分时，能考过的新职业优先于跳过，而且越早考越好（极小的虚拟分，只破平局）
                     # 同分的几个新职业里先取级别低的（手形便宜、门槛按初级算）
                     if new is not None:
-                        rest += self.EARLY_EPS * (self.n_levels - done + 1)
+                        rest += self.EARLY_EPS * (self.n_seeds - step)
                     gpp = getattr(self, "gold_per_pt", None)
                     if gpp:   # 11-08 晚：手形金币换成加权分扣掉（跳过按初级手形）
                         t = "初级" if new is None else _TIER.get(new, "中级")
@@ -335,7 +339,7 @@ class Planner:
         rule = getattr(self, "skip_rule", None)
         nss = getattr(self, "no_skip_seeds", ()) or ()
         skip_take = tuple(getattr(self, "skip_take", ()) or ())
-        while (done < self.n_levels if budget is None else step < budget) and step < 400:
+        while step < (self.n_seeds if budget is None else budget):
             lv = self.level + done
             if step < len(forced):
                 a, c = forced[step]
@@ -485,31 +489,12 @@ class Planner:
             return self._rule_plan_timed()
 
     def _rule_plan_timed(self):
-        """11-17 Yizhuo：比较路线要按「用掉同样多的乱数」比，不按到同一级比（考试/跳过都会用掉一个乱数，
-        按等级比时多考一次的路线会多算/少算边界上的一个种子）。做法：先照旧规划到目标级，记下用掉几个乱数 S；
-        再在「前 S 个乱数」这个窗口里挑要考的职业；窗口跟着选出的路线更新，最多 3 轮；最后把选好的职业照常走到目标级。"""
-        if not getattr(self, "equal_seeds", False):
-            self.seed_budget = None
-            return self._rule_plan()
+        """11-25 Yizhuo：所有路线都在同样多的乱数（self.n_seeds）里走和比，不按到第几级比。
+        先按规则挑要考的职业，再用 _pair_polish 在同一窗口里试 1～2 个职业的组合。"""
         self.seed_budget = None
         pl = self._rule_plan()
-        seen = set()
-        for _ in range(3):
-            if pl is None:
-                break
-            S = len(pl.raw_actions)
-            if S in seen:
-                break
-            seen.add(S)
-            self.seed_budget = S
-            sel = self._rule_plan()
-            self.seed_budget = None
-            if sel is None:
-                break
-            pl = self._rule_plan(fixed=list(sel.targets), mid=getattr(self, "mid_trained", None))
         pl = self._pair_polish(pl)
-        self.window = len(pl.raw_actions) if pl else None
-        self.seed_budget = None
+        self.window = self.n_seeds
         mt = getattr(self, "mid_train", None) or {}
         pt = getattr(self, "_mid_patched", set())
         self.mid_trained = next((c for c in (pl.targets if pl else []) if c in pt), None)
@@ -564,7 +549,7 @@ class Planner:
     def window_value(self, targets, S=None, must=()):
         """同一个乱数窗口（前 S 个）里，按 targets 走的 (动作, 加权分, 金币, 净值)。"""
         sv, se = getattr(self, "seed_budget", None), getattr(self, "exam_at", None)
-        self.seed_budget = S or getattr(self, "window", None)
+        self.seed_budget = S or self.n_seeds
         self.exam_at = {k: v for k, v in (se or {}).items() if v in targets}   # 选定的考试时机只对还在的职业有效
         try:
             r = self.rule_run(list(targets), tuple(must))
@@ -951,7 +936,7 @@ class Planner:
                     continue
                 if end % 5 == 0:
                     r.str_note = (f"体格：这一级比最高分少 {best - r.score} 分，换 1 点力量。少了这 1 点，"
-                                  f"力量到 Lv{self.level + self.n_levels} 只有 {end - 1}，拿不到 {end} 的体格 +1（+{self.str_bonus} 分）")
+                                  f"力量到 Lv{self.level + len(ups)} 只有 {end - 1}，拿不到 {end} 的体格 +1（+{self.str_bonus} 分）")
                 else:
                     r.str_note = f"体格：这一级比最高分少 {best - r.score} 分，换 1 点力量，让力量更早到 5 的倍数（体格 +1）"
         return rows

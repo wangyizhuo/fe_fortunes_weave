@@ -133,7 +133,7 @@ for name in ORDER:
                 ups += 1; lv += 1
         # 对照：不考试、每级用当前主职业直接升
         base = [0, 0, 0.0]
-        for i in range(p.n_levels):
+        for i in range(p.n_seeds):
             g = data.growth(name, OWNED[name][0], p.level + i)
             res = level_up(p.seed_at(i), g, 2).gains
             base[0] += sum(res); base[1] += sum(a * b for a, b in zip(res, w)); base[2] += expect(tuple(g))[0]
@@ -154,7 +154,7 @@ for name in ORDER:
             uu = first_round_u(p.seed_at(i), list(data.growth(name, OWNED[name][0], p.level)))
         fut_ps = dict(act=fact, exp=fexp, z=[(a - e) / (v ** 0.5) if v > 0 else 0 for a, e, v in zip(fact, fexp, fvar)],
                       u=[sum(x) / len(x) if x else None for x in fus], un=[len(x) for x in fus])
-        fut = dict(ps=fut_ps, frm=p.level, to=p.level + p.n_levels, ups=ups, exams=plan.exams, cnt=cnt, e_cnt=e, score=sc, e_score=esc,
+        fut = dict(ps=fut_ps, frm=p.level, to=p.level + p.n_seeds, ups=ups, exams=plan.exams, cnt=cnt, e_cnt=e, score=sc, e_score=esc,
                    noexam_cnt=base[0], noexam_score=base[1], noexam_e=base[2], main=OWNED[name][0])
     out["chars"].append(dict(name=name, now=now, seeded=seeded, past=past, pending=pending, future=fut,
                              past_ps=past_ps, rolls_ps=all_rolls,

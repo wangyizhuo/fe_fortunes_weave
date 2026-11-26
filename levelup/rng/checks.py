@@ -244,10 +244,14 @@ def p_owned_before_use():
     return bad
 
 
-@check("P2", "每人都升到目标等级（Lv35）")
+@check("P2", "每人的路线都正好用掉 n_seeds 个乱数（到目标级的级数 + 1）：比较按用掉的乱数个数，不按到第几级（11-25 Yizhuo）")
 def p_reach_target():
-    return [f"{n}：只升了 {sum(r.action == '升级' for r in plan(n)[1].rows)} 级" for n in ORDER
-            if sum(r.action == "升级" for r in plan(n)[1].rows) != TARGET[n] - plan(n)[0].level]
+    bad = []
+    for n in ORDER:
+        p, pl = plan(n)
+        if len(pl.raw_actions) != p.n_seeds or p.n_seeds != TARGET[n] - p.level + p.EXTRA_SEEDS:
+            bad.append(f"{n}：用了 {len(pl.raw_actions)} 个乱数，应为 {p.n_seeds}")
+    return bad
 
 
 @check("P3", "必考职业都考到，排除的职业不出现（Yizhuo：迪必考恶棍、法毕欧必考萨满；迪不要重装步兵）")
@@ -606,7 +610,7 @@ def snapshot():
         for r in pl.rows:
             if r.action == "升级":
                 pts = [a + b for a, b in zip(pts, r.gains)]
-        out[n] = {"from": p.level, "to": TARGET[n], "加权分": pl.total, "点数": sum(pts),
+        out[n] = {"from": p.level, "to": p.level + sum(r.action == "升级" for r in pl.rows), "乱数": p.n_seeds, "加权分": pl.total, "点数": sum(pts),
                   "各项": dict(zip(STATS, pts)), "净值": round(p.plan_net(pl.raw_actions, pl.total, pl.gold), 2),
                   "手形金币": pl.gold, "训练段": p.train_ranks(pl.raw_actions), "保底分": p.floor_value(pl.raw_actions), "路线": " ".join(f"{r.level_from}{r.cls}" if r.action == "升级" else f"[{r.cls}]" for r in pl.rows)}
     return out
@@ -646,6 +650,20 @@ def e_exam_rate():
         tol = 3 if r.get("known") else 1
         if abs(got - r["pct"]) > tol:
             bad.append(f"{r['who']} Lv{r['lv']} {r['cls']}：游戏 {r['pct']}%，公式 {got}%")
+    return bad
+
+
+@check("U11", "考试时机：路线里每场考试，换到窗口里别的能考过的乱数考（同样多的乱数、按乱数对齐比），都不会多出 2 加权分以上又不多花钱（11-25 Yizhuo：比较两个考试时机）")
+def u_exam_timing():
+    path = os.path.join(HERE, "reasons.json")
+    if not os.path.exists(path):
+        return ["没有 reasons.json：先跑 make_reasons.py"]
+    bad = []
+    for n, r in json.load(open(path, encoding="utf-8")).items():
+        for e in r.get("route", {}).get("exams", []):
+            for t in e.get("timing", []):
+                if t["total"]["w"] <= -2 and t["gold"] >= 0 and t["total"]["pts"] <= 0:
+                    bad.append(f"{n} {e['cls']}：改在 Lv{t['lv']}（第 {t['step'] + 1} 个乱数）考，加权分多 {-t['total']['w']}、点数多 {-t['total']['pts']}，金币不多")
     return bad
 
 
