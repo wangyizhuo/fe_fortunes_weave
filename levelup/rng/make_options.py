@@ -16,9 +16,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 def planner(name, target, train):
     p = R.make_planner(name, target)
-    if train and not p.exam_train_ranks:   # P1/P2：清单里也算「先练够」的版本
-        p.exam_train_ranks = {c: r[1] for c, r in p.exam_req.items() if r[1] > 0}
-        p.exam_req = {c: (r[0], 0) for c, r in p.exam_req.items()}
+    if train:   # 清单里算「先练够」的版本：对所有仍有技能差的职业补齐训练并移除练前成功率
+        extra_ranks = {c: r[1] for c, r in p.exam_req.items() if r[1] > 0}
+        if extra_ranks:
+            p.exam_train_ranks = dict(p.exam_train_ranks or {}, **extra_ranks)
+            p.exam_req = {c: (r[0], 0) for c, r in p.exam_req.items()}
+            p.exam_chance = {k: v for k, v in (p.exam_chance or {}).items() if k not in extra_ranks}
     p.min_exam_gain = 0
     return p
 

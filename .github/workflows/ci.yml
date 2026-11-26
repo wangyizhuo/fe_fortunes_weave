@@ -1,0 +1,33 @@
+name: CI & Modular Checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  test-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Run frontend pure core unit tests (Node.js)
+        run: node --test web/tests/*.test.js
+
+      - name: Build decoupled module data & static web
+        run: python3 build_site.py
+
+      - name: Run Python module & logic integrity tests
+        run: python3 -m unittest tests.test_modules tests.test_logic_integrity -v
+
+      - name: Run all 38 automated checks (D / P / U / E / A / G)
+        run: python3 levelup/rng/checks.py

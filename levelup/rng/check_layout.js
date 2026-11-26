@@ -2,7 +2,7 @@
 // 查：JS 报错、页面横向溢出、文字被挤成窄条（宽 < 110px 却折成 4 行以上）、渲染出 undefined/NaN。
 const { chromium } = require('playwright');
 (async () => {
-  const file = process.argv[2], tabs = ['meal', 'next', 'plan', 'l45', 'past', 'long', 'opts', 'mine'], problems = [];
+  const file = process.argv[2], tabs = ['meal', 'items', 'next', 'plan', 'l45', 'past', 'long', 'opts', 'mine'], problems = [];
   const b = await chromium.launch();
   for (const w of [1200, 390]) {
     const p = await b.newPage({ viewport: { width: w, height: 900 } });

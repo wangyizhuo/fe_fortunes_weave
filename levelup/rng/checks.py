@@ -151,7 +151,8 @@ def d_decisions():
         if not re.fullmatch(r"\d{4}-\d\d-\d\d", d["date"]) or d["date"] < last:
             bad.append(f"第 {i + 1} 条日期 {d['date']} 不对或倒退")
         last = max(last, d["date"])
-        for mod, sym in re.findall(r"\b(planner|run_plans|make_html|plan45|make_choices)\.([A-Za-z_][A-Za-z0-9_]*)", d.get("where", "")):
+        loc = (d.get("where") or "") + " " + (d.get("code") or "")
+        for mod, sym in re.findall(r"\b(planner|run_plans|make_html|plan45|make_choices|make_options|make_reasons)\.([A-Za-z_][A-Za-z0-9_]*)", loc):
             if sym not in ("py",) and not re.search(rf"\b{sym}\b", src.get(mod, "")):
                 bad.append(f"第 {i + 1} 条写的代码位置 {mod}.{sym} 已经不存在")
     return bad
@@ -578,28 +579,101 @@ BANNED = {
 }
 
 
+def _web_sources():
+    root = os.path.normpath(os.path.join(HERE, "..", ".."))
+    web_dir = os.path.join(root, "web")
+    out = {}
+    if os.path.isdir(web_dir):
+        for dp, dn, fn in os.walk(web_dir):
+            dn[:] = [d for d in dn if d != "tests"]
+            for f in fn:
+                if f.endswith((".html", ".js", ".css")):
+                    p = os.path.join(dp, f)
+                    out[os.path.relpath(p, root)] = open(p, encoding="utf-8").read()
+    return out
+
+
 @check("U6", "页面里没有过时或坏掉的文字（Yizhuo：『为什么迪线还有技能没确认』『不要用考试这种 ambiguous word』『我的决定』表里的 undefined）")
 def u_banned_words():
     pg = page()
     if pg is None:
         return []
-    text = json.dumps({k: v for k, v in pg.items() if k != "decisions"}, ensure_ascii=False)   # 规则记录会引用旧说法，不算
+    text = json.dumps({k: v for k, v in pg.items() if k != "decisions"}, ensure_ascii=False)
     bad = [f"页面数据里有「{w}」：{why}" for w, why in BANNED.items() if w in text]
-    tpl = open(os.path.join(HERE, "app_template.html"), encoding="utf-8").read()
-    bad += [f"页面模板里有「{w}」：{why}" for w, why in BANNED.items() if w in ("随便考", "[需考]", "需考", "技能没确认") and w in tpl]
+    for rel, src in _web_sources().items():
+        for w, why in BANNED.items():
+            if w in ("随便考", "[需考]", "需考", "技能没确认") and w in src:
+                bad.append(f"前端文件 {rel} 里有「{w}」：{why}")
     return bad
 
 
 @check("U7", "四种走法的名称在页面上统一：正常 / 转职 / 考试 / 跳过（Yizhuo 11-09：『使用我要求的术语』）")
 def u_terms():
-    tpl = open(os.path.join(HERE, "app_template.html"), encoding="utf-8").read()
-    return [f"页面模板里没有「{t}」这个走法名" for t in ("正常", "转职", "考试", "跳过") if t not in tpl]
+    merged = "\n".join(_web_sources().values())
+    return [f"前端源码里没有「{t}」这个走法名" for t in ("正常", "转职", "考试", "跳过") if t not in merged]
 
 
 @check("U8", "手写说明里不写数字：分数、等级、判定值一律由程序生成（Yizhuo：『所有的规则都应该固化在程序里，用数据 + 程序生成』；11-11 发现手写说明还停在 11-05 的旧路线）")
 def u_no_handwritten_numbers():
     d = json.load(open(os.path.join(HERE, "summary_text.json"), encoding="utf-8"))
     return [f"{n} 的手写简介里有数字：{v['intro']}" for n, v in d["chars"].items() if re.search(r"\d", json.dumps(v, ensure_ascii=False))]
+
+
+# ============================== A 架构守卫 ==============================
+
+@check("A1", "网页与数据分离：web/index.html 含标准 HTML5/UTF-8 头且不内联业务数据；out/data/ 独立输出三大模块 JSON")
+def a_web_data_separation():
+    bad = []
+    root = os.path.normpath(os.path.join(HERE, "..", ".."))
+    idx_path = os.path.join(root, "web", "index.html")
+    if not os.path.exists(idx_path):
+        return ["缺少 web/index.html"]
+    html = open(idx_path, encoding="utf-8").read()
+    if "<!DOCTYPE html>" not in html:
+        bad.append("web/index.html 缺少 <!DOCTYPE html>")
+    if 'charset="utf-8"' not in html.lower():
+        bad.append("web/index.html 缺少 UTF-8 charset 声明")
+    if "/*ROUTE_DATA*/" in html:
+        bad.append("web/index.html 不应内联 /*ROUTE_DATA*/ 数据占位符")
+    data_dir = os.path.join(OUT_DIR, "data")
+    if os.path.exists(os.path.join(OUT_DIR, "page_data.json")):
+        for fn in ("manifest.json", "affinity.json", "items.json", "route.json"):
+            if not os.path.exists(os.path.join(data_dir, fn)):
+                bad.append(f"out/data/{fn} 缺失（请运行 build_site.py）")
+    return bad
+
+
+@check("A2", "前端核心逻辑与 HTML/DOM 解耦：web/js/core/*.js 禁止直接访问 document / localStorage，保证 Node.js 可单测")
+def a_frontend_core_pure():
+    bad = []
+    root = os.path.normpath(os.path.join(HERE, "..", ".."))
+    core_dir = os.path.join(root, "web", "js", "core")
+    if not os.path.isdir(core_dir):
+        return ["缺少 web/js/core/ 目录"]
+    for fn in sorted(os.listdir(core_dir)):
+        if not fn.endswith(".js"):
+            continue
+        src = open(os.path.join(core_dir, fn), encoding="utf-8").read()
+        for forbidden in ("document.", "localStorage", "innerHTML", "addEventListener"):
+            if forbidden in src:
+                bad.append(f"web/js/core/{fn} 耦合了浏览器/DOM API：{forbidden}")
+    return bad
+
+
+@check("A3", "三大功能模块配置独立且合法：config/route_config.json、config/items_config.json、meals/meal_config.json")
+def a_module_configs():
+    bad = []
+    root = os.path.normpath(os.path.join(HERE, "..", ".."))
+    for rel in ("config/route_config.json", "config/items_config.json", "meals/meal_config.json"):
+        p = os.path.join(root, rel)
+        if not os.path.exists(p):
+            bad.append(f"缺少配置文件 {rel}")
+            continue
+        try:
+            json.load(open(p, encoding="utf-8"))
+        except Exception as e:
+            bad.append(f"配置文件 {rel} JSON 损坏：{e}")
+    return bad
 
 
 # ============================== G 快照 ==============================
