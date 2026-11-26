@@ -2,7 +2,7 @@
 
 规则
 - 闪光：最爱 2、喜欢 1、普通 0；三人 1+1+1 或 2+2+0 = perfect（Yizhuo 11-08）。2+1+0 等未确认，只当备选。
-- 讨厌这道菜的人不上桌。好感满了（maxed）、不在队伍附近（absent）的人不上桌。
+- 讨厌这道菜的人不上桌。招这个人只要支援 1 的不列（min_support 2）；支援 2 就能招的单独列出。好感满了（maxed）、不在队伍附近（absent）的人不上桌。
 - 不按主角筛人：所有角色和领主都是候选，一桌三人按「有用的支援对」打分。
   支援是两两之间涨的，一对 (领主, 目标) 有用 = 目标在该领主那条线还要靠支援挖，分数见 meal_config.json 的 goals。
 - 任何三个人都能一桌，不用带当前主角（Yizhuo 11-25 游戏里确认；gamewith 说要带，是错的）。开关 unscouted_need_current_lord 默认关。
@@ -22,7 +22,7 @@ SPK = ["讨厌", "普通", "喜欢", "最爱"]
 
 
 def load_people(tab_path, cfg):
-    """diet_tab.json 每行 → {name, pref[12], rep{route: 名声}}，加上领主。顺序 = 表里顺序（同分时靠前的优先）。"""
+    """diet_tab.json 每行 → {name, pref[12], rep{route: 名声}, sup{route: 要的支援等级}}，加上领主。顺序 = 表里顺序（同分时靠前的优先）。"""
     rows = json.load(open(tab_path, encoding="utf-8"))
     dishes = [h.split(" - ")[1] for h in rows[0][13:25]]
     people, seen = [], set()
@@ -31,10 +31,11 @@ def load_people(tab_path, cfg):
             continue
         seen.add(r[8])
         rep = {m.group(1): int(m.group(2)) for m in re.finditer(r"(\S+?)（名声(\d+)", (r[1] or "") + " " + (r[2] or ""))}
-        people.append({"name": r[8], "pref": [int(x) for x in r[13:25]], "rep": rep, "tier": r[0] or ""})
+        sup = {m.group(1): int(m.group(2)) for m in re.finditer(r"(\S+?)（名声\d+/支援(\d+)", (r[1] or "") + " " + (r[2] or ""))}
+        people.append({"name": r[8], "pref": [int(x) for x in r[13:25]], "rep": rep, "sup": sup, "tier": r[0] or ""})
     for n, p in cfg.get("lord_prefs", {}).items():
         if n not in seen:
-            people.append({"name": n, "pref": list(p), "rep": {}, "lord": True})
+            people.append({"name": n, "pref": list(p), "rep": {}, "sup": {}, "lord": True})
     return dishes, people
 
 
@@ -54,7 +55,7 @@ def pair_weights(people, cfg):
     """{(领主, 目标): 分数}：目标还没入队、在这条线要挖、名声在范围内。"""
     rec = set(cfg.get("recruited", []))
     names = {p["name"] for p in people}
-    w = {}
+    w, need = {}, {}
     for g in cfg.get("goals", []):
         if g["lord"] not in names:
             continue
@@ -63,6 +64,8 @@ def pair_weights(people, cfg):
             n, r = p["name"], p["rep"].get(g["route"])
             if r is None or n in rec or n in skip or n == g["lord"]:
                 continue
+            if p["sup"].get(g["route"], 99) < g.get("min_support", 0):
+                continue   # 11-25：支援 1 就能招的不用吃饭
             if "tiers" in g and not any(p.get("tier", "").startswith(t) for t in g["tiers"]):
                 continue   # 招募表第一栏（迪线招募）：只要还要招的
             if "renown_weight" in g:
@@ -71,6 +74,8 @@ def pair_weights(people, cfg):
                 s = g.get("weight", 1) if r <= g.get("max_renown", 99) else 0
             if s:
                 w[(g["lord"], n)] = w.get((g["lord"], n), 0) + s
+                need[(g["lord"], n)] = p["sup"].get(g["route"])
+    pair_weights.need = need
     return w
 
 
@@ -83,11 +88,13 @@ def plan(cfg, tab_path=os.path.join(HERE, "diet_tab.json")):
     out_of = set(cfg.get("maxed", [])) | set(cfg.get("absent", []))
     cand = [p for p in people if p["name"] not in out_of]
     order = {p["name"]: i for i, p in enumerate(cand)}
+    pref = {p["name"]: p["pref"] for p in cand}
     w = pair_weights(cand, cfg)
     rec = set(cfg.get("recruited", []))
     lord = cfg.get("current_lord")
     need_lord = cfg.get("unscouted_need_current_lord", False) and lord
     useful = {n for pr in w for n in pr}
+    lord_rank = {lord: 0, **{g["lord"]: 1 for g in cfg.get("goals", []) if g["lord"] != lord}}
     k = cfg.get("options_per_dish", 3)
     res = []
     for i, d in enumerate(dishes):
@@ -95,13 +102,13 @@ def plan(cfg, tab_path=os.path.join(HERE, "diet_tab.json")):
         pool = [p for p in cand if p["pref"][i] > 0 and p["name"] in useful | rec | ({lord} if need_lord else set())]
         tables = []
         for t in itertools.combinations(pool, 3):
-            ns = [p["name"] for p in t]
+            ns = sorted((p["name"] for p in t), key=lambda n: (lord_rank.get(n, 9), order[n]))   # 主角排第一，其他领主第二
             s = table_score(ns, w)
             if s <= 0:
                 continue
             if need_lord and lord not in ns and any(n not in rec for n in ns):
                 continue
-            v = [p["pref"][i] for p in t]
+            v = [pref[n][i] for n in ns]   # 和 who 同一顺序
             tables.append({"who": ns, "pref": v, "sparkle": sparkle(v), "perfect": is_perfect(v), "score": s,
                            "pairs": (pr := [[a, b] for a, b in w if a in ns and b in ns]),
                            "filler": [n for n in ns if not any(n in x for x in pr)],
@@ -119,7 +126,8 @@ def plan(cfg, tab_path=os.path.join(HERE, "diet_tab.json")):
         for t in tables:
             t.pop("_k")
         res.append({"dish": d, "perfect": bool(tables) and tables[0]["perfect"], "options": pick})
-    return {"dishes": res, "weights": [{"lord": a, "target": b, "score": s} for (a, b), s in sorted(w.items(), key=lambda x: (-x[1], order[x[0][1]]))]}
+    need = pair_weights.need
+    return {"dishes": res, "weights": [{"lord": a, "target": b, "score": s, "support": need.get((a, b))} for (a, b), s in sorted(w.items(), key=lambda x: (-x[1], order[x[0][1]]))]}
 
 
 def fmt(t):
@@ -138,7 +146,9 @@ def main():
     json.dump(p, open(a.out, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     for r in p["dishes"]:
         print(f"{r['dish']}：" + ("；".join(fmt(t) for t in r["options"]) or "没有能用的组合"))
-    print("目标：", "、".join(f"{x['lord']}–{x['target']}({x['score']})" for x in p["weights"]))
+    print("目标：", "、".join(f"{x['lord']}–{x['target']}(分{x['score']}，要支援{x['support']})" for x in p["weights"]))
+    lv2 = [x for x in p["weights"] if x["support"] == 2]
+    print("支援 2 就能招：", "、".join(f"{x['target']}（{x['lord']}线）" for x in lv2) or "没有")
 
 
 if __name__ == "__main__":
