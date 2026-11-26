@@ -1,7 +1,7 @@
 """成长规划 HTML：观星记录（备份）+ 规划器的未来路线，一页。
 每个角色：11-05 截图的等级/职业/能力/技能（页面可改）；每一步：这一步种子下所有选择（加点相同的职业并成一组）、
 加点项数、加权分；已完成按当前等级自动判断，也可手动勾。状态存 artifact db，可一键同步到主表「成长进度」。"""
-import json, os, re
+import json, os, re, sys
 OUT_DIR = os.environ.get("FE_OUT_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "out")   # 生成的网页放这里
 os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -280,33 +280,13 @@ for c in chars:
     if c["name"] in LONG:
         c["long"] = LONG[c["name"]]
 
-# 吃饭（11-08）：迪线招募表「Recruit - Diet」tab 的好感（3 最爱 2 喜欢 1 普通 0 讨厌），加上三位领主（fortunesweave）
-_dt = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "meals", "diet_tab.json"), encoding="utf-8"))
-# Yizhuo 11-18：哥莱亚斯好感满了，吃饭不再带他；名声现在 6，名声 ≤6 能挖的人优先
-MEAL_MAXED = {"哥莱亚斯", "班迪兹"}   # 11-25 Yizhuo：班迪兹也满足了
-MEAL_ABSENT = {"莱桑达"}      # 11-25 Yizhuo：莱桑达目前不在
-MEAL_LEDA_ONLY = {"绯亚娜"}   # 11-25 Yizhuo：迪不用刷绯亚娜，只在蕾达同桌时列
-RENOWN_NOW = 6
-_REC = {"迪托利希","法毕欧","艾丝梅拉尔达","米迦艾拉","杨界","伊欧","奇洛伊卡","努蒂奴","乌尔坦德"}
-_ppl = []
-import re as _re
-def _route_rep(r, route):
-    m = _re.search(route + r"（名声(\d+)", (r[1] or "") + (r[2] or ""))
-    return int(m.group(1)) if m else None
-LEDA_MAX_RENOWN = 5   # 11-25 Yizhuo：加上蕾达线名声 ≤5 能挖的人（和迪 + 蕾达同桌刷蕾达的支援）
-for r in _dt[1:]:
-    if len(r) < 25 or r[8] in MEAL_MAXED or r[8] in MEAL_ABSENT: continue
-    _rd, _rl = _route_rep(r, "迪托利希"), _route_rep(r, "蕾达")
-    leda = (r[0] not in ("必招", "满足", "可选") or r[8] in MEAL_LEDA_ONLY) and r[8] not in _REC and _rl is not None and _rl <= LEDA_MAX_RENOWN
-    if r[0] not in ("必招", "满足", "可选") and not leda: continue
-    _rn = int(str(r[6] or 0).split("–")[0] or 0)
-    _ppl.append({"name": r[8], "tier": r[0] if r[0] in ("必招", "满足", "可选") else "蕾达线", "pref": [int(x) for x in r[13:25]],
-                 "in": r[8] in _REC, "renown": _rd if _rd is not None else _rn, "leda": _rl if leda else None})
-# 11-25 Yizhuo：优先迪自己——迪线名声 6、7 要挖的人在前（名声低的先），然后其他人，蕾达线的目标最后
-_ppl.sort(key=lambda p: (0 if p["in"] else 1 if (p["renown"] in (6, 7) and p["tier"] != "蕾达线") else 3 if p["tier"] == "蕾达线" else 2, p["renown"]))
-_LORDS = {"蕾达": [2,2,0,0,2,2,2,0,2,2,2,2], "凯伊": [3,3,2,3,3,2,3,3,3,3,3,2], "赛奥朵拉": [2,2,1,2,2,1,2,2,1,0,2,1]}
-MEALS = {"dishes": [h.split(" - ")[1] for h in _dt[0][13:25]], "people": _ppl, "renownNow": RENOWN_NOW, "maxed": sorted(MEAL_MAXED),
-         "lords": [{"name": k, "tier": "领主", "pref": v, "in": False} for k, v in _LORDS.items()]}
+# 吃饭（11-25）：规则和人员状态都在 meals/meal_config.json，组合由 meals/meal_planner.py 算（perfect 优先，不按主角筛人）
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "meals"))
+import meal_planner as _mp
+_MCFG = json.load(open(os.path.join(os.path.dirname(_mp.__file__), "meal_config.json"), encoding="utf-8"))
+MEALS = _mp.plan(_MCFG)
+MEALS.update({"maxed": _MCFG.get("maxed", []), "absent": _MCFG.get("absent", []), "goals": [g.get("why", "") for g in _MCFG.get("goals", [])],
+              "lord": _MCFG.get("current_lord")})
 OPTS = json.load(open(os.path.join(HERE, "options.json"), encoding="utf-8")) if os.path.exists(os.path.join(HERE, "options.json")) else {}
 data_json = json.dumps({"options": OPTS, "meals": MEALS, "chars": chars, "stats": STATS, "skills": SKILLS, "decisions": json.load(open(os.path.join(HERE, "decisions.json"), encoding="utf-8"))}, ensure_ascii=False)
 tpl = open(os.path.join(HERE, "app_template.html"), encoding="utf-8").read()

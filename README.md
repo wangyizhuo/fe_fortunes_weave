@@ -17,12 +17,13 @@
 - `data/` 每个角色的可读数据（种子链、过去成长、等级、职业、能力、技能、吃饭喜好），自动导出
 - `docs/ARCHITECTURE.md` 系统设计和模块分工；`docs/检查规则.md` 检查规则
 - `levelup/rules/` 规则文档
-- `meals/` 吃饭组合；`dietrich/shops-src/` 迪线商店表
+- `meals/` 吃饭：`meal_planner.py` 每道菜三人一桌（perfect 优先，没有就给备选，按有用的支援对打分），配置 `meal_config.json`（已招、满了、不在、各线名声目标），输出 `meal_plan.json`，测试 `meals/tests/`；`dietrich/shops-src/` 迪线商店表
 
 ## 用法
 ```bash
 cd levelup/rng
 python3 -m pytest -q tests        # 测试（约 2 秒）
+python3 ../../meals/meal_planner.py   # 吃饭组合（改 meals/meal_config.json 后重跑；build.sh 生成网页时也会算）
 bash build.sh                     # 全部重建 + 排版检查 + 29 项检查 + 导出 data/；网页输出到仓库根目录 out/（FE_OUT_DIR 可改）
 python3 checks.py                 # 只跑检查（约 6 秒）；规则有意改了用 --update-golden
 python3 run_plans.py 迪托利希 --to 35   # 单个角色打印路线
