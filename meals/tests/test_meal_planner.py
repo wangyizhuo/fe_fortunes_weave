@@ -33,7 +33,7 @@ def test_plan_shape_and_order():
             assert min(t["pref"]) > 0                      # 没人讨厌
             assert not t["filler"]                           # 每个座位都有用
             assert not (set(t["who"]) & set(CFG["recruited"])) - {CFG["current_lord"]}   # 已入队的不上桌
-            assert "杰斯塔" not in t["who"] and "奥琳琵娅" not in t["who"] and "莱桑达" not in t["who"] and "乌修拉" not in t["who"]   # 迪–杰斯塔、迪–奥琳琵娅支援已经够了（11-25）
+            assert "杰斯塔" not in t["who"] and "奥琳琵娅" not in t["who"] and "莱桑达" not in t["who"] and "乌修拉" not in t["who"] and "大刀" not in t["who"]   # 迪–杰斯塔、迪–奥琳琵娅支援已经够了（11-25）
             assert "古扎岚" not in t["who"]                  # 蕾达线支援 1 就能招，不用吃饭
             if CFG["current_lord"] in t["who"]:
                 assert t["who"][0] == CFG["current_lord"]   # 主角排第一
@@ -58,7 +58,7 @@ def test_partner_only_and_goal_coverage():
     pear = next(r for r in p["dishes"] if r["dish"] == "糖浆炖梨")
     assert pear["options"][0]["perfect"]
     assert any("蕾达" in t["who"] and t["perfect"] for t in pear["options"])
-    ham = next(r for r in p["dishes"] if r["dish"] == "岩盐火腿")
+    ham = next(r for r in p["dishes"] if r["dish"] == "鱼酱汤")
     assert any(t["who"][0] == "蕾达" and "绯亚娜" in t["who"] and t["perfect"] for t in ham["options"])   # 不用带迪
     lv2 = {x["target"] for x in p["weights"] if x["support"] == 2 and x["lord"] == CFG["current_lord"]}
     assert lv2 == {"丹提"}   # 迪线还要招、支援 2（名声 8）
