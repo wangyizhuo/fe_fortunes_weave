@@ -27,8 +27,9 @@ def test_plan_shape_and_order():
             assert not out & set(t["who"])
             assert min(t["pref"]) > 0                      # 没人讨厌
             assert t["perfect"] == mp.is_perfect(t["pref"])
-            if any(n not in CFG["recruited"] for n in t["who"]):
-                assert CFG["current_lord"] in t["who"]     # 没入队的要主角同桌
+        assert "露露蒂雅" not in t["who"] or "蕾达" in t["who"]   # 迪线不招
+        if r["perfect"]:
+            assert all(x["perfect"] for x in r["options"])   # 有 perfect 就不列非 perfect
         # perfect 在前
         flags = [t["perfect"] for t in r["options"][:CFG["options_per_dish"]]]
         assert flags == sorted(flags, reverse=True)
@@ -44,3 +45,5 @@ def test_partner_only_and_goal_coverage():
     pear = next(r for r in p["dishes"] if r["dish"] == "糖浆炖梨")
     assert pear["options"][0]["perfect"] and pear["options"][0]["score"] >= 5
     assert any("蕾达" in t["who"] and t["perfect"] for t in pear["options"])
+    ham = next(r for r in p["dishes"] if r["dish"] == "岩盐火腿")
+    assert any(set(t["who"]) == {"绯亚娜", "古扎岚", "蕾达"} and t["perfect"] for t in ham["options"])   # 不用带迪

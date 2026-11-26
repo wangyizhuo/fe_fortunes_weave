@@ -5,8 +5,8 @@
 - 讨厌这道菜的人不上桌。好感满了（maxed）、不在队伍附近（absent）的人不上桌。
 - 不按主角筛人：所有角色和领主都是候选，一桌三人按「有用的支援对」打分。
   支援是两两之间涨的，一对 (领主, 目标) 有用 = 目标在该领主那条线还要靠支援挖，分数见 meal_config.json 的 goals。
-- 游戏规则：还没入队的人要和当前主角同桌才请得动（gamewith），开关 unscouted_need_current_lord。
-- 排序：perfect 在前 → 分数高 → 闪光多 → 表里靠前的人。每个 goal 至少有一桌出现在该菜的选项里（有得选时）。
+- 任何三个人都能一桌，不用带当前主角（Yizhuo 11-25 游戏里确认；gamewith 说要带，是错的）。开关 unscouted_need_current_lord 默认关。
+- 排序：perfect 在前 → 分数高 → 闪光多 → 表里靠前的人。这道菜有 perfect 就只列 perfect；每个 goal 至少有一桌（有得选时）。
 
 用法：python3 meal_planner.py [--config meal_config.json]  → 打印表格，写 meal_plan.json
 """
@@ -30,7 +30,7 @@ def load_people(tab_path, cfg):
             continue
         seen.add(r[8])
         rep = {m.group(1): int(m.group(2)) for m in re.finditer(r"(\S+?)（名声(\d+)", (r[1] or "") + " " + (r[2] or ""))}
-        people.append({"name": r[8], "pref": [int(x) for x in r[13:25]], "rep": rep})
+        people.append({"name": r[8], "pref": [int(x) for x in r[13:25]], "rep": rep, "tier": r[0] or ""})
     for n, p in cfg.get("lord_prefs", {}).items():
         if n not in seen:
             people.append({"name": n, "pref": list(p), "rep": {}, "lord": True})
@@ -62,6 +62,8 @@ def pair_weights(people, cfg):
             n, r = p["name"], p["rep"].get(g["route"])
             if r is None or n in rec or n in skip or n == g["lord"]:
                 continue
+            if "tiers" in g and not any(p.get("tier", "").startswith(t) for t in g["tiers"]):
+                continue   # 招募表第一栏（迪线招募）：只要还要招的
             if "renown_weight" in g:
                 s = g["renown_weight"].get(str(r), 0)
             else:
@@ -103,10 +105,13 @@ def plan(cfg, tab_path=os.path.join(HERE, "diet_tab.json")):
                            "_k": (not is_perfect(v), -s, -sum(v), sorted(order[n] for n in ns))})
         tables.sort(key=lambda x: x["_k"])
         pick = tables[:k]
-        for g in cfg.get("goals", []):   # 每个 goal 至少一桌（同样 perfect 的优先）
-            hit = [t for t in tables if any(a == g["lord"] for a, _ in t["pairs"])]
+        any_pf = bool(tables) and tables[0]["perfect"]
+        for g in cfg.get("goals", []):   # 每个 goal 至少一桌；这道菜有 perfect 时只补 perfect 的
+            hit = [t for t in tables if any(a == g["lord"] for a, _ in t["pairs"]) and (t["perfect"] or not any_pf)]
             if hit and not any(t in pick for t in hit):
-                pick.append(next((t for t in hit if t["perfect"]), hit[0]))
+                pick.append(hit[0])
+        if any_pf:
+            pick = [t for t in pick if t["perfect"]]
         for t in tables:
             t.pop("_k")
         res.append({"dish": d, "perfect": bool(tables) and tables[0]["perfect"], "options": pick})
