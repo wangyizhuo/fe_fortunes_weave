@@ -22,6 +22,7 @@
 
 from __future__ import annotations
 
+from functools import lru_cache
 from dataclasses import dataclass, field
 
 MASK32 = 0xFFFFFFFF
@@ -60,6 +61,7 @@ def next_seed(seed: int) -> int:
     return Xorshift128(seed).next() & MASK31
 
 
+@lru_cache(maxsize=1 << 16)
 def exam_roll(seed: int) -> int:
     """转职考试判定值（0～999999）：同一种子展开后的第 2 个乱数。判定值 < 成功率×10000 则考试成功。
     考试无论成败，种子都前进一步（next_seed）。出处：fireemblem.top 成长种子模拟器 Ver1.1。"""

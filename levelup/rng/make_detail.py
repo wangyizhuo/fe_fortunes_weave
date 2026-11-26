@@ -76,6 +76,7 @@ def past_rows(name):
     return out, first_lv
 
 
+@__import__("timing").timed("make_detail.build（每人）")
 def build(name):
     ch = _chars[name]
     shot = shot_of(name)

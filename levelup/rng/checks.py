@@ -18,6 +18,7 @@ import json
 import os
 import re
 import sys
+import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -25,6 +26,7 @@ sys.path.insert(0, HERE)
 import run_plans as R
 from run_plans import ORDER, TARGET, MAX_EXAMS
 from fe_growth import STATS, level_up
+from timing import timed
 from planner import plan_all, _TIER, _TIER_RANK, plan_gold
 
 OUT_DIR = os.environ.get("FE_OUT_DIR") or os.path.join(HERE, "..", "..", "out")
@@ -646,8 +648,11 @@ def run(ids=None):
     for cid, desc, f in CHECKS:
         if ids and cid not in ids:
             continue
-        probs = f()
-        print(("✗ " if probs else "✓ ") + cid + " " + desc.split("（")[0])
+        t0 = time.perf_counter()
+        with timed(f"检查 {cid}"):
+            probs = f()
+        dt = time.perf_counter() - t0
+        print((f"[{dt:5.1f}s] " if dt >= 1 else "") + ("✗ " if probs else "✓ ") + cid + " " + desc.split("（")[0])
         for x in probs[:20]:
             print("    " + x)
         failed += bool(probs)
