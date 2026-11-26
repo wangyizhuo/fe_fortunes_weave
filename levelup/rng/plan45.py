@@ -14,15 +14,7 @@ with contextlib.redirect_stdout(io.StringIO()):
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MAX45 = 6
-PHYS_ADV = ["侍道", "勇士", "狙击手", "巨型重甲兵", "卫士", "游侠", "锻造师"]
-MAGIC_ADV = ["先知", "主教", "游唱诗人"]
-ADV = {
-    "迪托利希": PHYS_ADV, "米迦艾拉": PHYS_ADV, "奇洛伊卡": PHYS_ADV,
-    "伊欧": PHYS_ADV + ["荣光骑士", "森林骑士", "铁甲骑兵"],          # 骑罗西南
-    "艾丝梅拉尔达": PHYS_ADV + ["驭龙兵", "铁甲骑兵"],                # 天翼兵/骑甲鸵兵
-    "努蒂奴": PHYS_ADV + ["驭龙兵", "铁甲骑兵"],
-    "法毕欧": MAGIC_ADV + ["锻造师"], "杨界": MAGIC_ADV, "乌尔坦德": MAGIC_ADV,
-}
+ADV = R.ADV_CLASSES
 
 
 RANKS = ["E", "E+", "D", "D+", "C", "C+", "B", "B+", "A", "A+", "S", "S+"]
