@@ -7605,31 +7605,33 @@
     "cls": "战车兵",
     "tier": "中级",
     "ok": true,
-    "lv": 26,
-    "roll": 3.81,
-    "pct": 32,
+    "lv": 20,
+    "roll": 82.65,
+    "pct": 100,
     "pctNow": 32,
-    "train": [],
-    "ranks": 0,
-    "used": 7,
-    "used45": 16,
+    "train": [
+     "马术 E→D（2 段）"
+    ],
+    "ranks": 2,
+    "used": 11,
+    "used45": 20,
     "floor": [],
     "toT": {
      "g": [
       -1,
-      -1,
+      0,
       0,
       -1,
-      2,
       1,
+      2,
       0,
       1,
       1
      ],
-     "total": 1,
+     "total": 5,
      "net": -11.0,
      "gold": 500,
-     "train": 0,
+     "train": 2,
      "seeds": 21,
      "endA": 34,
      "endB": 35
@@ -7857,60 +7859,6 @@
     "ruleBlocked": false
    },
    {
-    "cls": "骑甲鸵兵",
-    "tier": "中级",
-    "ok": true,
-    "lv": 20,
-    "roll": 82.65,
-    "pct": 100,
-    "pctNow": 0,
-    "train": [
-     "马术 E→D（2 段）",
-     "枪术 E→C（4 段）（任选一项）"
-    ],
-    "ranks": 6,
-    "used": 10,
-    "used45": 15,
-    "floor": [],
-    "toT": {
-     "g": [
-      -1,
-      0,
-      0,
-      0,
-      -1,
-      1,
-      0,
-      0,
-      0
-     ],
-     "total": -5,
-     "net": -29.0,
-     "gold": 500,
-     "train": 6,
-     "seeds": 21,
-     "endA": 34,
-     "endB": 35
-    },
-    "after": {
-     "g": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0
-     ],
-     "total": 2,
-     "net": 2.0
-    },
-    "rec": false,
-    "ruleBlocked": true
-   },
-   {
     "cls": "士兵",
     "tier": "初级",
     "ok": true,
@@ -8119,6 +8067,12 @@
     "tier": "中级",
     "ok": false,
     "why": "到目标级前没有能考过的种子"
+   },
+   {
+    "cls": "骑甲鸵兵",
+    "tier": "中级",
+    "ok": false,
+    "why": "到目标级前没有能考过的种子"
    }
   ],
   "recommended": [
@@ -8128,19 +8082,19 @@
    "toT": {
     "g": [
      -1,
-     -1,
+     0,
      0,
      -1,
-     2,
      1,
+     2,
      0,
      1,
      1
     ],
-    "total": 1,
+    "total": 5,
     "net": -11.0,
     "gold": 500,
-    "train": 0,
+    "train": 2,
     "seeds": 21,
     "endA": 34,
     "endB": 35
@@ -8165,621 +8119,16 @@
    {
     "target": 35,
     "seeds": 21,
-    "skips": [
-     {
-      "step": 10,
-      "lv": 25,
-      "roll": 67.11,
-      "opts": [
-       {
-        "cls": "弓箭手",
-        "pct": 100,
-        "pctNow": 100,
-        "ok": true,
-        "okNow": true,
-        "ranks": 0,
-        "train": [],
-        "ruleBlocked": false,
-        "d": {
-         "g": [
-          0,
-          1,
-          0,
-          1,
-          -1,
-          1,
-          0,
-          0,
-          0
-         ],
-         "pts": 2,
-         "total": 9,
-         "floorPts": 0,
-         "floorW": 0,
-         "gold": 200,
-         "seeds": 21,
-         "endA": 34,
-         "endB": 34
-        },
-        "used": 7,
-        "floor": [],
-        "worth": true,
-        "inner": 4.2,
-        "acts": [
-         "考战车兵@5"
-        ]
-       },
-       {
-        "cls": "恶棍",
-        "pct": 100,
-        "pctNow": 100,
-        "ok": true,
-        "okNow": true,
-        "ranks": 0,
-        "train": [],
-        "ruleBlocked": false,
-        "d": {
-         "g": [
-          0,
-          1,
-          0,
-          1,
-          -1,
-          1,
-          0,
-          0,
-          0
-         ],
-         "pts": 2,
-         "total": 9,
-         "floorPts": 0,
-         "floorW": 0,
-         "gold": 200,
-         "seeds": 21,
-         "endA": 34,
-         "endB": 34
-        },
-        "used": 6,
-        "floor": [],
-        "worth": true,
-        "inner": 4.2,
-        "acts": [
-         "考战车兵@5"
-        ]
-       },
-       {
-        "cls": "剑客",
-        "pct": 100,
-        "pctNow": 50,
-        "ok": true,
-        "okNow": false,
-        "ranks": 1,
-        "train": [
-         "剑术 D+→C（1 段）"
-        ],
-        "ruleBlocked": true,
-        "d": {
-         "g": [
-          0,
-          1,
-          0,
-          1,
-          -1,
-          1,
-          0,
-          0,
-          0
-         ],
-         "pts": 2,
-         "total": 9,
-         "floorPts": 0,
-         "floorW": 0,
-         "gold": 200,
-         "seeds": 21,
-         "endA": 34,
-         "endB": 34
-        },
-        "used": 2,
-        "floor": [],
-        "worth": false,
-        "inner": 2.2,
-        "acts": [
-         "考战车兵@5"
-        ]
-       },
-       {
-        "cls": "土匪",
-        "pct": 100,
-        "pctNow": 50,
-        "ok": true,
-        "okNow": false,
-        "ranks": 1,
-        "train": [
-         "剑术 D+→C（1 段）（任选一项）"
-        ],
-        "ruleBlocked": true,
-        "d": {
-         "g": [
-          0,
-          1,
-          0,
-          0,
-          -1,
-          1,
-          0,
-          0,
-          0
-         ],
-         "pts": 1,
-         "total": 4,
-         "floorPts": 0,
-         "floorW": 0,
-         "gold": 200,
-         "seeds": 21,
-         "endA": 34,
-         "endB": 34
-        },
-        "used": 1,
-        "floor": [],
-        "worth": false,
-        "inner": -2.8,
-        "acts": [
-         "考战车兵@5"
-        ]
-       },
-       {
-        "cls": "轻骑兵",
-        "pct": 100,
-        "pctNow": 18,
-        "ok": true,
-        "okNow": false,
-        "ranks": 3,
-        "train": [
-         "马术 E→D（2 段）",
-         "剑术 D+→C（1 段）（任选一项）"
-        ],
-        "ruleBlocked": true,
-        "d": {
-         "g": [
-          0,
-          1,
-          0,
-          0,
-          -1,
-          1,
-          0,
-          0,
-          0
-         ],
-         "pts": 1,
-         "total": 4,
-         "floorPts": 0,
-         "floorW": 0,
-         "gold": 200,
-         "seeds": 21,
-         "endA": 34,
-         "endB": 34
-        },
-        "used": 1,
-        "floor": [],
-        "worth": false,
-        "inner": -6.8,
-        "acts": [
-         "考战车兵@5"
-        ]
-       },
-       {
-        "cls": "斗拳手",
-        "pct": 100,
-        "pctNow": 8,
-        "ok": true,
-        "okNow": false,
-        "ranks": 4,
-        "train": [
-         "格斗术 E→C（4 段）"
-        ],
-        "ruleBlocked": true,
-        "d": {
-         "g": [
-          0,
-          1,
-          0,
-          0,
-          -1,
-          1,
-          0,
-          0,
-          0
-         ],
-         "pts": 1,
-         "total": 4,
-         "floorPts": 0,
-         "floorW": 0,
-         "gold": 200,
-         "seeds": 21,
-         "endA": 34,
-         "endB": 34
-        },
-        "used": 1,
-        "floor": [],
-        "worth": false,
-        "inner": -8.8,
-        "acts": [
-         "考战车兵@5"
-        ]
-       },
-       {
-        "cls": "骑甲鸵兵",
-        "pct": 100,
-        "pctNow": 0,
-        "ok": true,
-        "okNow": false,
-        "ranks": 6,
-        "train": [
-         "马术 E→D（2 段）",
-         "枪术 E→C（4 段）（任选一项）"
-        ],
-        "ruleBlocked": true,
-        "d": {
-         "g": [
-          0,
-          1,
-          0,
-          0,
-          -1,
-          1,
-          0,
-          0,
-          0
-         ],
-         "pts": 1,
-         "total": 4,
-         "floorPts": 0,
-         "floorW": 0,
-         "gold": 200,
-         "seeds": 21,
-         "endA": 34,
-         "endB": 34
-        },
-        "used": 1,
-        "floor": [],
-        "worth": false,
-        "inner": -12.8,
-        "acts": [
-         "考战车兵@5"
-        ]
-       },
-       {
-        "cls": "重装步兵",
-        "pct": 0,
-        "pctNow": 2,
-        "ok": false,
-        "okNow": false,
-        "ranks": 5,
-        "train": [
-         "重装术 E→E+（1 段）",
-         "枪术 E→C（4 段）（任选一项）"
-        ],
-        "ruleBlocked": true,
-        "why": "等级/技能不够，成功率 0"
-       }
-      ]
-     }
-    ],
+    "skips": [],
     "baseExams": [
-     "跳过",
      "战车兵"
     ]
    },
    {
     "target": 45,
     "seeds": 31,
-    "skips": [
-     {
-      "step": 10,
-      "lv": 25,
-      "roll": 67.11,
-      "opts": [
-       {
-        "cls": "土匪",
-        "pct": 100,
-        "pctNow": 50,
-        "ok": true,
-        "okNow": false,
-        "ranks": 1,
-        "train": [
-         "剑术 D+→C（1 段）（任选一项）"
-        ],
-        "ruleBlocked": true,
-        "d": {
-         "g": [
-          0,
-          1,
-          0,
-          0,
-          -1,
-          1,
-          0,
-          0,
-          0
-         ],
-         "pts": 1,
-         "total": 4,
-         "floorPts": 0,
-         "floorW": 0,
-         "gold": 200,
-         "seeds": 31,
-         "endA": 44,
-         "endB": 44
-        },
-        "used": 1,
-        "floor": [],
-        "worth": false,
-        "inner": -2.8,
-        "acts": [
-         "考战车兵@5"
-        ]
-       },
-       {
-        "cls": "轻骑兵",
-        "pct": 100,
-        "pctNow": 18,
-        "ok": true,
-        "okNow": false,
-        "ranks": 3,
-        "train": [
-         "马术 E→D（2 段）",
-         "剑术 D+→C（1 段）（任选一项）"
-        ],
-        "ruleBlocked": true,
-        "d": {
-         "g": [
-          0,
-          1,
-          0,
-          0,
-          -1,
-          1,
-          0,
-          0,
-          0
-         ],
-         "pts": 1,
-         "total": 4,
-         "floorPts": 0,
-         "floorW": 0,
-         "gold": 200,
-         "seeds": 31,
-         "endA": 44,
-         "endB": 44
-        },
-        "used": 1,
-        "floor": [],
-        "worth": false,
-        "inner": -6.8,
-        "acts": [
-         "考战车兵@5"
-        ]
-       },
-       {
-        "cls": "斗拳手",
-        "pct": 100,
-        "pctNow": 8,
-        "ok": true,
-        "okNow": false,
-        "ranks": 4,
-        "train": [
-         "格斗术 E→C（4 段）"
-        ],
-        "ruleBlocked": true,
-        "d": {
-         "g": [
-          0,
-          1,
-          0,
-          0,
-          -1,
-          1,
-          0,
-          0,
-          0
-         ],
-         "pts": 1,
-         "total": 4,
-         "floorPts": 0,
-         "floorW": 0,
-         "gold": 200,
-         "seeds": 31,
-         "endA": 44,
-         "endB": 44
-        },
-        "used": 1,
-        "floor": [],
-        "worth": false,
-        "inner": -8.8,
-        "acts": [
-         "考战车兵@5"
-        ]
-       },
-       {
-        "cls": "弓箭手",
-        "pct": 100,
-        "pctNow": 100,
-        "ok": true,
-        "okNow": true,
-        "ranks": 0,
-        "train": [],
-        "ruleBlocked": false,
-        "d": {
-         "g": [
-          -1,
-          1,
-          -1,
-          0,
-          -1,
-          1,
-          0,
-          0,
-          -1
-         ],
-         "pts": -2,
-         "total": 0,
-         "floorPts": 0,
-         "floorW": 0,
-         "gold": 500,
-         "seeds": 31,
-         "endA": 43,
-         "endB": 44
-        },
-        "used": 11,
-        "floor": [],
-        "worth": false,
-        "inner": -12.0,
-        "acts": [
-         "考战车兵@5",
-         "跳过@30"
-        ]
-       },
-       {
-        "cls": "恶棍",
-        "pct": 100,
-        "pctNow": 100,
-        "ok": true,
-        "okNow": true,
-        "ranks": 0,
-        "train": [],
-        "ruleBlocked": false,
-        "d": {
-         "g": [
-          -1,
-          1,
-          -1,
-          0,
-          -1,
-          1,
-          0,
-          0,
-          -1
-         ],
-         "pts": -2,
-         "total": 0,
-         "floorPts": 0,
-         "floorW": 0,
-         "gold": 500,
-         "seeds": 31,
-         "endA": 43,
-         "endB": 44
-        },
-        "used": 10,
-        "floor": [],
-        "worth": false,
-        "inner": -12.0,
-        "acts": [
-         "考战车兵@5",
-         "跳过@30"
-        ]
-       },
-       {
-        "cls": "骑甲鸵兵",
-        "pct": 100,
-        "pctNow": 0,
-        "ok": true,
-        "okNow": false,
-        "ranks": 6,
-        "train": [
-         "马术 E→D（2 段）",
-         "枪术 E→C（4 段）（任选一项）"
-        ],
-        "ruleBlocked": true,
-        "d": {
-         "g": [
-          0,
-          1,
-          0,
-          0,
-          -1,
-          1,
-          0,
-          0,
-          0
-         ],
-         "pts": 1,
-         "total": 4,
-         "floorPts": 0,
-         "floorW": 0,
-         "gold": 200,
-         "seeds": 31,
-         "endA": 44,
-         "endB": 44
-        },
-        "used": 1,
-        "floor": [],
-        "worth": false,
-        "inner": -12.8,
-        "acts": [
-         "考战车兵@5"
-        ]
-       },
-       {
-        "cls": "剑客",
-        "pct": 100,
-        "pctNow": 50,
-        "ok": true,
-        "okNow": false,
-        "ranks": 1,
-        "train": [
-         "剑术 D+→C（1 段）"
-        ],
-        "ruleBlocked": true,
-        "d": {
-         "g": [
-          -1,
-          1,
-          -1,
-          0,
-          -1,
-          1,
-          0,
-          0,
-          -1
-         ],
-         "pts": -2,
-         "total": 0,
-         "floorPts": 0,
-         "floorW": 0,
-         "gold": 500,
-         "seeds": 31,
-         "endA": 43,
-         "endB": 44
-        },
-        "used": 2,
-        "floor": [],
-        "worth": false,
-        "inner": -14.0,
-        "acts": [
-         "考战车兵@5",
-         "跳过@30"
-        ]
-       },
-       {
-        "cls": "重装步兵",
-        "pct": 0,
-        "pctNow": 2,
-        "ok": false,
-        "okNow": false,
-        "ranks": 5,
-        "train": [
-         "重装术 E→E+（1 段）",
-         "枪术 E→C（4 段）（任选一项）"
-        ],
-        "ruleBlocked": true,
-        "why": "等级/技能不够，成功率 0"
-       }
-      ]
-     }
-    ],
+    "skips": [],
     "baseExams": [
-     "跳过",
      "战车兵"
     ]
    }
@@ -8801,33 +8150,36 @@
     "cls": "重装步兵",
     "tier": "中级",
     "ok": true,
-    "lv": 20,
-    "roll": 11.9,
-    "pct": 32,
-    "pctNow": 32,
-    "train": [],
-    "ranks": 0,
-    "used": 11,
-    "used45": 18,
+    "lv": 16,
+    "roll": 7.31,
+    "pct": 8,
+    "pctNow": 4,
+    "train": [
+     "重装术 E→E+（1 段）",
+     "斧术 D+→C（1 段）（任选一项）"
+    ],
+    "ranks": 2,
+    "used": 14,
+    "used45": 21,
     "floor": [
-     "防 8→10"
+     "防 7→10"
     ],
     "toT": {
      "g": [
+      0,
+      2,
+      -1,
+      -4,
+      2,
+      4,
       -1,
       1,
-      0,
-      -3,
-      2,
-      3,
-      -2,
-      0,
       2
      ],
-     "total": 3,
-     "net": -7.0,
+     "total": 11,
+     "net": -2.0,
      "gold": 500,
-     "train": 0,
+     "train": 2,
      "seeds": 21,
      "endA": 35,
      "endB": 36
@@ -9473,20 +8825,20 @@
   "recRow": {
    "toT": {
     "g": [
+     0,
+     2,
+     -1,
+     -4,
+     2,
+     4,
      -1,
      1,
-     0,
-     -3,
-     2,
-     3,
-     -2,
-     0,
      2
     ],
-    "total": 3,
-    "net": -7.0,
+    "total": 11,
+    "net": -2.0,
     "gold": 500,
-    "train": 0,
+    "train": 2,
     "seeds": 21,
     "endA": 35,
     "endB": 36
@@ -9519,9 +8871,135 @@
    {
     "target": 45,
     "seeds": 31,
-    "skips": [],
+    "skips": [
+     {
+      "step": 25,
+      "lv": 39,
+      "roll": 95.09,
+      "opts": [
+       {
+        "cls": "剑客",
+        "pct": 8,
+        "pctNow": 8,
+        "ok": false,
+        "okNow": false,
+        "ranks": 0,
+        "train": [
+         "剑术 E→C（4 段）"
+        ],
+        "ruleBlocked": false,
+        "why": "判定值高于成功率，考不过"
+       },
+       {
+        "cls": "弓箭手",
+        "pct": 8,
+        "pctNow": 8,
+        "ok": false,
+        "okNow": false,
+        "ranks": 0,
+        "train": [
+         "箭术 E→C（4 段）"
+        ],
+        "ruleBlocked": false,
+        "why": "判定值高于成功率，考不过"
+       },
+       {
+        "cls": "恶棍",
+        "pct": 8,
+        "pctNow": 8,
+        "ok": false,
+        "okNow": false,
+        "ranks": 0,
+        "train": [
+         "剑术 E→C（4 段）（任选一项）"
+        ],
+        "ruleBlocked": false,
+        "why": "判定值高于成功率，考不过"
+       },
+       {
+        "cls": "土匪",
+        "pct": 50,
+        "pctNow": 50,
+        "ok": false,
+        "okNow": false,
+        "ranks": 0,
+        "train": [
+         "斧术 D+→C（1 段）（任选一项）"
+        ],
+        "ruleBlocked": false,
+        "why": "判定值高于成功率，考不过"
+       },
+       {
+        "cls": "斗拳手",
+        "pct": 8,
+        "pctNow": 8,
+        "ok": false,
+        "okNow": false,
+        "ranks": 0,
+        "train": [
+         "格斗术 E→C（4 段）"
+        ],
+        "ruleBlocked": false,
+        "why": "判定值高于成功率，考不过"
+       },
+       {
+        "cls": "轻骑兵",
+        "pct": 32,
+        "pctNow": 32,
+        "ok": false,
+        "okNow": false,
+        "ranks": 0,
+        "train": [
+         "枪术 D→C（2 段）（任选一项）"
+        ],
+        "ruleBlocked": false,
+        "why": "判定值高于成功率，考不过"
+       },
+       {
+        "cls": "战车兵",
+        "pct": 8,
+        "pctNow": 8,
+        "ok": false,
+        "okNow": false,
+        "ranks": 0,
+        "train": [
+         "箭术 E→C（4 段）"
+        ],
+        "ruleBlocked": false,
+        "why": "判定值高于成功率，考不过"
+       },
+       {
+        "cls": "骑甲鸵兵",
+        "pct": 50,
+        "pctNow": 50,
+        "ok": false,
+        "okNow": false,
+        "ranks": 0,
+        "train": [
+         "斧术 D+→C（1 段）（任选一项）"
+        ],
+        "ruleBlocked": false,
+        "why": "判定值高于成功率，考不过"
+       },
+       {
+        "cls": "天翼兵",
+        "pct": 32,
+        "pctNow": 32,
+        "ok": false,
+        "okNow": false,
+        "ranks": 0,
+        "train": [
+         "枪术 D→C（2 段）（任选一项）"
+        ],
+        "ruleBlocked": false,
+        "why": "判定值高于成功率，考不过"
+       }
+      ]
+     }
+    ],
     "baseExams": [
-     "战车兵"
+     "重装步兵",
+     "跳过"
     ]
    }
   ]

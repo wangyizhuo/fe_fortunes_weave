@@ -224,7 +224,7 @@ for name in ORDER:
                                "use": use_info.get(r.cls) if exam else None,
                                "train": (getattr(p, "exam_train", {}) or {}).get(r.cls) if exam else None,
                                # 11-16：P1/P2 不练技能（按实际成功率）；保底补的项；跳过顺手考的免费初级职业；名声要求
-                               "trainOk": bool(TRAIN_ALLOWED[tier_of(name)] or r.cls == getattr(p, "mid_trained", None)),
+                               "trainOk": bool(TRAIN_ALLOWED[tier_of(name)] or r.cls == getattr(p, "mid_trained", None) or (getattr(p, "exam_train_ranks", {}) or {}).get(r.cls)),
                                "trainLv": lv if exam else None,
                                "floor": [f"{a} {x}→{v}" for a, x, v in (r.floor or [])] if exam else None,
                                "skipCls": r.skip_class if exam else None,

@@ -111,8 +111,9 @@ def test_low_tiers_do_not_train(name):
     p, pl = plan(name)
     if R.TRAIN_ALLOWED[R.tier_of(name)]:
         return
-    assert p.train_ranks(pl.raw_actions) == 0
-    assert not p.exam_train_ranks          # 不假设先练够
+    ok = set(R.TRAIN_CASE.get(name, []))   # 11-25 Yizhuo：逐个准许练的（本来就有的技能）
+    assert set(p.exam_train_ranks or {}) <= ok    # 其余不假设先练够
+    assert p.train_ranks(pl.raw_actions) == sum((p.exam_train_ranks or {}).get(c, 0) for a, c in pl.raw_actions if a == "考试" and c in ok)
     done = 0
     for st, (a, c) in enumerate(pl.raw_actions):
         if a == "升级":
