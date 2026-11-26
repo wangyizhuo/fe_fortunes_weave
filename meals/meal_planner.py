@@ -6,7 +6,7 @@
 - 不按主角筛人：所有角色和领主都是候选，一桌三人按「有用的支援对」打分。
   支援是两两之间涨的，一对 (领主, 目标) 有用 = 目标在该领主那条线还要靠支援挖，分数见 meal_config.json 的 goals。
 - 任何三个人都能一桌，不用带当前主角（Yizhuo 11-25 游戏里确认；gamewith 说要带，是错的）。开关 unscouted_need_current_lord 默认关。
-- 凑数（不涨有用支援）的座位只用已入队的人。
+- 只有领主和还要挖的目标上桌，每个座位都要涨有用的支援（已入队的人不上桌，11-25）。
 - 排序：perfect 在前 → 分数高 → 闪光多 → 表里靠前的人。这道菜有 perfect 就只列 perfect；每个 goal 至少有一桌（有得选时）。
 
 用法：python3 meal_planner.py [--config meal_config.json]  → 打印表格，写 meal_plan.json
@@ -101,8 +101,8 @@ def plan(cfg, tab_path=os.path.join(HERE, "diet_tab.json")):
     k = cfg.get("options_per_dish", 3)
     res = []
     for i, d in enumerate(dishes):
-        # 候选：有用的人 + 已入队的人（凑数用，同分时优先已入队的凑数，不占没入队目标的名额）
-        pool = [p for p in cand if p["pref"][i] > 0 and p["name"] in useful | rec | ({lord} if need_lord else set())]
+        # 候选：只有有用的人（领主 + 还要挖的目标）。已入队的人不上桌（11-25：吃饭是为了挖角）
+        pool = [p for p in cand if p["pref"][i] > 0 and p["name"] in useful | ({lord} if need_lord else set())]
         tables = []
         for t in itertools.combinations(pool, 3):
             ns = sorted((p["name"] for p in t), key=lambda n: (lord_rank.get(n, 9), order[n]))   # 主角排第一，其他领主第二
@@ -116,7 +116,7 @@ def plan(cfg, tab_path=os.path.join(HERE, "diet_tab.json")):
                            "pairs": (pr := [[a, b] for a, b in w if a in ns and b in ns]),
                            "filler": [n for n in ns if not any(n in x for x in pr)],
                            "_k": (not is_perfect(v), -s, -sum(v), sorted(order[n] for n in ns))})
-        tables = [t for t in tables if all(n in rec for n in t["filler"])]   # 凑数只用已入队的；没入队的人上桌必须有用
+        tables = [t for t in tables if not t["filler"]]   # 每个座位都要涨有用的支援，没有凑数
         tables.sort(key=lambda x: x["_k"])
         pick = tables[:k]
         any_pf = bool(tables) and tables[0]["perfect"]
