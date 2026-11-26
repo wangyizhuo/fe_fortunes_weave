@@ -636,6 +636,19 @@ def golden_diff(old, new):
     return lines
 
 
+@check("E1", "考试成功率公式对得上游戏里读到的数（exam_rates_observed.json，11-25 Yizhuo）：差 ≤1%；记了 known 的两项技能差的情况只要公式不比游戏低太多（≤3%）")
+def e_exam_rate():
+    from planner import exam_rate
+    obs = json.load(open(os.path.join(HERE, "exam_rates_observed.json"), encoding="utf-8"))["rows"]
+    bad = []
+    for r in obs:
+        got = exam_rate(r["d"], r["g"])
+        tol = 3 if r.get("known") else 1
+        if abs(got - r["pct"]) > tol:
+            bad.append(f"{r['who']} Lv{r['lv']} {r['cls']}：游戏 {r['pct']}%，公式 {got}%")
+    return bad
+
+
 @check("U10", "每人路线里的每场考试都有记下的选择原因，和规划器一致（11-25 Yizhuo：选择原因记下来，不临时再算）")
 def u_reasons():
     path = os.path.join(HERE, "reasons.json")

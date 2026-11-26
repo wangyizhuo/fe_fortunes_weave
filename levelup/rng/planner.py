@@ -63,6 +63,22 @@ def gains_text(gains):
     return " ".join(STATS[i] + ("" if g == 1 else f"+{g}") for i, g in enumerate(gains) if g) or "—"
 
 
+
+def exam_rate(d, g):
+    """考试成功率公式（11-25 Yizhuo 游戏里读的数拟合，见 exam_rates_observed.json / checks E1）：
+    技能都够、等级 ≥ 推荐等级 → 100%；否则 2 ×［(6 + 等级差) × (1 − 技能差段数 ÷ 6)］²，四舍五入，最高 100、最低 0。
+    d = 等级 − 推荐等级，g = 技能还差几段（任选其一取差得最少的那项）。
+    等级高于推荐且技能不够时没有游戏数据，保守按等级差 0 算。
+    已知偏差：差的技能有两项时游戏比公式低（奇洛 轻骑兵 2% vs 4.5%，杨界 重装步兵 16% vs 18%），可能按技能经验算。"""
+    if g <= 0 and d >= 0:
+        return 100
+    d = min(d, 0)   # 等级高于推荐、技能又不够：没有游戏数据，保守按刚好推荐等级算（Game8：差 1 段时 50～85%，公式给 50）
+    x = (6 + d) * (1 - g / 6)
+    if x <= 0:
+        return 0
+    return min(100, int(2 * x * x + 0.5))
+
+
 class Planner:
     def __init__(self, data: GrowthData, name: str, seed: int, level: int, target_level: int,
                  owned: list[str], exam_options: list[str], weights: list[int], min_stats: int = 2,
@@ -130,9 +146,8 @@ class Planner:
         return self.str_bonus * ((cur_str + g[1]) // 5 - cur_str // 5)
 
     def exam_pct(self, cls, level):
-        """估计游戏显示的成功率（%）：填了游戏数字用游戏数字；否则按技能差距和等级估计（见 run_plans.exam_req）。
-        技能差 0 段 100%，差 1 段 50%（实测 50～85%，取保守），差 2 段以上 0；
-        等级比推荐低 1 级封顶 50%，低 2 级 32%，再低按 0。没有要求数据时返回 None。"""
+        """估计游戏显示的成功率（%）：填了游戏数字用游戏数字；否则按 exam_rate（等级差、技能差几段，见 run_plans.exam_req）。
+        没有要求数据时返回 None。"""
         ch = self.exam_chance.get(cls)
         if ch is not None:
             return ch
@@ -143,11 +158,7 @@ class Planner:
             req = (req[0], 0)     # 技能确认够了，但等级不够推荐等级时照样封顶
         if req is None:
             return None
-        rec_lv, gap = req
-        pct = 100 if gap <= 0 else 50 if gap == 1 else 0
-        d = rec_lv - level
-        cap = 100 if d <= 0 else 50 if d == 1 else 32 if d == 2 else 0
-        return min(pct, cap)
+        return exam_rate(level - req[0], req[1])
 
     def exam_ok(self, step, cls, level=None):
         pct = self.exam_pct(cls, self.level if level is None else level)
@@ -659,6 +670,16 @@ class Planner:
             return self.plan_net(r[0], r[2], r[3]) if r else float("-inf")
         def got(r, c):
             return r is not None and ("考试", c) in r[0] and any(a == "升级" and x == c for a, x in r[0])
+        def margin(r, c):
+            """这场考试的把握：估计成功率 − 判定值（%）。同分时选把握大的（11-25：杨界 萨满 100% 和 弓箭手 8% 同分时选萨满）。"""
+            lv = self.level
+            for st, (a, x) in enumerate(r[0]):
+                if a == "升级":
+                    lv += 1
+                elif x == c:
+                    pct = self.exam_pct(c, lv)
+                    return (100 if pct is None else pct) - exam_roll(self.seed_at(st)) / 10_000
+            return 0
         targets = list(base_t)
         cur = run(targets)
         cands = [c for c in self.exam_options if c not in targets]
@@ -736,7 +757,7 @@ class Planner:
                     self.mid_trained = c
                     self._mid_patched = getattr(self, "_mid_patched", set()) | {c}
             if opts:
-                v, c, r, tg = max(opts, key=lambda x: x[0])
+                v, c, r, tg = max(opts, key=lambda x: (round(x[0], 6), margin(x[2], x[1])))
                 targets = list(tg); cur = r
             else:
                 self.mid_missing = True
@@ -786,11 +807,7 @@ class Planner:
         req = (getattr(self, "skip_req", {}) or {}).get(cls)
         if req is None:
             return None
-        rec_lv, gap = req
-        pct = 100 if gap <= 0 else 50 if gap == 1 else 0
-        d = rec_lv - level
-        cap = 100 if d <= 0 else 50 if d == 1 else 32 if d == 2 else 0
-        return min(pct, cap)
+        return exam_rate(level - req[0], req[1])
 
     def annotate(self, pl):
         """11-16：每个考试/跳过行写上保底收益；跳过用哪场初级考试。

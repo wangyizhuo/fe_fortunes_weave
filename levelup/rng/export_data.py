@@ -90,6 +90,8 @@ def reasons_md(r):
          f"- {r['tier']}：{'可以' if r['trainAllowed'] else '不'}练技能考试", "", "### 路线里的考试"]
     for e in rt["exams"]:
         L.append(f"- **Lv{e['lv']} {e['cls']}**（{e['tier']}，判定值 {e['roll']}，成功率 {e['pct']}%，用它升 {e['used']} 级）：{e['why']}")
+        if e.get("trainSkills"):
+            L.append(f"  - 🎯 Lv{e['lv']} 考试前练好：{'、'.join(e['trainSkills'])}（共 {e['trainRanks']} 段）")
         d = e.get("vsDrop")
         if d:
             L.append(f"  - 和不考它比（同样多的乱数；不考时考 {'、'.join(d['dropExams']) or '无'}、跳过 {d['dropSkips']} 次）："
