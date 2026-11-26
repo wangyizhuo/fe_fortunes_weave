@@ -44,6 +44,13 @@ def diff(p, a, b):
 
 
 def exam_why(p, c, mids_in_route):
+    fb = (getattr(p, "first_bad_info", None) or {}).get(c)
+    if fb and fb["how"] == "你指定":
+        return f"你指定在第 {fb['step'] + 1} 个乱数考"
+    if fb and fb["how"] == "第一个不好的乱数":
+        return f"默认：第一个不好、又能考过的乱数（这级最好 {fb['s']} 分，未来 15 级平均 {fb['avg15']}）。更早或更晚考的对比见下表，由你决定"
+    if fb:
+        return fb["how"]
     if c in p.required:
         return "你指定必考"
     if c in (getattr(p, "skip_take", ()) or ()):

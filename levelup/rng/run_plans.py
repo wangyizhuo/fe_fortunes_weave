@@ -341,6 +341,12 @@ def exam_req(name, cls):
     return int(m.group(1)), total
 
 
+# 11-25 Yizhuo：P0 以外的人考试时机的决定 {角色: {职业: 第几个乱数（从 1 数，现在起）}}。没写的按「第一个不好的乱数」
+EXAM_AT_OVERRIDE = {}
+# 11-25 Yizhuo 规则 2：P1/P2 为这场考试可以练技能的（本来就有的技能），逐个定
+TRAIN_CASE = {"奇洛伊卡": ["战车兵"], "努蒂奴": ["重装步兵"]}
+
+
 # 11-11 Yizhuo：考试技能不够时，可以提前训练到够再考 → 规划时技能差当 0（只看等级），路线里写出要先练什么。
 TRAIN_TO_PASS = True
 
@@ -430,6 +436,10 @@ def make_planner(name, target=None):
     # 11-09 Yizhuo（讨论稿评论）：P0 ≤8 分或比未来 15 级平均低 ≥35%；P1 ≤8 分且低 ≥50%；P2 ≤6 分且低 ≥60%
     p.skip_rule = SKIP_RULE[tier]
     p.no_skip_seeds = NO_SKIP_SEEDS.get(name, set())
+    # 11-25 Yizhuo：P0 以外的人，考试默认在第一个不好、又能考过的乱数上考；要提前/推后由 Yizhuo 定（EXAM_AT_OVERRIDE）
+    p.first_bad_exam = name not in P0
+    p.bad_rule = SKIP_RULE["P0"]   # 11-25 Yizhuo 规则 1：「不好的乱数」= ≤8 分或比未来 15 级平均低 35%
+    p.exam_at_override = dict(EXAM_AT_OVERRIDE.get(name, {}))
     p.exam_req = {c: r for c in EXAM_OPTIONS.get(name, []) if (r := exam_req(name, c))}
     p.TRAIN_PTS_PER_RANK = TRAIN_PTS[tier_of(name)]
     p.min_exam_gain = MIN_EXAM_GAIN
@@ -452,6 +462,12 @@ def make_planner(name, target=None):
         p.exam_train_ranks = {c: r[1] for c, r in p.exam_req.items() if r[1] > 0}   # 要练几段（训练成本按段算）
         p.exam_req = {c: (r[0], 0) for c, r in p.exam_req.items()}
         p.exam_chance = {c: v for c, v in (p.exam_chance or {}).items() if c not in p.exam_train}
+    # 11-25 Yizhuo 规则 2：P1/P2 本来就有的技能可以练，逐个由 Yizhuo 定（TRAIN_CASE）
+    for c in TRAIN_CASE.get(name, []):
+        if c in p.exam_req and p.exam_req[c][1] > 0 and not TRAIN_ALLOWED[tier_of(name)]:
+            p.exam_train_ranks = dict(p.exam_train_ranks or {}, **{c: p.exam_req[c][1]})
+            p.exam_req = dict(p.exam_req, **{c: (p.exam_req[c][0], 0)})
+            p.exam_chance = {k: v for k, v in (p.exam_chance or {}).items() if k != c}
     # 不练技能的档位：考不过任何中级时，只为这个中级破例练（planner.rule_plan 用）
     p.mid_train = {}
     if p.require_mid and not TRAIN_ALLOWED[tier_of(name)]:

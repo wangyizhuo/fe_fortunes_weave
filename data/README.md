@@ -12,9 +12,9 @@
 | [米迦艾拉](characters/米迦艾拉.md) | P0 | Lv20 | 士兵 | 261 | 392 |
 | [杨界](characters/杨界.md) | P1 | Lv20 | 诅咒师 | 215 | 387 |
 | [伊欧](characters/伊欧.md) | P0 | Lv23 | 轻骑兵 | 224 | 305 |
-| [奇洛伊卡](characters/奇洛伊卡.md) | P1 | Lv15 | 猎兵 | 253 | 383 |
-| [努蒂奴](characters/努蒂奴.md) | P2 | Lv15 | 飞鸵兵 | 258 | 375 |
-| [乌尔坦德](characters/乌尔坦德.md) | P2 | Lv15 | 诅咒师 | 268 | 401 |
+| [奇洛伊卡](characters/奇洛伊卡.md) | P1 | Lv15 | 猎兵 | 261 | 391 |
+| [努蒂奴](characters/努蒂奴.md) | P2 | Lv15 | 飞鸵兵 | 258 | 376 |
+| [乌尔坦德](characters/乌尔坦德.md) | P2 | Lv15 | 诅咒师 | 268 | 393 |
 
 - `characters/<角色>.json / .md`：种子、观星记录（过去的成长）、等级、职业、能力、技能、权重、规划、吃饭喜好
 - `classes.json`：职业数据和可考清单；`rules.json`：优先级、跳过条件等规则常数

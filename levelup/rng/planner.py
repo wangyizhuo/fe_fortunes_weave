@@ -494,11 +494,56 @@ class Planner:
         self.seed_budget = None
         pl = self._rule_plan()
         pl = self._pair_polish(pl)
+        if getattr(self, "first_bad_exam", False) and pl is not None:
+            pl = self._first_bad_timing(pl)
         self.window = self.n_seeds
         mt = getattr(self, "mid_train", None) or {}
         pt = getattr(self, "_mid_patched", set())
         self.mid_trained = next((c for c in (pl.targets if pl else []) if c in pt), None)
         return pl
+
+    def _first_bad_timing(self, pl):
+        """11-25 Yizhuo：P0 以外的人，每场考试默认放在「第一个不好、又能考过」的乱数上考（不好 = 跳过条件成立）。
+        更早考能早拿到职业，但会用掉一个好乱数——这个取舍由 Yizhuo 决定（run_plans.EXAM_AT_OVERRIDE），
+        选择原因里列出每个能考过的乱数和默认比的 ①考试用掉的乱数 ②用不同职业升级 ③保底。"""
+        targets = list(pl.targets)
+        order = [c for a, c in pl.raw_actions if a == "考试" and c != "跳过" and c in targets]
+        plan_step = {c: next(i for i, (a, x) in enumerate(pl.raw_actions) if (a, x) == ("考试", c)) for c in order}
+        override = getattr(self, "exam_at_override", None) or {}
+        ea, info = {}, {}
+        sv = self.exam_at
+        for c in order:
+            if c in override:
+                ea[override[c] - 1] = c
+                info[c] = {"how": "你指定", "step": override[c] - 1}
+                continue
+            chosen = None
+            for st in range(self.n_seeds):
+                if st in ea:
+                    continue
+                self.exam_at = {**ea, st: c}
+                r = self.rule_run(targets)
+                if r is None or st >= len(r[0]) or r[0][st] != ("考试", c) or ("升级", c) not in r[0][st:]:
+                    continue   # 要考得过，而且考完还要用它升级
+                why = (r[1].get("why") or {}).get(st) or {}
+                br = getattr(self, "bad_rule", None)   # 11-25 Yizhuo 规则 1：P0 以外的人也按 P0 的标准判断「不好」
+                bad = why.get("want_skip") if not br or "avg15" not in why else (
+                    (why["s"] <= br["cap"] + 1e-6) or (why["s"] <= why["avg15"] * (1 - br["pct"]) + 1e-6))
+                if bad:
+                    chosen = st
+                    info[c] = {"how": "第一个不好的乱数", "step": st, "s": why.get("s"), "avg15": why.get("avg15")}
+                    break
+            if chosen is None:
+                chosen = plan_step[c]
+                info[c] = {"how": "没有不好、能考过、考完还能用来升级的乱数，按规则挑的乱数", "step": chosen}
+            ea[chosen] = c
+        self.exam_at = ea
+        new = self._rule_plan(fixed=targets, mid=getattr(self, "mid_trained", None))
+        if new is None or any(("考试", c) not in new.raw_actions for c in order):
+            self.exam_at = sv
+            return pl
+        self.first_bad_info = info
+        return new
 
     PAIR_TOL = 1.0   # 和 checks.P12 同一个容差：差 1 分以内算一样
 

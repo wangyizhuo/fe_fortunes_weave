@@ -661,6 +661,8 @@ def u_exam_timing():
     bad = []
     for n, r in json.load(open(path, encoding="utf-8")).items():
         for e in r.get("route", {}).get("exams", []):
+            if (e.get("why") or "").startswith(("默认", "你指定")):
+                continue   # 11-25 Yizhuo：P0 以外按「第一个不好的乱数」或他指定的时机，换时机的取舍由他定，不算错
             for t in e.get("timing", []):
                 if t["total"]["w"] <= -2 and t["gold"] >= 0 and t["total"]["pts"] <= 0:
                     bad.append(f"{n} {e['cls']}：改在 Lv{t['lv']}（第 {t['step'] + 1} 个乱数）考，加权分多 {-t['total']['w']}、点数多 {-t['total']['pts']}，金币不多")
