@@ -33,7 +33,7 @@ ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
 DATA = os.path.join(ROOT, "data")
 DISHES = ["岩盐火腿", "鱼酱汤", "玛达津", "烤山羊肉", "炭烤蒜香扇贝", "南瓜汤", "豆炖沙猪", "芝士烤小龙虾",
           "糖浆炖梨", "卤甜辣鞑古扎七节虫", "炭烤鱼", "特芙果酱"]
-PREF_NAME = {0: "讨厌", 1: "普通", 2: "喜欢", 3: "最爱"}   # 迪线招募表「Recruit - Diet」的编码（见 meals/diet_combos.py）
+PREF_NAME = {0: "讨厌", 1: "普通", 2: "喜欢", 3: "最爱"}   # 迪线招募表「Recruit - Diet」的编码（见 meals/meal_planner.py）
 CHAIN_STEPS = 25
 _KEYS = ["hp", "str", "mag", "spd", "dex", "def", "res", "lck", "cha"]
 
