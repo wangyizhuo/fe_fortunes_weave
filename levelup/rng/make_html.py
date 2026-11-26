@@ -9,6 +9,7 @@ from fe_growth import STATS, level_up, exam_roll
 from planner import plan_all, score
 from run_plans import OWNED, EXAM_OPTIONS, REQUIRED, CURRENT, W, data, make_planner, records, units
 from run_plans import TARGET, MAX_EXAMS, ORDER, P0, tier_of, TRAIN_ALLOWED  # noqa: F401
+from run_plans import shot as shot_of
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SKILLS = ["剑术", "枪术", "斧术", "箭术", "格斗术", "黑魔术", "白魔术", "指挥术", "步兵术", "马术", "重装术", "飞行术"]
@@ -59,7 +60,7 @@ HIDDEN_NOTE = {"h4": "你说没有跳过，但下一次升 Lv19 的加点对得�
 chars = []
 for name in ORDER:
     cur = CURRENT.get(name, {})
-    shot = cur.get("shot_1105", {})
+    shot = shot_of(name)
     w = W[name]
     owned = list(dict.fromkeys(OWNED.get(name, []) + CUR_CLASS_EXTRA.get(name, [])))
     opts_pool = list(dict.fromkeys(owned + EXAM_OPTIONS.get(name, [])))

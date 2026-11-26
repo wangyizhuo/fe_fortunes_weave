@@ -67,7 +67,7 @@ def _plan35():
 
 
 def character(name, fw, meals, p35, p45):
-    shot = R.CURRENT.get(name, {}).get("shot_1105") or {}
+    shot = R.shot(name)
     seed0, first = demo.KNOWN_SEEDS[name]
     seed, level = R.current_state(name)
     recs = []

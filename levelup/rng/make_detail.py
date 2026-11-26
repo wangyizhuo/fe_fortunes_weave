@@ -13,6 +13,7 @@ from fe_growth import STATS, exam_roll, level_up
 from planner import gains_text, plan_all
 from run_plans import (OWNED, EXAM_OPTIONS, REQUIRED, EXAM_CHANCE, CURRENT, data, make_planner,
                        records, ORDER, MAX_EXAMS, TARGET as _TARGETS, BOOST, class_bonus)
+from run_plans import shot as shot_of
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 KEYS = ["hp", "str", "mag", "spd", "dex", "def", "res", "lck", "cha"]
@@ -77,7 +78,7 @@ def past_rows(name):
 
 def build(name):
     ch = _chars[name]
-    shot = CURRENT[name]["shot_1105"]
+    shot = shot_of(name)
     cur_cls = shot["class"]
     bonus = class_bonus(cur_cls)
     boost, boost_note = BOOST.get(name, ([0] * 9, "无"))

@@ -217,8 +217,10 @@ def test_everyone_reaches_intermediate(name):
 
 
 def test_mid_owners_count_as_done():
-    for n in ("迪托利希", "艾丝梅拉尔达", "伊欧"):
+    # 11-25 重开章节：艾丝的天翼兵是本章考的，重开后没了 → 她要重新考一个中级
+    for n in ("迪托利希", "伊欧"):
         assert not make_planner(n).require_mid
+    assert make_planner("艾丝梅拉尔达").require_mid
 
 
 def test_low_tier_may_train_only_for_required_mid():

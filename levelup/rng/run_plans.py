@@ -44,8 +44,8 @@ OWNED = {
     "乌尔坦德": ["诅咒师"],
     "米迦艾拉": ["斗士", "士兵", "平民"],   # Yizhuo 11-07 确认有平民
     "努蒂奴": ["飞鸵兵"],
-    "艾丝梅拉尔达": ["天翼兵", "飞鸵兵", "斗士", "士兵"],   # 11-08 兵种截图：有士兵
-    "伊欧": ["战车兵", "轻骑兵", "平民"],
+    "艾丝梅拉尔达": ["飞鸵兵", "斗士", "士兵"],   # 11-08 兵种截图：有士兵；11-25 重开章节：天翼兵考试是本章做的，重开后没了
+    "伊欧": ["轻骑兵", "平民"],   # 11-25 重开章节：转战车兵的考试是本章做的，重开后没了（种子停在那次考试之前）
     "奇洛伊卡": ["猎兵", "斗士"],
 }
 
@@ -115,6 +115,22 @@ REPLAN_FROM_SHOT = {"杨界", "奇洛伊卡", "努蒂奴", "法毕欧", "伊欧"
 KEEP_AFTER_SHOT = {"乌尔坦德": 1}
 
 
+# 11-25 Yizhuo 重开章节：当前状态 = 重开后的部队表截图（current_stats.json 的 shot_1125）。
+# seed_index = 从 demo.KNOWN_SEEDS 的种子起已经用掉几步（升级、考试都算），由重开后的 30 张观星升级截图逐条对上得出（checks.py S1 会复核）。
+SHOT_KEY = "shot_1125"
+
+
+def shot(name):
+    """角色当前的截图快照（等级、职业、能力、技能、seed_index）。全项目只从这里取，别直接写 shot_xxxx。"""
+    c = CURRENT.get(name, {})
+    return c.get(SHOT_KEY) or c.get("shot_1105") or {}
+
+
+def _cut(name):
+    """快照里写了 seed_index 时，记录只保留种子位置在它之前的。"""
+    return shot(name).get("seed_index")
+
+
 def _draws(name):
     out, kept = [], 0
     shot = (CURRENT.get(name, {}).get("shot_1105") or {}).get("level") if name in REPLAN_FROM_SHOT else None
@@ -136,8 +152,13 @@ def _draws(name):
 
 
 def current_state(name):
-    """备份里最后一条记录之后的种子和等级（✓=升级，✗=考试，都推进一步）。"""
+    """备份里最后一条记录之后的种子和等级（✓=升级，✗=考试，都推进一步）。
+    快照有 seed_index（11-25 重开后）时：种子 = 已知种子往后走 seed_index 步，等级 = 截图等级。"""
     seed, first = demo.KNOWN_SEEDS[name]
+    if _cut(name) is not None:
+        for _ in range(_cut(name)):
+            seed = next_seed(seed)
+        return seed, shot(name)["level"]
     unit = units[name]
     level = unit["startLevel"]
     for idx, draw in enumerate(_draws(name), start=1):
@@ -168,6 +189,29 @@ def records(name):
     seed, first = demo.KNOWN_SEEDS.get(name, (None, 1))
     level = unit["startLevel"] + LEVEL_FIX.get(name, 0)   # 第 1 条记录升级前的等级
     out = []
+    cut, pos = _cut(name), 0
+    if cut is not None:
+        # 11-25：按种子位置截断（已知种子之前的记录没有种子，照常保留）
+        draws = [{**d, **RECORD_FIX.get(name, {}).get(i, {})} for i, d in enumerate(units[name]["draws"], start=1)]
+        for idx, draw in enumerate(draws, start=1):
+            if draw.get("drop"):
+                continue
+            for _ in range(demo.HIDDEN_STEPS.get(name, {}).get(idx, 0)):
+                if idx >= first and pos >= cut:
+                    return out
+                out.append(dict(idx=f"{idx}-", seed=seed if idx >= first else None, ok=None, cls="", frm=level, to=None, gains=[0] * 9))
+                if idx >= first:
+                    seed, pos = next_seed(seed), pos + 1
+            if idx >= first and pos >= cut:
+                return out
+            cur = seed if idx >= first else None
+            g = [1 if k in draw["gains"] else 0 for k in range(9)]
+            out.append(dict(idx=idx, seed=cur, ok=bool(draw["ok"]), cls=data.class_ids[str(draw["cls"])],
+                            frm=level, to=level + 1 if draw["ok"] else None, gains=g))
+            if idx >= first:
+                seed, pos = next_seed(seed), pos + 1
+            level += draw["ok"]
+        return out
     for idx, draw in enumerate(_draws(name), start=1):
         for _ in range(demo.HIDDEN_STEPS.get(name, {}).get(idx, 0)):
             out.append(dict(idx=f"{idx}-", seed=seed if idx >= first else None, ok=None, cls="", frm=level, to=None, gains=[0] * 9))
@@ -198,12 +242,12 @@ def records(name):
 
 def start_stats(name):
     """规划起点（最后一条记录之后）的能力：11-05 截图 + 还没升的记录加点。"""
-    shot = CURRENT.get(name, {}).get("shot_1105")
-    if not shot:
+    sh = shot(name)
+    if not sh:
         return CURRENT.get(name, {}).get("stats")
-    st = list(shot["stats"])
-    for r in records(name) if name in units else []:
-        if r["ok"] and r["to"] > shot["level"]:
+    st = list(sh["stats"])
+    for r in records(name) if name in units and _cut(name) is None else []:   # 有 seed_index 时记录都在截图之前
+        if r["ok"] and r["to"] > sh["level"]:
             st = [a + b for a, b in zip(st, r["gains"])]
     return st
 
@@ -232,13 +276,13 @@ BOOST = {
 
 def raw_start(name):
     """规划起点的裸能力（截图 − 当前职业加成 − 额外加成 + 截图后的记录加点），保底和它比。"""
-    shot = CURRENT.get(name, {}).get("shot_1105")
-    if not shot:
+    sh = shot(name)
+    if not sh:
         return None
     boost = BOOST.get(name, ([0] * 9, ""))[0]
-    raw = [s - b - x for s, b, x in zip(shot["stats"], class_bonus(shot["class"]), boost)]
-    for r in records(name) if name in units else []:
-        if r["ok"] and r["to"] and r["to"] > shot["level"]:
+    raw = [s - b - x for s, b, x in zip(sh["stats"], class_bonus(sh["class"]), boost)]
+    for r in records(name) if name in units and _cut(name) is None else []:
+        if r["ok"] and r["to"] and r["to"] > sh["level"]:
             raw = [a + b for a, b in zip(raw, r["gains"])]
     return raw
 
@@ -276,7 +320,7 @@ def exam_req(name, cls):
     m = re.search(r"推荐 Lv(\d+)", text)
     if not m:
         return None
-    skills = (CURRENT.get(name, {}).get("shot_1105") or {}).get("skills", {})
+    skills = shot(name).get("skills", {})
 
     def gap(sk, rk):
         need = RANKS.index(rk)
@@ -302,7 +346,7 @@ def train_need(name, cls):
     """考 cls 之前要练的技能，如 ['箭术 D→C']；技能截图没有的项写「（截图没有，按差 1 段）」。"""
     import re
     text = _CLS_REQ.get(cls, "")
-    skills = (CURRENT.get(name, {}).get("shot_1105") or {}).get("skills", {})
+    skills = shot(name).get("skills", {})
     out = []
     for part in text.split("·"):
         part = part.strip()
