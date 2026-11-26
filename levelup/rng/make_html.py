@@ -9,7 +9,7 @@ from fe_growth import STATS, level_up, exam_roll
 from planner import plan_all, score
 from run_plans import OWNED, EXAM_OPTIONS, REQUIRED, CURRENT, W, data, make_planner, records, units
 from run_plans import TARGET, MAX_EXAMS, ORDER, P0, tier_of, TRAIN_ALLOWED  # noqa: F401
-from run_plans import shot as shot_of
+from run_plans import shot as shot_of, _cut
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SKILLS = ["剑术", "枪术", "斧术", "箭术", "格斗术", "黑魔术", "白魔术", "指挥术", "步兵术", "马术", "重装术", "飞行术"]
@@ -86,6 +86,14 @@ for name in ORDER:
                 for st in c["steps"]:
                     if st["key"] == f"h{r['idx']}":
                         st["autoDone"] = True
+        # 11-25 Yizhuo「按截图为准」：截图前已经用掉、但截图等级没涨的乱数（记录里写成升级，例如乌尔坦德 Lv15 那条）
+        #   → 当作截图前已做完的「没升级」一步（考试/跳过），不再显示成待做的升级
+        lv_shot = shot.get("level")
+        if lv_shot is not None and _cut(name) is not None:
+            for st in c["steps"]:
+                if st["src"] == "record" and not st["exam"] and st["frm"] is not None and st["frm"] >= lv_shot:
+                    st.update(exam=True, cls="", hidden=True, autoDone=True,
+                              note="按截图为准：这个乱数在截图前已经用掉，但等级没涨（当时是考试或跳过），算已完成")
         # Yizhuo 11-08：艾丝 Lv21 现在就能升级 → 截图后那一步没记录的跳过已经做过了
         for st in c["steps"]:
             if st["key"] in HIDDEN_DONE.get(name, []):
