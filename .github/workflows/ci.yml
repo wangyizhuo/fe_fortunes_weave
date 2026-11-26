@@ -26,8 +26,8 @@ jobs:
       - name: Build decoupled module data & static web
         run: python3 build_site.py
 
-      - name: Run Python module & logic integrity tests
-        run: python3 -m unittest tests.test_modules tests.test_logic_integrity -v
+      - name: Run Python module, two-stage planner & logic integrity tests
+        run: python3 -m unittest tests.test_modules tests.test_logic_integrity tests.test_two_stage_planner -v
 
       - name: Run all 38 automated checks (D / P / U / E / A / G)
         run: python3 levelup/rng/checks.py

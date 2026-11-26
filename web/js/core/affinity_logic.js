@@ -11,6 +11,41 @@
     return { totalDishes: dishes.length, perfectCount };
   }
 
+  function summarizeRoster(roster) {
+    const list = roster || [];
+    const recruited = list.filter(x => x.statusKey === "recruited").length;
+    const dietMet = list.filter(x => x.statusKey === "met").length;
+    const dietTodo = list.filter(x => x.statusKey === "todo").length;
+    const importantTotal = list.filter(x => x.isImportant).length;
+    const otherRoute = list.filter(x => x.statusKey === "other_route").length;
+    return {
+      total: list.length,
+      recruited,
+      dietMet,
+      dietTodo,
+      importantTotal,
+      otherRoute,
+    };
+  }
+
+  function filterRoster(roster, filterKey, query) {
+    const q = String(query || "").trim().toLowerCase();
+    const fk = filterKey || "important";
+    return (roster || []).filter(x => {
+      if (fk === "important" && !x.isImportant) return false;
+      if (fk === "met" && x.statusKey !== "met") return false;
+      if (fk === "todo" && x.statusKey !== "todo") return false;
+      if (fk === "recruited" && x.statusKey !== "recruited") return false;
+      if (fk === "other" && x.statusKey !== "other_route") return false;
+      if (!q) return true;
+      const hay = [
+        x.name, x.jpName, x.dietTier, x.condition, x.easiestRoute, x.secondRoute,
+        x.dietAffinityReason, ...(x.favoriteDishes || []),
+      ].join(" ").toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
   function listSupportTwoTargets(data) {
     const weights = (data && data.weights) || [];
     const lord = data && data.lord;
@@ -50,5 +85,12 @@
     });
   }
 
-  return { summarizeAffinity, listSupportTwoTargets, buildTargetDishMatrix, filterDishes };
+  return {
+    summarizeAffinity,
+    summarizeRoster,
+    filterRoster,
+    listSupportTwoTargets,
+    buildTargetDishMatrix,
+    filterDishes,
+  };
 });

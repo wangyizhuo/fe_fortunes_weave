@@ -50,8 +50,24 @@ class TestAffinityModule(unittest.TestCase):
     def test_build_affinity_data_schema(self):
         d = build_affinity_data()
         self.assertEqual(d["module"], "affinity")
+        self.assertEqual(d["schemaVersion"], 2)
         self.assertEqual(len(d["dishes"]), 12)
         self.assertTrue(any(x["perfect"] for x in d["dishes"]))
+        self.assertEqual([x["name"] for x in d["lords"]], ["迪托利希", "蕾达", "凯伊", "赛奥朵拉"])
+        by_name = {x["name"]: x for x in d["roster"]}
+        self.assertGreaterEqual(len(by_name), 40)
+        # 迪线已满足友好度（待招）角色
+        for met_name in ("哥莱亚斯", "班迪兹", "杰斯塔", "奥琳琵娅", "莱桑达", "索绯雅", "乌修拉"):
+            self.assertIn(met_name, by_name)
+            self.assertTrue(by_name[met_name]["dietAffinityMet"], f"{met_name} 应标记为迪线友好度已满足")
+            self.assertEqual(by_name[met_name]["statusKey"], "met")
+        # 迪线待刷友好度角色
+        for todo_name in ("希蒙", "穆", "丹提"):
+            self.assertEqual(by_name[todo_name]["statusKey"], "todo")
+            self.assertFalse(by_name[todo_name]["dietAffinityMet"])
+        # 已入队角色
+        self.assertEqual(by_name["迪托利希"]["statusKey"], "recruited")
+
 
 
 class TestItemsModule(unittest.TestCase):

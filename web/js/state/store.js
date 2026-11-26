@@ -25,6 +25,7 @@
       longS: {},
       affinityQuery: "",
       affinityOnlyPerfect: false,
+      affinityRosterFilter: "important",
       itemsCategory: "全部",
       itemsQuery: "",
       itemsTab: "all", // all | shops | barter | materials

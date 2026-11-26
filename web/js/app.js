@@ -165,6 +165,12 @@
 
     // 统一点击事件委托
     viewEl.addEventListener("click", e => {
+      const affRf = e.target.closest("[data-aff-rf]");
+      if (affRf) {
+        store.state.affinityRosterFilter = affRf.dataset.affRf;
+        render();
+        return;
+      }
       const itemCat = e.target.closest("[data-item-cat]");
       if (itemCat) {
         store.state.itemsCategory = itemCat.dataset.itemCat;

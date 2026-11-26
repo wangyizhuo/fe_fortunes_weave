@@ -53,7 +53,7 @@ class TestBrowserE2E(unittest.TestCase):
         cls.thread.start()
 
         cls.pw = sync_playwright().start()
-        cls.browser = cls.pw.chromium.launch()
+        cls.browser = cls.pw.chromium.launch(args=["--disable-dev-shm-usage"])
 
     @classmethod
     def tearDownClass(cls):
@@ -118,12 +118,27 @@ class TestBrowserE2E(unittest.TestCase):
         page_errors = []
         page.on("pageerror", lambda err: page_errors.append(str(err)))
 
-        # 1) 友好度培养：搜索 + 只看 perfect 筛选
+        # 1) 友好度培养：四大主角、待挖角名册与迪线已满足筛选 + 菜单搜索
         page.goto(f"{self.base_url}#meal", wait_until="domcontentloaded")
         page.wait_for_selector("#affQuery")
+        meal_txt = page.inner_text("#view")
+        for lord in ("迪托利希", "蕾达", "凯伊", "赛奥朵拉"):
+            self.assertIn(lord, meal_txt)
+        self.assertIn("主角与待挖角角色", meal_txt)
+        page.click('button[data-aff-rf="met"]')
+        page.wait_for_timeout(100)
+        met_txt = page.inner_text("#view")
+        for met_name in ("哥莱亚斯", "班迪兹", "杰斯塔", "奥琳琵娅", "莱桑达", "索绯雅", "乌修拉"):
+            self.assertIn(met_name, met_txt)
+        page.click('button[data-aff-rf="todo"]')
+        page.wait_for_timeout(100)
+        self.assertIn("希蒙", page.inner_text("#view"))
+        page.click('button[data-aff-rf="important"]')
         page.fill("#affQuery", "糖浆炖梨")
         page.wait_for_timeout(100)
         self.assertIn("当前显示 1 道", page.inner_text("#view"))
+        page.fill("#affQuery", "")
+        page.wait_for_timeout(50)
 
         # 2) 道具 / 材料采集：点一级导航切换 + 分类筛选 + 材料反查搜索
         page.click('#domains a[data-domain="items"]')

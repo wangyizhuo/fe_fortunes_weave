@@ -50,3 +50,31 @@ test("filterDishes filters by query and onlyPerfect", () => {
   assert.equal(AL.filterDishes(SAMPLE_AFFINITY, "绯亚娜", false).length, 1);
   assert.equal(AL.filterDishes(SAMPLE_AFFINITY, "不存在", false).length, 0);
 });
+
+const SAMPLE_ROSTER = [
+  { name: "迪托利希", jpName: "ディートリヒ", isLord: true, isImportant: true, statusKey: "recruited", dietTier: "主角", dietAffinityReason: "已入队", favoriteDishes: ["糖浆炖梨"] },
+  { name: "哥莱亚斯", jpName: "ゴライアス", isLord: false, isImportant: true, statusKey: "met", dietTier: "必招", dietAffinityReason: "好感已满", favoriteDishes: ["烤肉"] },
+  { name: "丹提", jpName: "ダンテ", isLord: false, isImportant: true, statusKey: "todo", dietTier: "可选", dietAffinityReason: "待刷（需支援 2）", favoriteDishes: ["糖浆炖梨"] },
+  { name: "大刀", jpName: "ダイトウ", isLord: false, isImportant: false, statusKey: "other_route", dietTier: "别线更易", dietAffinityReason: "别线更易", favoriteDishes: [] },
+];
+
+test("summarizeRoster counts statuses accurately", () => {
+  assert.deepEqual(AL.summarizeRoster(SAMPLE_ROSTER), {
+    total: 4,
+    recruited: 1,
+    dietMet: 1,
+    dietTodo: 1,
+    importantTotal: 3,
+    otherRoute: 1,
+  });
+});
+
+test("filterRoster filters by status tab and search query", () => {
+  assert.equal(AL.filterRoster(SAMPLE_ROSTER, "important", "").length, 3);
+  assert.deepEqual(AL.filterRoster(SAMPLE_ROSTER, "met", "").map(x => x.name), ["哥莱亚斯"]);
+  assert.deepEqual(AL.filterRoster(SAMPLE_ROSTER, "todo", "").map(x => x.name), ["丹提"]);
+  assert.deepEqual(AL.filterRoster(SAMPLE_ROSTER, "recruited", "").map(x => x.name), ["迪托利希"]);
+  assert.deepEqual(AL.filterRoster(SAMPLE_ROSTER, "other", "").map(x => x.name), ["大刀"]);
+  assert.deepEqual(AL.filterRoster(SAMPLE_ROSTER, "all", "烤肉").map(x => x.name), ["哥莱亚斯"]);
+});
+
