@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>万紫千红 · 养成规划台（版本对比）</title>
+  <style>
+    :root { --bg:#f2f3f6; --panel:#fff; --ink:#1c2233; --muted:#5d6680; --line:#dde1ea; --accent:#b0802a; --tint:#fff6e2; }
+    @media (prefers-color-scheme: dark) { :root { --bg:#12151d; --panel:#1b202b; --ink:#e6e9f2; --muted:#9aa3ba; --line:#2c3342; --accent:#d9a84e; --tint:#2d2717; } }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background:var(--bg); color:var(--ink); padding:40px 16px; }
+    main { max-width:760px; margin:0 auto; display:grid; gap:16px; }
+    h1 { margin:0; font-size:24px; }
+    p.sub { margin:0; color:var(--muted); font-size:14px; }
+    .cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; margin-top:8px; }
+    a.card { display:grid; gap:8px; padding:18px; background:var(--panel); border:1px solid var(--line); border-radius:12px; text-decoration:none; color:inherit; transition:border-color .15s; }
+    a.card:hover { border-color:var(--accent); }
+    a.card.new { background:var(--tint); border-color:var(--accent); }
+    .badge { display:inline-block; width:fit-content; font-size:12px; font-weight:700; padding:2px 8px; border-radius:999px; background:var(--bg); color:var(--muted); }
+    a.card.new .badge { background:var(--accent); color:#fff; }
+    h2 { margin:0; font-size:18px; }
+    .desc { font-size:13.5px; color:var(--muted); line-height:1.6; }
+    .url { font-family: ui-monospace, monospace; font-size:12px; color:var(--accent); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>万紫千红 · 养成规划台（GitHub Pages 对比入口）</h1>
+    <p class="sub">分别托管了 <code>main</code> 原版与新分支 <code>refactor/modular-web-architecture</code> 重构版，方便并排对比。</p>
+    <div class="cards">
+      <a class="card new" href="./refactor/">
+        <span class="badge">新分支 · refactor/modular-web-architecture</span>
+        <h2>模块化重构版（推荐）</h2>
+        <div class="desc">友好度培养 / 道具与材料采集（含材料反查）/ 路线规划三大一级模块；网页与 JSON 数据解耦加载；修复重开章节已有职业与训练短路 Bug。</div>
+        <div class="url">./refactor/ →</div>
+      </a>
+      <a class="card" href="./main/">
+        <span class="badge">主分支 · main (7542dc7)</span>
+        <h2>原版单文件页面</h2>
+        <div class="desc">重构前的 <code>main</code> 分支原始构建产物（单页内联 <code>growth-route.html</code>），用于对照检查。</div>
+        <div class="url">./main/ →</div>
+      </a>
+    </div>
+  </main>
+</body>
+</html>

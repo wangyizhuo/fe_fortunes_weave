@@ -1,0 +1,1 @@
+{"schemaVersion": 2, "builtAt": "2026-11-26 08:04 UTC", "modules": {"affinity": {"path": "./data/affinity.json", "dishes": 12, "perfectDishes": 8}, "items": {"path": "./data/items.json", "townCount": 28, "shopItemCount": 186, "barterCount": 25, "materialCount": 29}, "route": {"path": "./data/route.json", "characters": 9, "decisions": 78}}}

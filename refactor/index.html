@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="claude:viewport-fit-sides" content="cover">
+  <title>万紫千红 · 养成规划台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;800&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="top gut">
+    <div class="in">
+      <div class="hrow">
+        <h1>万紫千红养成规划</h1>
+        <span class="live" id="live"><i></i><span id="status">正在加载模块数据…</span></span>
+        <span class="sp">
+          <span id="syncStatus"></span>
+          <button class="btn pri" id="syncBtn" type="button">同步到 Google Sheet</button>
+        </span>
+      </div>
+      <!-- 一级功能模块导航：友好度培养 / 道具与材料采集 / 路线规划 -->
+      <nav class="domains" id="domains" aria-label="功能模块">
+        <a href="#meal" data-domain="affinity">友好度培养<small>吃饭组合 · 支援挖角</small></a>
+        <a href="#items" data-domain="items">道具 / 材料采集<small>商店 · 以物易物 · 材料反查</small></a>
+        <a href="#next" data-domain="route">路线规划<small>种子推演 · 转职考试 · 长线</small></a>
+      </nav>
+      <!-- 二级子导航（路线规划模块下展示） -->
+      <nav class="tabs" id="routeTabs" aria-label="路线规划子视图">
+        <a href="#next" data-v="next">下一步<small>今天升级前看</small></a>
+        <a href="#plan" data-v="plan">到目标级<small>Lv35 或 +15 级</small></a>
+        <a href="#past" data-v="past">回顾<small>入队到现在</small></a>
+        <a href="#l45" data-v="l45">到 Lv45<small>可转一次上级</small></a>
+        <a href="#long" data-v="long">长线观星<small>未来 40 级</small></a>
+        <a href="#opts" data-v="opts">职业选择<small>可考职业与选择原因</small></a>
+        <a href="#mine" data-v="mine">我的决定<small>所有确认与规则</small></a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="gut">
+    <div class="in">
+      <div class="who" id="who" role="group" aria-label="只看某个角色"></div>
+      <main id="view"></main>
+      <p class="foot" id="foot"></p>
+    </div>
+  </div>
+
+  <!-- 可选 file:// 离线数据回退（HTTP 访问时优先动态 fetch ./data/*.json） -->
+  <script src="./data/bundle_data.js" onerror="void 0"></script>
+  <!-- 纯核心逻辑层（零 DOM 依赖，Node.js 可直接单元测试） -->
+  <script src="./js/core/utils.js"></script>
+  <script src="./js/core/route_logic.js"></script>
+  <script src="./js/core/affinity_logic.js"></script>
+  <script src="./js/core/items_logic.js"></script>
+  <!-- 状态与同步层 -->
+  <script src="./js/state/store.js"></script>
+  <!-- 按功能域拆分的视图层 -->
+  <script src="./js/views/affinity_view.js"></script>
+  <script src="./js/views/items_view.js"></script>
+  <script src="./js/views/route_views.js"></script>
+  <!-- 应用装配与路由入口 -->
+  <script src="./js/app.js"></script>
+</body>
+</html>
