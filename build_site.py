@@ -22,6 +22,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from modules.affinity.service import build_affinity_data  # noqa: E402
+from modules.classes.service import build_classes_data  # noqa: E402
 from modules.items.service import build_items_data  # noqa: E402
 from modules.route.service import build_route_data  # noqa: E402
 
@@ -36,13 +37,14 @@ def _write_json(path: Path, payload: Any) -> None:
 
 
 def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
-    """数据层构建：按三大功能模块独立输出 JSON 数据文件（不接触任何 HTML 模板）。"""
+    """数据层构建：按功能模块独立输出 JSON 数据文件（不接触任何 HTML 模板）。"""
     t0 = time.perf_counter()
     data_dir = out_dir / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
 
     affinity = build_affinity_data()
     items = build_items_data()
+    classes = build_classes_data()
     route = build_route_data()
 
     manifest = {
@@ -58,6 +60,11 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
                 "path": "./data/items.json",
                 **items["summary"],
             },
+            "classes": {
+                "path": "./data/classes.json",
+                "classCount": classes["summary"]["classCount"],
+                "tierCount": classes["summary"]["tierCount"],
+            },
             "route": {
                 "path": "./data/route.json",
                 "characters": len(route["chars"]),
@@ -69,16 +76,23 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
     _write_json(data_dir / "manifest.json", manifest)
     _write_json(data_dir / "affinity.json", affinity)
     _write_json(data_dir / "items.json", items)
+    _write_json(data_dir / "classes.json", classes)
     _write_json(data_dir / "route.json", route)
 
     # file:// 离线打开回退用的纯数据脚本（仍在 out/data/ 下，不注入 HTML）
-    bundle_payload = {"manifest": manifest, "affinity": affinity, "items": items, "route": route}
+    bundle_payload = {
+        "manifest": manifest,
+        "affinity": affinity,
+        "items": items,
+        "classes": classes,
+        "route": route,
+    }
     with open(data_dir / "bundle_data.js", "w", encoding="utf-8") as f:
         f.write("window.FE_BUNDLE_DATA = ")
         json.dump(bundle_payload, f, ensure_ascii=False)
         f.write(";\n")
 
-    # 兼容 checks.py 的 page_data.json（保留旧字段，同时新增 items / manifest）
+    # 兼容 checks.py 的 page_data.json（保留旧字段，同时新增 items / classes / manifest）
     compat_page_data = {
         "schemaVersion": 2,
         "manifest": manifest,
@@ -86,6 +100,7 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
         "reasons": route["reasons"],
         "meals": affinity,
         "items": items,
+        "classes": classes,
         "chars": route["chars"],
         "stats": route["stats"],
         "skills": route["skills"],
@@ -99,6 +114,7 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
         f"[data] ok ({dt:.2f}s) -> {data_dir} | "
         f"affinity:{len(affinity['dishes'])} dishes, "
         f"items:{items['summary']['townCount']} towns/{items['summary']['barterCount']} barter/{items['summary']['materialCount']} materials, "
+        f"classes:{classes['summary']['classCount']} classes, "
         f"route:{len(route['chars'])} chars"
     )
     return bundle_payload

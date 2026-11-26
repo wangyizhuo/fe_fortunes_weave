@@ -29,6 +29,10 @@
       itemsCategory: "全部",
       itemsQuery: "",
       itemsTab: "all", // all | shops | barter | materials
+      classesTier: "全部",
+      classesSkills: [],
+      classesMatchMode: "all", // all | any
+      classesQuery: "",
       db: null,
       writing: false,
       dirty: new Map(),

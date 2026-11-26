@@ -252,3 +252,27 @@ td.n.up { color: var(--good); } td.n.dn { color: var(--bad); }
 .hgrid .hrow i.w { width: 11px; font-size: 7px; font-style: normal; line-height: 14px; text-align: center; overflow: hidden; color: var(--muted); }
 .hgrid .hrow i.w.g { background: var(--good-bg); color: var(--good); } .hgrid .hrow i.w.b { background: var(--bad-bg); color: var(--bad); }
 th.grp { text-align: center; border-bottom: 1px solid var(--line); } td.cur, th.cur { background: var(--tint); font-weight: 700; }
+
+/* 职业图鉴模块：可用技能 Checkbox 面板与阶级表格 */
+.skill-panel { display: grid; gap: 10px; }
+.skill-group { display: grid; gap: 6px; }
+.skill-glab { font-size: 12px; font-weight: 700; color: var(--muted); }
+.skill-cbs { display: flex; flex-wrap: wrap; gap: 7px; }
+.skill-cb { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); cursor: pointer; user-select: none; }
+.skill-cb input[type=checkbox] { width: 15px; height: 15px; margin: 0; accent-color: var(--accent-ink); cursor: pointer; }
+.skill-cb small { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.skill-cb.on { border-color: var(--accent-ink); background: var(--tint); color: var(--accent-ink); font-weight: 700; }
+.skill-cb.on small { color: var(--accent-ink); }
+.skill-ctrl { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding-top: 6px; border-top: 1px dashed var(--line); }
+.cls-tbl th, .cls-tbl td { vertical-align: top; }
+.cls-name { white-space: nowrap; min-width: 7.5em; }
+.cls-meta { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+.cls-skills { min-width: 9.5em; }
+.sk-list { display: flex; flex-wrap: wrap; gap: 4px; }
+.sk-pill { display: inline-block; font-size: 11.5px; padding: 1px 6px; border-radius: 4px; background: var(--chip); color: var(--ink); white-space: nowrap; }
+.sk-pill.hit { background: var(--accent-ink); color: var(--panel); font-weight: 700; }
+.cls-pos { color: var(--good); font-weight: 500; }
+.cls-neg { color: var(--bad); }
+.cls-z { color: var(--muted); opacity: .45; }
+.cls-min { font-family: var(--mono); font-size: 12px; min-width: 10em; }
+

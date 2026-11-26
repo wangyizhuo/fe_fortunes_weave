@@ -4,10 +4,10 @@
   const RL = root.FE.routeLogic;
 
   const ROUTE_VIEWS = ["next", "plan", "past", "l45", "long", "opts", "mine"];
-  const ALL_VIEWS = ["meal", "items", ...ROUTE_VIEWS];
+  const ALL_VIEWS = ["meal", "items", "classes", ...ROUTE_VIEWS];
 
   let MANIFEST = null;
-  let DATA = { affinity: null, items: null, route: null };
+  let DATA = { affinity: null, items: null, classes: null, route: null };
   let pending = false;
 
   function setStatus(text, k) {
@@ -27,21 +27,23 @@
   function domainOf(v) {
     if (v === "meal") return "affinity";
     if (v === "items") return "items";
+    if (v === "classes") return "classes";
     return "route";
   }
 
   async function loadModuleData() {
-    // 1) HTTP(S) 访问时，优先按三大模块独立 fetch JSON，彻底分离网页与数据
+    // 1) HTTP(S) 访问时，优先按功能模块独立 fetch JSON，彻底分离网页与数据
     if (location.protocol === "http:" || location.protocol === "https:") {
       try {
-        const [manifest, affinity, items, route] = await Promise.all([
+        const [manifest, affinity, items, classes, route] = await Promise.all([
           fetch("./data/manifest.json", { cache: "no-store" }).then(r => r.json()),
           fetch("./data/affinity.json", { cache: "no-store" }).then(r => r.json()),
           fetch("./data/items.json", { cache: "no-store" }).then(r => r.json()),
+          fetch("./data/classes.json", { cache: "no-store" }).then(r => r.json()),
           fetch("./data/route.json", { cache: "no-store" }).then(r => r.json()),
         ]);
         MANIFEST = manifest;
-        DATA = { affinity, items, route };
+        DATA = { affinity, items, classes, route };
         return;
       } catch (err) {
         if (root.FE_BUNDLE_DATA) {
@@ -105,6 +107,7 @@
     let html = "";
     if (view === "meal") html = V.renderAffinityView(DATA.affinity, store.state);
     else if (view === "items") html = V.renderItemsView(DATA.items, store.state);
+    else if (view === "classes") html = V.renderClassesView(DATA.classes, store.state);
     else html = V.renderRouteView(view, DATA.route, store.state);
 
     const viewEl = document.getElementById("view");
@@ -119,7 +122,7 @@
     if (foot && DATA.route) {
       const rm = DATA.route.rulesMeta || {};
       const built = MANIFEST && MANIFEST.builtAt ? ` · 数据构建于 ${MANIFEST.builtAt}` : "";
-      foot.textContent = `架构：三大模块（友好度培养 / 道具与材料采集 / 路线规划）前后端数据与逻辑解耦加载（当前快照 ${rm.shotKey || "latest"}，名声 Lv${rm.renown ?? "?"}${built}）。页面勾选与选择保存在当前浏览器本地存储。`;
+      foot.textContent = `架构：四大模块（友好度培养 / 道具与材料采集 / 职业图鉴 / 路线规划）前后端数据与逻辑解耦加载（当前快照 ${rm.shotKey || "latest"}，名声 Lv${rm.renown ?? "?"}${built}）。页面勾选与选择保存在当前浏览器本地存储。`;
     }
 
     if (focusInputId) {
@@ -152,13 +155,16 @@
 
     const viewEl = document.getElementById("view");
 
-    // 输入过滤（友好度培养 / 道具与材料采集）
+    // 输入过滤（友好度培养 / 道具与材料采集 / 职业图鉴）
     viewEl.addEventListener("input", e => {
       if (e.target.matches("[data-aff-q]")) {
         store.state.affinityQuery = e.target.value;
         render();
       } else if (e.target.matches("[data-item-q]")) {
         store.state.itemsQuery = e.target.value;
+        render();
+      } else if (e.target.matches("[data-cls-q]")) {
+        store.state.classesQuery = e.target.value;
         render();
       }
     });
@@ -180,6 +186,26 @@
       const itemTab = e.target.closest("[data-item-tab]");
       if (itemTab) {
         store.state.itemsTab = itemTab.dataset.itemTab;
+        render();
+        return;
+      }
+      const clsTier = e.target.closest("[data-cls-tier]");
+      if (clsTier) {
+        store.state.classesTier = clsTier.dataset.clsTier;
+        render();
+        return;
+      }
+      const clsMode = e.target.closest("[data-cls-mode]");
+      if (clsMode) {
+        store.state.classesMatchMode = clsMode.dataset.clsMode;
+        render();
+        return;
+      }
+      if (e.target.closest("[data-cls-clear]")) {
+        store.state.classesTier = "全部";
+        store.state.classesSkills = [];
+        store.state.classesMatchMode = "all";
+        store.state.classesQuery = "";
         render();
         return;
       }
@@ -265,6 +291,15 @@
     viewEl.addEventListener("change", e => {
       if (e.target.matches("[data-aff-pf]")) {
         store.state.affinityOnlyPerfect = e.target.checked;
+        render();
+        return;
+      }
+      if (e.target.matches("[data-cls-skill]")) {
+        const sk = e.target.dataset.clsSkill;
+        const cur = new Set(store.state.classesSkills || []);
+        if (e.target.checked) cur.add(sk);
+        else cur.delete(sk);
+        store.state.classesSkills = [...cur];
         render();
         return;
       }

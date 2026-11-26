@@ -19,6 +19,7 @@ if str(ROOT / "levelup" / "rng") not in sys.path:
 
 from modules.affinity.planner import compute_pair_weights, is_perfect, plan_meals
 from modules.affinity.service import build_affinity_data
+from modules.classes.service import build_classes_data
 from modules.items.catalog import parse_materials
 from modules.items.service import build_items_data
 from modules.route.config_loader import load_route_config
@@ -118,6 +119,20 @@ class TestRouteConfigAndBugfixes(unittest.TestCase):
             html = (out_dir / "index.html").read_text(encoding="utf-8")
             self.assertIn("<!DOCTYPE html>", html)
             self.assertNotIn("/*ROUTE_DATA*/", html)
+
+
+class TestClassesModule(unittest.TestCase):
+    def test_build_classes_data_schema_and_tiers(self):
+        d = build_classes_data()
+        self.assertEqual(d["module"], "classes")
+        self.assertEqual(d["tierOrder"], ["基础", "初级", "中级", "上级", "最上级", "神将"])
+        self.assertEqual(d["summary"]["classCount"], 60)
+        self.assertEqual(d["summary"]["tierCounts"]["初级"], 5)
+        self.assertEqual(d["summary"]["tierCounts"]["中级"], 12)
+        self.assertTrue(all(len(c["usableSkills"]) >= 1 for c in d["classes"]))
+        # 验证按阶级顺序排列
+        tier_indices = [d["tierOrder"].index(c["tier"]) for c in d["classes"]]
+        self.assertEqual(tier_indices, sorted(tier_indices))
 
 
 if __name__ == "__main__":

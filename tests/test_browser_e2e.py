@@ -20,7 +20,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "out"
-ALL_TABS = ["meal", "items", "next", "plan", "past", "l45", "long", "opts", "mine"]
+ALL_TABS = ["meal", "items", "classes", "next", "plan", "past", "l45", "long", "opts", "mine"]
 
 
 class _QuietUTF8Handler(http.server.SimpleHTTPRequestHandler):
@@ -107,9 +107,9 @@ class TestBrowserE2E(unittest.TestCase):
             self.assertEqual(failed_reqs, [], f"[{width}px] HTTP 错误请求: {failed_reqs}")
             page.close()
 
-        # 确认浏览器通过 HTTP 动态拉取了四大独立 JSON 数据文件
+        # 确认浏览器通过 HTTP 动态拉取了全部独立 JSON 数据文件
         self.assertTrue(
-            {"manifest.json", "affinity.json", "items.json", "route.json"} <= fetched_json,
+            {"manifest.json", "affinity.json", "items.json", "classes.json", "route.json"} <= fetched_json,
             f"未检测到独立 JSON 加载，实际加载: {fetched_json}",
         )
 
@@ -155,7 +155,28 @@ class TestBrowserE2E(unittest.TestCase):
         self.assertIn("采集 / 钓鱼材料反查表", mat_txt)
         self.assertIn("斩马刀", mat_txt)
 
-        # 3) 路线规划：验证角色筛选、动态规则说明（无过时文案）、以及重开章节修复
+        # 3) 职业图鉴：按阶级分组 + 可用技能 Checkbox 筛选（AND / OR + 清空）
+        page.click('#domains a[data-domain="classes"]')
+        page.wait_for_selector("#clsQuery")
+        cls_txt = page.inner_text("#view")
+        for t in ("基础职业", "初级职业", "中级职业", "上级职业", "最上级职业", "神将职业"):
+            self.assertIn(t, cls_txt)
+        page.check('input[data-cls-skill="剑术"]')
+        page.check('input[data-cls-skill="马术"]')
+        page.wait_for_timeout(100)
+        and_txt = page.inner_text("#view")
+        self.assertIn("轻骑兵", and_txt)
+        self.assertNotIn("萨满巫师", and_txt)
+        page.click('button[data-cls-tier="中级"]')
+        page.wait_for_timeout(100)
+        mid_txt = page.inner_text("#view")
+        self.assertIn("轻骑兵", mid_txt)
+        self.assertNotIn("上级职业", mid_txt)
+        page.click('button[data-cls-clear]')
+        page.wait_for_timeout(100)
+        self.assertIn("当前匹配 60 / 60", page.inner_text("#view"))
+
+        # 4) 路线规划：验证角色筛选、动态规则说明（无过时文案）、以及重开章节修复
         page.click('#domains a[data-domain="route"]')
         page.wait_for_selector('#who button[data-who="esmeralda"]')
         page.click('#routeTabs a[data-v="plan"]')
@@ -175,7 +196,7 @@ class TestBrowserE2E(unittest.TestCase):
         shot_dir = os.environ.get("FE_E2E_SCREENSHOT_DIR")
         if shot_dir:
             Path(shot_dir).mkdir(parents=True, exist_ok=True)
-            for tab, fname in (("meal", "01_affinity.png"), ("items", "02_items.png"), ("plan", "03_route.png")):
+            for tab, fname in (("meal", "01_affinity.png"), ("items", "02_items.png"), ("classes", "04_classes.png"), ("plan", "03_route.png")):
                 page.goto(f"{self.base_url}#{tab}", wait_until="domcontentloaded")
                 page.wait_for_selector("#view > *")
                 page.wait_for_timeout(200)
