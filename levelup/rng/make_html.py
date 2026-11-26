@@ -224,7 +224,8 @@ for name in ORDER:
                                "use": use_info.get(r.cls) if exam else None,
                                "train": (getattr(p, "exam_train", {}) or {}).get(r.cls) if exam else None,
                                # 11-16：P1/P2 不练技能（按实际成功率）；保底补的项；跳过顺手考的免费初级职业；名声要求
-                               "trainOk": TRAIN_ALLOWED[tier_of(name)],
+                               "trainOk": bool(TRAIN_ALLOWED[tier_of(name)] or r.cls == getattr(p, "mid_trained", None)),
+                               "trainLv": lv if exam else None,
                                "floor": [f"{a} {x}→{v}" for a, x, v in (r.floor or [])] if exam else None,
                                "skipCls": r.skip_class if exam else None,
                                "skipFail": r.skip_fail if exam else None,
@@ -237,6 +238,11 @@ for name in ORDER:
                                       if not exam else None)})
             if not exam:
                 lv += 1
+        # 11-25 Yizhuo：要练的技能在什么等级练好，路线上标出来（考进并用来升级的职业，考试那一级之前练好）
+        used = {r.cls for r in plan.rows if r.action == "升级"}
+        c["trainPlan"] = [{"key": s_["key"], "lv": s_["trainLv"], "cls": s_["cls"], "train": s_["train"],
+                           "ranks": (getattr(p, "exam_train_ranks", {}) or {}).get(s_["cls"], 0)}
+                          for s_ in c["steps"] if s_.get("src") == "plan" and s_["exam"] and s_.get("train") and s_["trainOk"] and s_["cls"] in used]
     chars.append(c)
 
 # 3) 档案数据（detail/summary/summary_text）并进来：回顾过往、平均对比、考试收益、说明文字

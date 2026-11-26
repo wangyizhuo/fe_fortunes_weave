@@ -68,7 +68,10 @@ def route_part(p, pl):
             continue
         used = sum(1 for x, y in acts if x == "升级" and y == c)
         row = {"cls": c, "tier": _TIER.get(c), "lv": lv_now, "roll": round(exam_roll(p.seed_at(step)) / 10_000, 2),
-               "pct": p.exam_pct(c, lv_now), "used": used, "why": exam_why(p, c, mids)}
+               "pct": p.exam_pct(c, lv_now), "used": used, "why": exam_why(p, c, mids),
+               # 11-25 Yizhuo：要练的技能在哪一级练好（考试那一级之前）
+               "trainRanks": (p.exam_train_ranks or {}).get(c, 0) if used else 0,
+               "trainSkills": ((getattr(p, "exam_train", {}) or {}).get(c) or []) if used and (p.exam_train_ranks or {}).get(c) else []}
         rest = [x for x in exams if x != c]
         keep_req = tuple(x for x in rest if x in p.required)
         sv, sk = p.required, getattr(p, "skip_take", ())

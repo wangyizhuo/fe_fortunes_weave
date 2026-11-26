@@ -274,7 +274,7 @@ const SHORT = { "迪托利希": "迪", "法毕欧": "法毕欧", "米迦艾拉":
 const CH = DATA.chars, ST = DATA.stats, DECISIONS = DATA.decisions || [];
 const slug = c => SLUG[c.name] || "c" + CH.indexOf(c);
 const keyOf = (c, s) => slug(c) + "-" + s.key;
-const stepName = s => examName(s) ? `考试（到 ${examName(s)}${s.train ? "，先练 " + s.train.join("、") : ""}）` : "跳过";   // 11-09 术语；11-11 考前要练的技能
+const stepName = s => examName(s) ? `考试（到 ${examName(s)}${s.train && s.trainOk ? `，Lv${s.trainLv} 考前练好 ` + s.train.join("、") : ""}）` : "跳过";   // 11-09 术语；11-11 考前要练的技能
 let prog = {}, info = {}, db = null, writing = false, pending = false;
 const dirty = new Map();
 let view = "next", focus = "";
@@ -355,6 +355,14 @@ function remain(c, w) {
 function examVerdict(c, s) {
   const ch = (prog[keyOf(c, s)] || {}).chance;
   return { ch, pass: ch == null ? null : s.roll < ch };
+}
+
+// 11-25 Yizhuo：要练的技能在什么等级练好（还没做的考试）
+function trainBox(c, w) {
+  const done = new Set(w.rows.filter(r => r.done).map(r => r.s.key));
+  const todo = (c.trainPlan || []).filter(t => !done.has(t.key));
+  if (!todo.length) return "";
+  return `<div class="sec"><h4>要练的技能</h4><ul class="txt">${todo.map(t => `<li>🎯 <b>Lv${t.lv}</b> 考${esc(t.cls)}之前练好：${esc(t.train.join("、"))}（共 ${t.ranks} 段；训练场、指南书、委托都不涨人物经验，不影响种子）</li>`).join("")}</ul></div>`;
 }
 
 // ---------- 下一步 ----------
@@ -529,7 +537,7 @@ function reasonsBox(name) {
   const r = (DATA.reasons || {})[name]; if (!r) return "";
   const rt = r.route, G = v => (v > 0 ? "+" : "") + v;
   const dtxt = d => `${esc(gtxt(d.g))}；点数 ${G(d.pts)}，加权分 ${G(d.w)}；金币 ${G(d.gold)}G；练技能 ${G(d.train)} 段`;
-  const ex = rt.exams.map(e => `<li><b>Lv${e.lv} ${esc(e.cls)}</b> <small>${esc(e.tier || "")}｜判定值 ${e.roll}%｜成功率 ${e.pct ?? "—"}%｜用它升 ${e.used} 级</small><br>${esc(e.why)}${e.vsDrop ? `<br><span class="hint">和不考它比（同样 ${rt.seeds} 个乱数；不考时${e.vsDrop.dropExams.length ? "考 " + esc(e.vsDrop.dropExams.join("、")) + "、" : ""}跳过 ${e.vsDrop.dropSkips} 次）：${dtxt(e.vsDrop)}</span>` : `<br><span class="hint">${esc(e.dropNote || "")}</span>`}</li>`).join("") || "<li>不考新职业</li>";
+  const ex = rt.exams.map(e => `<li><b>Lv${e.lv} ${esc(e.cls)}</b> <small>${esc(e.tier || "")}｜判定值 ${e.roll}%｜成功率 ${e.pct ?? "—"}%｜用它升 ${e.used} 级</small><br>${esc(e.why)}${e.trainSkills && e.trainSkills.length ? `<br><span class="changed">🎯 Lv${e.lv} 考前练好：${esc(e.trainSkills.join("、"))}（共 ${e.trainRanks} 段）</span>` : ""}${e.vsDrop ? `<br><span class="hint">和不考它比（同样 ${rt.seeds} 个乱数；不考时${e.vsDrop.dropExams.length ? "考 " + esc(e.vsDrop.dropExams.join("、")) + "、" : ""}跳过 ${e.vsDrop.dropSkips} 次）：${dtxt(e.vsDrop)}</span>` : `<br><span class="hint">${esc(e.dropNote || "")}</span>`}</li>`).join("") || "<li>不考新职业</li>";
   const mids = r.mids.map(m => `<li><b>${esc(m.cls)}</b>：${esc(m.why)}${m.vsRoute ? `<br><span class="hint">和现在路线比：${dtxt(m.vsRoute)}</span>` : ""}</li>`).join("");
   const exc = r.excluded.length ? `<p class="hint">不考虑：${esc(r.excluded.map(x => `${x.cls}（${x.why}）`).join("、"))}</p>` : "";
   const dec = r.decisions.length ? `<h4>你的决定</h4><ul>${r.decisions.map(d => `<li><small>${esc(d.date)}</small> ${esc(d.rule)}</li>`).join("")}</ul>` : "";
@@ -656,7 +664,7 @@ function viewNext() {
     const w = walk(c), nx = w.rows.filter(r => !r.done).slice(0, 3), rm = remain(c, w);
     const left = w.rows.filter(r => !r.done).length;
     return `<article class="card" data-slug="${slug(c)}" id="${slug(c)}">${head(c, w, `还剩 ${left} 步 → Lv${w.endLevel}`)}
-      ${nx.length ? `<ol class="next">${nx.map((r, i) => nextItem(c, w, r, i)).join("")}</ol>` : `<div class="empty">${c.steps.length ? "路线上的步骤都完成了。" : "还没有观星记录和种子，暂时没有路线。"}</div>`}
+      ${nx.length ? `<ol class="next">${nx.map((r, i) => nextItem(c, w, r, i)).join("")}</ol>` : ""}${trainBox(c, w)}${nx.length ? "" : `<div class="empty">${c.steps.length ? "路线上的步骤都完成了。" : "还没有观星记录和种子，暂时没有路线。"}</div>`}
       <div class="cfoot">${c.steps.length ? `<span>按现在的选择到 Lv${w.endLevel} 还会升 <b>${rm.lv}</b> 级、涨 <b>${rm.cnt}</b> 点，加权分 <b>${rm.sc}</b>。<a href="#plan" data-go="${slug(c)}">看完整路线</a></span>` : ""}${stateHtml(c, w)}</div>
     </article>`;
   }).join("");
@@ -750,7 +758,7 @@ function fullList(c, w) {
     return `<li class="${row.done ? "done" : ""} ${r.exam ? "isx" : ""}" data-key="${s.key}">
       <input type="checkbox" data-f="done" id="d-${keyOf(c, s)}"${row.done ? " checked" : ""} aria-label="已完成">
       <label class="lvl" for="d-${keyOf(c, s)}">${r.exam ? (examName(s) ? "考试" : "跳过") : `Lv${row.frm}→${row.to}`}</label>
-      <div class="body">${r.exam ? `${examName(s) ? "考试（到 " + esc(examName(s)) + "）" : (s.skipNone ? `跳过 <span class="changed">没有可用的初级考试</span>` : s.skipFail && s.skipFail.length ? `跳过（考 ${esc(s.skipFail.join(" / "))}，会考不过，不拿职业）` : s.skipCls ? `跳过（只能考 ${esc(s.skipCls)}，会考过，用掉一个可跳过的职业，还剩 ${s.skipLeft} 个）` : "跳过")}${s.train && examName(s) ? (s.trainOk ? ` <span class="changed">先练：${esc(s.train.join("、"))}</span>` : ` <span class="changed">技能差：${esc(s.train.join("、"))}（不练，按实际成功率）</span>`) : ""}<span class="hint">　判定值 ${s.roll}%${examName(s) && s.pct != null ? `｜估计成功率 ${s.pct}%${s.train && s.trainOk ? "（练够之后）" : ""}` : ""}${s.renown && examName(s) ? `｜要名声 Lv${s.renown}` : ""}</span>${s.floor && s.floor.length ? ` <span class="changed">保底：${esc(s.floor.join("、"))}</span>` : ""}${!examName(s) ? smHint(c, s) : ""}${s.use && examName(s) ? `<span class="hint">　之后到 Lv${c.planTo} 用它升 ${s.use[0]} 级${s.use[0] ? `：${esc(s.use[1])}（${sgn(s.use[2])} 分）` : ""}</span>` : ""}` : `<b>${esc(eqName(row))}</b>　${esc(r.gains.join(" ") || "—")}`}${row.choice !== recOf(s) ? ` <span class="changed">已改</span>` : ""}${row.missing ? ` <span class="changed">还没考到</span>` : ""}${row.fail ? ` <span class="changed">估计考不过</span>` : ""}
+      <div class="body">${r.exam ? `${examName(s) ? "考试（到 " + esc(examName(s)) + "）" : (s.skipNone ? `跳过 <span class="changed">没有可用的初级考试</span>` : s.skipFail && s.skipFail.length ? `跳过（考 ${esc(s.skipFail.join(" / "))}，会考不过，不拿职业）` : s.skipCls ? `跳过（只能考 ${esc(s.skipCls)}，会考过，用掉一个可跳过的职业，还剩 ${s.skipLeft} 个）` : "跳过")}${s.train && examName(s) ? (s.trainOk ? ` <span class="changed">🎯 Lv${s.trainLv} 考试前练好：${esc(s.train.join("、"))}</span>` : ` <span class="changed">技能差：${esc(s.train.join("、"))}（不练，按实际成功率）</span>`) : ""}<span class="hint">　判定值 ${s.roll}%${examName(s) && s.pct != null ? `｜估计成功率 ${s.pct}%${s.train && s.trainOk ? "（练够之后）" : ""}` : ""}${s.renown && examName(s) ? `｜要名声 Lv${s.renown}` : ""}</span>${s.floor && s.floor.length ? ` <span class="changed">保底：${esc(s.floor.join("、"))}</span>` : ""}${!examName(s) ? smHint(c, s) : ""}${s.use && examName(s) ? `<span class="hint">　之后到 Lv${c.planTo} 用它升 ${s.use[0]} 级${s.use[0] ? `：${esc(s.use[1])}（${sgn(s.use[2])} 分）` : ""}</span>` : ""}` : `<b>${esc(eqName(row))}</b>　${esc(r.gains.join(" ") || "—")}`}${row.choice !== recOf(s) ? ` <span class="changed">已改</span>` : ""}${row.missing ? ` <span class="changed">还没考到</span>` : ""}${row.fail ? ` <span class="changed">估计考不过</span>` : ""}
         ${row.done ? "" : `<details class="more"><summary>选择</summary>${optsHtml(c, s, row, "f")}</details>`}</div>
       <span class="sc">${r.exam ? "—" : PW(r.cnt, r.score)}</span></li>`;
   }).join("")}</ol></div>`;
@@ -770,7 +778,7 @@ function changesHtml(c) {
   const owned = new Set(c.owned);
   for (const x of c.route) {
     if (x[0] === "exam") {
-      if (x[1]) items.push(`考试（到 <b>${esc(x[1])}</b>）（${owned.has(x[1]) ? "已有" : "新职业"}；判定值 ${x[2]}%${x[3] == null ? "" : `，估计显示 ${x[3]}%`}）${x[4] != null ? `<div class="hint" style="margin:2px 0 0">之后到 Lv${c.planTo} 用它升 <b>${x[4]}</b> 级${x[4] ? `，比每级改用已有职业里最好的：<b>${esc(x[5])}</b>（${sgn(x[6])} 分）` : "（只为拿到职业或精通，不用来升级）"}</div>` : ""}`);
+      if (x[1]) items.push(`考试（到 <b>${esc(x[1])}</b>）（${owned.has(x[1]) ? "已有" : "新职业"}；判定值 ${x[2]}%${x[3] == null ? "" : `，估计显示 ${x[3]}%`}）${(c.trainPlan || []).filter(t => t.cls === x[1]).map(t => ` <span class="changed">🎯 Lv${t.lv} 考前练好：${esc(t.train.join("、"))}</span>`).join("")}${x[4] != null ? `<div class="hint" style="margin:2px 0 0">之后到 Lv${c.planTo} 用它升 <b>${x[4]}</b> 级${x[4] ? `，比每级改用已有职业里最好的：<b>${esc(x[5])}</b>（${sgn(x[6])} 分）` : "（只为拿到职业或精通，不用来升级）"}</div>` : ""}`);
       else items.push(`跳过一级（判定值 ${x[2]}%，过不过都行）`);
       if (x[1]) owned.add(x[1]);
       continue;
@@ -844,6 +852,7 @@ function viewPlan() {
     return `<article class="card" data-slug="${slug(c)}" id="${slug(c)}">${head(c, w, right)}
       <details class="more cbody"${focus ? " open" : ""}><summary>展开：路线、能力、考试和每一步</summary>
       ${c.examWarn ? `<div class="sec"><p class="txt"><span class="sev warn">注意</span> 这条路线考试 + 跳过一共 ${c.exams} 次，比较多（手形 ${c.planGold}G）。</p></div>` : ""}
+      ${trainBox(c, w)}
       ${c.route ? `<div class="sec"><h4>推荐路线</h4>${changesHtml(c)}<details class="more"><summary>逐级一览</summary><div class="route">${routeTxt(c)}</div></details></div>` : ""}
       ${l45Box(c)}
       <div class="sec"><h4>能力到 Lv${w.endLevel}</h4>${statTable(c, w)}</div>

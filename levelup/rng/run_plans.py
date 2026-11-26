@@ -357,14 +357,15 @@ def train_need(name, cls):
         def short(sk, rk):
             need = RANKS.index(rk)
             if sk not in skills:
-                return None if need <= 1 else f"{sk} →{rk}（截图没有这项）"
-            return f"{sk} {skills[sk]}→{rk}" if RANKS.index(skills[sk]) < need else None
+                return (0, None) if need <= 1 else (1, f"{sk} →{rk}（截图没有这项）")
+            g = need - RANKS.index(skills[sk])
+            return (g, f"{sk} {skills[sk]}→{rk}（{g} 段）") if g > 0 else (0, None)
         if part.startswith("主要"):
-            out += [x for a, b in pairs if (x := short(a, b))]
+            out += [x for a, b in pairs if (x := short(a, b)[1])]
         elif part.startswith("任选其一") and pairs:
-            opts = [short(a, b) for a, b in pairs]
-            if all(opts):
-                out.append(min(opts, key=len) + "（任选一项）")
+            g, x = min((short(a, b) for a, b in pairs), key=lambda t: t[0])   # 11-25：取差得最少的那项（杨界 重装：斧 D→C，不是枪 E→C）
+            if x:
+                out.append(x + "（任选一项）")
     return out
 
 
