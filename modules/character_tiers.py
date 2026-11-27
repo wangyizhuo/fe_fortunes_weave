@@ -9,6 +9,21 @@ ROOT = Path(__file__).resolve().parents[1]
 TIERS_PATH = ROOT / "config" / "character_tiers.json"
 
 STRENGTH_ORDER = {"SS": 0, "S": 1, "A": 2, "B": 3, "C": 4, "D": 5}
+PRIORITY_ORDER = {"P0": 0, "P1": 1, "P2": 2}
+
+
+def zh_name_key(name: str) -> bytes:
+    """按 GB18030（一级汉字严格按拼音顺序）生成稳定的中文姓名排序键。"""
+    return str(name or "").encode("gb18030", errors="replace")
+
+
+def char_sort_key(name: str, priority: str | None = None, strength_tier: str | None = None) -> tuple[int, int, bytes]:
+    """统一排序键：P 级（P0→P1→P2）→ 综合强度（SS→S→A→B→C→D）→ 名字升序。"""
+    return (
+        PRIORITY_ORDER.get(priority or "", 9),
+        STRENGTH_ORDER.get(strength_tier or "", 9),
+        zh_name_key(name),
+    )
 
 
 def load_character_tiers(path: str | Path = TIERS_PATH) -> dict[str, Any]:

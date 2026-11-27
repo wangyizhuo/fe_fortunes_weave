@@ -21,7 +21,7 @@ if str(RNG_DIR) not in sys.path:
 from fe_growth import STATS  # noqa: E402
 from planner import _TIER, plan_all  # noqa: E402
 import run_plans as R  # noqa: E402
-from modules.character_tiers import get_character_tier, load_character_tiers  # noqa: E402
+from modules.character_tiers import char_sort_key, get_character_tier, load_character_tiers  # noqa: E402
 from .objective import DEFAULT_TIER_POLICIES  # noqa: E402
 from .two_stage_planner import (  # noqa: E402
     EvaluatedPlan,
@@ -349,6 +349,5 @@ def build_route_proposals() -> list[dict[str, Any]]:
             "options": options,
         })
 
-    tier_order = {"P0": 0, "P1": 1, "P2": 2}
-    proposals.sort(key=lambda pr: (tier_order.get(pr["tier"], 9), R.ORDER.index(pr["name"])))
+    proposals.sort(key=lambda pr: char_sort_key(pr["name"], pr["tier"], pr["strengthTier"]))
     return proposals

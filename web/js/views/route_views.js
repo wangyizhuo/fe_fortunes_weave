@@ -62,10 +62,12 @@
             </div>
           </div>`;
         }
+        const locBits = [c.viewHash || (c.section ? "#" + c.section : ""), c.anchorId ? "#" + c.anchorId : "", c.version ? "v" + c.version : ""].filter(Boolean).join(" · ");
         return `<div class="cmt-item${c.resolved ? " resolved" : ""}" data-cmt-id="${U.esc(c.id)}">
           ${c.quote ? `<blockquote class="cmt-quote">「${U.esc(c.quote)}」</blockquote>` : ""}
           <div class="cmt-text">${U.esc(c.text)}</div>
           <div class="cmt-meta">
+            ${locBits ? `<span class="cmt-loc" title="${U.esc(c.xpath || "")}">${U.esc(locBits)}</span>` : ""}
             <span>${c.at ? U.esc(c.at.slice(5, 16).replace("T", " ")) : ""}</span>
             <button type="button" class="cmt-act" data-cmt-resolve="${U.esc(c.id)}">${c.resolved ? "↺ 重新打开" : "✓ 标为已解决"}</button>
             <button type="button" class="cmt-act" data-cmt-edit="${U.esc(c.id)}">编辑</button>
@@ -80,6 +82,7 @@
             <b>💬 Plan Mode 批注 · ${U.esc(commentDraft.targetLabel || targetLabel)}</b>
             <button type="button" class="cmt-act" data-cmt-cancel>关闭</button>
           </div>
+          ${commentDraft.anchorId || commentDraft.xpath ? `<div class="hint" style="font-family:var(--mono);font-size:11px">定位：${U.esc(commentDraft.viewHash || ("#" + state.view))}${commentDraft.anchorId ? ` · #${U.esc(commentDraft.anchorId)}` : ""}${commentDraft.xpath ? ` · ${U.esc(commentDraft.xpath)}` : ""}${commentDraft.version ? ` · v${U.esc(commentDraft.version)}` : ""}</div>` : ""}
           ${commentDraft.quote ? `<blockquote class="cmt-quote">选中内容：「${U.esc(commentDraft.quote)}」</blockquote>` : ""}
           <textarea class="cmt-input" id="cmtDraftInput" data-cmt-draft-text rows="2" placeholder="写下你的审阅意见、改法或 case by case 决定（Ctrl/Cmd+Enter 保存）…">${U.esc(commentDraft.text || "")}</textarea>
           <div class="cmt-actions">
@@ -94,8 +97,9 @@
 
     function renderPlanModeBar() {
       const drawerItems = planComments.length
-        ? planComments.map(c => `
-            <div class="cmt-drawer-row${c.resolved ? " resolved" : ""}">
+        ? planComments.map(c => {
+            const locBits = [c.viewHash || (c.section ? "#" + c.section : ""), c.anchorId ? "#" + c.anchorId : "", c.xpath || "", c.version ? "v" + c.version : ""].filter(Boolean).join(" · ");
+            return `<div class="cmt-drawer-row${c.resolved ? " resolved" : ""}">
               <div class="cmt-dr-top">
                 <span class="cat-pill">${U.esc(c.targetLabel)}</span>
                 <span class="hint">${c.at ? U.esc(c.at.slice(5, 16).replace("T", " ")) : ""}</span>
@@ -104,9 +108,11 @@
                   <button type="button" class="cmt-act dn" data-cmt-del="${U.esc(c.id)}">删除</button>
                 </span>
               </div>
+              ${locBits ? `<div class="hint" style="font-family:var(--mono);font-size:11px;word-break:break-all">${U.esc(locBits)}</div>` : ""}
               ${c.quote ? `<blockquote class="cmt-quote">「${U.esc(c.quote)}」</blockquote>` : ""}
               <div class="cmt-text">${U.esc(c.text)}</div>
-            </div>`).join("")
+            </div>`;
+          }).join("")
         : `<p class="hint" style="margin:4px 0">还没有批注。点击任意角色/方案/规则上的「💬 批注」，或者直接<b>划选任意文字</b>即可像 Plan Mode 一样就地批注。</p>`;
 
       return `<section class="pm-bar${commentMode ? " on" : ""}" aria-label="Plan Mode 批注工具栏">
@@ -304,13 +310,13 @@
         return `<b>Lv${t.lv} 考${U.esc(t.cls)}前</b>：${U.esc(t.train.join("、"))}<span class="next-sub">共 ${t.ranks} 段${more}</span>`;
       };
 
-      const overviewTableHtml = `<section class="alerts" data-cmt-target="summary:next-overview" data-cmt-label="全员下一步总览（按 P0→P1→P2）">
+      const overviewTableHtml = `<section class="alerts" id="sec-next-overview" data-cmt-target="summary:next-overview" data-cmt-label="全员下一步总览（按 P → 强度 → 名字）">
         <div class="pm-sec-head">
-          <h2>全员下一步总览（按 P0 → P1 → P2 排序 · 共 ${summaryRows.length} 人）</h2>
-          ${renderCommentBtn("summary:next-overview", "全员下一步总览（按 P0→P1→P2）", "批注总览")}
+          <h2>全员下一步总览（按 P 级 → 强度 → 名字排序 · 共 ${summaryRows.length} 人）</h2>
+          ${renderCommentBtn("summary:next-overview", "全员下一步总览（按 P → 强度 → 名字）", "批注总览")}
         </div>
         ${RM.priorityLinkNote ? `<p class="hint" style="margin:4px 0 8px">${U.esc(RM.priorityLinkNote)}（完整 63 人 SS~D 评级见 <a href="#skills">「技能图鉴 → 全 63 角色评级」</a>）</p>` : ""}
-        ${renderCommentThread("summary:next-overview", "全员下一步总览（按 P0→P1→P2）")}
+        ${renderCommentThread("summary:next-overview", "全员下一步总览（按 P → 强度 → 名字）")}
         <div class="scroll"><table class="next-tbl">
           <tr>
             <th>角色（P 级 · 强度）</th>
@@ -322,7 +328,7 @@
           </tr>
           ${summaryRows.map(r => {
             const needStop = ["exam", "skip", "switch", "missing"].includes(r.immediate.kind);
-            return `<tr class="${needStop ? "cur" : ""}" data-next-row="${U.esc(r.name)}" data-tier="${U.esc(r.tier)}">
+            return `<tr class="${needStop ? "cur" : ""}" data-next-row="${U.esc(r.name)}" data-tier="${U.esc(r.tier)}" data-strength="${U.esc(r.strengthTier)}">
               <td class="next-who">
                 <a href="#next" data-go="${U.slug(r.char)}"><b>${U.esc(U.shortName(r.name))}</b></a>
                 <span class="next-badges">${renderPTierBadge(r.tier, r.priorityNote)}${renderStrengthBadge(r)}</span>
@@ -503,23 +509,32 @@
           return `<div title="Lv${r.frm}→${r.to} ${U.esc(r.choice)}：${U.PW(r.r.cnt, r.r.score)}"><i class="${k}${r.done ? " done" : ""}" style="height:${h}px">${es != null ? `<b style="bottom:${64 * es / mx}px"></b>` : ""}</i><span>${r.to}</span></div>`;
         }).join("")}</div><div class="legend"><span style="--k:var(--good)">好于平均 2 分以上</span><span style="--k:var(--bad)">低于平均 2 分以上</span><span style="--k:var(--muted)">差不多</span><span style="--k:var(--exam)">考试或跳过</span><span>横线 = 平均运气</span></div>` : "";
 
-        // 每次考试值不值 + 多转一个中级
+        // 每次考试值不值 + 多转一个中级（仅默认展示正净值收益项，负收益排雷表默认折叠避免视觉噪音）
         const eb = (c.hist && c.hist.exam_benefit) || [];
         const mg = c.midGain || [];
-        const examSec = `<div class="sec"><h4>每次考试值不值</h4>
+        const mgPos = mg.filter(r => r.dnet > 0);
+        const mgNeg = mg.filter(r => r.dnet <= 0);
+        const renderMidTable = list => `<div class="scroll"><table><tr><th>多转</th><th class="n">用它升级</th><th>能力差</th><th class="n">点数差</th><th class="n">加权分</th><th class="n">比现在</th><th class="n">手形</th><th>说明</th></tr>${list.map(r => `<tr><td>${U.esc(r.cls)}</td><td class="n">${r.used}</td><td class="note">${U.esc(r.diff || "")}</td><td class="n">${r.dpts == null ? "—" : U.sgn(r.dpts)}</td><td class="n">${r.total}</td><td class="n">${U.sgn(r.dsc)}</td><td class="n">${r.gold}G</td><td class="note">${r.dnet > 0 ? "净值略高（被组合顺序挡住），值得看看" : "综合金币与训练后无净收益（排雷参考）"}</td></tr>`).join("")}</table></div>`;
+        const midGainHtml = mg.length
+          ? `<div id="sec-midgain-${U.slug(c)}" data-cmt-target="route:${U.esc(c.name)}" data-cmt-label="${U.esc(c.name)}（多转中级对比）">
+              ${mgPos.length ? `<h4 style="margin-top:8px">多转一个中级值多少（有正净值收益）</h4>${renderMidTable(mgPos)}` : ""}
+              ${mgNeg.length ? `<details class="more" style="margin-top:6px"><summary>多转一个中级排雷对比（以下 ${mgNeg.length} 个均无正净值收益，已折叠）</summary>${renderMidTable(mgNeg)}</details>` : ""}
+            </div>`
+          : "";
+        const examSec = `<div class="sec" id="sec-exam-${U.slug(c)}"><h4>每次考试值不值</h4>
           ${eb.length ? `<div class="scroll"><table><tr><th>考试</th><th class="n">判定值</th><th>比不考它的最好路线</th><th class="n">点数</th><th class="n">加权分</th><th class="n">多花</th></tr>${eb.map(e => `<tr><td>${U.esc(e.cls)}${e.req ? " · 必考" : ""}</td><td class="n">${e.roll}%</td><td>${U.esc(U.gtxt(e.diff, ST))}</td><td class="n">${U.sgn(U.psum(e.diff))}</td><td class="n">${U.sgn(e.wdiff)}</td><td class="n">${e.dgold == null ? "—" : e.dgold + "G"}</td></tr>`).join("")}</table></div>` : `<p class="txt">推荐路线不考试。</p>`}
-          ${mg.length ? `<h4 style="margin-top:8px">多转一个中级值多少</h4><div class="scroll"><table><tr><th>多转</th><th class="n">用它升级</th><th>能力差</th><th class="n">点数差</th><th class="n">加权分</th><th class="n">比现在</th><th class="n">手形</th><th>说明</th></tr>${mg.map(r => `<tr><td>${U.esc(r.cls)}</td><td class="n">${r.used}</td><td class="note">${U.esc(r.diff || "")}</td><td class="n">${r.dpts == null ? "—" : U.sgn(r.dpts)}</td><td class="n">${r.total}</td><td class="n">${U.sgn(r.dsc)}</td><td class="n">${r.gold}G</td><td class="note">${r.dnet > 0 ? "净值略高（被组合顺序挡住），值得看看" : "综合金币与训练后不选"}</td></tr>`).join("")}</table></div>` : ""}
+          ${midGainHtml}
         </div>`;
 
-        return `<article class="card" data-slug="${U.slug(c)}" id="${U.slug(c)}">${head(c, w, right)}
+        return `<article class="card" data-slug="${U.slug(c)}" id="${U.slug(c)}" data-cmt-target="route:${U.esc(c.name)}" data-cmt-label="${U.esc(c.name)}（路线规划）">${head(c, w, right)}
           <details class="more cbody"${focus ? " open" : ""}><summary>展开：路线、能力、考试和每一步</summary>
             ${c.examWarn ? `<div class="sec"><p class="txt"><span class="sev warn">注意</span> 这条路线考试 + 跳过一共 ${c.exams} 次，比较多（手形 ${c.planGold}G）。</p></div>` : ""}
             ${trainBox(c, w)}
-            ${c.route ? `<div class="sec"><h4>推荐路线</h4>${changesHtml}<details class="more"><summary>逐级一览</summary><div class="route">${routeTxt}</div></details></div>` : ""}
-            <div class="sec"><h4>能力到 Lv${w.endLevel}</h4>${statTable}</div>
+            ${c.route ? `<div class="sec" id="sec-route-${U.slug(c)}"><h4>推荐路线</h4>${changesHtml}<details class="more"><summary>逐级一览</summary><div class="route">${routeTxt}</div></details></div>` : ""}
+            <div class="sec" id="sec-stats-${U.slug(c)}"><h4>能力到 Lv${w.endLevel}</h4>${statTable}</div>
             ${examSec}
-            ${tlHtml ? `<div class="sec"><h4>每一步的加权分<small>按现在的选择，剩 ${U.PW(rm.cnt, rm.sc)}</small></h4>${tlHtml}</div>` : ""}
-            ${c.steps.length ? `<div class="sec"><details class="more" open><summary>逐级路线和所有选择（可以改）</summary>${fullList}</details></div>` : ""}
+            ${tlHtml ? `<div class="sec" id="sec-tl-${U.slug(c)}"><h4>每一步的加权分<small>按现在的选择，剩 ${U.PW(rm.cnt, rm.sc)}</small></h4>${tlHtml}</div>` : ""}
+            ${c.steps.length ? `<div class="sec" id="sec-steps-${U.slug(c)}"><details class="more" open><summary>逐级路线和所有选择（可以改）</summary>${fullList}</details></div>` : ""}
           </details>
         </article>`;
       }).join("");

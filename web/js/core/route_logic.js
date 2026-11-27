@@ -289,19 +289,24 @@
   }
 
   const TIER_ORDER = { P0: 0, P1: 1, P2: 2 };
+  const STRENGTH_ORDER = { SS: 0, S: 1, A: 2, B: 3, C: 4, D: 5 };
 
   function tierOrderOf(tier) {
     return Object.prototype.hasOwnProperty.call(TIER_ORDER, tier) ? TIER_ORDER[tier] : 9;
   }
 
+  function strengthOrderOf(st) {
+    return Object.prototype.hasOwnProperty.call(STRENGTH_ORDER, st) ? STRENGTH_ORDER[st] : 9;
+  }
+
   function sortCharsByTier(chars) {
-    return (chars || [])
-      .map((c, idx) => ({ c, idx }))
-      .sort((a, b) => {
-        const d = tierOrderOf(a.c && a.c.tier) - tierOrderOf(b.c && b.c.tier);
-        return d !== 0 ? d : a.idx - b.idx;
-      })
-      .map(x => x.c);
+    return [...(chars || [])].sort((a, b) => {
+      const dp = tierOrderOf(a && a.tier) - tierOrderOf(b && b.tier);
+      if (dp !== 0) return dp;
+      const ds = strengthOrderOf(a && a.strengthTier) - strengthOrderOf(b && b.strengthTier);
+      if (ds !== 0) return ds;
+      return String((a && a.name) || "").localeCompare(String((b && b.name) || ""), "zh-CN");
+    });
   }
 
   function summarizeNextActions(chars, prog, infoMap) {

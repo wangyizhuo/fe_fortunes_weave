@@ -7,7 +7,13 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from modules.character_tiers import STRENGTH_ORDER, get_character_tier, load_character_tiers
+from modules.character_tiers import (
+    PRIORITY_ORDER,
+    STRENGTH_ORDER,
+    get_character_tier,
+    load_character_tiers,
+    zh_name_key,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -385,9 +391,9 @@ def build_skills_catalog() -> dict[str, Any]:
     characters_list.sort(
         key=lambda x: (
             0 if x["recruited"] else (1 if x["dietrichRoute"] else 2),
-            recruited_rank.get(x["name"], 999) if x["recruited"] else STRENGTH_ORDER.get(x["strengthTier"], 9),
+            PRIORITY_ORDER.get(x["dietrichPriority"] or "", 9) if x["recruited"] else 0,
             STRENGTH_ORDER.get(x["strengthTier"], 9),
-            x["_order"],
+            zh_name_key(x["name"]),
         )
     )
     for ch in characters_list:

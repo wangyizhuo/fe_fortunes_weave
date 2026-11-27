@@ -36,10 +36,15 @@ test("Plan Mode comments CRUD: add, update, resolve, delete", () => {
   assert.equal(list.length, 0);
 });
 
-test("formatPlanReviewExport formats grouped quotes and route choices", () => {
+test("formatPlanReviewExport formats grouped quotes, locators, version, and route choices", () => {
   const comments = CL.addComment([], {
     targetId: "char:努蒂奴",
     targetLabel: "努蒂奴 (P2)",
+    section: "plan",
+    viewHash: "#plan",
+    anchorId: "sec-midgain-nutinu",
+    xpath: '//*[@id="sec-midgain-nutinu"]/h4[1]',
+    version: "b09bf2a",
     quote: "转职保底 +3",
     text: "提前 S/L 测 Lv16 重装",
     at: "2026-11-26T10:00:00Z",
@@ -49,9 +54,12 @@ test("formatPlanReviewExport formats grouped quotes and route choices", () => {
     proposals: [{ name: "努蒂奴" }],
     routePicks: {},
     formatRoutePicksExport: () => "- 努蒂奴：Lv16 重装步兵",
+    meta: { version: "b09bf2a", builtAt: "2026-11-27 02:10 UTC", shotKey: "shot_11_24", viewHash: "#plan" },
   });
+  assert.match(md, /版本：`b09bf2a`/);
   assert.match(md, /### 努蒂奴 \(P2\)/);
   assert.match(md, /引用：「转职保底 \+3」/);
+  assert.match(md, /定位：视图 `#plan` · id `#sec-midgain-nutinu` · XPath `\/\/\*\[@id="sec-midgain-nutinu"\]\/h4\[1\]` · 版本 `b09bf2a`/);
   assert.match(md, /批注：提前 S\/L 测 Lv16 重装/);
   assert.match(md, /- 努蒂奴：Lv16 重装步兵/);
 });

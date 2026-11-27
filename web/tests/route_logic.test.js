@@ -219,6 +219,19 @@ test("summarizeNextActions sorts by P0→P1→P2 and extracts next exam, switch,
   assert.equal(rows[2].immediate.kind, "level");
   assert.equal(rows[2].nextSkip.lv, 17);
   assert.equal(rows[2].nextSkip.stepsAway, 1);
+
+  // 严格按 P -> 强度 -> 名字（zh-CN 拼音）排序
+  const mixed = [
+    { name: "米迦艾拉", tier: "P0", strengthTier: "A" },
+    { name: "迪托利希", tier: "P0", strengthTier: "S" },
+    { name: "艾丝梅拉尔达", tier: "P0", strengthTier: "S" },
+    { name: "乌尔坦德", tier: "P2", strengthTier: "B" },
+    { name: "努蒂奴", tier: "P2", strengthTier: "B" },
+  ];
+  assert.deepEqual(
+    RL.sortCharsByTier(mixed).map(c => c.name),
+    ["艾丝梅拉尔达", "迪托利希", "米迦艾拉", "努蒂奴", "乌尔坦德"]
+  );
 });
 
 

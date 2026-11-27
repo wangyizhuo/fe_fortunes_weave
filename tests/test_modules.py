@@ -130,18 +130,25 @@ class TestClassesModule(unittest.TestCase):
         self.assertEqual(d["summary"]["tierCounts"]["初级"], 5)
         self.assertEqual(d["summary"]["tierCounts"]["中级"], 12)
         self.assertTrue(all(len(c["usableSkills"]) >= 1 for c in d["classes"]))
-        # 验证按阶级顺序排列
+        # 验证按阶级顺序排列，并计算优势/劣势属性
         tier_indices = [d["tierOrder"].index(c["tier"]) for c in d["classes"]]
         self.assertEqual(tier_indices, sorted(tier_indices))
+        by_cls = {c["name"]: c for c in d["classes"]}
+        self.assertIn("防", by_cls["重装步兵"]["advantageStats"])
+        self.assertIn("力", by_cls["重装步兵"]["advantageStats"])
+        self.assertIn("魔防", by_cls["重装步兵"]["disadvantageStats"])
+        self.assertIn("魔", by_cls["萨满巫师"]["advantageStats"])
+        self.assertIn("防", by_cls["萨满巫师"]["disadvantageStats"])
 
     def test_route_proposals_include_9stat_diffs_and_defaults(self):
         from modules.route.choice_builder import build_route_proposals
         props = build_route_proposals()
         self.assertEqual(len(props), 9)
-        # 严格按档位 P0 -> P1 -> P2 排序，且伊欧已下调至 P1
-        tier_rank = {"P0": 0, "P1": 1, "P2": 2}
-        ranks = [tier_rank[p["tier"]] for p in props]
-        self.assertEqual(ranks, sorted(ranks))
+        # 严格按 P -> 综合强度(SS~D) -> 名字(拼音) 排序，且伊欧已下调至 P1
+        self.assertEqual(
+            [p["name"] for p in props],
+            ["艾丝梅拉尔达", "迪托利希", "米迦艾拉", "法毕欧", "奇洛伊卡", "伊欧", "杨界", "努蒂奴", "乌尔坦德"],
+        )
         by_name = {p["name"]: p for p in props}
         self.assertEqual(by_name["伊欧"]["tier"], "P1")
         self.assertEqual(by_name["伊欧"]["strengthTier"], "B")

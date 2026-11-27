@@ -146,8 +146,9 @@
     const foot = document.getElementById("foot");
     if (foot && DATA.route) {
       const rm = DATA.route.rulesMeta || {};
+      const ver = MANIFEST && MANIFEST.version ? ` · 版本 v${MANIFEST.version}` : "";
       const built = MANIFEST && MANIFEST.builtAt ? ` · 数据构建于 ${MANIFEST.builtAt}` : "";
-      foot.textContent = `架构：五大模块（友好度培养 / 道具与材料采集 / 职业图鉴 / 技能图鉴 / 路线规划）前后端数据与逻辑解耦加载（当前快照 ${rm.shotKey || "latest"}，名声 Lv${rm.renown ?? "?"}${built}）。页面勾选、选择与 Plan Mode 批注均保存在当前浏览器本地存储。`;
+      foot.textContent = `架构：五大模块（友好度培养 / 道具与材料采集 / 职业图鉴 / 技能图鉴 / 路线规划）前后端数据与逻辑解耦加载（当前快照 ${rm.shotKey || "latest"}，名声 Lv${rm.renown ?? "?"}${ver}${built}）。页面勾选、选择与 Plan Mode 批注均保存在当前浏览器本地存储。`;
     }
 
     if (focusInputId) {
@@ -209,6 +210,47 @@
       }
     });
 
+    function getNearestAnchorId(el) {
+      let cur = el && el.nodeType === 1 ? el : (el && el.parentElement);
+      while (cur && cur !== document.body) {
+        if (cur.id) return cur.id;
+        cur = cur.parentElement;
+      }
+      return "view";
+    }
+
+    function getElementXPath(el) {
+      let cur = el && el.nodeType === 1 ? el : (el && el.parentElement);
+      if (!cur) return "";
+      const segs = [];
+      while (cur && cur.nodeType === 1 && cur !== document.documentElement) {
+        if (cur.id) {
+          segs.unshift(`//*[@id="${cur.id}"]`);
+          return segs.join("/");
+        }
+        const tag = cur.tagName.toLowerCase();
+        let idx = 1;
+        let sib = cur.previousElementSibling;
+        while (sib) {
+          if (sib.tagName === cur.tagName) idx += 1;
+          sib = sib.previousElementSibling;
+        }
+        segs.unshift(`${tag}[${idx}]`);
+        cur = cur.parentElement;
+      }
+      return "/" + segs.join("/");
+    }
+
+    function getVersionMeta() {
+      const rm = (DATA.route && DATA.route.rulesMeta) || {};
+      return {
+        version: (MANIFEST && MANIFEST.version) || "local",
+        builtAt: (MANIFEST && MANIFEST.builtAt) || "",
+        shotKey: (MANIFEST && MANIFEST.shotKey) || rm.shotKey || "",
+        viewHash: "#" + store.state.view,
+      };
+    }
+
     // Plan Mode 快捷键：Ctrl/Cmd + Enter 直接保存批注，Esc 取消
     viewEl.addEventListener("keydown", e => {
       if (e.target.matches("[data-cmt-draft-text]")) {
@@ -216,10 +258,15 @@
           e.preventDefault();
           const d = store.state.commentDraft;
           if (d && (e.target.value || "").trim()) {
+            const vm = getVersionMeta();
             store.addPlanComment({
               targetId: d.targetId,
               targetLabel: d.targetLabel,
               section: store.state.view,
+              viewHash: d.viewHash || vm.viewHash,
+              anchorId: d.anchorId || "",
+              xpath: d.xpath || "",
+              version: d.version || vm.version,
               quote: d.quote || "",
               text: e.target.value,
             });
@@ -270,10 +317,11 @@
           routePicks: store.state.routePicks,
           formatRoutePicksExport: RL.formatRoutePicksExport,
           includeResolved: false,
+          meta: getVersionMeta(),
         });
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(txt).then(() => {
-            store.state.copyFeedback = "✓ 已复制全部 Plan Mode 批注与路线选择，可直接粘贴发给我";
+            store.state.copyFeedback = "✓ 已复制全部 Plan Mode 批注（含 div id / XPath / 版本号）与路线选择，可直接粘贴发给我";
             render();
           }).catch(() => {
             store.state.copyFeedback = "已生成批注与选择文本（浏览器限制剪贴板权限，请展开批注清单查看）";
@@ -299,11 +347,17 @@
       if (cmtOpen) {
         e.preventDefault();
         e.stopPropagation();
+        const host = cmtOpen.closest("[data-cmt-target]") || cmtOpen;
+        const vm = getVersionMeta();
         store.state.editingCommentId = null;
         store.state.commentDraft = {
           targetId: cmtOpen.dataset.cmtOpen,
           targetLabel: cmtOpen.dataset.cmtLabel || cmtOpen.dataset.cmtOpen,
           section: store.state.view,
+          viewHash: vm.viewHash,
+          anchorId: getNearestAnchorId(host),
+          xpath: getElementXPath(host),
+          version: vm.version,
           quote: "",
           text: "",
         };
@@ -316,10 +370,15 @@
         const ta = box && box.querySelector("[data-cmt-draft-text]");
         const txt = ta ? ta.value.trim() : (store.state.commentDraft && store.state.commentDraft.text || "").trim();
         if (store.state.commentDraft && txt) {
+          const vm = getVersionMeta();
           store.addPlanComment({
             targetId: store.state.commentDraft.targetId,
             targetLabel: store.state.commentDraft.targetLabel,
             section: store.state.view,
+            viewHash: store.state.commentDraft.viewHash || vm.viewHash,
+            anchorId: store.state.commentDraft.anchorId || "",
+            xpath: store.state.commentDraft.xpath || "",
+            version: store.state.commentDraft.version || vm.version,
             quote: store.state.commentDraft.quote || "",
             text: txt,
           });
@@ -470,6 +529,7 @@
       if (e.target.closest("[data-cls-clear]")) {
         store.state.classesTier = "全部";
         store.state.classesSkills = [];
+        store.state.classesStats = [];
         store.state.classesMatchMode = "all";
         store.state.classesQuery = "";
         render();
@@ -609,6 +669,15 @@
         render();
         return;
       }
+      if (e.target.matches("[data-cls-stat]")) {
+        const st = e.target.dataset.clsStat;
+        const cur = new Set(store.state.classesStats || []);
+        if (e.target.checked) cur.add(st);
+        else cur.delete(st);
+        store.state.classesStats = [...cur];
+        render();
+        return;
+      }
       if (e.target.matches("[data-rpick]")) {
         store.setRoutePick(e.target.dataset.rpick, e.target.value, undefined);
         store.state.copyFeedback = "";
@@ -702,7 +771,16 @@
         hideSelPop();
         return;
       }
-      pendingSelection = { targetId, targetLabel, quote: txt.slice(0, 180) };
+      const vm = getVersionMeta();
+      pendingSelection = {
+        targetId,
+        targetLabel,
+        viewHash: vm.viewHash,
+        anchorId: getNearestAnchorId(anchor),
+        xpath: getElementXPath(anchor),
+        version: vm.version,
+        quote: txt.slice(0, 180),
+      };
       if (selPop) {
         const left = Math.max(12, Math.min(window.innerWidth - 200, rect.left + rect.width / 2 - 90));
         const top = Math.max(12, rect.top - 40);
@@ -724,6 +802,10 @@
           targetId: ps.targetId,
           targetLabel: ps.targetLabel,
           section: store.state.view,
+          viewHash: ps.viewHash,
+          anchorId: ps.anchorId,
+          xpath: ps.xpath,
+          version: ps.version,
           quote: ps.quote,
           text: "",
         };

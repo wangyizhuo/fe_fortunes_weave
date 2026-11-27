@@ -38,6 +38,7 @@
       itemsTab: "all", // all | shops | barter | materials
       classesTier: "全部",
       classesSkills: [],
+      classesStats: [],
       classesMatchMode: "all", // all | any
       classesQuery: "",
       skillsTab: "skills", // skills | chars

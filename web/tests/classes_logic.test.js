@@ -106,3 +106,23 @@ test("formatMinStats formats non-zero promotion floor stats compactly", () => {
   assert.equal(CL.formatMinStats({ hp: 25, str: 10, mag: 0, def: 8 }), "HP25 力10 防8");
   assert.equal(CL.formatMinStats({ hp: 0, str: 0 }), "—");
 });
+
+test("filterClasses supports advantageStats checkbox filtering (AND/OR) and advantageCounts", () => {
+  const withAdv = [
+    { name: "重装步兵", tier: "中级", usableSkills: ["枪术", "重装术"], advantageStats: ["防", "力", "HP"], disadvantageStats: ["速", "魔防", "魔"] },
+    { name: "天翼兵", tier: "中级", usableSkills: ["枪术", "飞行术"], advantageStats: ["魔防", "速", "魅"], disadvantageStats: [] },
+    { name: "土匪", tier: "中级", usableSkills: ["斧术", "步兵术"], advantageStats: ["力", "HP"], disadvantageStats: ["魔防", "魔"] },
+  ];
+  assert.deepEqual(
+    CL.filterClasses(withAdv, { selectedStats: ["力", "防"], matchMode: "all" }).map(c => c.name),
+    ["重装步兵"]
+  );
+  assert.deepEqual(
+    CL.filterClasses(withAdv, { selectedStats: ["力", "魔防"], matchMode: "any" }).map(c => c.name),
+    ["重装步兵", "天翼兵", "土匪"]
+  );
+  const sum = CL.summarizeClasses(withAdv, ["枪术"]);
+  assert.equal(sum.advantageCounts["力"], 2);
+  assert.equal(sum.advantageCounts["防"], 1);
+  assert.equal(sum.advantageCounts["魔防"], 1);
+});

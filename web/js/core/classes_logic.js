@@ -14,6 +14,7 @@
     const o = opts || {};
     const tier = o.tier && o.tier !== "全部" ? o.tier : null;
     const selected = (o.selectedSkills || []).filter(Boolean);
+    const selectedStats = (o.selectedStats || []).filter(Boolean);
     const matchMode = o.matchMode === "any" ? "any" : "all";
     const q = String(o.query || "").trim().toLowerCase();
 
@@ -25,6 +26,14 @@
           if (!selected.every(sk => usable.includes(sk))) return false;
         } else {
           if (!selected.some(sk => usable.includes(sk))) return false;
+        }
+      }
+      const adv = c.advantageStats || [];
+      if (selectedStats.length) {
+        if (matchMode === "all") {
+          if (!selectedStats.every(st => adv.includes(st))) return false;
+        } else {
+          if (!selectedStats.some(st => adv.includes(st))) return false;
         }
       }
       if (!q) return true;
@@ -40,6 +49,8 @@
         c.unlock,
         ...(c.innate || []),
         ...usable,
+        ...adv,
+        ...(c.disadvantageStats || []),
       ].filter(Boolean).join(" ").toLowerCase();
       return hay.includes(q);
     });
@@ -70,15 +81,20 @@
     const list = classes || [];
     const tierCounts = {};
     const skillCounts = {};
+    const advantageCounts = {};
     for (const sk of (allSkills || [])) skillCounts[sk] = 0;
+    for (const st of STAT_LABELS) advantageCounts[st] = 0;
     for (const c of list) {
       const t = c.tier || "其他";
       tierCounts[t] = (tierCounts[t] || 0) + 1;
       for (const sk of (c.usableSkills || [])) {
         skillCounts[sk] = (skillCounts[sk] || 0) + 1;
       }
+      for (const st of (c.advantageStats || [])) {
+        advantageCounts[st] = (advantageCounts[st] || 0) + 1;
+      }
     }
-    return { total: list.length, tierCounts, skillCounts };
+    return { total: list.length, tierCounts, skillCounts, advantageCounts };
   }
 
   function formatMinStats(minStats) {

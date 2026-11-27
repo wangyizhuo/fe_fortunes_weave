@@ -11,6 +11,7 @@ import argparse
 import json
 import os
 import shutil
+import subprocess
 import sys
 import time
 from datetime import datetime, timezone
@@ -29,6 +30,19 @@ from modules.skills.service import build_skills_data  # noqa: E402
 
 WEB_SRC = ROOT / "web"
 DEFAULT_OUT = Path(os.environ.get("FE_OUT_DIR") or (ROOT / "out"))
+
+
+def _git_short_version() -> str:
+    try:
+        sha = subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=str(ROOT),
+            stderr=subprocess.DEVNULL,
+            text=True,
+        ).strip()
+        return sha or "dev"
+    except Exception:
+        return "dev"
 
 
 def _write_json(path: Path, payload: Any) -> None:
@@ -51,6 +65,8 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
 
     manifest = {
         "schemaVersion": 2,
+        "version": _git_short_version(),
+        "shotKey": (route.get("rulesMeta") or {}).get("shotKey") or "",
         "builtAt": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "modules": {
             "affinity": {
