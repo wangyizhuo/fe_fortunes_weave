@@ -25,6 +25,7 @@ from modules.affinity.service import build_affinity_data  # noqa: E402
 from modules.classes.service import build_classes_data  # noqa: E402
 from modules.items.service import build_items_data  # noqa: E402
 from modules.route.service import build_route_data  # noqa: E402
+from modules.skills.service import build_skills_data  # noqa: E402
 
 WEB_SRC = ROOT / "web"
 DEFAULT_OUT = Path(os.environ.get("FE_OUT_DIR") or (ROOT / "out"))
@@ -45,6 +46,7 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
     affinity = build_affinity_data()
     items = build_items_data()
     classes = build_classes_data()
+    skills = build_skills_data()
     route = build_route_data()
 
     manifest = {
@@ -65,6 +67,11 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
                 "classCount": classes["summary"]["classCount"],
                 "tierCount": classes["summary"]["tierCount"],
             },
+            "skills": {
+                "path": "./data/skills.json",
+                "skillCount": skills["summary"]["skillCount"],
+                "charCount": skills["summary"]["charCount"],
+            },
             "route": {
                 "path": "./data/route.json",
                 "characters": len(route["chars"]),
@@ -77,6 +84,7 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
     _write_json(data_dir / "affinity.json", affinity)
     _write_json(data_dir / "items.json", items)
     _write_json(data_dir / "classes.json", classes)
+    _write_json(data_dir / "skills.json", skills)
     _write_json(data_dir / "route.json", route)
 
     # file:// 离线打开回退用的纯数据脚本（仍在 out/data/ 下，不注入 HTML）
@@ -85,6 +93,7 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
         "affinity": affinity,
         "items": items,
         "classes": classes,
+        "skills": skills,
         "route": route,
     }
     with open(data_dir / "bundle_data.js", "w", encoding="utf-8") as f:
@@ -92,7 +101,7 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
         json.dump(bundle_payload, f, ensure_ascii=False)
         f.write(";\n")
 
-    # 兼容 checks.py 的 page_data.json（保留旧字段，同时新增 items / classes / manifest）
+    # 兼容 checks.py 的 page_data.json（保留旧字段，同时新增 items / classes / skillsCatalog / manifest）
     compat_page_data = {
         "schemaVersion": 2,
         "manifest": manifest,
@@ -101,6 +110,7 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
         "meals": affinity,
         "items": items,
         "classes": classes,
+        "skillsCatalog": skills,
         "chars": route["chars"],
         "stats": route["stats"],
         "skills": route["skills"],
@@ -115,6 +125,7 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
         f"affinity:{len(affinity['dishes'])} dishes, "
         f"items:{items['summary']['townCount']} towns/{items['summary']['barterCount']} barter/{items['summary']['materialCount']} materials, "
         f"classes:{classes['summary']['classCount']} classes, "
+        f"skills:{skills['summary']['skillCount']} skills/{skills['summary']['charCount']} chars, "
         f"route:{len(route['chars'])} chars"
     )
     return bundle_payload

@@ -17,10 +17,16 @@
   };
 
   function createStore(onRender, onStatus) {
+    const CL = root.FE.commentsLogic;
     const state = {
       prog: {},
       info: {},
       routePicks: {},
+      planComments: [],
+      commentMode: true,
+      commentDrawerOpen: false,
+      commentDraft: null, // { targetId, targetLabel, section, quote, text }
+      editingCommentId: null,
       focus: "",
       view: "meal",
       longS: {},
@@ -34,6 +40,15 @@
       classesSkills: [],
       classesMatchMode: "all", // all | any
       classesQuery: "",
+      skillsTab: "skills", // skills | chars
+      skillsQuery: "",
+      skillsRating: "全部",
+      skillsScope: "全部",
+      skillsCategory: "全部",
+      skillsDiscipline: "全部",
+      skillsOnlyRecruited: false,
+      skillsCharGroup: "recruited", // recruited | dietrich | all
+      skillsShowAll: false,
       copyFeedback: "",
       db: null,
       writing: false,
@@ -44,7 +59,12 @@
       try {
         localStorage.setItem(
           "route-state2",
-          JSON.stringify({ prog: state.prog, info: state.info, routePicks: state.routePicks })
+          JSON.stringify({
+            prog: state.prog,
+            info: state.info,
+            routePicks: state.routePicks,
+            planComments: state.planComments,
+          })
         );
       } catch (_) {}
     }
@@ -55,6 +75,7 @@
         state.prog = v.prog || {};
         state.info = v.info || {};
         state.routePicks = v.routePicks || {};
+        state.planComments = Array.isArray(v.planComments) ? v.planComments : [];
       } catch (_) {}
     }
 
@@ -149,6 +170,39 @@
       if (!names.length) saveLocal();
     }
 
+    function addPlanComment(payload) {
+      const prevLen = state.planComments.length;
+      state.planComments = CL.addComment(state.planComments, payload);
+      if (state.planComments.length > prevLen) {
+        const created = state.planComments[state.planComments.length - 1];
+        queue("planComments/" + created.id, created);
+      }
+    }
+
+    function updatePlanComment(id, text) {
+      state.planComments = CL.updateComment(state.planComments, id, text);
+      const item = state.planComments.find(c => c.id === id);
+      if (item) queue("planComments/" + id, item);
+    }
+
+    function toggleResolvePlanComment(id) {
+      state.planComments = CL.toggleResolveComment(state.planComments, id);
+      const item = state.planComments.find(c => c.id === id);
+      if (item) queue("planComments/" + id, item);
+    }
+
+    function deletePlanComment(id) {
+      state.planComments = CL.deleteComment(state.planComments, id);
+      queue("planComments/" + id, null);
+    }
+
+    function clearAllPlanComments() {
+      const ids = state.planComments.map(c => c.id);
+      state.planComments = [];
+      for (const id of ids) queue("planComments/" + id, null);
+      if (!ids.length) saveLocal();
+    }
+
     async function initSync() {
       const db = root.claude?.use ? await root.claude.use("db").catch(() => null) : null;
       state.db = db;
@@ -202,6 +256,11 @@
           }
         }
       });
+      watch("planComments", v => {
+        state.planComments = Object.values(v)
+          .filter(d => d && d.id && d.text)
+          .sort((a, b) => String(a.at || "").localeCompare(String(b.at || "")));
+      });
     }
 
     async function syncSheet(routeData, btn, setSyncText) {
@@ -227,7 +286,9 @@
 
     return {
       state, loadLocal, loadFocus, setFocus, setProg, setCharInfo,
-      setRoutePick, clearRoutePick, resetAllRoutePicks, initSync, syncSheet,
+      setRoutePick, clearRoutePick, resetAllRoutePicks,
+      addPlanComment, updatePlanComment, toggleResolvePlanComment, deletePlanComment, clearAllPlanComments,
+      initSync, syncSheet,
     };
   }
 

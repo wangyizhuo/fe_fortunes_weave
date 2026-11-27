@@ -3,11 +3,13 @@
 核心原则（按 Yizhuo 11-26 审阅意见彻底去补丁化）：
   1. 真正以终为始：不人工锁单颗种子（no_skip_seeds），不设初级/中级职业数量上限，
      不强制「考完必须用来升级」，也不对 P1/P2 禁训练——全部由统一目标函数 J(π) 与边际成本/收益说了算。
-  2. 严格区分两种保底：
+  2. 严格区分「升级保底」与「转职保底」（全文禁止笼统简称）：
      - 升级保底：单次升级时至少涨 2 项属性（fe_growth.py `level_up(min_stats=2)`，已内含在每次升级结果中）。
      - 转职保底：转职瞬间若裸属性低于目标职业最低线（fw_classes.json `minStats`），永久补足到该线（planner.py `floor_lifts`）。
-  3. 每个额外职业必须算清「边际收益（Marginal Gain）」：去掉这一个职业会少拿多少属性/转职保底/精通、省多少金币和训练。
-  4. 不因公式可能不准而硬杀好方案：不设 3% 禁考红线；对「非实测、非 100%、公式估值接近判定值」的考试，
+  3. 每个额外职业必须算清「边际收益（Marginal Gain）」：去掉这一个职业会少拿多少属性/转职保底/精通、省多少金币和训练；
+     P2 提高边际门槛（≥6.0 分），减少 P2 角色的无谓手形金币与操作时间投入。
+  4. 职业精通进度由用户 case by case 决定，不计入虚拟加权分（mastery_pts_per_lv = 0.0），仅在同净值同成本下作破平局参考。
+  5. 不因公式可能不准而硬杀好方案：不设 3% 禁考红线；对「非实测、非 100%、公式估值接近判定值」的考试，
      发出明确的「⚠️ 需提前 NS Online S/L 实测」预警并附稳过备选；实机测完若不准直接校准公式或录入实测值。
 """
 from __future__ import annotations
@@ -17,16 +19,16 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class TierPolicy:
-    """P0 / P1 / P2 统一策略参数（同一套算法，全员可训练、初级中级不限职业数，仅成本权重不同）。"""
+    """P0 / P1 / P2 统一策略参数（同一套算法，全员可训练、初级中级不限职业数，仅成本权重与边际门槛不同）。"""
     tier: str
     gold_per_pt: float            # 每 1 加权分折合多少手形金币
     train_pts_per_rank: float     # 每练 1 段技能折合扣多少加权分（全档位均可自由训练，靠成本权衡）
-    min_marginal_gain: float      # 多考 1 个非必考职业时，该职业自身至少要带来的净增量（才值得折腾）
-    mastery_pts_per_lv: float     # 早转多用目标职业升 1 级的精通等效分（同分时倾向早拿精通）
+    min_marginal_gain: float      # 多考 1 个非必考职业时，该职业自身至少要带来的净增量（P2 提高门槛以省金币与时间）
+    mastery_pts_per_lv: float     # 默认 0.0（精通价值由用户 case by case 决定，不折算进虚拟加权分）
     sl_warn_margin: float         # 非实测、非 100% 考试时，(公式估% - 判定值%) < 该值则标 ⚠️ 建议提前 S/L 实测（但不禁止）
     skip_cap: float               # 额外纯跳过的绝对分数线
     skip_pct: float               # 额外纯跳过相对未来 15 级均分的低出比例
-    skip_or: bool                 # True=满足其一即跳（P0），False=两条件同时满足才跳（P1/P2）
+    skip_or: bool                 # True=满足其一即跳，False=两条件同时满足才跳
 
 
 DEFAULT_TIER_POLICIES: dict[str, TierPolicy] = {
@@ -34,8 +36,8 @@ DEFAULT_TIER_POLICIES: dict[str, TierPolicy] = {
         tier="P0",
         gold_per_pt=500 / 8,       # 62.5 G/分（500G ≈ 8 分）
         train_pts_per_rank=0.5,    # 练 1 段 ≈ 0.5 分
-        min_marginal_gain=2.0,     # 多考 1 个非必考职业至少净赚 2 分才值得折腾
-        mastery_pts_per_lv=0.25,
+        min_marginal_gain=2.0,     # P0 多考 1 个非必考职业至少净赚 2.0 分
+        mastery_pts_per_lv=0.0,    # 精通由用户 case by case 决定，不计入虚拟加权分
         sl_warn_margin=5.0,        # 公式估值离判定值不到 5% 时提醒提前 S/L 实测
         skip_cap=8.0,
         skip_pct=0.35,
@@ -45,8 +47,8 @@ DEFAULT_TIER_POLICIES: dict[str, TierPolicy] = {
         tier="P1",
         gold_per_pt=500 / 12,      # 41.67 G/分（500G ≈ 12 分）
         train_pts_per_rank=2.0,    # 照常可练，但每练 1 段按 2 分计成本
-        min_marginal_gain=2.0,
-        mastery_pts_per_lv=0.20,
+        min_marginal_gain=3.0,     # P1 多考 1 个非必考职业至少净赚 3.0 分
+        mastery_pts_per_lv=0.0,    # 精通由用户 case by case 决定
         sl_warn_margin=5.0,
         skip_cap=8.0,
         skip_pct=0.50,
@@ -56,8 +58,8 @@ DEFAULT_TIER_POLICIES: dict[str, TierPolicy] = {
         tier="P2",
         gold_per_pt=500 / 16,      # 31.25 G/分（500G ≈ 16 分）
         train_pts_per_rank=3.0,    # 照常可练，但每练 1 段按 3 分计成本
-        min_marginal_gain=2.0,
-        mastery_pts_per_lv=0.15,
+        min_marginal_gain=6.0,     # P2 显著提高额外职业门槛（≥6.0 分），减少金币与操作时间成本
+        mastery_pts_per_lv=0.0,    # 精通由用户 case by case 决定
         sl_warn_margin=5.0,
         skip_cap=6.0,
         skip_pct=0.60,

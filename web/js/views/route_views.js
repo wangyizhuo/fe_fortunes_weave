@@ -4,6 +4,7 @@
 (function (root) {
   const U = root.FE.utils;
   const RL = root.FE.routeLogic;
+  const CL = root.FE.commentsLogic;
   const LONG_DEF = 5;
   const N_PTS = "<b>点数</b> = 不加权的加点总数；<b>加权分</b> = 每项加点 × 该角色的能力权重（权重在每张卡名字下面）。所有合计都同时给这两个数。";
   const notesBox = items => `<details class="notes"><summary>说明（规则和名词解释）</summary><ul>${items.map(x => `<li>${x}</li>`).join("")}</ul></details>`;
@@ -28,18 +29,107 @@
     const PROPOSALS = (D && D.routeProposals) || [];
     const prog = state.prog, info = state.info, focus = state.focus, longS = state.longS;
     const routePicks = state.routePicks || {};
+    const planComments = state.planComments || [];
+    const commentMode = state.commentMode !== false;
+    const commentDraft = state.commentDraft || null;
+    const editingId = state.editingCommentId || null;
+    const cmtSum = CL.summarizeComments(planComments);
 
     const walkOf = c => RL.walk(c, prog, info);
     const remainOf = (c, w) => RL.remain(c, w, ST);
     const verdictOf = (c, s) => RL.examVerdict(c, s, prog);
     const shotLabel = RM.shotKey ? `当前快照（${RM.shotKey}）` : "当前截图";
 
+    function renderCommentBtn(targetId, targetLabel, btnLabel) {
+      if (!commentMode) return "";
+      const stat = cmtSum.byTarget[targetId];
+      const badge = stat && stat.open ? ` <span class="cmt-cnt">${stat.open}</span>` : "";
+      return `<button type="button" class="cmt-trig" data-cmt-open="${U.esc(targetId)}" data-cmt-label="${U.esc(targetLabel)}" title="为此项添加 Plan Mode 批注">💬 ${U.esc(btnLabel || "批注")}${badge}</button>`;
+    }
+
+    function renderCommentThread(targetId, targetLabel) {
+      const list = CL.commentsForTarget(planComments, targetId, { includeResolved: true });
+      const isComposing = commentDraft && commentDraft.targetId === targetId;
+      if (!list.length && !isComposing) return "";
+      const itemsHtml = list.map(c => {
+        if (editingId === c.id) {
+          return `<div class="cmt-item editing" data-cmt-id="${U.esc(c.id)}">
+            ${c.quote ? `<blockquote class="cmt-quote">「${U.esc(c.quote)}」</blockquote>` : ""}
+            <textarea class="cmt-input" id="cmtEditInput" data-cmt-edit-text rows="2">${U.esc(c.text)}</textarea>
+            <div class="cmt-actions">
+              <button type="button" class="btn pri" data-cmt-edit-save="${U.esc(c.id)}">保存修改</button>
+              <button type="button" class="btn ghost" data-cmt-edit-cancel>取消</button>
+            </div>
+          </div>`;
+        }
+        return `<div class="cmt-item${c.resolved ? " resolved" : ""}" data-cmt-id="${U.esc(c.id)}">
+          ${c.quote ? `<blockquote class="cmt-quote">「${U.esc(c.quote)}」</blockquote>` : ""}
+          <div class="cmt-text">${U.esc(c.text)}</div>
+          <div class="cmt-meta">
+            <span>${c.at ? U.esc(c.at.slice(5, 16).replace("T", " ")) : ""}</span>
+            <button type="button" class="cmt-act" data-cmt-resolve="${U.esc(c.id)}">${c.resolved ? "↺ 重新打开" : "✓ 标为已解决"}</button>
+            <button type="button" class="cmt-act" data-cmt-edit="${U.esc(c.id)}">编辑</button>
+            <button type="button" class="cmt-act dn" data-cmt-del="${U.esc(c.id)}">删除</button>
+          </div>
+        </div>`;
+      }).join("");
+
+      const composerHtml = isComposing ? `
+        <div class="cmt-composer" data-cmt-box>
+          <div class="cmt-comp-head">
+            <b>💬 Plan Mode 批注 · ${U.esc(commentDraft.targetLabel || targetLabel)}</b>
+            <button type="button" class="cmt-act" data-cmt-cancel>关闭</button>
+          </div>
+          ${commentDraft.quote ? `<blockquote class="cmt-quote">选中内容：「${U.esc(commentDraft.quote)}」</blockquote>` : ""}
+          <textarea class="cmt-input" id="cmtDraftInput" data-cmt-draft-text rows="2" placeholder="写下你的审阅意见、改法或 case by case 决定（Ctrl/Cmd+Enter 保存）…">${U.esc(commentDraft.text || "")}</textarea>
+          <div class="cmt-actions">
+            <button type="button" class="btn pri" data-cmt-save>保存批注</button>
+            <button type="button" class="btn ghost" data-cmt-cancel>取消</button>
+          </div>
+        </div>
+      ` : "";
+
+      return `<div class="cmt-thread">${itemsHtml}${composerHtml}</div>`;
+    }
+
+    function renderPlanModeBar() {
+      const drawerItems = planComments.length
+        ? planComments.map(c => `
+            <div class="cmt-drawer-row${c.resolved ? " resolved" : ""}">
+              <div class="cmt-dr-top">
+                <span class="cat-pill">${U.esc(c.targetLabel)}</span>
+                <span class="hint">${c.at ? U.esc(c.at.slice(5, 16).replace("T", " ")) : ""}</span>
+                <span class="r">
+                  <button type="button" class="cmt-act" data-cmt-resolve="${U.esc(c.id)}">${c.resolved ? "↺ 重开" : "✓ 已解决"}</button>
+                  <button type="button" class="cmt-act dn" data-cmt-del="${U.esc(c.id)}">删除</button>
+                </span>
+              </div>
+              ${c.quote ? `<blockquote class="cmt-quote">「${U.esc(c.quote)}」</blockquote>` : ""}
+              <div class="cmt-text">${U.esc(c.text)}</div>
+            </div>`).join("")
+        : `<p class="hint" style="margin:4px 0">还没有批注。点击任意角色/方案/规则上的「💬 批注」，或者直接<b>划选任意文字</b>即可像 Plan Mode 一样就地批注。</p>`;
+
+      return `<section class="pm-bar${commentMode ? " on" : ""}" aria-label="Plan Mode 批注工具栏">
+        <div class="pm-row">
+          <button type="button" class="pill${commentMode ? " on" : ""}" data-pm-toggle>💬 Plan Mode 批注：${commentMode ? "已开启" : "已关闭"}</button>
+          <button type="button" class="pill${state.commentDrawerOpen ? " on" : ""}" data-pm-drawer>📋 批注清单（待处理 ${cmtSum.open}${cmtSum.resolved ? ` / 已解决 ${cmtSum.resolved}` : ""}）</button>
+          <button type="button" class="btn pri" data-pm-export>复制批注 + 路线选择给 AI</button>
+          ${commentMode ? `<button type="button" class="btn ghost" data-cmt-open="rules:global" data-cmt-label="全局路线规划规则">+ 全局批注</button>` : ""}
+          ${planComments.length ? `<button type="button" class="btn ghost" data-pm-clear>清空批注</button>` : ""}
+        </div>
+        ${commentMode ? `<div class="pm-tip">💡 Plan Mode 已开启：点击任意卡片/候选方案的 <b>「💬 批注」</b>，或直接<b>鼠标划选任意文字</b>即可弹窗批注；所有批注自动保存在本地浏览器，点右侧按钮一键导出发给 AI 执行修改。</div>` : ""}
+        ${state.copyFeedback ? `<div class="ok" style="font-size:13px;margin-top:6px">${U.esc(state.copyFeedback)}</div>` : ""}
+        ${state.commentDrawerOpen ? `<div class="pm-drawer">${drawerItems}</div>` : ""}
+        ${renderCommentThread("rules:global", "全局路线规划规则")}
+      </section>`;
+    }
+
     function timingBox(e) {
       const t = e.timing || [];
       if (!t.length) return `<br><span class="hint">考试时机：窗口里没有别的乱数能考过，只能在这一级考。</span>`;
       const P = x => `${x.pts > 0 ? "+" : ""}${x.pts} 点 / ${x.w > 0 ? "+" : ""}${x.w}`;
       return `<details class="more"><summary>换到别的乱数考（${t.length} 个能考过）：现在这场比它们 ${t.every(x => x.total.w >= 0) ? "都不差" : "有更好的"}</summary>
-        <div class="scroll" style="max-width:calc(100vw - 100px)"><table><tr><th>改在</th><th class="n">判定值 / 成功率</th><th>① 考试用掉的乱数</th><th>② 用不同职业升级</th><th>③ 保底</th><th>合计（现在减它）</th><th class="n">金币</th></tr>
+        <div class="scroll" style="max-width:calc(100vw - 100px)"><table><tr><th>改在</th><th class="n">判定值 / 成功率</th><th>① 考试用掉的乱数</th><th>② 用不同职业升级</th><th>③ 转职保底</th><th>合计（现在减它）</th><th class="n">金币</th></tr>
         ${t.map(x => `<tr><td>Lv${x.lv}（第 ${x.step + 1} 个乱数）</td><td class="n">${x.roll} / ${x.pct ?? "—"}%</td><td class="n">${P(x.exam)}</td><td class="n">${P(x.cls)}</td><td class="n">${P(x.floor)}</td><td class="n ${x.total.w > 0 ? "up" : x.total.w < 0 ? "dn" : ""}"><b>${P(x.total)}</b></td><td class="n">${x.gold > 0 ? "+" : ""}${x.gold}G</td></tr>`).join("")}</table></div>
         <p class="hint" style="max-width:calc(100vw - 100px)">${t[0].explain.map(U.esc).join("<br>")}</p></details>`;
     }
@@ -53,10 +143,12 @@
 
     function head(c, w, right) {
       const n = w.rows.filter(r => r.done).length;
-      return `<div class="ch"><div class="ct"><h3>${U.esc(c.name)}</h3><span class="lv">Lv${w.ci.level ?? "?"} ${U.esc(w.cur || "")}</span><span class="r">${right}</span></div>
+      const cmtBtn = renderCommentBtn("route:" + c.name, `${c.name}（路线规划）`, "批注");
+      return `<div class="ch" data-cmt-target="route:${U.esc(c.name)}" data-cmt-label="${U.esc(c.name)}（路线规划）"><div class="ct"><h3>${U.esc(c.name)}</h3><span class="lv">Lv${w.ci.level ?? "?"} ${U.esc(w.cur || "")}</span><span class="r">${right} ${cmtBtn}</span></div>
         ${c.steps.length ? `<div class="meter" title="完成 ${n} / ${c.steps.length}"><i style="width:${100 * n / c.steps.length}%"></i></div>` : ""}
         ${c.weights ? `<div class="wts" title="能力权重，加权分 = 每项加点 × 权重">${ST.map((k, i) => `<span class="w${c.weights[i]}">${k}<b>${c.weights[i]}</b></span>`).join("")}</div>` : ""}
-        ${c.text ? `<p class="intro">${U.esc(c.text.intro)}</p>` : ""}${c.text && c.text.note ? `<p class="intro note2">${U.esc(c.text.note)}</p>` : ""}${c.guide ? `<p class="intro note2"><b>攻略评价 ${U.esc(c.guide.tier)}</b>（憨色 Ver1.0）：${U.esc(c.guide.t)}</p>` : ""}</div>`;
+        ${c.text ? `<p class="intro">${U.esc(c.text.intro)}</p>` : ""}${c.text && c.text.note ? `<p class="intro note2">${U.esc(c.text.note)}</p>` : ""}${c.guide ? `<p class="intro note2"><b>攻略评价 ${U.esc(c.guide.tier)}</b>（憨色 Ver1.0）：${U.esc(c.guide.t)}</p>` : ""}
+        ${renderCommentThread("route:" + c.name, `${c.name}（路线规划）`)}</div>`;
     }
 
     function optsHtml(c, s, row, idp) {
@@ -196,7 +288,7 @@
     }
 
     // ---------- 2. 到目标级 ----------
-    const smDiff = d => `点数 ${U.sgn(d.pts)}、加权分 ${U.sgn(d.total)}${d.floorPts ? `、保底 ${U.sgn(d.floorPts)} 点` : ""}、金币 ${U.sgn(d.gold)}G`;
+    const smDiff = d => `点数 ${U.sgn(d.pts)}、加权分 ${U.sgn(d.total)}${d.floorPts ? `、转职保底 ${U.sgn(d.floorPts)} 点` : ""}、金币 ${U.sgn(d.gold)}G`;
     function smHint(c, s) {
       const o = OPTS[c.name], w = o && o.skipMid && o.skipMid[0];
       if (!w || s.src !== "plan") return "";
@@ -303,7 +395,7 @@
           return `<li class="${row.done ? "done" : ""} ${r.exam ? "isx" : ""}" data-key="${s.key}">
             <input type="checkbox" data-f="done" id="d-${U.keyOf(c, s)}"${row.done ? " checked" : ""} aria-label="已完成">
             <label class="lvl" for="d-${U.keyOf(c, s)}">${r.exam ? (RL.examName(s) ? "考试" : "跳过") : `Lv${row.frm}→${row.to}`}</label>
-            <div class="body">${r.exam ? `${RL.examName(s) ? "考试（到 " + U.esc(RL.examName(s)) + "）" : (s.skipNone ? `跳过 <span class="changed">没有可用的初级考试</span>` : s.skipFail && s.skipFail.length ? `跳过（考 ${U.esc(s.skipFail.join(" / "))}，会考不过，不拿职业）` : s.skipCls ? `跳过（只能考 ${U.esc(s.skipCls)}，会考过，用掉一个可跳过的职业，还剩 ${s.skipLeft} 个）` : "跳过")}${s.train && RL.examName(s) ? (s.trainOk ? ` <span class="changed">🎯 Lv${s.trainLv} 考试前练好：${U.esc(s.train.join("、"))}</span>` : ` <span class="changed">技能差：${U.esc(s.train.join("、"))}（不练，按实际成功率）</span>`) : ""}<span class="hint">　判定值 ${s.roll}%${RL.examName(s) && s.pct != null ? `｜估计成功率 ${s.pct}%${s.train && s.trainOk ? "（练够之后）" : ""}` : ""}${s.renown && RL.examName(s) ? `｜要名声 Lv${s.renown}` : ""}</span>${s.floor && s.floor.length ? ` <span class="changed">保底：${U.esc(s.floor.join("、"))}</span>` : ""}${!RL.examName(s) ? smHint(c, s) : ""}${s.use && RL.examName(s) ? `<span class="hint">　之后到 Lv${c.planTo} 用它升 ${s.use[0]} 级${s.use[0] ? `：${U.esc(s.use[1])}（${U.sgn(s.use[2])} 分）` : ""}</span>` : ""}` : `<b>${U.esc(RL.eqName(row))}</b>　${U.esc(r.gains.join(" ") || "—")}`}${row.choice !== RL.recOf(s) ? ` <span class="changed">已改</span>` : ""}${row.missing ? ` <span class="changed">还没考到</span>` : ""}${row.fail ? ` <span class="changed">估计考不过</span>` : ""}
+            <div class="body">${r.exam ? `${RL.examName(s) ? "考试（到 " + U.esc(RL.examName(s)) + "）" : (s.skipNone ? `跳过 <span class="changed">没有可用的初级考试</span>` : s.skipFail && s.skipFail.length ? `跳过（考 ${U.esc(s.skipFail.join(" / "))}，会考不过，不拿职业）` : s.skipCls ? `跳过（只能考 ${U.esc(s.skipCls)}，会考过，用掉一个可跳过的职业，还剩 ${s.skipLeft} 个）` : "跳过")}${s.train && RL.examName(s) ? (s.trainOk ? ` <span class="changed">🎯 Lv${s.trainLv} 考试前练好：${U.esc(s.train.join("、"))}</span>` : ` <span class="changed">技能差：${U.esc(s.train.join("、"))}（不练，按实际成功率）</span>`) : ""}<span class="hint">　判定值 ${s.roll}%${RL.examName(s) && s.pct != null ? `｜估计成功率 ${s.pct}%${s.train && s.trainOk ? "（练够之后）" : ""}` : ""}${s.renown && RL.examName(s) ? `｜要名声 Lv${s.renown}` : ""}</span>${s.floor && s.floor.length ? ` <span class="changed">转职保底：${U.esc(s.floor.join("、"))}</span>` : ""}${!RL.examName(s) ? smHint(c, s) : ""}${s.use && RL.examName(s) ? `<span class="hint">　之后到 Lv${c.planTo} 用它升 ${s.use[0]} 级${s.use[0] ? `：${U.esc(s.use[1])}（${U.sgn(s.use[2])} 分）` : ""}</span>` : ""}` : `<b>${U.esc(RL.eqName(row))}</b>　${U.esc(r.gains.join(" ") || "—")}`}${row.choice !== RL.recOf(s) ? ` <span class="changed">已改</span>` : ""}${row.missing ? ` <span class="changed">还没考到</span>` : ""}${row.fail ? ` <span class="changed">估计考不过</span>` : ""}
               ${row.done ? "" : `<details class="more"><summary>选择</summary>${optsHtml(c, s, row, "f")}</details>`}</div>
             <span class="sc">${r.exam ? "—" : U.PW(r.cnt, r.score)}</span></li>`;
         }).join("")}</ol></div>`;
@@ -445,7 +537,7 @@
       }).join("");
       return `<p class="lede">从现在的种子往后看 40 级：哪项长得好、哪项差，跳过能多拿多少。</p>
         <section class="alerts"><h2>九人对比（40 级）</h2><div class="scroll"><table><tr><th>角色</th><th class="n">涨 / 期望</th><th class="n">差值</th><th>最好</th><th>最差</th><th class="n">单项跳5上限和</th><th class="n">不跳</th><th class="n">建议跳后</th><th class="n">跳次</th><th class="n">多</th><th>总结</th></tr>${rows}</table></div></section>
-        <div class="grid one">${cards}</div>` + notesBox(["<b>成长率</b> = 个人 + 统一 15%，保底 2 项。", N_PTS]);
+        <div class="grid one">${cards}</div>` + notesBox(["<b>成长率</b> = 个人 + 统一 15%，单次升级保底 2 项。", N_PTS]);
     }
 
     // ---------- 6. 职业选择与选择原因 ----------
@@ -458,7 +550,7 @@
           const blk = [];
           for (const r of w.skips) for (const x of r.opts) if (x.ruleBlocked) blk.push(`Lv${r.lv} ${x.cls}（${x.ranks} 段）`);
           return `<p class="txt" style="font-size:13px"><span class="lab">跳过那一级改考中级 · ${w.target === o.target ? `到 Lv${w.target}` : "到 Lv45"}</span>同样 ${w.seeds} 个乱数对比</p>
-            <div class="scroll"><table><tr><th class="n">跳过的等级</th><th class="n">判定值</th><th>改考</th><th class="n">成功率<br><small>练够 / 不练</small></th><th class="n">先练</th><th class="n">用它升级</th><th>能力差</th><th class="n">点数</th><th class="n">加权分</th><th class="n">保底</th><th class="n">金币</th><th>结论</th></tr>
+            <div class="scroll"><table><tr><th class="n">跳过的等级</th><th class="n">判定值</th><th>改考</th><th class="n">成功率<br><small>练够 / 不练</small></th><th class="n">先练</th><th class="n">用它升级</th><th>能力差</th><th class="n">点数</th><th class="n">加权分</th><th class="n">转职保底</th><th class="n">金币</th><th>结论</th></tr>
             ${w.skips.map(r => smOpts(r).map((x, i, a) => `<tr${x.worth ? ' class="cur"' : ""}>${i ? "" : `<td class="n" rowspan="${a.length}">Lv${r.lv}</td><td class="n" rowspan="${a.length}">${r.roll}%</td>`}<td><b>${U.esc(x.cls)}</b></td><td class="n">${x.pct ?? "—"}% / ${x.pctNow ?? "—"}%</td>${x.ok ? `<td class="n">${x.ranks ? x.ranks + " 段" : "—"}</td><td class="n">${x.used} 级</td><td>${U.esc(U.gtxt(x.d.g, ST))}</td><td class="n">${U.sgn(x.d.pts)}</td><td class="n ${x.d.total > 0 ? "up" : x.d.total < 0 ? "dn" : ""}">${U.sgn(x.d.total)}</td><td class="n">${x.d.floorPts ? U.sgn(x.d.floorPts) : "—"}</td><td class="n">${U.sgn(x.d.gold)}G</td><td class="note">${x.worth ? "值得" : x.used ? "不值得" : "考过但用不上"}</td>` : `<td colspan="8" class="note">${U.esc(x.why)}</td>`}</tr>`).join("")).join("")}</table></div>
             ${blk.length ? `<p class="hint">规则不考虑（本档不练技能）：${U.esc(blk.join("、"))}</p>` : ""}`;
         }).join("");
@@ -479,17 +571,21 @@
         const diffCell = d => d ? `<td>${U.esc(U.gtxt(d.g, ST))}</td><td class="n">${U.sgn(U.psum(d.g))}</td><td class="n ${d.total > 0 ? "up" : d.total < 0 ? "dn" : ""}">${U.sgn(d.total)}</td>` : `<td>—</td><td class="n">—</td><td class="n">—</td>`;
         const blk = o.options.filter(x => x.ok && x.ruleBlocked);
         const rows = o.options.filter(x => !(x.ok && x.ruleBlocked)).map(x => x.ok
-          ? `<tr${x.rec ? ' class="cur"' : ""}><td><b>${U.esc(x.cls)}</b> <small>${U.esc(x.tier || "")}</small>${x.rec ? ' <span class="rec r1">现在推荐</span>' : ""}</td><td class="n">Lv${x.lv}</td><td class="n">${x.roll}%</td><td class="n">${o.trainAllowed ? `${x.pct ?? "—"}%${x.ranks ? `<br><small>不练 ${x.pctNow ?? "—"}%</small>` : ""}` : `${x.pctNow ?? "—"}%${x.ranks ? `<br><small>练后 ${x.pct ?? "—"}%</small>` : ""}`}</td><td class="note">${x.train.length ? U.esc(x.train.join("、")) : "—"}${x.floor.length ? `<br>保底 ${U.esc(x.floor.join("、"))}` : ""}</td><td class="n">${x.used}/${x.used45}</td>${diffCell(x.toT)}<td class="n">${U.sgn(x.toT.gold)}G</td>${diffCell(x.after)}</tr>`
+          ? `<tr${x.rec ? ' class="cur"' : ""}><td><b>${U.esc(x.cls)}</b> <small>${U.esc(x.tier || "")}</small>${x.rec ? ' <span class="rec r1">现在推荐</span>' : ""}</td><td class="n">Lv${x.lv}</td><td class="n">${x.roll}%</td><td class="n">${o.trainAllowed ? `${x.pct ?? "—"}%${x.ranks ? `<br><small>不练 ${x.pctNow ?? "—"}%</small>` : ""}` : `${x.pctNow ?? "—"}%${x.ranks ? `<br><small>练后 ${x.pct ?? "—"}%</small>` : ""}`}</td><td class="note">${x.train.length ? U.esc(x.train.join("、")) : "—"}${x.floor.length ? `<br>转职保底 ${U.esc(x.floor.join("、"))}` : ""}</td><td class="n">${x.used}/${x.used45}</td>${diffCell(x.toT)}<td class="n">${U.sgn(x.toT.gold)}G</td>${diffCell(x.after)}</tr>`
           : `<tr><td><b>${U.esc(x.cls)}</b></td><td colspan="12" class="note">${U.esc(x.why)}</td></tr>`
         ).join("") + (blk.length ? `<tr><td colspan="13" class="note">规则不考虑（本档不练）：${U.esc(blk.map(x => `${x.cls}（${x.ranks} 段，加权分 ${U.sgn(x.toT.total)}）`).join("、"))}</td></tr>` : "");
         const rr = o.recRow ? `<tr class="sum"><td>现在推荐的组合：${U.esc(o.recommended.join(" + "))}</td><td colspan="5"></td>${diffCell(o.recRow.toT)}<td class="n">${U.sgn(o.recRow.toT.gold)}G</td>${diffCell(o.recRow.after)}</tr>` : "";
-        return `<details class="char" data-slug="${U.slug(c)}"${focus ? " open" : ""}><summary><h3>${U.esc(c.name)}</h3><span>${o.tier} · Lv${o.level}→${o.target} · 已有 ${U.esc(o.owned.join("、"))}${o.required.length ? ` · 必考 ${U.esc(o.required.join("、"))}` : ""}${o.recommended.length ? ` · 推荐 ${U.esc(o.recommended.join("、"))}` : " · 推荐：不考新职业"}</span></summary>
-          ${reasonsBox(c.name)}<div class="sec"><div class="scroll"><table><tr><th rowspan="2">职业</th><th class="n" rowspan="2">考的时机</th><th class="n" rowspan="2">判定值</th><th class="n" rowspan="2">成功率</th><th rowspan="2">要练 / 保底</th><th class="n" rowspan="2">用它升级<br><small>目标/45</small></th><th colspan="4" class="grp">到 Lv${o.target}（和不考比）</th><th colspan="3" class="grp">Lv${o.target}→45 额外影响</th></tr><tr><th>能力</th><th class="n">点数</th><th class="n">加权分</th><th class="n">金币</th><th>能力</th><th class="n">点数</th><th class="n">加权分</th></tr>${rows}${rr}</table></div>${smTable(o)}</div></details>`;
+        const tid = "opts:" + c.name;
+        const tlbl = `${c.name}（职业选择 · ${o.tier}）`;
+        const hasCmt = (cmtSum.byTarget[tid] && cmtSum.byTarget[tid].total > 0) || (commentDraft && commentDraft.targetId === tid);
+        return `<details class="char" data-slug="${U.slug(c)}" data-cmt-target="${U.esc(tid)}" data-cmt-label="${U.esc(tlbl)}"${focus || hasCmt ? " open" : ""}><summary><h3>${U.esc(c.name)}</h3><span>${o.tier} · Lv${o.level}→${o.target} · 已有 ${U.esc(o.owned.join("、"))}${o.required.length ? ` · 必考 ${U.esc(o.required.join("、"))}` : ""}${o.recommended.length ? ` · 推荐 ${U.esc(o.recommended.join("、"))}` : " · 推荐：不考新职业"}</span></summary>
+          <div class="sec" style="padding-bottom:0">${renderCommentBtn(tid, tlbl, "批注此角色职业选择")}${renderCommentThread(tid, tlbl)}</div>
+          ${reasonsBox(c.name)}<div class="sec"><div class="scroll"><table><tr><th rowspan="2">职业</th><th class="n" rowspan="2">考的时机</th><th class="n" rowspan="2">判定值</th><th class="n" rowspan="2">成功率</th><th rowspan="2">要练 / 转职保底</th><th class="n" rowspan="2">用它升级<br><small>目标/45</small></th><th colspan="4" class="grp">到 Lv${o.target}（和不考比）</th><th colspan="3" class="grp">Lv${o.target}→45 额外影响</th></tr><tr><th>能力</th><th class="n">点数</th><th class="n">加权分</th><th class="n">金币</th><th>能力</th><th class="n">点数</th><th class="n">加权分</th></tr>${rows}${rr}</table></div>${smTable(o)}</div></details>`;
       }).join("");
       return `<p class="lede">每个可考职业单独算：一定考到它、其余照规则走，和基准路线按同样多的乱数比，点数/加权分/金币/训练段数分开展示。</p><div class="grid one">${cards}</div>`;
     }
 
-    // ---------- 7. 我的决定（含新路线方案交互选择 + 9 项具体能力差展开） ----------
+    // ---------- 7. 我的决定（按档位 P0->P1->P2 排序 + 9 项能力差展开 + Plan Mode 批注） ----------
     function renderStatDiffChips(diffVec, isBaseline) {
       if (isBaseline) return `<span class="hint">基准方案（对照原点）</span>`;
       const parts = [];
@@ -506,11 +602,8 @@
       const sumAll = RL.summarizeRoutePicks(PROPOSALS, routePicks);
       const sumVis = RL.summarizeRoutePicks(visibleProps, routePicks);
 
-      // 待选择的排在前面，方便一眼看到还没拍板的角色
-      const orderWeight = { pending: 0, user: 1, default: 2, identical: 3 };
-      const sortedRows = [...sumVis.rows].sort(
-        (a, b) => (orderWeight[a.resolved.source] ?? 9) - (orderWeight[b.resolved.source] ?? 9)
-      );
+      // 严格按档位（P0 -> P1 -> P2）排序（PROPOSALS 已按档位排好）
+      const sortedRows = [...sumVis.rows];
 
       const proposalCards = sortedRows.map(({ proposal: pr, resolved: r }) => {
         const statusBadge =
@@ -521,6 +614,9 @@
               : r.source === "identical"
                 ? `<span class="rec r3">新旧一致：${U.esc(r.option.title)}</span>`
                 : `<span class="rec r2">⏳ 待你选择</span>`;
+
+        const charTid = "char:" + pr.name;
+        const charLbl = `${pr.name}（${pr.tier}）`;
 
         const optHtml = (pr.options || []).map(opt => {
           const picked = r.optionId === opt.id;
@@ -577,35 +673,43 @@
             : "";
 
           const finalVec = (opt.statVec || []).map((v, i) => `${ST[i]}+${v}`).join(" ");
+          const optTid = `opt:${pr.name}:${opt.id}`;
+          const optLbl = `${pr.name}（${pr.tier}）· ${opt.title}`;
 
-          return `<label class="rp-opt${picked ? " on" : ""}">
-            <div class="rp-opt-head">
-              <input type="radio" name="rpick-${U.esc(U.slug({ name: pr.name }))}" value="${U.esc(opt.id)}" data-rpick="${U.esc(pr.name)}"${picked ? " checked" : ""}>
-              <b>${U.esc(opt.title)}</b>
-              <span class="cat-pill">${U.esc(opt.tag)}</span>
-            </div>
-            <div class="rp-opt-body">
-              ${slHtml}
-              <div class="rp-sdiff"><span class="lab">相对旧路线 9 项能力差</span><div class="sdiff-list">${renderStatDiffChips(d.statDiff, isBase)}</div></div>
-              ${metricsHtml}
-              ${promoHtml}
-              <div class="hint">考试安排：${examLine}${opt.skips ? `；纯跳过 ${opt.skips} 次` : ""}</div>
-              <div class="hint">窗口总增量（Lv${pr.level}→Lv${opt.endLevel}）：${U.esc(finalVec)}</div>
-              ${marginalsHtml}
-            </div>
-          </label>`;
+          return `<div class="rp-opt-wrap" data-cmt-target="${U.esc(optTid)}" data-cmt-label="${U.esc(optLbl)}">
+            <label class="rp-opt${picked ? " on" : ""}">
+              <div class="rp-opt-head">
+                <input type="radio" name="rpick-${U.esc(U.slug({ name: pr.name }))}" value="${U.esc(opt.id)}" data-rpick="${U.esc(pr.name)}"${picked ? " checked" : ""}>
+                <b>${U.esc(opt.title)}</b>
+                <span class="cat-pill">${U.esc(opt.tag)}</span>
+                <span class="r">${renderCommentBtn(optTid, optLbl, "批注此方案")}</span>
+              </div>
+              <div class="rp-opt-body">
+                ${slHtml}
+                <div class="rp-sdiff"><span class="lab">相对旧路线 9 项能力差</span><div class="sdiff-list">${renderStatDiffChips(d.statDiff, isBase)}</div></div>
+                ${metricsHtml}
+                ${promoHtml}
+                <div class="hint">考试安排：${examLine}${opt.skips ? `；纯跳过 ${opt.skips} 次` : ""}</div>
+                <div class="hint">窗口总增量（Lv${pr.level}→Lv${opt.endLevel}）：${U.esc(finalVec)}</div>
+                ${marginalsHtml}
+              </div>
+            </label>
+            ${renderCommentThread(optTid, optLbl)}
+          </div>`;
         }).join("");
 
-        return `<article class="card rp-card" data-rp-char="${U.esc(pr.name)}">
+        return `<article class="card rp-card" data-rp-char="${U.esc(pr.name)}" data-cmt-target="${U.esc(charTid)}" data-cmt-label="${U.esc(charLbl)}">
           <div class="ch"><div class="ct">
             <h3>${U.esc(pr.name)}</h3>
             <span class="rec ${pr.tier === "P0" ? "r1" : pr.tier === "P1" ? "r2" : "r3"}">${U.esc(pr.tier)}</span>
             <span class="lv">Lv${pr.level}→目标 Lv${pr.target}（${pr.seeds} 个乱数）</span>
-            <span class="r">${statusBadge}</span>
+            <span class="r">${statusBadge} ${renderCommentBtn(charTid, charLbl, "批注")}</span>
           </div></div>
-          <div class="sec rp-opts">${optHtml}
+          <div class="sec rp-opts">
+            ${renderCommentThread(charTid, charLbl)}
+            ${optHtml}
             <div class="rp-note-row">
-              <input type="text" class="rp-note" data-rpick-note="${U.esc(pr.name)}" placeholder="可选备注（例如 S/L 实测结果、个人偏好）" value="${U.esc(r.note || "")}">
+              <input type="text" class="rp-note" data-rpick-note="${U.esc(pr.name)}" placeholder="可选简短备注（例如 S/L 实测结果、个人偏好）" value="${U.esc(r.note || "")}">
               ${r.source === "user" ? `<button type="button" class="btn ghost" data-rpick-clear="${U.esc(pr.name)}">恢复默认</button>` : ""}
             </div>
           </div>
@@ -619,8 +723,10 @@
           : r.source === "default" ? `<span class="cat-pill">默认已确认</span>`
           : r.source === "identical" ? `<span class="cat-pill">新旧一致</span>`
           : `<span class="tag warn">待选择</span>`;
+        const cCnt = (cmtSum.byTarget["char:" + pr.name]?.open || 0)
+          + (pr.options || []).reduce((acc, o) => acc + (cmtSum.byTarget[`opt:${pr.name}:${o.id}`]?.open || 0), 0);
         return `<tr class="${r.source === "pending" ? "cur" : ""}">
-          <td><b>${U.esc(U.shortName(pr.name))}</b> <small>${U.esc(pr.tier)}</small></td>
+          <td><b>${U.esc(U.shortName(pr.name))}</b> <small>${U.esc(pr.tier)}</small>${cCnt ? ` <span class="cmt-cnt">💬${cCnt}</span>` : ""}</td>
           <td>${srcTag}</td>
           <td>${r.option ? `<b>${U.esc(r.option.title)}</b>` : `<span class="hint">尚未选择</span>`}</td>
           <td class="n">${r.option ? `${r.option.net}${d && r.option.id !== "old_baseline" ? ` (${U.sgn(d.net)})` : ""}` : "—"}</td>
@@ -631,14 +737,17 @@
       }).join("");
 
       const proposalSection = PROPOSALS.length ? `
-        <section class="alerts">
-          <h2>新路线方案选择与确认（已确认 ${sumAll.confirmed} / ${sumAll.total} 人 · 待你选择 ${sumAll.pending} 人）</h2>
-          <p class="txt">每个候选方案均已展开<b>相对旧路线的 9 项具体能力差</b>、转职保底、金币/训练/精通差与 S/L 提醒。你的每次点选与备注都会<b>自动保存在当前浏览器</b>；选完后可点右侧按钮一键复制结果发给我固化进配置和 golden 快照。</p>
-          <div class="rp-toolbar">
-            <button type="button" class="btn pri" data-rpick-copy>复制我的全部选择</button>
-            ${sumAll.userPicked ? `<button type="button" class="btn ghost" data-rpick-reset>重置全部网页选择</button>` : ""}
-            ${state.copyFeedback ? `<span class="ok" style="font-size:13px">${U.esc(state.copyFeedback)}</span>` : ""}
+        <section class="alerts" data-cmt-target="summary:proposals" data-cmt-label="全 9 人方案对比总表">
+          <div class="pm-sec-head">
+            <h2>新路线方案选择与确认（按档位 P0→P1→P2 · 已确认 ${sumAll.confirmed} / ${sumAll.total} 人 · 待你选择 ${sumAll.pending} 人）</h2>
+            ${renderCommentBtn("summary:proposals", "全 9 人方案对比总表", "批注总表")}
           </div>
+          <p class="txt">每个候选方案均已展开<b>相对旧路线的 9 项具体能力差</b>、<b>转职保底</b>、金币/训练/精通差（职业精通不计入虚拟加权分，由你 case by case 拍板）与 S/L 提醒。你的每次点选与 Plan Mode 批注都会<b>自动保存在当前浏览器</b>。</p>
+          <div class="rp-toolbar">
+            <button type="button" class="btn pri" data-rpick-copy>仅复制路线选择</button>
+            ${sumAll.userPicked ? `<button type="button" class="btn ghost" data-rpick-reset>重置全部网页选择</button>` : ""}
+          </div>
+          ${renderCommentThread("summary:proposals", "全 9 人方案对比总表")}
           <div class="scroll" style="margin-top:8px"><table>
             <tr><th>角色</th><th>状态</th><th>当前方案</th><th class="n">净值 (Δ)</th><th>相对旧路线 9 项能力差</th><th>备注</th><th class="n">更新时间</th></tr>
             ${pickSummaryRows}
@@ -668,19 +777,26 @@
         : `<p class="txt">${focus ? "这个角色" : "页面上"}还没有单步改选记录。</p>`;
       const focusChar = focus ? CH.find(c => U.slug(c) === focus) : null;
       const rules = DECISIONS.filter(d => !focusChar || d.scope === "全部" || (d.scope || "").split("、").includes(U.shortName(focusChar.name)) || (d.scope || "").split("、").includes(focusChar.name)).slice().reverse();
-      return `<p class="lede">在这里对比并选择每位角色的新旧路线（展开全部 9 项具体能力差），页面会自动记录你的选择；下方保留单步微调与历史规划规则。</p>
+      return `<p class="lede">在这里按档位（P0 → P1 → P2）对比并选择每位角色的新旧路线，或直接用上方 <b>Plan Mode 批注模式</b> 划词/就地添加批注并一键复制导出。</p>
         ${proposalSection}
         <section class="alerts"><h2>单步微调与实测记录（${rows.length}）</h2>${live}</section>
-        <section class="alerts"><h2>历史规划规则（${rules.length}）</h2><div class="scroll"><table><tr><th class="n">日期</th><th>范围</th><th>规则</th></tr>${rules.map(d => `<tr><td class="n">${U.esc(d.date)}</td><td>${U.esc(d.scope)}</td><td class="note">${U.esc(d.rule)}</td></tr>`).join("")}</table></div></section>`;
+        <section class="alerts" data-cmt-target="rules:history" data-cmt-label="历史规划规则">
+          <div class="pm-sec-head"><h2>历史规划规则（${rules.length}）</h2>${renderCommentBtn("rules:history", "历史规划规则", "批注规则")}</div>
+          ${renderCommentThread("rules:history", "历史规划规则")}
+          <div class="scroll"><table><tr><th class="n">日期</th><th>范围</th><th>规则</th></tr>${rules.map(d => `<tr><td class="n">${U.esc(d.date)}</td><td>${U.esc(d.scope)}</td><td class="note">${U.esc(d.rule)}</td></tr>`).join("")}</table></div>
+        </section>`;
     }
 
-    if (view === "plan") return viewPlan();
-    if (view === "past") return viewPast();
-    if (view === "l45") return viewL45();
-    if (view === "long") return viewLong();
-    if (view === "opts") return viewOpts();
-    if (view === "mine") return viewMine();
-    return viewNext();
+    let body = "";
+    if (view === "plan") body = viewPlan();
+    else if (view === "past") body = viewPast();
+    else if (view === "l45") body = viewL45();
+    else if (view === "long") body = viewLong();
+    else if (view === "opts") body = viewOpts();
+    else if (view === "mine") body = viewMine();
+    else body = viewNext();
+
+    return renderPlanModeBar() + body;
   }
 
   root.FE = root.FE || {};

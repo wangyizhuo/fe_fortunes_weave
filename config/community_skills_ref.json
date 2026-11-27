@@ -1,0 +1,3082 @@
+{
+  "source": "Community Fortune's Weave Skill/Spell List (Google Sheet 1YW5AdvPUbLPr1RAGlnotcRaNTFCQPTKiIgshwrcdUtE)",
+  "charEnMap": {
+    "亚历珊德拉": "Alexandra",
+    "爱娜特莉亚": "Anatolia",
+    "亚丝望": "Aswan",
+    "班迪兹": "Benditz",
+    "贝特兰": "Bertrand",
+    "波拿帕尔特": "Bonaventure",
+    "巴卡尼亚": "Buccar",
+    "凯伊": "Cai",
+    "卡塔妮雅": "Catania",
+    "盛托利翁": "Centurio",
+    "齐利科": "Creek",
+    "大刀": "Dadao",
+    "丹提": "Dante",
+    "迪雅各": "Diego",
+    "迪托利希": "Dietrich",
+    "救世主": "Eshmel",
+    "艾丝梅拉尔达": "Esmeralda",
+    "法毕欧": "Fabio",
+    "绯亚娜": "Fianna",
+    "盖茨": "Gaitz",
+    "哥莱亚斯": "Goliath",
+    "古扎岚": "Guzran",
+    "哈尔温": "Halvin",
+    "红花": "Hong Hua",
+    "易尼奥尼": "Inyoni",
+    "伊欧": "Io",
+    "嘉丝敏": "Jasmine",
+    "杰斯塔": "Jester",
+    "奇洛伊卡": "Kiroc",
+    "库拉普卡": "Klapka",
+    "蕾达": "Leda",
+    "莉利安": "Lilian",
+    "罗蕾塔": "Loretta",
+    "露露蒂雅": "Ludia",
+    "莱桑达": "Lysander",
+    "马吉迪": "Majide",
+    "米迦艾拉": "Mikaela",
+    "穆": "Mu (with growth)",
+    "内森": "Nathan",
+    "哪吒": "Nezha",
+    "妮涅": "Ninae",
+    "诺克裘拉": "Noctula",
+    "努佐": "Nuzzuo",
+    "努蒂奴": "Nydine",
+    "奥琳琵娅": "Olympia",
+    "欧露赫露": "Orchel",
+    "佩佩": "Peppe",
+    "皮特鲁": "Peter",
+    "西提司": "Seteth",
+    "沙兰": "Sha Lan",
+    "希蒙": "Simon",
+    "西洛可": "Sirocco",
+    "索绯雅": "Sofia",
+    "塔霍尼雅": "Tahonia",
+    "谭利穆恩": "Talimun",
+    "赛奥朵拉": "Theodora",
+    "媞雅拉": "Tialla",
+    "托比亚斯": "Tobias",
+    "特洛伊亚": "Troy",
+    "乌尔坦德": "Ultand",
+    "乌修拉": "Ursula",
+    "杨界": "Yang Jie",
+    "札可捏": "Zarcone"
+  },
+  "skills": {
+    "一刀两断": {
+      "enName": "Single Sunder",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 4,
+        "mt": 12,
+        "hit": -50,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "三段尖刺": {
+      "enName": "Triple Spike",
+      "effect": "Strikes 3 times. When foe avoids a strike, grants Hit+10 to unit.",
+      "params": {
+        "cost": 10,
+        "mt": 0,
+        "hit": -50,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "不退架势": {
+      "enName": "Resolute Stance",
+      "effect": "If unit's HP = 100%, grants Shld+5 during combat."
+    },
+    "不退的觉悟": {
+      "enName": "Royal Resolve",
+      "effect": "Unit takes half damage when attacked. Trigger % = 30.\n(Unit takes half damage when attacked. Trigger % = 50.)"
+    },
+    "与爱马连携": {
+      "enName": "With My Steed",
+      "effect": "[Cavalry] If unit attacks first, grants Shld+3, Ddg+30 during combat."
+    },
+    "两断": {
+      "enName": "Sunder",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 2,
+        "mt": 4,
+        "hit": 0,
+        "crit": 10,
+        "rng": 1
+      }
+    },
+    "乘降术": {
+      "enName": "Mount/Dismount",
+      "effect": "Allows use of Mount and Dismount commands."
+    },
+    "乱射": {
+      "enName": "Haphazard",
+      "effect": "Strikes 4 times at 90% damage.",
+      "params": {
+        "cost": 10,
+        "mt": 0,
+        "hit": -50,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "争强好胜": {
+      "enName": "Competitive Zeal",
+      "effect": "When equipped with magic, grants Crit+10."
+    },
+    "二连投掷": {
+      "enName": "Double Throw",
+      "effect": "Attacks twice. Only usable by spears with Rng = 1-2.",
+      "params": {
+        "cost": 5,
+        "mt": 0,
+        "hit": -30,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "云手": {
+      "enName": "Yun Shou",
+      "effect": "When equipped with gauntlets, grants Hit+10."
+    },
+    "休息": {
+      "enName": "Restore",
+      "effect": "Removes all status effects from an ally.",
+      "params": {
+        "rng": "1-3",
+        "uses": 10
+      }
+    },
+    "优位战斗术": {
+      "enName": "Combat Advantage",
+      "effect": "[Infantry] If unit is on favorable terrain, grants Atk+5 during combat."
+    },
+    "传送": {
+      "enName": "Warp",
+      "effect": "Moves an ally to a space within 5 spaces of user.",
+      "params": {
+        "rng": 1,
+        "uses": 1
+      }
+    },
+    "体力强化": {
+      "enName": "Bolster Health",
+      "effect": "Grants max HP +3."
+    },
+    "体格": {
+      "enName": "Build",
+      "effect": "Grants Bld+5 (+10)."
+    },
+    "体格+": {
+      "enName": "Build+",
+      "effect": "Grants Bld+5 (+10)."
+    },
+    "佯攻": {
+      "enName": "Distraction",
+      "effect": "Inflicts Hit-3 (-5) on adjacent foes."
+    },
+    "佯攻+": {
+      "enName": "Distraction+",
+      "effect": "Inflicts Hit-3 (-5) on adjacent foes."
+    },
+    "佯攻拳": {
+      "enName": "Feint",
+      "effect": "After combat, inflicts Avo-20 on foe through their next combat.",
+      "params": {
+        "cost": 2,
+        "mt": 0,
+        "hit": -50,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "保镖": {
+      "enName": "Caretaker",
+      "effect": "Adjacent allies cannot suffer a follow-up during combat. Trigger % = 5."
+    },
+    "信仰心": {
+      "enName": "Piety",
+      "effect": "Grants Lck+3."
+    },
+    "先发制人": {
+      "enName": "Quick Draw",
+      "effect": "If unit attacks first, grants Atk+3 during combat. Trigger % = 50."
+    },
+    "光箭": {
+      "enName": "Sagittae",
+      "effect": "Magic that attacks a foe with mystical arrows.",
+      "params": {
+        "mt": 13,
+        "hit": 100,
+        "rng": "1-2",
+        "wt": 12,
+        "crit": 0,
+        "uses": 3
+      }
+    },
+    "光辉一击": {
+      "enName": "Brilliant Strike",
+      "effect": "After defeating a foe, grants Rsl+7 until unit's next phase.",
+      "params": {
+        "cost": 5,
+        "mt": 5,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "全力+": {
+      "enName": "Full Strength",
+      "effect": "Multiplies damage by 1.3 when attacking. Trigger % = Str/2.\n(Multiplies damage by 1.5 when attacking. Trigger % = Str/2.)"
+    },
+    "全力一射": {
+      "enName": "Mighty Shot",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 4,
+        "mt": 12,
+        "hit": -30,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "兽之冲动": {
+      "enName": "Bestial Impulse",
+      "effect": "After combat, grants Crit+2 until a unit makes a critical."
+    },
+    "再生": {
+      "enName": "Regenera",
+      "effect": "Restores a little HP at start of unit's phase for 5 turns.",
+      "params": {
+        "rng": 1,
+        "uses": 5
+      }
+    },
+    "冒险王的英运": {
+      "enName": "Swashbuckler's Luck",
+      "effect": "Grants Lck+3.\n(Grants Lck+5 to unit and all allies.)"
+    },
+    "军师之才": {
+      "enName": "Tactician's Wit",
+      "effect": "Grants Rng+1 to combat arts usable on allies."
+    },
+    "冥炎之主": {
+      "enName": "Flamekeeper",
+      "effect": "Unit and allies are unaffected by Underworld Flames and take half damage from attacks while in Underworld Flames."
+    },
+    "冰刃": {
+      "enName": "Ice Blade",
+      "effect": "Advanced ice magic that attacks an enemy with sliding ice blades.",
+      "params": {
+        "mt": 12,
+        "hit": 75,
+        "rng": "1-2",
+        "wt": 10,
+        "crit": 5,
+        "uses": 6
+      }
+    },
+    "冰枪": {
+      "enName": "Frozen Spear",
+      "effect": "Treated as a magical attack.",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "冰风雪": {
+      "enName": "Blizzard",
+      "effect": "Basic ice magic that freezes the target.",
+      "params": {
+        "mt": 4,
+        "hit": 80,
+        "rng": "1-2",
+        "wt": 6,
+        "crit": 5,
+        "uses": 5
+      }
+    },
+    "冲撞": {
+      "enName": "Shove",
+      "effect": "[Infantry] Adjacent ally moves 1 space forward. (Cannot use on large-scale allies.)",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "冷静沉着": {
+      "enName": "Steady Hands",
+      "effect": "If foe attacks first, grants AS+3, Avo+10 to unit during combat."
+    },
+    "冻结": {
+      "enName": "Freeze",
+      "effect": "Inflicts Immobilize on foe.",
+      "params": {
+        "hit": 60,
+        "rng": "1-10",
+        "uses": 1
+      }
+    },
+    "出谋划策": {
+      "enName": "Sage Advice",
+      "effect": "Grants Dex+3 to adjacent allies."
+    },
+    "击倒": {
+      "enName": "Knockout",
+      "effect": "If unit's attack hits, inflicts Confusion on foe for ??? (trigger % = 5). Cannot make a follow-up.",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "击飞": {
+      "enName": "Propel",
+      "effect": "[Infantry] Adjacent ally moves 2 spaces forward. (Cannot use on large-scale allies.)",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "刀背打": {
+      "enName": "Subdue",
+      "effect": "If foe's HP ≥ 2, leaves foe with 1 HP. Cannot follow up.",
+      "params": {
+        "cost": 2,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "刚击": {
+      "enName": "Wrath Strike",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 2,
+        "mt": 4,
+        "hit": 10,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "刚玉": {
+      "enName": "Sturdy Corundum",
+      "effect": "For the first combat in enemy's phase, unit takes half damage."
+    },
+    "刚腕投掷": {
+      "enName": "Power Throw",
+      "effect": "Only usable by axes with Rng = 1-2.",
+      "params": {
+        "cost": 7,
+        "mt": 10,
+        "hit": 10,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "判读风向": {
+      "enName": "Read the Winds",
+      "effect": "If foe uses a bow, grants Avo+10 to unit during combat"
+    },
+    "刺针": {
+      "enName": "Stinger",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 3,
+        "mt": 7,
+        "hit": -20,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "剃刀铁拳": {
+      "enName": "Razor Fist",
+      "effect": "If unit makes a critical, reduces weapon durability cost to 0.",
+      "params": {
+        "cost": 6,
+        "mt": 8,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "前线计略术": {
+      "enName": "Frontline Gambit",
+      "effect": "After using an offensive gambit, grants Atk+5 until unit's next phase."
+    },
+    "剑刃猛击": {
+      "enName": "Blade Slam",
+      "effect": "Sets unit's Hit% to 50.",
+      "params": {
+        "cost": 5,
+        "mt": 13,
+        "hit": "Set to 50%",
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "剑术的奥妙": {
+      "enName": "Swordfaire"
+    },
+    "劈刺": {
+      "enName": "Spike",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 2,
+        "mt": 4,
+        "hit": 10,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "力量尖刺": {
+      "enName": "Power Spike",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 8,
+        "mt": 12,
+        "hit": 10,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "力量的大防御": {
+      "enName": "Strength Fend",
+      "effect": "Unit takes half damage when attacked. Trigger % = Str/2"
+    },
+    "力量连击": {
+      "enName": "Power Combo",
+      "effect": "Strikes 2 times. Reduces Hit to 50%.",
+      "params": {
+        "cost": 7,
+        "mt": 7,
+        "hit": "Halved",
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "加快节奏": {
+      "enName": "Beatdown",
+      "effect": "After combat, grants Spd+1 until the end of the map. (Max +10)",
+      "params": {
+        "cost": 3,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "勇气之咒歌": {
+      "enName": "Song of Courage",
+      "effect": "Grants Dex/Spd+2 to allies in range until unit's next phase.",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": "1-2"
+      }
+    },
+    "十字智慧": {
+      "enName": "Crosswise Cut",
+      "effect": "After combat, grants Dex+2 until the end of the map. (Max +10)",
+      "params": {
+        "cost": 4,
+        "mt": 5,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "半劈刺": {
+      "enName": "Half Spike",
+      "effect": "Grants Avo+10 during combat.",
+      "params": {
+        "cost": 2,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "单挑": {
+      "enName": "One-on-One",
+      "effect": "If unit's attack hits, inflicts Immobilize on foe.",
+      "params": {
+        "cost": 3,
+        "mt": 0,
+        "hit": -50,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "占地": {
+      "enName": "Positioning",
+      "effect": "[Infantry] If unit is on favorable terrain, grants Avo+10 (Avo+15, Shld+3) during combat."
+    },
+    "占地+": {
+      "enName": "Positioning+",
+      "effect": "[Infantry] If unit is on favorable terrain, grants Avo+10 (Avo+15, Shld+3) during combat."
+    },
+    "即兴": {
+      "enName": "Improviso",
+      "effect": "After using Blaze Arts during Overblaze, unit can attack."
+    },
+    "即席修理": {
+      "enName": "Makeshift",
+      "effect": "When using a combat art, reduces weapon durability cost to 0 during combat. Trigger % = 10."
+    },
+    "即时回避": {
+      "enName": "Evasion",
+      "effect": "[Infantry] Grants Avo+100 when attacked. Trigger % = 3 (5)."
+    },
+    "即时回避+": {
+      "enName": "Evasion+",
+      "effect": "[Infantry] Grants Avo+100 when attacked. Trigger % = 3 (5)."
+    },
+    "及时防御": {
+      "enName": "Narrow Defense",
+      "effect": "Grants Shld+3 when attacked. Trigger % = 25."
+    },
+    "双刃": {
+      "enName": "Twin Blades",
+      "effect": "Strikes 2 times at 80% damage.",
+      "params": {
+        "cost": 10,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "双重攻击": {
+      "enName": "Double Attack",
+      "effect": "Strikes twice at 90% damage.",
+      "params": {
+        "cost": 5,
+        "mt": 0,
+        "hit": -30,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "双鹰": {
+      "enName": "Double Swing",
+      "effect": "Only usable by axes with Rng = 1-2. Strikes twice at 90% damage.",
+      "params": {
+        "cost": 7,
+        "mt": 0,
+        "hit": -20,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "反击": {
+      "enName": "One-Two Punch",
+      "effect": "Foe attacks first. Grants Avo+20 during combat.",
+      "params": {
+        "cost": 5,
+        "mt": 10,
+        "hit": 20,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "反击射击": {
+      "enName": "Countershot",
+      "effect": "When equipped with a bow, unit can counter adjacent foes during combat. Trigger % = 50."
+    },
+    "反击的号令": {
+      "enName": "Counter Order"
+    },
+    "史莱姆B": {
+      "enName": "Mire B",
+      "effect": "Attacks using the digestive fluids of artificial lifeforms.",
+      "params": {
+        "mt": 3,
+        "hit": 70,
+        "rng": "1-3",
+        "wt": 15,
+        "crit": 0,
+        "uses": 1
+      }
+    },
+    "合围之箭": {
+      "enName": "Encloser",
+      "effect": "If unit's attack hits, inflicts Mov-3 on foe until unit's next phase.",
+      "params": {
+        "cost": 3,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "后撤突击": {
+      "enName": "Fading Assault",
+      "effect": "After combat, unit can move up to 2 spaces.",
+      "params": {
+        "cost": 8,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "呼唤平静": {
+      "enName": "Calm Call",
+      "effect": "After defeating a foe, grants Avo+30 through unit's next combat.",
+      "params": {
+        "cost": 3,
+        "mt": 1,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "命运一击": {
+      "enName": "Fateful Strike",
+      "effect": "Grants Atk+10 for the atk. Trigger % = Lck/2.",
+      "params": {
+        "cost": 7,
+        "mt": 5,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "哈姆辛": {
+      "enName": "Khamsin",
+      "effect": "If foe's Hit ≤ 20, reduces foe's Hit to 0 during combat",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "唤暗": {
+      "enName": "Dark Calling",
+      "effect": "Inflicts Ddg-5 on adjacent foes."
+    },
+    "商会理事": {
+      "enName": "Management Skills",
+      "effect": "Allows storage access to unit and allies within 2 spaces."
+    },
+    "圣吸": {
+      "enName": "Nosferatu",
+      "effect": "Unit recovers HP equal to half the damage they deal.",
+      "params": {
+        "mt": 1,
+        "hit": 80,
+        "rng": "1-2",
+        "wt": 8,
+        "crit": 0,
+        "uses": 8
+      }
+    },
+    "圣愈": {
+      "enName": "Recover",
+      "effect": "Restores a lot of HP to an ally.",
+      "params": {
+        "mt": 30,
+        "rng": 1,
+        "uses": 5
+      }
+    },
+    "圣治": {
+      "enName": "Laia",
+      "effect": "Restores a little HP to an ally. Sometimes restores +100 HP. (Trigger % = 10)",
+      "params": {
+        "mt": 3,
+        "rng": 1,
+        "uses": 15
+      }
+    },
+    "圣疗": {
+      "enName": "Heal",
+      "effect": "Restores HP to an ally.",
+      "params": {
+        "mt": 10,
+        "rng": 1,
+        "uses": 10
+      }
+    },
+    "圣盾": {
+      "enName": "Aegis",
+      "effect": "Unit takes half damage when attacked with a magical attack. Trigger % = 20."
+    },
+    "圣突枪": {
+      "enName": "Holy Spear",
+      "effect": "After combat, restores a little HP to unit.",
+      "params": {
+        "cost": 6,
+        "mt": 8,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "坚如磐石": {
+      "enName": "Solid and Sturdy",
+      "effect": "Grants Def+5. Unit is armored. Cannot change class to cavalry or flying."
+    },
+    "复苏": {
+      "enName": "Revival",
+      "effect": "Restores HP after defeating foe.",
+      "params": {
+        "cost": 6,
+        "mt": 5,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "多拉Δ": {
+      "enName": "Miasma Δ",
+      "effect": "Attacks a foe with a ball of concentrated dark matter.",
+      "params": {
+        "mt": 5,
+        "hit": 80,
+        "rng": "1-2",
+        "wt": 5,
+        "crit": 0,
+        "uses": 10
+      }
+    },
+    "多重反击术": {
+      "enName": "Counterflurry",
+      "effect": "If foe attacks first, unit makes a follow-up regardless of AS during combat. Trigger % = 20"
+    },
+    "大一番枪": {
+      "enName": "Vanguard Spear",
+      "effect": "Grants Atk+5 for the attack. Trigger % = Str/2.",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "大刚击": {
+      "enName": "Furious Strike",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 8,
+        "mt": 12,
+        "hit": 10,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "大反击": {
+      "enName": "Great Counter",
+      "effect": "If foe attacks first, grants Atk +3 to unit during combat."
+    },
+    "大地之颚": {
+      "enName": "Earth's Jaws",
+      "effect": "Calculates damage based on foe's Prt.",
+      "params": {
+        "mt": 17,
+        "hit": 90,
+        "rng": "3-10",
+        "wt": 25,
+        "crit": 0,
+        "uses": 1
+      }
+    },
+    "大强弓": {
+      "enName": "Leaden Draw",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 8,
+        "mt": 12,
+        "hit": 10,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "大投掷": {
+      "enName": "Yawning Throw",
+      "effect": "Only usable by spears with Rng = 1-2.",
+      "params": {
+        "cost": 7,
+        "mt": 10,
+        "hit": 10,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "大招": {
+      "enName": "Power Arts",
+      "effect": "Grants Atk+3 when attacking with a combat art."
+    },
+    "大招的号令": {
+      "enName": "Power-Arts Order"
+    },
+    "大物粉碎": {
+      "enName": "Giant Breaker",
+      "effect": "If foe is large scale, grants Atk+7.",
+      "params": {
+        "cost": 5,
+        "mt": 5,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "大盾": {
+      "enName": "Pavise",
+      "effect": "Unit takes half damage when attacked with a physical attack. Trigger % = 20."
+    },
+    "大魔刃": {
+      "enName": "Greater Hexblade",
+      "effect": "Treated as a magical attack.",
+      "params": {
+        "cost": 8,
+        "mt": 12,
+        "hit": 10,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "天使": {
+      "enName": "Seraphim",
+      "effect": "Effective vs. undead.",
+      "params": {
+        "mt": 10,
+        "hit": 75,
+        "rng": "1-2",
+        "wt": 10,
+        "crit": 0,
+        "uses": 3
+      }
+    },
+    "天马的护翼": {
+      "enName": "Protecting Wings",
+      "effect": "Grants Res+3."
+    },
+    "奇袭": {
+      "enName": "Surprise Attack",
+      "effect": "[Infantry] If unit is on favorable terrain, grants Hit+15 during combat."
+    },
+    "奇袭之箭": {
+      "enName": "Surprise Shot",
+      "effect": "If foe's HP = 100%, grants Atk+5. Trigger % = 30.",
+      "params": {
+        "cost": 2,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "女神的恩宠": {
+      "enName": "Goddess's Favor",
+      "effect": "After combat, restores 5 HP to unit."
+    },
+    "威吓": {
+      "enName": "Threaten",
+      "effect": "Inflicts Crit-5 (-10) on adjacent foes."
+    },
+    "威吓+": {
+      "enName": "Threaten+",
+      "effect": "Inflicts Crit-5 (-10) on adjacent foes."
+    },
+    "娴熟一击": {
+      "enName": "Destreza",
+      "effect": "If foe's HP ≤ 50%, grants Atk+5, Crit+10.",
+      "params": {
+        "cost": 3,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "孤注一掷": {
+      "enName": "One Chance",
+      "effect": "If unit and foe cannot make a follow-up, grants Atk+5 to unit during combat."
+    },
+    "守护旋风": {
+      "enName": "Protective Storm",
+      "effect": "Grants Prt+7 during combat.",
+      "params": {
+        "cost": 6,
+        "mt": 5,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "守护突枪": {
+      "enName": "Defending Spear",
+      "effect": "Grants Shld+3 during combat.",
+      "params": {
+        "cost": 4,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "守护骑士的教导": {
+      "enName": "Teach Guardian"
+    },
+    "守护骑士的职责": {
+      "enName": "Guardian's Duty",
+      "effect": "Reduces damage to 90% when attacked."
+    },
+    "安全攻击": {
+      "enName": "Careful Attack",
+      "effect": "When foe avoids attack, foe cannot counter. Deals half damage. Cannot make a follow-up.",
+      "params": {
+        "cost": 2,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "安全策略": {
+      "enName": "Safety First",
+      "effect": "If foe cannot counter, grants Hit+10 to unit during combat."
+    },
+    "安全策略的号令": {
+      "enName": "Safety First Order"
+    },
+    "安定射击": {
+      "enName": "Steady Shot",
+      "effect": "[Infantry] When unit is equipped with a bow or magic, grants Hit+5 (+10)."
+    },
+    "安定射击+": {
+      "enName": "Steady Shot+",
+      "effect": "[Infantry] When unit is equipped with a bow or magic, grants Hit+5 (+10)."
+    },
+    "对狙击战术": {
+      "enName": "Counter Snipers",
+      "effect": "Inflicts Hit/Avo-5 on bow foes within 2 (3) spaces."
+    },
+    "对飞行战术": {
+      "enName": "Counter Fliers"
+    },
+    "对飞行战术+": {
+      "enName": "Counter Fliers+"
+    },
+    "对骑兵战术": {
+      "enName": "Counter Cavalry",
+      "effect": "Inflicts Hit/Avo-5 on cavalry foes within 2 (3) spaces."
+    },
+    "对骑兵战术+": {
+      "enName": "Counter Cavalry+",
+      "effect": "Inflicts Hit/Avo-5 on cavalry foes within 2 (3) spaces."
+    },
+    "对魔法战术": {
+      "enName": "Counter Mages",
+      "effect": "Inflicts Hit/Avo-5 on magic foes within 2 (3) spaces."
+    },
+    "对魔法战术+": {
+      "enName": "Counter Mages+",
+      "effect": "Inflicts Hit/Avo-5 on magic foes within 2 (3) spaces."
+    },
+    "封魔之矢": {
+      "enName": "Ward Arrow",
+      "effect": "If unit's attack hits, inflicts Silence on foe.",
+      "params": {
+        "cost": 6,
+        "mt": 0,
+        "hit": -40,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "射击专家": {
+      "enName": "Marksmanship",
+      "effect": "When equipped with a bow, grants Hit+15."
+    },
+    "射足": {
+      "enName": "Leg Shot",
+      "effect": "If unit's attack hits, inflicts Avo-20 on foe through their next combat. Cannot make a follow-up.",
+      "params": {
+        "cost": 2,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "屏障": {
+      "enName": "Barrier",
+      "effect": "Ally takes half damage during their next combat.",
+      "params": {
+        "rng": 1,
+        "uses": 2
+      }
+    },
+    "帮手": {
+      "enName": "Brave Assist",
+      "effect": "Grants Def+3 to adjacent allies."
+    },
+    "帮手的架势": {
+      "enName": "Counter Cavalry+",
+      "effect": "Inflicts Hit/Avo-5 on cavalry foes within 2 (3) spaces."
+    },
+    "平静之咒歌": {
+      "enName": "Song of Calm",
+      "effect": "Grants Res+2 to all allies within range until unit's next turn.",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": "1-2"
+      }
+    },
+    "幸运的大防御": {
+      "enName": "Luck Fend",
+      "effect": "Unit takes half damage when attacked. Trigger % = Lck/2"
+    },
+    "弓姬": {
+      "enName": "Princess of Arrows",
+      "effect": "When equipped with a bow, grants Hit+20."
+    },
+    "强化防弓盾": {
+      "enName": "Bowblock+",
+      "effect": "[Armored] If foe uses a bow, grants Shld+5 (+10) during combat."
+    },
+    "强弓手": {
+      "enName": "Heavy-Bow User",
+      "effect": "When equipped with a bow, grants Str+3."
+    },
+    "强打&治愈": {
+      "enName": "Strike and Heal",
+      "effect": "Unit can use assist magic after attacking.",
+      "params": {
+        "cost": 10,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "强行突破": {
+      "enName": "Barge Through",
+      "effect": "[Cavalry] Can move through foe's space. (Cannot move through large-scale foes.)"
+    },
+    "强行突破的号令": {
+      "enName": "Barging Order"
+    },
+    "影眩之箭": {
+      "enName": "Shadow Arrow",
+      "effect": "Grants Avo+10 during combat.",
+      "params": {
+        "cost": 7,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "彷徨之壁": {
+      "enName": "Thunder",
+      "effect": "Additional (double) damage during Rainy Weather.",
+      "params": {
+        "mt": 5,
+        "hit": 75,
+        "rng": "1-2",
+        "wt": 7,
+        "crit": 0,
+        "uses": 8
+      }
+    },
+    "心眼一击": {
+      "enName": "Mind's-Eye Blow",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 30,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "必杀防守": {
+      "enName": "Crit Defense",
+      "effect": "Unit takes half damage when attacked with a critical. Trigger % = 30."
+    },
+    "必闪一击": {
+      "enName": "Flash Blow",
+      "effect": "Grants Atk+5 for the attack. Trigger % = Dex/2.",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "忘我": {
+      "enName": "Wild Abandon"
+    },
+    "急救": {
+      "enName": "Patch Up",
+      "effect": "After an adjacent ally's combat, restores a little HP to that ally."
+    },
+    "急救的架势": {
+      "enName": "Patch Up Stance"
+    },
+    "怪力": {
+      "enName": "Brawn",
+      "effect": "Reduces Wt of unit's equipment to 80%."
+    },
+    "愤怒激发": {
+      "enName": "Enrage",
+      "effect": "After combat, grants Str+1 until the end of the map. (Max +5)",
+      "params": {
+        "cost": 4,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "成长的预兆": {
+      "enName": "Signs of Growth",
+      "effect": "When unit levels up, gains enhanced basic stat growth."
+    },
+    "战刃一击": {
+      "enName": "Battleblade Strike",
+      "effect": "After combat, grants Dex+2 until the end of the map. (Max +10)",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "战场剧作家": {
+      "enName": "Stage Direction",
+      "effect": "Grants Ddg+10 to allies within 2 spaces during their combats. Trigger % = ally's Cha/2."
+    },
+    "战斗强打": {
+      "enName": "Battle Rush",
+      "effect": "Unit's follow-up occurs before foe's counter.",
+      "params": {
+        "cost": 7,
+        "mt": -2,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "战斗重拳": {
+      "enName": "Battle Blow",
+      "effect": "If unit's HP = 100%, grants Atk+3.",
+      "params": {
+        "cost": 4,
+        "mt": 4,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "战神": {
+      "enName": "Divine Insight",
+      "effect": "Grants Spd+10."
+    },
+    "战象旗手": {
+      "enName": "Elephant Vanguard",
+      "effect": "If unit is an elephant rider, grants Hit+10."
+    },
+    "战鬼一击": {
+      "enName": "War Master's Strike",
+      "effect": "Multiplies damage dealt by 1.5x.",
+      "params": {
+        "cost": 9,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "托隆": {
+      "enName": "Thoron",
+      "effect": "Additional (double) damage during Rainy Weather.",
+      "params": {
+        "mt": 20,
+        "hit": 55,
+        "rng": "1-3",
+        "wt": 25,
+        "crit": 5,
+        "uses": 4
+      }
+    },
+    "技巧咒缚": {
+      "enName": "Bind Dexterity",
+      "effect": "Inflicts Dex-3 on adjacent foes."
+    },
+    "技巧的大防御": {
+      "enName": "Dexterity Fend",
+      "effect": "Unit takes half damage when attacked. Trigger % = Dex/2"
+    },
+    "技巧精湛": {
+      "enName": "Ravaging Arts",
+      "effect": "If unit makes a critical, deal +6 damage."
+    },
+    "技术指挥": {
+      "enName": "Lend Dexterity",
+      "effect": "Grants Dex +2/3/5 to an ally until unit's next phase.",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "技术指挥+": {
+      "enName": "Lend Dexterity+",
+      "effect": "Grants Dex +2/3/5 to an ally until unit's next phase.",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "技术指挥++": {
+      "enName": "Lend Dexterity++"
+    },
+    "投击": {
+      "enName": "Hurl",
+      "effect": "Only usable by axes with Rng = 1-2.",
+      "params": {
+        "cost": 3,
+        "mt": 3,
+        "hit": 20,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "投掷魔斧": {
+      "enName": "Magic Throw",
+      "effect": "Magic. Only usable by axes with Rng = 1-2.",
+      "params": {
+        "cost": 3,
+        "mt": 1,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "护身枪": {
+      "enName": "Protective Spear",
+      "effect": "Grants Ddg+20 during combat.",
+      "params": {
+        "cost": 4,
+        "mt": 5,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "抵抗魔装": {
+      "enName": "Resistant Armor",
+      "effect": "[Armored] Grants Res+5 (+10)."
+    },
+    "抵抗魔装+": {
+      "enName": "Resistant Armor+",
+      "effect": "[Armored] Grants Res+5 (+10)."
+    },
+    "拉近": {
+      "enName": "Draw Back",
+      "effect": "[Infantry] Unit and adjacent ally move 1 space back. (Cannot use on large scale allies.)",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "指挥术的奥妙": {
+      "enName": "Authority Mastery"
+    },
+    "挽留者": {
+      "enName": "Cooler Heads",
+      "effect": "After using Draw Back, unit can use assist magic."
+    },
+    "推撞": {
+      "enName": "Jab",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 1,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "攻击&远离": {
+      "enName": "Attack, Get Back",
+      "effect": "When using a combat art, grants Avo +10 during combat."
+    },
+    "攻击的基本": {
+      "enName": "Attack Basics",
+      "effect": "Grants Str+1."
+    },
+    "攻击阵形": {
+      "enName": "Attack Formation",
+      "effect": "Grants Atk+1 (+2) to adjacent allies."
+    },
+    "攻击阵形+": {
+      "enName": "Attack Formation+",
+      "effect": "Grants Atk+1 (+2) to adjacent allies."
+    },
+    "攻势指挥": {
+      "enName": "Lend Strength",
+      "effect": "Grants Str +2/3/5 to an ally until unit's next phase.",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "攻势指挥+": {
+      "enName": "Lend Strength+",
+      "effect": "Grants Str +2/3/5 to an ally until unit's next phase.",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "攻势指挥++": {
+      "enName": "Lend Strength++"
+    },
+    "攻势的基本": {
+      "enName": "Offense Basics",
+      "effect": "Grants Str/Mag+1."
+    },
+    "攻速指挥": {
+      "enName": "Lend Speed",
+      "effect": "Grants Spd +2/3/5 to an ally until unit's next phase.",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "攻速指挥+": {
+      "enName": "Lend Speed+",
+      "effect": "Grants Spd +2/3/5 to an ally until unit's next phase.",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "攻速指挥++": {
+      "enName": "Lend Speed++"
+    },
+    "救世之光": {
+      "enName": "Light of Salvation",
+      "effect": "Neutralizes Underworld Boon on foes within 2 spaces."
+    },
+    "救出": {
+      "enName": "Rescue",
+      "effect": "Teleports distant ally to a space adjacent to user.",
+      "params": {
+        "rng": "2-10",
+        "uses": 1
+      }
+    },
+    "救援": {
+      "enName": "Resquia",
+      "effect": "Teleports nearby ally to a space adjacent to user.",
+      "params": {
+        "rng": "2-3",
+        "uses": 3
+      }
+    },
+    "斧术的奥妙": {
+      "enName": "Axe Mastery"
+    },
+    "斧菜刀": {
+      "enName": "Hatchet Man",
+      "effect": "When equipped with an axe, grants Hit+10."
+    },
+    "旋风枪": {
+      "enName": "Tempest Spear",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 2,
+        "mt": 4,
+        "hit": 10,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "明镜止水": {
+      "enName": "Focused Strike",
+      "effect": "No additional effect.",
+      "params": {
+        "cost": 7,
+        "mt": 5,
+        "hit": 40,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "星光": {
+      "enName": "Starlight",
+      "effect": "Effective vs. undead.",
+      "params": {
+        "mt": 13,
+        "hit": 90,
+        "rng": "1-3",
+        "wt": 30,
+        "crit": 0,
+        "uses": 3
+      }
+    },
+    "暗中袭击": {
+      "enName": "Blindside",
+      "effect": "If unit attacks first, cannot be countered during combat. Trigger % = 5.\n(If unit attacks first, cannot be countered during combat. Trigger % = 10.)"
+    },
+    "暗影迫近": {
+      "enName": "Shadow Gambit",
+      "effect": "If foe is on favorable terrain, ignores those terrain effects.",
+      "params": {
+        "cost": 2,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "暗影隐身": {
+      "enName": "In Shadow",
+      "effect": "After defeating a foe, grants Avo+10 through unit's next combat."
+    },
+    "暗月": {
+      "enName": "Dark Moon",
+      "effect": "Halves foe's Shld when attacking. Trigger % = 10."
+    },
+    "暗杀拳": {
+      "enName": "Assassin's Fist",
+      "effect": "Deals at least 20 damage",
+      "params": {
+        "cost": 6,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "暗黑冲击T": {
+      "enName": "Dark Spikes T",
+      "effect": "Effective+ vs. Cavalry",
+      "params": {
+        "mt": 20,
+        "hit": 60,
+        "rng": "1-2",
+        "wt": 20,
+        "crit": 0,
+        "uses": 2
+      }
+    },
+    "暗黑射线": {
+      "enName": "Dark Ray",
+      "effect": "Inflicts Hit/Crit/Avo-20 on foe during combat.",
+      "params": {
+        "cost": 7,
+        "mt": 8,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "暴动": {
+      "enName": "Riot",
+      "effect": "Grants Atk+5 when making a follow-up.",
+      "params": {
+        "cost": 4,
+        "mt": 5,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "暴虐": {
+      "enName": "Tyranny",
+      "effect": "If foe has a status effect, grants Atk+3, Crit+10 to unit during combat."
+    },
+    "曲射": {
+      "enName": "Curved Shot",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 2,
+        "mt": 4,
+        "hit": 10,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "替换": {
+      "enName": "Swap",
+      "effect": "[Infantry] Unit and adjacent ally swap spaces. (Cannot use on large-scale allies.)",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "月神Λ": {
+      "enName": "Luna Λ",
+      "effect": "Ignores foe's Res.",
+      "params": {
+        "mt": 1,
+        "hit": 50,
+        "rng": "1-2",
+        "wt": 20,
+        "crit": 0,
+        "uses": 1
+      }
+    },
+    "朱明": {
+      "enName": "Zhu Ming",
+      "effect": "When equipped with magic, grants Hit+10."
+    },
+    "杀弓之矢": {
+      "enName": "Bowbreaker Arrow",
+      "effect": "If foe uses a bow, strikes 2 times at 90% damage.",
+      "params": {
+        "cost": 6,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "杀意": {
+      "enName": "Murderous Intent",
+      "effect": "If unit attacks first, grants Crit+5 during combat.\n(If unit attacks first, grants Crit+10 during combat.)"
+    },
+    "杀手尖刺": {
+      "enName": "Killer Spike",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 7,
+        "mt": 10,
+        "hit": 0,
+        "crit": 15,
+        "rng": 1
+      }
+    },
+    "杰克一击": {
+      "enName": "Jack Hit",
+      "effect": "Grants Atk+10 for the attack. Trigger % = 5.",
+      "params": {
+        "cost": 1,
+        "mt": 1,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "极一闪": {
+      "enName": "Vicious Flash",
+      "effect": "Grants Atk+8 for the attack. Trigger % = Dex/2.",
+      "params": {
+        "cost": 1,
+        "mt": 2,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "枪术的奥妙": {
+      "enName": "Spearfaire"
+    },
+    "格斗术的奥妙": {
+      "enName": "Gauntlet Mastery"
+    },
+    "步行再移动": {
+      "enName": "Infantry Canto",
+      "effect": "[Infantry] After combat, unit can move up to 1 (2) space(s)."
+    },
+    "步行移动术": {
+      "enName": "Infantry Move",
+      "effect": "[Infantry] Applies -1 (-2) to movement cost for terrain (cannot be reduced below 1)."
+    },
+    "步行移动术+": {
+      "enName": "Infantry Move+",
+      "effect": "[Infantry] Applies -1 (-2) to movement cost for terrain (cannot be reduced below 1)."
+    },
+    "武神": {
+      "enName": "Divine Might",
+      "effect": "Grants Str+10."
+    },
+    "死神Γ": {
+      "enName": "Death Γ",
+      "effect": "Summons the power of death and unleashes it on a foe. High Crit.",
+      "params": {
+        "mt": 15,
+        "hit": 75,
+        "rng": "1-2",
+        "wt": 13,
+        "crit": 20,
+        "uses": 5
+      }
+    },
+    "死里逃生": {
+      "enName": "Close Call",
+      "effect": "If unit's HP ≥ 2 and damage would reduce it to 0, leaves unit with 1 HP. Trigger % = Lck."
+    },
+    "残心": {
+      "enName": "Ever Vigilant",
+      "effect": "After defeating a foe with a critical attack, restores a little HP to unit."
+    },
+    "气流功": {
+      "enName": "Celestial Flow\n(Meridian Rotation)",
+      "effect": "Grants Avo+3.\n(Grants Avo+5. Allows use of the Shining Dragon Strike Blaze Art.)"
+    },
+    "沉默": {
+      "enName": "Silence",
+      "effect": "Inflicts Silence on foe.",
+      "params": {
+        "hit": 60,
+        "rng": "1-10",
+        "uses": 2
+      }
+    },
+    "治愈的号令": {
+      "enName": "Healing Order"
+    },
+    "治愈的心得": {
+      "enName": "Healing Knowledge",
+      "effect": "When healing an ally with magic, restores +10 HP."
+    },
+    "治愈铠甲": {
+      "enName": "Healing Armor",
+      "effect": "[Armored] Heal equal to half the damage dealt. Trigger % = Mag"
+    },
+    "波纹斩": {
+      "enName": "Ripple Slash",
+      "effect": "Guaranteed hit.",
+      "params": {
+        "cost": 5,
+        "mt": -3,
+        "hit": "Guaranteed",
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "注意唤起+": {
+      "enName": "Watchfulness",
+      "effect": "Grants Spd+2 to adjacent allies.\n(Grants Spd+4 to adjacent allies.)"
+    },
+    "活人拳": {
+      "enName": "Saving Fist",
+      "effect": "If foe's HP ≥ 2, leaves foe with 1 HP. Cannot make a follow-up.",
+      "params": {
+        "cost": 4,
+        "mt": 12,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "活杀一击": {
+      "enName": "Deal Death",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 2,
+        "mt": 4,
+        "hit": 0,
+        "crit": 5,
+        "rng": 1
+      }
+    },
+    "活泼": {
+      "enName": "Brio",
+      "effect": "Grants Mov+1.\n(Grants Mov+2.)"
+    },
+    "流丽一击": {
+      "enName": "Graceful Blow",
+      "effect": "Reduces weapon durability cost to 0 for the attack. Trigger % = Dex/2.",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "流丽双射": {
+      "enName": "Twin-Shot Flow",
+      "effect": "Strikes 2 times at 70% damage.",
+      "params": {
+        "cost": 10,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "流星": {
+      "enName": "Astra",
+      "effect": "Strikes 5 times at 50% damage.",
+      "params": {
+        "cost": 10,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "流风枪": {
+      "enName": "Flowing Spear",
+      "effect": "Grants Avo+10 during combat.",
+      "params": {
+        "cost": 2,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "淑光": {
+      "enName": "Graceful Light",
+      "effect": "When healing an ally with magic, reduces magic cost to 0. Trigger % = Lck."
+    },
+    "游刃有余": {
+      "enName": "Steadfast",
+      "effect": "If unit's HP ≥ 50%, grants Avo+10 during combat."
+    },
+    "激动之咒歌": {
+      "enName": "Song of Feeling",
+      "effect": "Grants Str+2 to all allies within range until unit's next turn.",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": "1-2"
+      }
+    },
+    "火山爆焰": {
+      "enName": "Bolganone",
+      "effect": "Reduced (halved) damage during Rainy Weather.",
+      "params": {
+        "mt": 10,
+        "hit": 85,
+        "rng": "1-2",
+        "wt": 8,
+        "crit": 0,
+        "uses": 5
+      }
+    },
+    "火炬": {
+      "enName": "Torch",
+      "effect": "Grants Vis+3 until unit's next phase.",
+      "params": {
+        "rng": "Self",
+        "uses": 5
+      }
+    },
+    "火焰": {
+      "enName": "Fire",
+      "effect": "Reduced (halved) damage during Rainy Weather",
+      "params": {
+        "mt": 3,
+        "hit": 90,
+        "rng": "1-2",
+        "wt": 5,
+        "crit": 0,
+        "uses": 10
+      }
+    },
+    "烈炎一击": {
+      "enName": "Blaze Blow",
+      "effect": "Grants Atk+5 for the attack. Trigger % = Str/2.",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "烈风": {
+      "enName": "Wind",
+      "effect": "Effective vs. flying.",
+      "params": {
+        "mt": 3,
+        "hit": 100,
+        "rng": "1-2",
+        "wt": 3,
+        "crit": 0,
+        "uses": 10
+      }
+    },
+    "烈风枪": {
+      "enName": "Gale Spear",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 2,
+        "mt": 4,
+        "hit": 0,
+        "crit": 5,
+        "rng": 1
+      }
+    },
+    "熟练之技": {
+      "enName": "Practiced Art",
+      "effect": "Grants Hit+10 when attacking with a combat art."
+    },
+    "熟练的反击术": {
+      "enName": "Expert Counter",
+      "effect": "If foe attacks first, grants Hit+20 to unit during combat."
+    },
+    "燕返": {
+      "enName": "Grounder",
+      "effect": "Effective against flying.",
+      "params": {
+        "cost": 3,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "牵制": {
+      "enName": "Rein",
+      "effect": "Inflicts Avo-3 (-5) on adjacent foes."
+    },
+    "牵制+": {
+      "enName": "Rein+",
+      "effect": "Inflicts Avo-3 (-5) on adjacent foes."
+    },
+    "特别舞蹈": {
+      "enName": "Special Dance",
+      "effect": "When using Dance, grants Dex/Spd+3 to target ally for the current phase."
+    },
+    "状态不错": {
+      "enName": "Crescendo",
+      "effect": "After defeating a foe, grants Hit +3 until the end of the map. (Max +30)"
+    },
+    "狂乱": {
+      "enName": "Berserk",
+      "effect": "Inflicts Confusion on foe.",
+      "params": {
+        "hit": 60,
+        "rng": "1-10",
+        "uses": 1
+      }
+    },
+    "狂暴斧": {
+      "enName": "Hellbent Axe",
+      "effect": "When equipped with an axe, grants Str+3."
+    },
+    "狙击回避": {
+      "enName": "Sniper Evasion",
+      "effect": "[Infantry] Grants Avo+10 (+20) during combat against a foe 3+ spaces away."
+    },
+    "狙击回避+": {
+      "enName": "Sniper Evasion+",
+      "effect": "[Infantry] Grants Avo+10 (+20) during combat against a foe 3+ spaces away."
+    },
+    "狙射": {
+      "enName": "Steady Aim",
+      "effect": "Grants Rng+1 when attacking with a bow combat art."
+    },
+    "狩猎的基本": {
+      "enName": "Hunting Basics",
+      "effect": "Grants Dex/Spd+1."
+    },
+    "猎人之眼": {
+      "enName": "Hunter's Eye",
+      "effect": "When equipped with a bow, grants Atk+3 when making a follow-up."
+    },
+    "猎人十字": {
+      "enName": "Hunter's Cross",
+      "effect": "No additional effect.",
+      "params": {
+        "cost": 6,
+        "mt": 8,
+        "hit": 20,
+        "crit": 10,
+        "rng": 2
+      }
+    },
+    "猎人的埋伏": {
+      "enName": "Hunter's Snare",
+      "effect": "In enemy's phase, if foe is damaged, unit attacks first during combat. Trigger % = 30."
+    },
+    "猛击": {
+      "enName": "Smash",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 2,
+        "mt": 4,
+        "hit": 0,
+        "crit": 5,
+        "rng": 1
+      }
+    },
+    "猛斩": {
+      "enName": "Chop",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 4,
+        "mt": 8,
+        "hit": -30,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "猛盾": {
+      "enName": "Fierce Shield",
+      "effect": "If unit attacks first, unit takes half damage during combat. Trigger % = 50."
+    },
+    "玻璃车轮": {
+      "enName": "Glass Wheel",
+      "effect": "Calculates damage based on foe's Prt. Effective vs. flying.",
+      "params": {
+        "mt": 12,
+        "hit": 90,
+        "rng": "1-2",
+        "wt": 7,
+        "crit": 0,
+        "uses": 7
+      }
+    },
+    "用心一击": {
+      "enName": "Cautious Blow",
+      "effect": "Grants Avo+10 during combat.",
+      "params": {
+        "cost": 2,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "疾行攻击": {
+      "enName": "Racing Attack",
+      "effect": "If unit attacks first, grants Avo+15 during combat."
+    },
+    "疾风": {
+      "enName": "Punishing Squall",
+      "effect": "If AS ≥ foe's AS+3, grants Hit+20 during combat."
+    },
+    "疾风一击": {
+      "enName": "Gale Blow",
+      "effect": "Grants Atk+5 for the attack. Trigger % = Spd/2.",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "疾风横扫": {
+      "enName": "Windsweep",
+      "effect": "If attack hits, cannot be countered. Trigger % = 20.",
+      "params": {
+        "cost": 10,
+        "mt": 5,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "疾风的号令": {
+      "enName": "Squall Order"
+    },
+    "白银的乙女": {
+      "enName": "Silver Maiden",
+      "effect": "Grants Hit/Avo+5 to unit for each adjacent ally."
+    },
+    "白魔术的奥妙": {
+      "enName": "White Magic Mastery"
+    },
+    "皮同的流仪": {
+      "enName": "Python Technique",
+      "effect": "When using a gauntlet combat art, unit makes a follow-up regardless of AS during combat. Trigger % = 15."
+    },
+    "直击": {
+      "enName": "Unstoppable Force",
+      "effect": "Multiplies damage by 3 when attacking obstacles.\nDeals +10 damage when attacking with Blaze Arts. Trigger % = 30."
+    },
+    "看穿一击": {
+      "enName": "Discerning Blow",
+      "effect": "Deals half damage.",
+      "params": {
+        "cost": 3,
+        "mt": 0,
+        "hit": 50,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "瞬击": {
+      "enName": "Instant Strike",
+      "effect": "Grants Atk+5 for the attack and when making a follow up. Trigger % = Spd/2.",
+      "params": {
+        "cost": 2,
+        "mt": 2,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "瞬转": {
+      "enName": "Blink of an Eye",
+      "effect": "After using Swap, grants Def+3 until unit's next phase."
+    },
+    "短兵相接": {
+      "enName": "Close Quarters",
+      "effect": "[Infantry] Inflicts Mov-1 (-2) on adjacent foes."
+    },
+    "短兵相接+": {
+      "enName": "Close Quarters+",
+      "effect": "[Infantry] Inflicts Mov-1 (-2) on adjacent foes."
+    },
+    "破剑": {
+      "enName": "Sword Breaker",
+      "effect": "If foes uses a sword, grants Atk+8.",
+      "params": {
+        "cost": 4,
+        "mt": 4,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "破坏光箭": {
+      "enName": "Arrowcrack",
+      "effect": "Grants Atk+15 for the attack. Trigger % = 50.",
+      "params": {
+        "cost": 5,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "破戒僧": {
+      "enName": "Monkly Havoc",
+      "effect": "After defeating a foe, recovers HP equal to max HP. Trigger % = Lck/2."
+    },
+    "破戒僧的教导": {
+      "enName": "Lend Magic++"
+    },
+    "破枪": {
+      "enName": "Spear Buster",
+      "effect": "If foe uses a spear, grants Atk+7.",
+      "params": {
+        "cost": 3,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "破盔": {
+      "enName": "Helm Splitter",
+      "effect": "Effective vs. armored.",
+      "params": {
+        "cost": 3,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "破魔": {
+      "enName": "Magic Breaker",
+      "effect": "If foe uses magic, Atk+12.",
+      "params": {
+        "cost": 5,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "碎铠拳": {
+      "enName": "Crush Armor",
+      "effect": "Effective vs armored.",
+      "params": {
+        "cost": 4,
+        "mt": 5,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "神命": {
+      "enName": "Divine Will",
+      "effect": "Grants Lck+10."
+    },
+    "神壁": {
+      "enName": "Divine Wall",
+      "effect": "Grants Def+10."
+    },
+    "神技": {
+      "enName": "Divine Dexterity",
+      "effect": "Grants Dex+10."
+    },
+    "神法": {
+      "enName": "Divine Law",
+      "effect": "Grants Mag+10."
+    },
+    "神舞": {
+      "enName": "Divine Dance",
+      "effect": "Grants Cha+10."
+    },
+    "神装": {
+      "enName": "Divine Adornment",
+      "effect": "Grants Res+10."
+    },
+    "神风之剑": {
+      "enName": "Excalibur",
+      "effect": "Effective vs. flying.",
+      "params": {
+        "mt": 15,
+        "hit": 100,
+        "rng": "1-2",
+        "wt": 10,
+        "crit": 10,
+        "uses": 3
+      }
+    },
+    "秘剑": {
+      "enName": "Finesse Blade",
+      "effect": "Deals at least 10 damage.",
+      "params": {
+        "cost": 2,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "秘奥+": {
+      "enName": "Precision Strike",
+      "effect": "If unit is effective against foe, grants Hit+10 during combat.\n(If unit is effective against foe, grants Hit+20 during combat.)"
+    },
+    "穿行": {
+      "enName": "Pass",
+      "effect": "[Infantry] Unit can move through foe's space."
+    },
+    "穿铠": {
+      "enName": "Rend Armor",
+      "effect": "Effective against armor.",
+      "params": {
+        "cost": 3,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "突击态势": {
+      "enName": "Charger",
+      "effect": "When using Charge, grants Prt+10 until unit's next phase."
+    },
+    "箭术的奥妙": {
+      "enName": "Bow Mastery"
+    },
+    "粉碎": {
+      "enName": "Crash",
+      "effect": "If unit's attack hits, inflicts Confusion on foe (trigger % = 5). Cannot make follow-up.",
+      "params": {
+        "cost": 6,
+        "mt": 9,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "精准射击": {
+      "enName": "Snipe",
+      "effect": "If foe's HP ≤ 50%, grants Atk+3, Hit+10.",
+      "params": {
+        "cost": 4,
+        "mt": 5,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "精灵之声": {
+      "enName": "Spirits' Voice",
+      "effect": "If foe uses magic, grants Hit/Avo+10 to unit during combat."
+    },
+    "精灵弓": {
+      "enName": "Spirit Bow",
+      "effect": "Grants Rsl+7 during combat.",
+      "params": {
+        "cost": 6,
+        "mt": 8,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "精灵拳": {
+      "enName": "Spirit Fist",
+      "effect": "Grants Atk+5 for the attack. Trigger % = Res/2.",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "精魂一击": {
+      "enName": "Spirit Blow",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 8,
+        "mt": 12,
+        "hit": 10,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "结界": {
+      "enName": "Barrier",
+      "effect": "Ally takes half damage during their next combat.",
+      "params": {
+        "rng": 1,
+        "uses": 2
+      }
+    },
+    "绝境回避": {
+      "enName": "Close-Call Evasion",
+      "effect": "[Infantry] If unit's HP ≤ 50%, Avo+20."
+    },
+    "绝对防御": {
+      "enName": "Absolute Defense",
+      "effect": "[Armored] Grants Shld+10 when attacked. Trigger % = 10 (20)."
+    },
+    "绝对防御+": {
+      "enName": "Absolute Defense+",
+      "effect": "[Armored] Grants Shld+10 when attacked. Trigger % = 10 (20)."
+    },
+    "绷紧神经": {
+      "enName": "Brace",
+      "effect": "After defeating a foe, grants Prt+3 until unit's next phase."
+    },
+    "群体圣疗": {
+      "enName": "Fortify",
+      "effect": "Restores HP to all allies in range.",
+      "params": {
+        "mt": 20,
+        "rng": "1-5",
+        "uses": 2
+      }
+    },
+    "翔闪枪": {
+      "enName": "Flying Spear",
+      "effect": "Unit's follow-up occurs before foe's counter.",
+      "params": {
+        "cost": 7,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "脱离射击": {
+      "enName": "Breakaway Shot",
+      "effect": "After combat, unit can move up to 1 space.",
+      "params": {
+        "cost": 10,
+        "mt": -5,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "致命回避": {
+      "enName": "Avoid Fatality",
+      "effect": "[Infantry] Grants Ddg+10 (+20)."
+    },
+    "致命回避+": {
+      "enName": "Avoid Fatality+",
+      "effect": "[Infantry] Grants Ddg+10 (+20)."
+    },
+    "落影之刃": {
+      "enName": "Dropshadow Blade",
+      "effect": "If foe is on favorable terrain, ignores those terrain effects.",
+      "params": {
+        "cost": 7,
+        "mt": 10,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "葬骑连击": {
+      "enName": "Knightkneel",
+      "effect": "#REF!",
+      "params": {
+        "cost": 10,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "虎切": {
+      "enName": "Tiger Slash",
+      "effect": "Effective against cavalry.",
+      "params": {
+        "cost": 3,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "螺旋射击": {
+      "enName": "Spiral Shot",
+      "effect": "Grants Atk+5 for the attack. Trigger % = Dex/2.",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "血风铁火": {
+      "enName": "Bloodbath",
+      "effect": "After defeating foe, grants Shld+10 through unit's next combat.",
+      "params": {
+        "cost": 7,
+        "mt": 5,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "裁决之剑": {
+      "enName": "Sword of Judgment",
+      "effect": "Strikes 2 times. Calculates damage based on foe's Prt.",
+      "params": {
+        "mt": 6,
+        "hit": 80,
+        "rng": "1-2",
+        "wt": 10,
+        "crit": 0,
+        "uses": 2
+      }
+    },
+    "裂空": {
+      "enName": "Skysplit",
+      "effect": "Grants AS+5 during combat.",
+      "params": {
+        "cost": 5,
+        "mt": 1,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "要害回避": {
+      "enName": "Emergis",
+      "effect": "Grants Ddg+30 to an ally until unit's next phase.",
+      "params": {
+        "rng": "1-10",
+        "uses": 1
+      }
+    },
+    "要害射击": {
+      "enName": "Vital Shot",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 2,
+        "mt": 4,
+        "hit": 0,
+        "crit": 5,
+        "rng": 2
+      }
+    },
+    "警戒射击": {
+      "enName": "Warning Shot",
+      "effect": "Grants Avo+10 during combat.",
+      "params": {
+        "cost": 2,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "计略达人": {
+      "enName": "Gambit Mastery",
+      "effect": "Grants +1 use to gambits."
+    },
+    "豪拳一击": {
+      "enName": "Mighty Fist",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 2,
+        "mt": 4,
+        "hit": 10,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "跳舞": {
+      "enName": "Dance",
+      "effect": "Allows an ally to act again.",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "踏步烈风": {
+      "enName": "Lunging Gale",
+      "effect": "AS+3 during combat, grants Atk+7 when making a follow up.",
+      "params": {
+        "cost": 7,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "身经百战的强者": {
+      "enName": "Veteran's Mettle",
+      "effect": "Grants Hit+10 during combat against an adjacent foe."
+    },
+    "车上战斗术": {
+      "enName": "Wheeled Warrior",
+      "effect": "[Cavalry] If unit is a Charioteer, grants Hit+20."
+    },
+    "转击": {
+      "enName": "Pivot Strike"
+    },
+    "辉光": {
+      "enName": "Aura",
+      "effect": "Sacred magic that incinerates a target with light from the ground.",
+      "params": {
+        "mt": 22,
+        "hit": 70,
+        "rng": "1-2",
+        "wt": 18,
+        "crit": 0,
+        "uses": 3
+      }
+    },
+    "迅隼": {
+      "enName": "Falcon",
+      "effect": "If unit attacks first, grants AS+3 during combat."
+    },
+    "迅雷风烈": {
+      "enName": "Lightning Reflexes",
+      "effect": "If unit attacks first, and AS ≥ foe's AS+10, unit's follow-up occurs before foe's counter during combat."
+    },
+    "迎战态势": {
+      "enName": "Ready for Battle",
+      "effect": "For the first combat in enemy's phase, unit attacks first. Trigger % = 50."
+    },
+    "远程圣疗": {
+      "enName": "Physic",
+      "effect": "Restores HP to an ally at a distance.",
+      "params": {
+        "mt": 8,
+        "rng": "1-10",
+        "uses": 5
+      }
+    },
+    "追击防御": {
+      "enName": "Pursuit Defense",
+      "effect": "Unit takes half damage when attacked by a follow-up. Trigger % = 50"
+    },
+    "退身拳": {
+      "enName": "Fading Blow",
+      "effect": "After combat, unit can move up to 1 space.",
+      "params": {
+        "cost": 10,
+        "mt": -5,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "适应": {
+      "enName": "Adaptability",
+      "effect": "After combat, grants Hit+2 until the end of the map. (Max +30)"
+    },
+    "逆转乱舞": {
+      "enName": "Reflecting Dance",
+      "effect": "If foe would have made a followup, foe cannot and unit makes a followup instead.",
+      "params": {
+        "cost": 10,
+        "mt": -10,
+        "hit": -20,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "速度咒缚": {
+      "enName": "Bind Speed",
+      "effect": "Inflict Spd-3 on adjacent foes."
+    },
+    "速突": {
+      "enName": "Quick Thrust",
+      "effect": "Grants AS+3 during combat.",
+      "params": {
+        "cost": 2,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "部族的秘技": {
+      "enName": "Har Hali Wisdom",
+      "effect": "If unit is effective against foe, grant Atk+3 during combat."
+    },
+    "重整态势": {
+      "enName": "Regroup",
+      "effect": "When foe avoids an attack, grants Avo+20 to unit during combat."
+    },
+    "重破坏": {
+      "enName": "Heavy Break",
+      "effect": "[Armored] Multiplies damage by 1.5 (2.0) when attacking. Trigger % = Def/2."
+    },
+    "重破坏+": {
+      "enName": "Heavy Break+",
+      "effect": "[Armored] Multiplies damage by 1.5 (2.0) when attacking. Trigger % = Def/2."
+    },
+    "重装战斗术": {
+      "enName": "Armored Combat",
+      "effect": "[Armored] Grants Dex+5 (+10)."
+    },
+    "重装战斗术+": {
+      "enName": "Armored Combat+",
+      "effect": "[Armored] Grants Dex+5 (+10)."
+    },
+    "重装移动术": {
+      "enName": "Armored Move",
+      "effect": "[Armored] Grants Mov+1 (+2)."
+    },
+    "重装移动术+1": {
+      "enName": "Armored Move+",
+      "effect": "[Armored] Grants Mov+1 (+2)."
+    },
+    "重量级战士": {
+      "enName": "Heavyweight Class",
+      "effect": "Unit cannot change to cavalry or flying. Grants Bld+5."
+    },
+    "金刚一击": {
+      "enName": "Armored Blow",
+      "effect": "After defeating a foe, grants Prt+3 until unit's next phase. Cannot make a follow-up.",
+      "params": {
+        "cost": 4,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "铅之矢": {
+      "enName": "Lead Arrow",
+      "effect": "Effective vs. armored.",
+      "params": {
+        "cost": 4,
+        "mt": 5,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "铠甲跳跃": {
+      "enName": "Armored Leap",
+      "effect": "[Armored] Grants Avo+10 (+20)."
+    },
+    "铠甲跳跃+": {
+      "enName": "Armored Leap+",
+      "effect": "[Armored] Grants Avo+10 (+20)."
+    },
+    "铠葬流": {
+      "enName": "Requiem Style",
+      "effect": "Unit makes a follow-up regardless of AS during combat. Trigger % = 5.\n(Unit makes a follow-up regardless of AS during combat. Trigger % = 10.)"
+    },
+    "铠葬流的教导": {
+      "enName": "Teach Requiem"
+    },
+    "银之精神": {
+      "enName": "Spirit of Silver",
+      "effect": "After combat, grants Def+1 to unit until the end of the map. (Max +10) Trigger % = Def."
+    },
+    "闪身": {
+      "enName": "Dodge",
+      "effect": "[Infantry] If foe uses a bow or magic, grants Avo+5 (+10) to unit during combat."
+    },
+    "闪身+": {
+      "enName": "Dodge+",
+      "effect": "[Infantry] If foe uses a bow or magic, grants Avo+5 (+10) to unit during combat."
+    },
+    "防卫指挥": {
+      "enName": "Lend Defense",
+      "effect": "Grants Def +2/3/5 to an ally until unit's next phase.",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "防卫指挥+": {
+      "enName": "Lend Defense+",
+      "effect": "Grants Def +2/3/5 to an ally until unit's next phase.",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "防卫指挥++": {
+      "enName": "Lend Defense++"
+    },
+    "防卫的基本": {
+      "enName": "Defense Basics",
+      "effect": "Grants Def+1."
+    },
+    "防守架势": {
+      "enName": "Defense Stance",
+      "effect": "[Infantry] Grants Def+3 at cost of Avo-10 to unit until unit's next phase.",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": "Self"
+      }
+    },
+    "防守的大防御": {
+      "enName": "Defense Fend",
+      "effect": "Unit takes half damage when attacked. Trigger % = Def/2"
+    },
+    "防弓术": {
+      "enName": "Bowblock",
+      "effect": "[Armored] If foe uses a bow, grants Shld+5 (+10) during combat."
+    },
+    "防御劈刺": {
+      "enName": "Guard Spike",
+      "effect": "Grants Prt+10 during combat.",
+      "params": {
+        "cost": 6,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "防御阵形": {
+      "enName": "Defense Formation",
+      "effect": "Grants Shld+1 (+2) to adjacent allies."
+    },
+    "防御阵形+": {
+      "enName": "Defense Formation+",
+      "effect": "Grants Shld+1 (+2) to adjacent allies."
+    },
+    "防枪术": {
+      "enName": "Spearblock",
+      "effect": "[Armored] If foe uses a spear, grants Shld+5 (+10) during combat."
+    },
+    "阳炎": {
+      "enName": "Heat Haze",
+      "effect": "After defeating foe, grants Avo+20 until unit's next phase.",
+      "params": {
+        "cost": 3,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "阻绝": {
+      "enName": "Intercept",
+      "effect": "Reduces damage taken by 5 when attacked."
+    },
+    "随心所欲": {
+      "enName": "Hot-Headed",
+      "effect": "Grants one of Hit+10, Avo+10, or Crit+10 during combat."
+    },
+    "隐匿射击": {
+      "enName": "Sneaky Shot",
+      "effect": "If unit is on favorable terrain, grants Atk+5, Hit/Crit +10.",
+      "params": {
+        "cost": 4,
+        "mt": 5,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "集中": {
+      "enName": "Warrior's Clarity",
+      "effect": "After combat, grants Avo+3 until unit's next phase."
+    },
+    "集中反击": {
+      "enName": "Focused Counter",
+      "effect": "If foe attacks first, grants Hit+10 to unit during combat."
+    },
+    "集中投掷": {
+      "enName": "Focused Throw",
+      "effect": "Only usable by spears with Rng = 1-2.",
+      "params": {
+        "cost": 3,
+        "mt": 3,
+        "hit": 20,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "雷斧": {
+      "enName": "Lightning Axe",
+      "effect": "Treated as a magical attack.",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "雷暴": {
+      "enName": "Bolting",
+      "effect": "Cannot make a follow-up.",
+      "params": {
+        "mt": 10,
+        "hit": 50,
+        "rng": "3-10",
+        "wt": 30,
+        "crit": 5,
+        "uses": 1
+      }
+    },
+    "雷电": {
+      "enName": "Thunder",
+      "effect": "Additional (double) damage during Rainy Weather.",
+      "params": {
+        "mt": 5,
+        "hit": 75,
+        "rng": "1-2",
+        "wt": 7,
+        "crit": 0,
+        "uses": 8
+      }
+    },
+    "雾刃": {
+      "enName": "Mist Reaper",
+      "effect": "Grants Avo+10 during combat. Grants Crit+10 when making a follow-up.",
+      "params": {
+        "cost": 6,
+        "mt": 2,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "霞切": {
+      "enName": "Haze Slice",
+      "effect": "Grants Avo+10 during combat.",
+      "params": {
+        "cost": 2,
+        "mt": 3,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "静心之咒歌": {
+      "enName": "Song of Calm",
+      "effect": "Grants Res+2 to all allies within range until unit's next turn.",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": "1-2"
+      }
+    },
+    "风刃": {
+      "enName": "Cutting Gale",
+      "effect": "Effective vs. flying.",
+      "params": {
+        "mt": 7,
+        "hit": 95,
+        "rng": "1-2",
+        "wt": 8,
+        "crit": 5,
+        "uses": 8
+      }
+    },
+    "风切冰枪": {
+      "enName": "Frozen-Spear Slice",
+      "effect": "Treated as a magical attack. Only usable by spears with Rng = 1-2.",
+      "params": {
+        "cost": 6,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "飓风": {
+      "enName": "Raging Tempest",
+      "effect": "No additional effect",
+      "params": {
+        "cost": 8,
+        "mt": 12,
+        "hit": 20,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "飞空猎手": {
+      "enName": "Sky Hunter",
+      "effect": "If foe is flying, grants Hit+50.",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "飞行战斗术": {
+      "enName": "Airfighter",
+      "effect": "[Flying] If unit attacks first, grants Hit+5 (+10) during combat."
+    },
+    "飞行战斗术+": {
+      "enName": "Airfighter+",
+      "effect": "[Flying] If unit attacks first, grants Hit+5 (+10) during combat."
+    },
+    "驰骋": {
+      "enName": "Overtake",
+      "effect": "After defeating a foe, grant Mov+1 through the end of the next turn. (Max +3)"
+    },
+    "骑兵移动术": {
+      "enName": "Cavalry Move",
+      "effect": "[Cavalry] Applies -1 (-2) to movement cost for terrain (cannot be reduced below 1)."
+    },
+    "骑兵移动术+": {
+      "enName": "Cavalry Move+",
+      "effect": "[Cavalry] Applies -1 (-2) to movement cost for terrain (cannot be reduced below 1)."
+    },
+    "骑士先阵": {
+      "enName": "Vanguard",
+      "effect": "[Cavalry] If unit attacks first, grants Shld+2 (+4) during combat."
+    },
+    "骑士先阵+": {
+      "enName": "Vanguard+",
+      "effect": "[Cavalry] If unit attacks first, grants Shld+2 (+4) during combat."
+    },
+    "骑士烈枪": {
+      "enName": "Fierce Spear",
+      "effect": "Unit cannot suffer a follow-up during combat.",
+      "params": {
+        "cost": 10,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "骑士的感觉": {
+      "enName": "Knightly Senses",
+      "effect": "If a foe uses a spear, grants Avo+10 to unit during combat."
+    },
+    "高速飞行术": {
+      "enName": "Flitting Flier",
+      "effect": "[Flying] If unit attacks first, grants AS+2 (+4) during combat."
+    },
+    "高速飞行术+": {
+      "enName": "Flitting Flier+",
+      "effect": "[Flying] If unit attacks first, grants AS+2 (+4) during combat."
+    },
+    "魔刃": {
+      "enName": "Hexblade",
+      "effect": "Treated as a magical attack.",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "魔力掌握": {
+      "enName": "Dominate Magic",
+      "effect": "If foe uses magic, unit cannot be countered during combat. Trigger % = 10."
+    },
+    "魔力的大防御": {
+      "enName": "Magic Fend",
+      "effect": "Unit takes half damage when attacked. Trigger % = Res/2"
+    },
+    "魔法之矢": {
+      "enName": "Magic Arrow",
+      "effect": "Treated as a magical attack.",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 2
+      }
+    },
+    "魔法截断": {
+      "enName": "Curtail Magic",
+      "effect": "Grants Rsl+5 during combat.",
+      "params": {
+        "cost": 3,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "魔法护盾": {
+      "enName": "Ward",
+      "effect": "Grants Res+10 to an ally until unit's next phase. (Decreases by 2 every 1 turn.)",
+      "params": {
+        "rng": 1,
+        "uses": 3
+      }
+    },
+    "魔法指挥": {
+      "enName": "Lend Magic",
+      "effect": "Grants Mag +2/3/5 to an ally until unit's next phase.",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "魔法指挥+": {
+      "enName": "Lend Magic+",
+      "effect": "Grants Mag +2/3/5 to an ally until unit's next phase.",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "魔法指挥++": {
+      "enName": "Lend Magic++"
+    },
+    "魔法连击": {
+      "enName": "Magic Combo",
+      "effect": "Strikes 2 times at 80% damage. Treated as a magical attack.",
+      "params": {
+        "cost": 10,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "魔法重拳": {
+      "enName": "Mystic Blow",
+      "effect": "Treated as a magical attack.",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "魔盾架势": {
+      "enName": "Resist Stance",
+      "effect": "[Infantry] Grants Res+3 at cost of Avo-10 to unit until unit's next phase.",
+      "params": {
+        "cost": 0,
+        "mt": 0,
+        "hit": 0,
+        "crit": 0,
+        "rng": "Self"
+      }
+    },
+    "魔道的基本": {
+      "enName": "Magic Basics",
+      "effect": "Grants Mag/Res+1."
+    },
+    "魔防咒缚": {
+      "enName": "Bind Resistance",
+      "effect": "Inflict Res-3 on adjacent foes."
+    },
+    "魔风连刃": {
+      "enName": "Devilwind Flurry",
+      "effect": "Will make a follow-up regardless of AS during combat. Trigger % = Mag/2.",
+      "params": {
+        "cost": 5,
+        "mt": 7,
+        "hit": 0,
+        "crit": 0,
+        "rng": 1
+      }
+    },
+    "黑魔术的奥妙": {
+      "enName": "Black Magic Mastery"
+    }
+  }
+}

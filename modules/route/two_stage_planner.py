@@ -437,14 +437,16 @@ def optimize_exam_timings(
     return best
 
 
-def _rank_key(ev: EvaluatedPlan) -> tuple[float, float, int, int, int]:
-    """统一排序键：目标函数 J(π) → 不含精通净值 → 总点数 → S/L 预警数更少 → 金币更少。"""
+def _rank_key(ev: EvaluatedPlan) -> tuple[float, float, int, int, int, int, int]:
+    """统一排序键：目标函数 J(π) → 不含精通净值 → 训练段数更少 → 金币更少 → 总点数 → 精通级数（零权重破平局）→ S/L 预警更少。"""
     return (
         round(ev.breakdown.objective, 4),
         round(ev.breakdown.net_without_mastery, 4),
-        ev.breakdown.raw_points,
-        -len(ev.sl_warnings),
+        -ev.breakdown.train_ranks,
         -ev.breakdown.gold,
+        ev.breakdown.raw_points,
+        ev.breakdown.mastery_levels,
+        -len(ev.sl_warnings),
     )
 
 

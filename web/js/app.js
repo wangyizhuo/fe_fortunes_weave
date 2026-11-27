@@ -2,13 +2,15 @@
 (function (root) {
   const U = root.FE.utils;
   const RL = root.FE.routeLogic;
+  const CL = root.FE.commentsLogic;
 
   const ROUTE_VIEWS = ["next", "plan", "past", "l45", "long", "opts", "mine"];
-  const ALL_VIEWS = ["meal", "items", "classes", ...ROUTE_VIEWS];
+  const ALL_VIEWS = ["meal", "items", "classes", "skills", ...ROUTE_VIEWS];
 
   let MANIFEST = null;
-  let DATA = { affinity: null, items: null, classes: null, route: null };
+  let DATA = { affinity: null, items: null, classes: null, skills: null, route: null };
   let pending = false;
+  let pendingSelection = null; // { targetId, targetLabel, quote }
 
   function setStatus(text, k) {
     const el = document.getElementById("status");
@@ -28,6 +30,7 @@
     if (v === "meal") return "affinity";
     if (v === "items") return "items";
     if (v === "classes") return "classes";
+    if (v === "skills") return "skills";
     return "route";
   }
 
@@ -46,15 +49,16 @@
     // 1) HTTP(S) 访问时，按功能模块独立 fetch JSON，彻底分离网页与数据（不重复下载 bundle_data.js）
     if (location.protocol === "http:" || location.protocol === "https:") {
       try {
-        const [manifest, affinity, items, classes, route] = await Promise.all([
+        const [manifest, affinity, items, classes, skills, route] = await Promise.all([
           fetch("./data/manifest.json", { cache: "no-store" }).then(r => r.json()),
           fetch("./data/affinity.json", { cache: "no-store" }).then(r => r.json()),
           fetch("./data/items.json", { cache: "no-store" }).then(r => r.json()),
           fetch("./data/classes.json", { cache: "no-store" }).then(r => r.json()),
+          fetch("./data/skills.json", { cache: "no-store" }).then(r => r.json()),
           fetch("./data/route.json", { cache: "no-store" }).then(r => r.json()),
         ]);
         MANIFEST = manifest;
-        DATA = { affinity, items, classes, route };
+        DATA = { affinity, items, classes, skills, route };
         return;
       } catch (err) {
         const b = await loadBundleScript().catch(() => null);
@@ -78,6 +82,12 @@
 
   const store = root.FE.createStore(() => render(), setStatus);
 
+  function hideSelPop() {
+    const pop = document.getElementById("selCommentBtn");
+    if (pop) pop.hidden = true;
+    pendingSelection = null;
+  }
+
   function render() {
     const a = document.activeElement;
     if (a && a.closest && a.closest("#view") && a.type === "number") {
@@ -89,6 +99,7 @@
     const selEnd = focusInputId ? a.selectionEnd : null;
 
     pending = false;
+    hideSelPop();
     const y = scrollY;
     const view = store.state.view;
     const dom = domainOf(view);
@@ -121,6 +132,7 @@
     if (view === "meal") html = V.renderAffinityView(DATA.affinity, store.state);
     else if (view === "items") html = V.renderItemsView(DATA.items, store.state);
     else if (view === "classes") html = V.renderClassesView(DATA.classes, store.state);
+    else if (view === "skills") html = V.renderSkillsView(DATA.skills, store.state);
     else html = V.renderRouteView(view, DATA.route, store.state);
 
     const viewEl = document.getElementById("view");
@@ -135,7 +147,7 @@
     if (foot && DATA.route) {
       const rm = DATA.route.rulesMeta || {};
       const built = MANIFEST && MANIFEST.builtAt ? ` · 数据构建于 ${MANIFEST.builtAt}` : "";
-      foot.textContent = `架构：四大模块（友好度培养 / 道具与材料采集 / 职业图鉴 / 路线规划）前后端数据与逻辑解耦加载（当前快照 ${rm.shotKey || "latest"}，名声 Lv${rm.renown ?? "?"}${built}）。页面勾选与选择保存在当前浏览器本地存储。`;
+      foot.textContent = `架构：五大模块（友好度培养 / 道具与材料采集 / 职业图鉴 / 技能图鉴 / 路线规划）前后端数据与逻辑解耦加载（当前快照 ${rm.shotKey || "latest"}，名声 Lv${rm.renown ?? "?"}${built}）。页面勾选、选择与 Plan Mode 批注均保存在当前浏览器本地存储。`;
     }
 
     if (focusInputId) {
@@ -144,6 +156,15 @@
         nextInput.focus();
         if (selStart != null && selEnd != null) nextInput.setSelectionRange(selStart, selEnd);
       }
+    } else if (store.state.commentDraft) {
+      const box = document.getElementById("cmtDraftInput");
+      if (box) {
+        box.focus();
+        box.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    } else if (store.state.editingCommentId) {
+      const box = document.getElementById("cmtEditInput");
+      if (box) box.focus();
     } else {
       scrollTo(0, y);
     }
@@ -168,7 +189,7 @@
 
     const viewEl = document.getElementById("view");
 
-    // 输入过滤（友好度培养 / 道具与材料采集 / 职业图鉴）
+    // 输入过滤（友好度培养 / 道具与材料采集 / 职业图鉴 / 技能图鉴 / Plan Mode 草稿同步）
     viewEl.addEventListener("input", e => {
       if (e.target.matches("[data-aff-q]")) {
         store.state.affinityQuery = e.target.value;
@@ -179,11 +200,236 @@
       } else if (e.target.matches("[data-cls-q]")) {
         store.state.classesQuery = e.target.value;
         render();
+      } else if (e.target.matches("[data-sk-q]")) {
+        store.state.skillsQuery = e.target.value;
+        store.state.skillsShowAll = false;
+        render();
+      } else if (e.target.matches("[data-cmt-draft-text]") && store.state.commentDraft) {
+        store.state.commentDraft.text = e.target.value;
+      }
+    });
+
+    // Plan Mode 快捷键：Ctrl/Cmd + Enter 直接保存批注，Esc 取消
+    viewEl.addEventListener("keydown", e => {
+      if (e.target.matches("[data-cmt-draft-text]")) {
+        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+          e.preventDefault();
+          const d = store.state.commentDraft;
+          if (d && (e.target.value || "").trim()) {
+            store.addPlanComment({
+              targetId: d.targetId,
+              targetLabel: d.targetLabel,
+              section: store.state.view,
+              quote: d.quote || "",
+              text: e.target.value,
+            });
+            store.state.commentDraft = null;
+            render();
+          }
+        } else if (e.key === "Escape") {
+          store.state.commentDraft = null;
+          render();
+        }
+      } else if (e.target.matches("[data-cmt-edit-text]")) {
+        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+          e.preventDefault();
+          const cid = store.state.editingCommentId;
+          if (cid && (e.target.value || "").trim()) {
+            store.updatePlanComment(cid, e.target.value);
+            store.state.editingCommentId = null;
+            render();
+          }
+        } else if (e.key === "Escape") {
+          store.state.editingCommentId = null;
+          render();
+        }
       }
     });
 
     // 统一点击事件委托
     viewEl.addEventListener("click", e => {
+      // --- Plan Mode 批注工具栏与卡片内联批注 ---
+      if (e.target.closest("[data-pm-toggle]")) {
+        store.state.commentMode = !store.state.commentMode;
+        if (!store.state.commentMode) {
+          store.state.commentDraft = null;
+          hideSelPop();
+        }
+        render();
+        return;
+      }
+      if (e.target.closest("[data-pm-drawer]")) {
+        store.state.commentDrawerOpen = !store.state.commentDrawerOpen;
+        render();
+        return;
+      }
+      if (e.target.closest("[data-pm-export]")) {
+        const txt = CL.formatPlanReviewExport({
+          comments: store.state.planComments,
+          proposals: (DATA.route && DATA.route.routeProposals) || [],
+          routePicks: store.state.routePicks,
+          formatRoutePicksExport: RL.formatRoutePicksExport,
+          includeResolved: false,
+        });
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(txt).then(() => {
+            store.state.copyFeedback = "✓ 已复制全部 Plan Mode 批注与路线选择，可直接粘贴发给我";
+            render();
+          }).catch(() => {
+            store.state.copyFeedback = "已生成批注与选择文本（浏览器限制剪贴板权限，请展开批注清单查看）";
+            store.state.commentDrawerOpen = true;
+            render();
+          });
+        } else {
+          store.state.copyFeedback = "已生成批注与选择汇总（已展开批注清单）";
+          store.state.commentDrawerOpen = true;
+          render();
+        }
+        return;
+      }
+      if (e.target.closest("[data-pm-clear]")) {
+        store.clearAllPlanComments();
+        store.state.commentDraft = null;
+        store.state.editingCommentId = null;
+        store.state.copyFeedback = "已清空全部本地批注";
+        render();
+        return;
+      }
+      const cmtOpen = e.target.closest("[data-cmt-open]");
+      if (cmtOpen) {
+        e.preventDefault();
+        e.stopPropagation();
+        store.state.editingCommentId = null;
+        store.state.commentDraft = {
+          targetId: cmtOpen.dataset.cmtOpen,
+          targetLabel: cmtOpen.dataset.cmtLabel || cmtOpen.dataset.cmtOpen,
+          section: store.state.view,
+          quote: "",
+          text: "",
+        };
+        render();
+        return;
+      }
+      if (e.target.closest("[data-cmt-save]")) {
+        e.preventDefault();
+        const box = e.target.closest("[data-cmt-box]");
+        const ta = box && box.querySelector("[data-cmt-draft-text]");
+        const txt = ta ? ta.value.trim() : (store.state.commentDraft && store.state.commentDraft.text || "").trim();
+        if (store.state.commentDraft && txt) {
+          store.addPlanComment({
+            targetId: store.state.commentDraft.targetId,
+            targetLabel: store.state.commentDraft.targetLabel,
+            section: store.state.view,
+            quote: store.state.commentDraft.quote || "",
+            text: txt,
+          });
+          store.state.commentDraft = null;
+          store.state.copyFeedback = "";
+          render();
+        }
+        return;
+      }
+      if (e.target.closest("[data-cmt-cancel]")) {
+        e.preventDefault();
+        store.state.commentDraft = null;
+        render();
+        return;
+      }
+      const cmtRes = e.target.closest("[data-cmt-resolve]");
+      if (cmtRes) {
+        e.preventDefault();
+        store.toggleResolvePlanComment(cmtRes.dataset.cmtResolve);
+        render();
+        return;
+      }
+      const cmtEdit = e.target.closest("[data-cmt-edit]");
+      if (cmtEdit) {
+        e.preventDefault();
+        store.state.commentDraft = null;
+        store.state.editingCommentId = cmtEdit.dataset.cmtEdit;
+        render();
+        return;
+      }
+      const cmtEditSave = e.target.closest("[data-cmt-edit-save]");
+      if (cmtEditSave) {
+        e.preventDefault();
+        const item = cmtEditSave.closest("[data-cmt-id]");
+        const ta = item && item.querySelector("[data-cmt-edit-text]");
+        if (ta && ta.value.trim()) {
+          store.updatePlanComment(cmtEditSave.dataset.cmtEditSave, ta.value);
+          store.state.editingCommentId = null;
+          render();
+        }
+        return;
+      }
+      if (e.target.closest("[data-cmt-edit-cancel]")) {
+        e.preventDefault();
+        store.state.editingCommentId = null;
+        render();
+        return;
+      }
+      const cmtDel = e.target.closest("[data-cmt-del]");
+      if (cmtDel) {
+        e.preventDefault();
+        store.deletePlanComment(cmtDel.dataset.cmtDel);
+        if (store.state.editingCommentId === cmtDel.dataset.cmtDel) store.state.editingCommentId = null;
+        render();
+        return;
+      }
+
+      // --- 技能图鉴筛选交互 ---
+      const skTab = e.target.closest("[data-sk-tab]");
+      if (skTab) {
+        store.state.skillsTab = skTab.dataset.skTab;
+        store.state.skillsShowAll = false;
+        render();
+        return;
+      }
+      const skRating = e.target.closest("[data-sk-rating]");
+      if (skRating) {
+        store.state.skillsRating = skRating.dataset.skRating;
+        store.state.skillsShowAll = false;
+        render();
+        return;
+      }
+      const skScope = e.target.closest("[data-sk-scope]");
+      if (skScope) {
+        store.state.skillsScope = skScope.dataset.skScope;
+        store.state.skillsShowAll = false;
+        render();
+        return;
+      }
+      const skCat = e.target.closest("[data-sk-cat]");
+      if (skCat) {
+        store.state.skillsCategory = skCat.dataset.skCat;
+        store.state.skillsShowAll = false;
+        render();
+        return;
+      }
+      const skCgrp = e.target.closest("[data-sk-cgrp]");
+      if (skCgrp) {
+        store.state.skillsCharGroup = skCgrp.dataset.skCgrp;
+        render();
+        return;
+      }
+      if (e.target.closest("[data-sk-all]")) {
+        store.state.skillsShowAll = true;
+        render();
+        return;
+      }
+      if (e.target.closest("[data-sk-clear]")) {
+        store.state.skillsRating = "全部";
+        store.state.skillsScope = "全部";
+        store.state.skillsCategory = "全部";
+        store.state.skillsDiscipline = "全部";
+        store.state.skillsOnlyRecruited = false;
+        store.state.skillsQuery = "";
+        store.state.skillsShowAll = false;
+        render();
+        return;
+      }
+
+      // --- 友好度 / 道具 / 职业图鉴筛选交互 ---
       const affRf = e.target.closest("[data-aff-rf]");
       if (affRf) {
         store.state.affinityRosterFilter = affRf.dataset.affRf;
@@ -330,6 +576,18 @@
 
     // 表单变更事件委托
     viewEl.addEventListener("change", e => {
+      if (e.target.matches("[data-sk-disc]")) {
+        store.state.skillsDiscipline = e.target.value;
+        store.state.skillsShowAll = false;
+        render();
+        return;
+      }
+      if (e.target.matches("[data-sk-rec]")) {
+        store.state.skillsOnlyRecruited = e.target.checked;
+        store.state.skillsShowAll = false;
+        render();
+        return;
+      }
       if (e.target.matches("[data-aff-pf]")) {
         store.state.affinityOnlyPerfect = e.target.checked;
         render();
@@ -406,6 +664,65 @@
       if (t.type === "number") t.blur();
       render();
     });
+
+    // Plan Mode 划词批注：在路线规划域选中任意文本后弹出浮动「💬 对选中内容添加批注」按钮
+    const selPop = document.getElementById("selCommentBtn");
+    document.addEventListener("mouseup", e => {
+      if (e.target === selPop || (selPop && selPop.contains(e.target))) return;
+      if (domainOf(store.state.view) !== "route" || !store.state.commentMode) {
+        hideSelPop();
+        return;
+      }
+      const sel = window.getSelection();
+      const txt = sel ? sel.toString().trim() : "";
+      if (!txt || txt.length < 2 || !sel.rangeCount) {
+        hideSelPop();
+        return;
+      }
+      const range = sel.getRangeAt(0);
+      const anchor = range.commonAncestorContainer.nodeType === 1
+        ? range.commonAncestorContainer
+        : range.commonAncestorContainer.parentElement;
+      if (!anchor || !viewEl.contains(anchor) || anchor.closest("textarea,input,.cmt-composer")) {
+        hideSelPop();
+        return;
+      }
+      const targetEl = anchor.closest("[data-cmt-target]");
+      const targetId = targetEl ? targetEl.dataset.cmtTarget : "rules:global";
+      const targetLabel = targetEl ? targetEl.dataset.cmtLabel : "全局路线规划规则";
+      const rect = range.getBoundingClientRect();
+      if (!rect || (!rect.width && !rect.height)) {
+        hideSelPop();
+        return;
+      }
+      pendingSelection = { targetId, targetLabel, quote: txt.slice(0, 180) };
+      if (selPop) {
+        const left = Math.max(12, Math.min(window.innerWidth - 200, rect.left + rect.width / 2 - 90));
+        const top = Math.max(12, rect.top - 40);
+        selPop.style.left = left + "px";
+        selPop.style.top = top + "px";
+        selPop.hidden = false;
+      }
+    });
+
+    if (selPop) {
+      selPop.addEventListener("click", () => {
+        if (!pendingSelection) return;
+        const ps = pendingSelection;
+        hideSelPop();
+        const sel = window.getSelection();
+        if (sel) sel.removeAllRanges();
+        store.state.editingCommentId = null;
+        store.state.commentDraft = {
+          targetId: ps.targetId,
+          targetLabel: ps.targetLabel,
+          section: store.state.view,
+          quote: ps.quote,
+          text: "",
+        };
+        render();
+      });
+    }
 
     const syncBtn = document.getElementById("syncBtn");
     if (syncBtn) {

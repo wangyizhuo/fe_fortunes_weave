@@ -138,10 +138,14 @@ class TestClassesModule(unittest.TestCase):
         from modules.route.choice_builder import build_route_proposals
         props = build_route_proposals()
         self.assertEqual(len(props), 9)
+        # 严格按档位 P0 -> P1 -> P2 排序
+        tier_rank = {"P0": 0, "P1": 1, "P2": 2}
+        ranks = [tier_rank[p["tier"]] for p in props]
+        self.assertEqual(ranks, sorted(ranks))
         by_name = {p["name"]: p for p in props}
         for confirmed in ("伊欧", "奇洛伊卡", "米迦艾拉", "杨界"):
             self.assertEqual(by_name[confirmed]["defaultPick"], "new_best")
-        for pending in ("努蒂奴", "乌尔坦德", "法毕欧", "艾丝梅拉尔达"):
+        for pending in ("迪托利希", "努蒂奴", "乌尔坦德", "法毕欧", "艾丝梅拉尔达"):
             self.assertIsNone(by_name[pending]["defaultPick"])
         # 努蒂奴必须同时有 new_best (含 S/L 提醒 + 9项具体能力差) 与 safe_fallback
         nu_opts = {o["id"]: o for o in by_name["努蒂奴"]["options"]}
@@ -150,6 +154,24 @@ class TestClassesModule(unittest.TestCase):
         self.assertEqual(len(nu_opts["new_best"]["diffVsBaseline"]["statDiff"]), 9)
         self.assertIn("防+3", nu_opts["new_best"]["diffVsBaseline"]["statDiffText"])
         self.assertGreaterEqual(len(nu_opts["new_best"]["slWarnings"]), 1)
+
+
+class TestSkillsModule(unittest.TestCase):
+    def test_build_skills_data_completeness_and_scopes(self):
+        from modules.skills.service import build_skills_data
+        d = build_skills_data()
+        self.assertGreater(d["summary"]["skillCount"], 500)
+        self.assertEqual(d["summary"]["charCount"], 63)
+        self.assertEqual(d["summary"]["recruitedCount"], 9)
+        by_name = {s["name"]: s for s in d["skills"]}
+        self.assertEqual(by_name["传送"]["rating"], "S")
+        self.assertEqual(by_name["体格+"]["rating"], "S")
+        self.assertEqual(by_name["秘传·落燕+"]["scope"], "unique")
+        self.assertEqual(by_name["秘传·落燕+"]["charSources"][0]["char"], "迪托利希")
+        self.assertEqual(by_name["大反击"]["scope"], "common_class")
+        self.assertEqual(by_name["大反击"]["classSources"][0]["cls"], "重装步兵")
+        # 角色表已招 9 人排在最前面
+        self.assertTrue(all(c["recruited"] for c in d["characters"][:9]))
 
 
 if __name__ == "__main__":

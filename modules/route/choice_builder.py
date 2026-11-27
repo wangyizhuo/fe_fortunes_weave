@@ -341,4 +341,6 @@ def build_route_proposals() -> list[dict[str, Any]]:
             "options": options,
         })
 
+    tier_order = {"P0": 0, "P1": 1, "P2": 2}
+    proposals.sort(key=lambda pr: (tier_order.get(pr["tier"], 9), R.ORDER.index(pr["name"])))
     return proposals

@@ -20,7 +20,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "out"
-ALL_TABS = ["meal", "items", "classes", "next", "plan", "past", "l45", "long", "opts", "mine"]
+ALL_TABS = ["meal", "items", "classes", "skills", "next", "plan", "past", "l45", "long", "opts", "mine"]
 
 
 class _QuietUTF8Handler(http.server.SimpleHTTPRequestHandler):
@@ -117,7 +117,7 @@ class TestBrowserE2E(unittest.TestCase):
 
         # 确认浏览器通过 HTTP 动态拉取了全部独立 JSON 数据文件
         self.assertTrue(
-            {"manifest.json", "affinity.json", "items.json", "classes.json", "route.json"} <= fetched_json,
+            {"manifest.json", "affinity.json", "items.json", "classes.json", "skills.json", "route.json"} <= fetched_json,
             f"未检测到独立 JSON 加载，实际加载: {fetched_json}",
         )
 
@@ -184,7 +184,26 @@ class TestBrowserE2E(unittest.TestCase):
         page.wait_for_timeout(100)
         self.assertIn("当前匹配 60 / 60", page.inner_text("#view"))
 
-        # 4) 路线规划：验证角色筛选、动态规则说明（无过时文案）、以及重开章节修复
+        # 4) 技能图鉴：评级筛选 S + 角色特有筛选 + 切换角色 12 项熟练度矩阵速览
+        page.click('#domains a[data-domain="skills"]')
+        page.wait_for_selector("#skSearch")
+        page.click('button[data-sk-rating="S"]')
+        page.wait_for_timeout(100)
+        s_txt = page.inner_text("#view")
+        self.assertIn("体格+", s_txt)
+        self.assertIn("传送", s_txt)
+        page.click('button[data-sk-scope="unique"]')
+        page.wait_for_timeout(100)
+        u_txt = page.inner_text("#view")
+        self.assertIn("秘传·落燕+", u_txt)
+        self.assertIn("角色特有（唯一）", u_txt)
+        page.click('button[data-sk-tab="chars"]')
+        page.wait_for_timeout(100)
+        ch_txt = page.inner_text("#view")
+        self.assertIn("迪托利希", ch_txt)
+        self.assertIn("个人特技", ch_txt)
+
+        # 5) 路线规划：验证角色筛选、动态规则说明（无过时文案）、以及重开章节修复
         page.click('#domains a[data-domain="route"]')
         page.wait_for_selector('#who button[data-who="esmeralda"]')
         page.click('#routeTabs a[data-v="plan"]')
@@ -200,7 +219,7 @@ class TestBrowserE2E(unittest.TestCase):
         es_txt = page.inner_text("#view")
         self.assertIn("考试（到 天翼兵）（新职业", es_txt)
 
-        # 5) 我的决定（#mine）：验证新路线方案选择、展开 9 项具体能力差，以及刷新后 localStorage 持久化记录
+        # 6) 我的决定（#mine）：验证新路线方案选择、展开 9 项具体能力差、Plan Mode 内联批注与持久化
         page.click('#who button[data-who=""]')
         page.click('#routeTabs a[data-v="mine"]')
         page.wait_for_selector('input[data-rpick="努蒂奴"]')
@@ -208,20 +227,44 @@ class TestBrowserE2E(unittest.TestCase):
         self.assertIn("新路线方案选择与确认", mine_txt)
         self.assertIn("防+3", mine_txt)
         self.assertIn("需提前 NS Online S/L 实测", mine_txt)
+        self.assertIn("Plan Mode 批注：已开启", mine_txt)
         page.click('input[data-rpick="努蒂奴"][value="safe_fallback"]')
         page.wait_for_timeout(100)
         self.assertIn("你已选择：Lv18 考重装步兵", page.inner_text("#view"))
-        # 刷新页面确认选择已保存在浏览器 localStorage
+
+        # Plan Mode 内联批注：打开法毕欧卡片批注、输入并保存、刷新确认持久化、打开批注清单并清空
+        page.click('button[data-cmt-open="char:法毕欧"]')
+        page.wait_for_selector("#cmtDraftInput")
+        page.fill("#cmtDraftInput", "法毕欧我要萨满精通，先留着 s2 方案")
+        page.click("button[data-cmt-save]")
+        page.wait_for_timeout(100)
+        self.assertIn("法毕欧我要萨满精通", page.inner_text("#view"))
+        self.assertIn("待处理 1", page.inner_text("#view"))
+
+        # 刷新页面确认方案选择 + Plan Mode 批注均已保存在浏览器 localStorage
         page.reload(wait_until="domcontentloaded")
         page.wait_for_selector('input[data-rpick="努蒂奴"]')
         self.assertTrue(page.is_checked('input[data-rpick="努蒂奴"][value="safe_fallback"]'))
         self.assertIn("你已选择：Lv18 考重装步兵", page.inner_text("#view"))
+        self.assertIn("法毕欧我要萨满精通", page.inner_text("#view"))
+
+        # 展开批注清单抽屉验证展示与解决
+        page.click("button[data-pm-drawer]")
+        page.wait_for_timeout(80)
+        self.assertIn("法毕欧（P1）", page.inner_text(".pm-drawer"))
 
         # 可选截图导出（供视觉验收）
         shot_dir = os.environ.get("FE_E2E_SCREENSHOT_DIR")
         if shot_dir:
             Path(shot_dir).mkdir(parents=True, exist_ok=True)
-            for tab, fname in (("meal", "01_affinity.png"), ("items", "02_items.png"), ("classes", "04_classes.png"), ("plan", "03_route.png"), ("mine", "05_mine.png")):
+            for tab, fname in (
+                ("meal", "01_affinity.png"),
+                ("items", "02_items.png"),
+                ("classes", "04_classes.png"),
+                ("skills", "06_skills.png"),
+                ("plan", "03_route.png"),
+                ("mine", "05_mine.png"),
+            ):
                 page.goto(f"{self.base_url}#{tab}", wait_until="domcontentloaded")
                 page.wait_for_selector("#view > *")
                 page.wait_for_timeout(200)
@@ -229,6 +272,12 @@ class TestBrowserE2E(unittest.TestCase):
                     page.click('#who button[data-who=""]')
                     page.wait_for_timeout(150)
                 page.screenshot(path=str(Path(shot_dir) / fname), full_page=False)
+            # 也截一张角色技能矩阵速览
+            page.goto(f"{self.base_url}#skills", wait_until="domcontentloaded")
+            page.wait_for_selector('button[data-sk-tab="chars"]')
+            page.click('button[data-sk-tab="chars"]')
+            page.wait_for_timeout(200)
+            page.screenshot(path=str(Path(shot_dir) / "07_skills_chars.png"), full_page=False)
 
         self.assertEqual(page_errors, [])
         page.close()
