@@ -229,14 +229,36 @@ class TestExploreModule(unittest.TestCase):
         self.assertEqual(d["module"], "explore")
         self.assertEqual(d["defaultRoute"], "dietrich")
         self.assertIn("dietrich", d["routes"])
+        # 验证基于 PR #31 武器评级（SS/S→P0、A→P1、忽视 +3 后缀）重整的商会置换优先级
+        bs = d["barterSummary"]
+        by_entry = {(e["item"], e["place"]): e for e in bs["entries"]}
+        self.assertEqual(by_entry[("雷电剑", "帝都鞑古席翁")]["priority"], "P0")
+        self.assertEqual(by_entry[("雷电剑", "帝都鞑古席翁")]["weaponTier"], "SS")
+        self.assertEqual(by_entry[("伏力萨", "帝都鞑古席翁")]["priority"], "P0")
+        self.assertEqual(by_entry[("伏力萨", "帝都鞑古席翁")]["weaponTier"], "S")
+        self.assertEqual(by_entry[("屠马弓", "帝都鞑古席翁")]["priority"], "P0")
+        self.assertEqual(by_entry[("屠马弓", "帝都鞑古席翁")]["weaponTier"], "S")
+        self.assertEqual(by_entry[("达·米纳手甲", "佐托湖")]["priority"], "P1")
+        self.assertEqual(by_entry[("达·米纳手甲", "佐托湖")]["weaponTier"], "A")
+        self.assertEqual(by_entry[("铁枪", "帝都鞑古席翁")]["priority"], "P2")
+        self.assertTrue(by_entry[("巨人戒指", "海都阿雷库托")]["done"])
+
         dt = d["routes"]["dietrich"]
         self.assertGreater(dt["summary"]["totalSpots"], 150)
         self.assertGreater(dt["summary"]["tierCounts"]["P0"], 30)
         by_name = {s["name"]: s for s in dt["spots"]}
         self.assertEqual(by_name["亚特拉山顶"]["priority"], "P0")
         self.assertIn("奥利哈钢", by_name["亚特拉山顶"]["highlights"])
-        self.assertEqual(by_name["布隆提斯湖"]["priority"], "P0")
-        self.assertIn("辉光鱼", by_name["布隆提斯湖"]["highlights"])
+        # P0 真实缺口素材采集点：尤那魅(SS雷电剑)、挪亚果(S伏力萨+封魔盾)、恩黎艾特(S屠马弓)、青津吉(P0祝胜宝珠)
+        self.assertEqual(by_name["达玛先海岬"]["priority"], "P0")
+        self.assertTrue(by_name["达玛先海岬"]["hasBarterLack"])
+        self.assertEqual(by_name["观日岭"]["priority"], "P0")
+        self.assertEqual(by_name["阳光花园"]["priority"], "P0")
+        self.assertEqual(by_name["内皮亚之森"]["priority"], "P0")
+        # 迷宫宝箱 S 级武器猎兽弓同步升为 P0
+        self.assertEqual(by_name["迦连堡垒残迹"]["priority"], "P0")
+        # 巨人戒指已换完，布隆提斯湖(辉光鱼)自动降为 P2 不再干扰地图 P0
+        self.assertEqual(by_name["布隆提斯湖"]["priority"], "P2")
         self.assertTrue(by_name["亚特拉山顶"]["nearestStation"])
         self.assertTrue(by_name["亚特拉山顶"]["fwMapUrl"].startswith("https://fire-emblem-fw.site/map.html#n:"))
 

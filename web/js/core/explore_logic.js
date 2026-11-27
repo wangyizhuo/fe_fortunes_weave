@@ -41,11 +41,13 @@
     const types = Array.isArray(o.types) ? o.types.filter(Boolean) : [];
     const q = norm(o.query);
     const hideVisited = !!o.hideVisited;
+    const onlyBarterLack = !!o.onlyBarterLack;
     const visitedMap = o.visitedMap || {};
 
     return (spots || []).filter(sp => {
       if (priorities.length && !priorities.includes(sp.priority)) return false;
       if (types.length && !types.includes(sp.type)) return false;
+      if (onlyBarterLack && !sp.hasBarterLack) return false;
       if (hideVisited && visitedMap[sp.id]) return false;
       if (q) {
         const itemHay = (sp.items || []).map(it => {
