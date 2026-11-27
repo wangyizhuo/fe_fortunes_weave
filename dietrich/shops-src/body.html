@@ -22,7 +22,7 @@
 </div>
 <script>
 const DATA = __DATA__;
-const CATS=['全部','剑','枪','斧','弓','拳套','盾','教本','手形','箱','道具'];
+const CATS=['全部','剑','枪','斧','弓','手甲','盾','教本','手形','箱','道具'];
 let cat='全部';
 const chips=document.getElementById('chips');
 CATS.forEach(c=>{const b=document.createElement('button');b.className='chip';b.textContent=c;b.setAttribute('aria-pressed',c===cat);b.onclick=()=>{cat=c;[...chips.children].forEach(x=>x.setAttribute('aria-pressed',x.textContent===cat));render()};chips.appendChild(b)});

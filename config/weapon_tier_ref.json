@@ -38,9 +38,11 @@
    "effect": "追击时，给予的伤害变为1.2倍。",
    "description": "受神圣祝福净化过的剑。战斗时，使敌人的“冥府加护”无效。",
    "reason": "战斗时可无效化敌人的“冥府加护”；命中与重量处于高水准。",
+   "iid": "IID_清めの剣",
+   "officialName": "净化剑",
    "repoName": "净化剑",
    "inShopTsv": true,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "SS",
@@ -59,9 +61,11 @@
    "effect": "追击时，给予的伤害变为1.2倍；雷系所造成的伤害变为2倍，炎系所造成的伤害减半。",
    "description": "寄宿着雷之精灵力量的魔法剑。视为魔法攻击。可使用战技“雷击”。",
    "reason": "射程1-2且为魔法攻击，便于处理物防高的敌人；雨天时可打出超高火力。",
+   "iid": "IID_サンダーソード",
+   "officialName": "雷电剑",
    "repoName": "雷电剑",
    "inShopTsv": true,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "SS",
@@ -80,9 +84,11 @@
    "effect": "至少给予5伤害。",
    "description": "据说蕴藏甚至能劈开天空之力的斧。可使用战技“霸绝+”。",
    "reason": "战技“霸绝+”可无效化“冥府加护”，且威力极高；威力、命中处于高水准。",
+   "iid": "IID_ザルモクシス",
+   "officialName": "查尔摩克西斯",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "SS",
@@ -101,9 +107,11 @@
    "effect": "战斗时，若敌人未装备手甲，回避+15。",
    "description": "寄宿着雷之力的至高之圣刻。可使用战技“雷甲托隆”。",
    "reason": "战技“雷甲托隆”为魔法攻击且射程1-2；重量仅为1，容易与其他装备搭配。",
+   "iid": "IID_スミルノスの雷甲",
+   "officialName": "史米尔诺斯之雷甲",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "SS",
@@ -122,9 +130,11 @@
    "effect": "说明：“太阳”回复量与所造成伤害相同。",
    "description": "寄宿着太阳力量的至高之圣刻。可使用战技“太阳”。",
    "reason": "锻至最大后，战技“太阳”可按造成的伤害回复HP；威力、命中、重量均处于高水准。",
+   "iid": "IID_ソレルの輝槍",
+   "officialName": "索雷尔之辉枪",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "SS",
@@ -143,9 +153,11 @@
    "effect": "说明：“天风”的命中+20。",
    "description": "寄宿着风之力的至高之圣刻。可使用战技“天风”。",
    "reason": "战技“天风”射程3-10，可进行超远距离攻击；蕾达篇第10章起即可使用。",
+   "iid": "IID_カーラの聖弓",
+   "officialName": "卡拉之弓",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "S",
@@ -164,9 +176,11 @@
    "effect": "追击时，给予的伤害变为1.2倍。说明：战斗时，若敌人为骑兵，必杀+10。",
    "description": "能将骑兵连人带马一起砍倒的大剑。",
    "reason": "对骑兵有效；锻至最大后，对骑兵战斗时必杀+10。",
+   "iid": "IID_斬馬刀",
+   "officialName": "斩马刀",
    "repoName": "斩马刀",
    "inShopTsv": true,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "S",
@@ -185,9 +199,11 @@
    "effect": "追击时，给予的伤害变为1.2倍。说明：战斗时，若敌人为重装，必杀+10。",
    "description": "用于贯穿铠甲缝隙的刺剑。",
    "reason": "对重装有效，锻至最大后对重装时必杀+10；命中与重量处于高水准。",
-   "repoName": "弗莉萨剑",
+   "iid": "IID_フリッサ",
+   "officialName": "伏力萨",
+   "repoName": "伏力萨",
    "inShopTsv": true,
-   "nameConflict": "仓库 weaponNames 译名为「弗莉萨剑」，本文为「伏力萨」"
+   "nameNote": ""
   },
   {
    "tier": "S",
@@ -206,9 +222,11 @@
    "effect": "说明：“真月”的威力+7。",
    "description": "传奇英雄使用过的闪耀着金光的枪。可使用战技“真月”。",
    "reason": "使用战技“真月”后可回复HP，武器锻成可大幅提升真月威力；威力、命中处于高水准。",
+   "iid": "IID_マハマドゥの槍",
+   "officialName": "马哈马杜之枪",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "S",
@@ -227,9 +245,11 @@
    "effect": "说明：战斗时，若敌人为骑兵，防御力+5。",
    "description": "能对骑兵发挥出优异性能的枪。",
    "reason": "对骑兵具有特效；锻至最大后，对骑兵时防御+5。",
+   "iid": "IID_ナイトキラー",
+   "officialName": "骑士杀手",
    "repoName": "骑士杀手",
    "inShopTsv": true,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "S",
@@ -248,9 +268,11 @@
    "effect": "—",
    "description": "蕴藏着星辰光辉的至高之圣刻。可使用战技“星光瞬闪”。",
    "reason": "战技“星光闪烁”为魔法攻击且对冥魔有效；战技射程1-2，可进行远距离攻击。",
+   "iid": "IID_アウロラの星槍",
+   "officialName": "欧若拉之星枪",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "S",
@@ -269,9 +291,11 @@
    "effect": "说明：“缠风”的命中+10。",
    "description": "适用于各种战斗方式的枪。可使用战技“缠风”。",
    "reason": "对重装有效；锻至最大后，使用战技“风缝”时命中+10。",
-   "repoName": "戟",
+   "iid": "IID_ゲキ",
+   "officialName": "长戟",
+   "repoName": "长戟",
    "inShopTsv": true,
-   "nameConflict": "仓库 weaponNames 译名为「戟」，本文为「长戟」"
+   "nameNote": ""
   },
   {
    "tier": "S",
@@ -290,9 +314,11 @@
    "effect": "—",
    "description": "拥有血印之人可驾驭的英雄的遗产。仅艾丝梅拉尔达能使用战技“无尘”。",
    "reason": "仅艾丝梅拉尔达可用的战技“无尘”对兽、龙有效；射程1-2，与艾丝梅拉尔达的技能“投枪达人+”相性良好。",
+   "iid": "IID_魔槍グランシーダ",
+   "officialName": "魔枪格拉希达",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "S",
@@ -311,9 +337,11 @@
    "effect": "至少给予5伤害。",
    "description": "甚至能粉碎坚硬铠甲的战锤。",
    "reason": "对重装具有特效。",
+   "iid": "IID_ハンマー",
+   "officialName": "战锤",
    "repoName": "战锤",
    "inShopTsv": true,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "S",
@@ -332,9 +360,11 @@
    "effect": "说明：战斗时，若敌人为兽，命中+20。",
    "description": "森之部族爱用的复合弓。",
    "reason": "锻至最大后，对兽命中+20；对兽有效。",
+   "iid": "IID_獣狩りの弓",
+   "officialName": "猎兽弓",
    "repoName": "猎兽弓",
    "inShopTsv": true,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "S",
@@ -353,9 +383,11 @@
    "effect": "说明：战斗时，若敌人为骑兵，命中+10。",
    "description": "能对骑兵发挥出优异性能的弓。",
    "reason": "锻至最大后，对骑兵命中+10；对骑兵有效。",
-   "repoName": "杀马弓",
+   "iid": "IID_馬殺しの弓",
+   "officialName": "屠马弓",
+   "repoName": "屠马弓",
    "inShopTsv": true,
-   "nameConflict": "仓库 weaponNames 译名为「杀马弓」，本文为「屠马弓」"
+   "nameNote": ""
   },
   {
    "tier": "S",
@@ -374,9 +406,11 @@
    "effect": "战斗时，若敌人未装备手甲，回避+15。",
    "description": "专为特洛伊亚改造的便携式枪械。视为魔法攻击。可使用战技“过压缩光弹”。",
    "reason": "魔法攻击且射程1-2，可进行远距离攻击；特洛伊亚的技能“改造+”发动后变为对飞行特效。",
+   "iid": "IID_ツェルベロス",
+   "officialName": "杰尔贝鲁斯",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "S",
@@ -395,9 +429,11 @@
    "effect": "说明：“圣闪”的回复量增加。",
    "description": "亚拉格王家代代相传的圣刻之一。可使用战技“圣闪”。",
    "reason": "战技“圣闪”击倒敌人时可回复HP，消耗耐久少，可连续使用；威力、命中处于高水准。",
+   "iid": "IID_イデアの弓",
+   "officialName": "伊地亚之弓",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "S",
@@ -416,9 +452,11 @@
    "effect": "至少给予5伤害。说明：使用“炎环”后，中幅回复HP。",
    "description": "蕴藏着强大魔力的至高之圣刻。可使用战技“炎环”。",
    "reason": "战技“炎环”可进行魔法攻击，锻至最大后还附带HP回复；威力、命中处于高水准。",
+   "iid": "IID_クレールの大槌",
+   "officialName": "柯雷尔之大锤",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "S",
@@ -437,9 +475,11 @@
    "effect": "追击时，给予的伤害变为1.2倍。",
    "description": "拥有血印之人可驾驭的英雄的遗产。仅迪托利希能使用战技“血闪+”。",
    "reason": "仅迪托利希可使用对龙有效的战技“血闪+”；命中、重量处于高水准。",
+   "iid": "IID_アンスウェラー凰",
+   "officialName": "安萨拉·凰",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": "文中日文标注为「アンスウェラー改」（官方「安萨拉·改」），但名称写「安萨拉·凰」；按名称对应 IID_アンスウェラー凰"
   },
   {
    "tier": "A",
@@ -458,9 +498,11 @@
    "effect": "追击时，给予的伤害变为1.2倍。说明：战斗时，若敌人为大型单位，命中·必杀+10。",
    "description": "能砍倒任何目标的巨剑。",
    "reason": "对重装有效；锻至最大后，对大型单位战斗时命中、必杀+10。",
+   "iid": "IID_グレートソード",
+   "officialName": "巨剑",
    "repoName": "巨剑",
    "inShopTsv": true,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "A",
@@ -479,9 +521,11 @@
    "effect": "技巧+5",
    "description": "兼具突刺和劈砍功能的枪。",
    "reason": "对重装有效；锻至最大后，技+5。",
+   "iid": "IID_ハルバード",
+   "officialName": "斧枪",
    "repoName": "斧枪",
    "inShopTsv": true,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "A",
@@ -500,9 +544,11 @@
    "effect": "至少给予5伤害。说明：“魔冲打击”的威力+3。",
    "description": "易于使用的打击武器。可使用战技“魔冲打击”。",
    "reason": "战技“魔冲打”可进行魔法攻击；命中、重量处于高水准。",
+   "iid": "IID_メイス",
+   "officialName": "锤矛",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "A",
@@ -521,9 +567,11 @@
    "effect": "至少给予5伤害。说明：战斗时，若敌人为大型单位，物攻+5。",
    "description": "长柄末端有巨刃的斧。",
    "reason": "锻至最大后，对大型单位物攻+5；对骑兵有效。",
+   "iid": "IID_バルディッシュ",
+   "officialName": "长柄斧",
    "repoName": "长柄斧",
    "inShopTsv": true,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "A",
@@ -542,9 +590,11 @@
    "effect": "—",
    "description": "拥有长射程的超大型弓。可使用战技“狙击”。",
    "reason": "可使用射程3-5的战技“狙击”。",
+   "iid": "IID_ロングボウ",
+   "officialName": "长弓",
    "repoName": "长弓",
    "inShopTsv": true,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "A",
@@ -563,9 +613,11 @@
    "effect": "战斗时，若敌人未装备手甲，回避+15。说明：在达·米纳制造的高品质手甲。使用战技攻击时，命中·必杀+10。",
    "description": "在达·米纳制造的高品质手甲。使用战技攻击时，命中+10。",
    "reason": "锻至最大后，回避+10；威力、命中处于高水准，使用战技时命中、必杀再+10。",
-   "repoName": "达米纳拳套",
+   "iid": "IID_ダ・ミナの籠手",
+   "officialName": "达·米纳手甲",
+   "repoName": "达·米纳手甲",
    "inShopTsv": true,
-   "nameConflict": "仓库 weaponNames 译名为「达米纳拳套」，本文为「达·米纳手甲」"
+   "nameNote": ""
   },
   {
    "tier": "A",
@@ -584,9 +636,11 @@
    "effect": "战斗时，若敌人未装备手甲，回避+15。说明：与距离2格以外的敌人战斗时，命中·必杀·回避+10。",
    "description": "可投掷的圆形武器。",
    "reason": "射程1-2，可进行远距离攻击；锻至最大后，与相距2格以上的敌人战斗时命中、必杀、回避+10。",
+   "iid": "IID_乾坤圏",
+   "officialName": "乾坤圈",
    "repoName": "乾坤圈",
    "inShopTsv": true,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "A",
@@ -605,9 +659,11 @@
    "effect": "战斗时，若敌人未装备手甲，回避+15。说明：若战斗时为先攻，命中+15。",
    "description": "寄宿着炎之力的美丽圣刻。可使用战技“炎轮”。",
    "reason": "战技“炎轮”可进行魔法攻击，并能在敌人反击前追击；射程1-2，手甲也能进行远距离攻击。",
+   "iid": "IID_風火輪",
+   "officialName": "风火轮",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "A",
@@ -626,9 +682,11 @@
    "effect": "说明：与邻接的敌人战斗时，攻速+5。",
    "description": "极易操作的小型弓。",
    "reason": "射程1-2的弓，可攻击相邻敌人；游戏前期尤其方便。",
+   "iid": "IID_ショートボウ",
+   "officialName": "短弓",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "A",
@@ -647,9 +705,11 @@
    "effect": "追击时，给予的伤害变为1.2倍。说明：“血闪”的威力+6。",
    "description": "拥有血印之人可驾驭的英雄的遗产。仅迪托利希能使用战技“血闪”。",
    "reason": "仅迪托利希可使用对龙有效的战技“血闪”；命中、重量处于高水准，迪托利希篇初期即可活跃。",
+   "iid": "IID_アンスウェラー",
+   "officialName": "安萨拉",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "A",
@@ -668,9 +728,11 @@
    "effect": "飞行",
    "description": "从神秘组织阿加尔塔被带出，为了验证某样武器性能的试作品。（仿造库罗德的弓「费鲁诺特」）",
    "reason": "锻至最大后，射程变为2-3；威力、重量处于高水准。",
+   "iid": "",
+   "officialName": "试作品11号",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": "官方数据库未收录（DLC），沿用文中名称"
   },
   {
    "tier": "B",
@@ -689,9 +751,11 @@
    "effect": "追击时，给予的伤害变为1.2倍。说明：在达·米纳制造的高品质的剑。使用战技攻击时，命中·必杀+10。",
    "description": "在达·米纳制造的高品质的剑。使用战技攻击时，命中+10。",
    "reason": "威力、命中、重量处于高水准；锻至最大后，使用战技时命中、必杀+10。",
-   "repoName": "达米纳之剑",
+   "iid": "IID_ダ・ミナの剣",
+   "officialName": "达·米纳剑",
+   "repoName": "达·米纳剑",
    "inShopTsv": true,
-   "nameConflict": "仓库 weaponNames 译名为「达米纳之剑」，本文为「达·米纳剑」"
+   "nameNote": ""
   },
   {
    "tier": "B",
@@ -710,9 +774,11 @@
    "effect": "追击时，给予的伤害变为1.2倍。说明：战斗中回避攻击后，物攻+3。",
    "description": "刃部寄宿着风之精灵力量的剑。",
    "reason": "命中、重量、回避处于高水准，容易与其他装备搭配。",
+   "iid": "IID_疾風の剣",
+   "officialName": "疾风剑",
    "repoName": "疾风剑",
    "inShopTsv": true,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "B",
@@ -731,9 +797,11 @@
    "effect": "说明：“圣击”的回复量增加。",
    "description": "西提司过去亲手锻造的枪。可使用战技“圣击”。",
    "reason": "战技“圣击”击倒敌人时可回复HP，消耗耐久少，可连续使用。",
+   "iid": "IID_聖槍アッサル",
+   "officialName": "圣枪阿萨勒",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "B",
@@ -752,9 +820,11 @@
    "effect": "说明：与距离2格以外的敌人战斗时，物攻+3。",
    "description": "提升过威力的高品质标枪。",
    "reason": "射程1-2，可进行远距离攻击；锻至最大后，与相距2格以上的敌人战斗时物攻+3。",
-   "repoName": "细身枪",
+   "iid": "IID_スレンドスピア",
+   "officialName": "投枪",
+   "repoName": "投枪",
    "inShopTsv": true,
-   "nameConflict": "仓库 weaponNames 译名为「细身枪」，本文为「投枪」；本文译名「投枪」与仓库中「手槍」的译名相同（不同武器）"
+   "nameNote": ""
   },
   {
    "tier": "B",
@@ -773,9 +843,11 @@
    "effect": "攻击时，有20%几率发动。攻击力+3。",
    "description": "寄宿着冥界黑暗力量的蛇腹枪。可使用战技“霸蛇”。",
    "reason": "战技“霸蛇”射程2-5，可进行远距离攻击；威力高且射程1-2，可用于管理主人公的烈焰槽。",
+   "iid": "IID_妖槍ヴェンデッタ",
+   "officialName": "妖枪温德塔",
    "repoName": "",
    "inShopTsv": false,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "B",
@@ -794,9 +866,11 @@
    "effect": "至少给予5伤害。说明：与距离2格以外的敌人战斗时，必杀+10。",
    "description": "斧刃锐利的投掷斧。",
    "reason": "射程1-2的斧，可进行远距离攻击；命中处于高水准。",
+   "iid": "IID_鷹爪斧",
+   "officialName": "鹰爪斧",
    "repoName": "鹰爪斧",
    "inShopTsv": true,
-   "nameConflict": ""
+   "nameNote": ""
   },
   {
    "tier": "B",
@@ -815,9 +889,11 @@
    "effect": "说明：可使用战技“弑毒者之箭”。",
    "description": "箭上涂有剧毒的弓。攻击命中时，使敌人陷入中毒状态。",
    "reason": "只要造成伤害就能使敌人陷入中毒状态；与奇洛伊卡的个人技能“暴虐”及战技“毒杀之箭”相性良好。",
+   "iid": "IID_毒の弓",
+   "officialName": "毒弓",
    "repoName": "毒弓",
    "inShopTsv": true,
-   "nameConflict": ""
+   "nameNote": ""
   }
  ]
 }
