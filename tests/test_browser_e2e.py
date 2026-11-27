@@ -184,13 +184,14 @@ class TestBrowserE2E(unittest.TestCase):
         page.wait_for_timeout(100)
         self.assertIn("当前匹配 60 / 60", page.inner_text("#view"))
 
-        # 4) 技能图鉴：评级筛选 S + 角色特有筛选 + 切换角色 12 项熟练度矩阵速览
+        # 4) 技能图鉴：评级筛选 S + 角色表限定说明 + 角色特有筛选 + 切换角色 SS~D 评级与 12 项熟练度矩阵
         page.click('#domains a[data-domain="skills"]')
         page.wait_for_selector("#skSearch")
         page.click('button[data-sk-rating="S"]')
         page.wait_for_timeout(100)
         s_txt = page.inner_text("#view")
         self.assertIn("体格+", s_txt)
+        self.assertIn("角色表限定", s_txt)
         self.assertIn("传送", s_txt)
         page.click('button[data-sk-scope="unique"]')
         page.wait_for_timeout(100)
@@ -202,9 +203,29 @@ class TestBrowserE2E(unittest.TestCase):
         ch_txt = page.inner_text("#view")
         self.assertIn("迪托利希", ch_txt)
         self.assertIn("个人特技", ch_txt)
+        page.click('button[data-sk-cgrp="all"]')
+        page.click('button[data-sk-ctier="SS"]')
+        page.wait_for_timeout(100)
+        ss_txt = page.inner_text("#view")
+        for top3 in ("救世主", "蕾达", "赛奥朵拉"):
+            self.assertIn(top3, ss_txt)
+        self.assertIn("展示 3 位角色", ss_txt)
 
-        # 5) 路线规划：验证角色筛选、动态规则说明（无过时文案）、以及重开章节修复
+        # 5) 路线规划：验证 #next 全员总览表按 P0→P1→P2 排序（且伊欧在 P1）、角色筛选、动态规则说明
         page.click('#domains a[data-domain="route"]')
+        page.wait_for_selector('tr[data-next-row]')
+        next_rows = page.evaluate(
+            """() => [...document.querySelectorAll('tr[data-next-row]')].map(tr => ({
+                name: tr.dataset.nextRow, tier: tr.dataset.tier
+            }))"""
+        )
+        self.assertEqual(len(next_rows), 9)
+        tier_order = {"P0": 0, "P1": 1, "P2": 2}
+        self.assertEqual([tier_order[r["tier"]] for r in next_rows], sorted(tier_order[r["tier"]] for r in next_rows))
+        self.assertEqual(next(r["tier"] for r in next_rows if r["name"] == "伊欧"), "P1")
+        next_txt = page.inner_text("#view")
+        self.assertIn("全员下一步总览（按 P0 → P1 → P2 排序", next_txt)
+
         page.wait_for_selector('#who button[data-who="esmeralda"]')
         page.click('#routeTabs a[data-v="plan"]')
         page.wait_for_timeout(150)

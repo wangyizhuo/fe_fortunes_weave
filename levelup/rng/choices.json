@@ -147,37 +147,22 @@
   ]
  },
  "伊欧": {
-  "base": 224,
-  "k": 3,
+  "base": 234,
+  "k": 0,
   "opts": [
    {
     "kind": "budget",
     "title": "考试 0 次：不考",
     "cost": "0 张手形，约 0G",
-    "gain": 10,
-    "pts": 5,
-    "tpts": 68,
-    "diff": "HP+2 速-1 防+1 幸+2 魅+1",
-    "total": 234,
-    "rec": "可选",
-    "why": "加权分 +10，金币 -1100G",
-    "cur": false,
-    "money": 0,
-    "dnet": 27.6
-   },
-   {
-    "kind": "budget",
-    "title": "考试 3 次：战车兵、飞鸵兵、跳过",
-    "cost": "3 张手形，约 1100G",
     "gain": 0,
     "pts": 0,
-    "tpts": 63,
+    "tpts": 68,
     "diff": "能力一样",
-    "total": 224,
+    "total": 234,
     "rec": "推荐（现在的路线）",
     "why": "按跳过条件逐级走出来的路线",
     "cur": true,
-    "money": 1100,
+    "money": 0,
     "dnet": 0.0
    }
   ]

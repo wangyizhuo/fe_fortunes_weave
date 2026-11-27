@@ -162,3 +162,63 @@ test("resolveRoutePick, summarizeRoutePicks and formatRoutePicksExport track use
   assert.match(txt, /备注：先稳过/);
 });
 
+test("summarizeNextActions sorts by P0→P1→P2 and extracts next exam, switch, skip, and train steps", () => {
+  const chars = [
+    {
+      name: "努蒂奴",
+      tier: "P2",
+      strengthTier: "B",
+      level: 16,
+      curClass: "弓手",
+      owned: ["弓手"],
+      planFrom: 16,
+      trainPlan: [],
+      steps: [
+        { key: "1", src: "plan", exam: false, cls: "弓手", frm: 16, gains: ["力"], cnt: 1, score: 5, opts: [] },
+        { key: "2", src: "plan", exam: true, cls: "", roll: 50, opts: [] },
+      ],
+    },
+    {
+      name: "伊欧",
+      tier: "P1",
+      strengthTier: "B",
+      level: 23,
+      curClass: "轻骑兵",
+      owned: ["轻骑兵", "剑客"],
+      planFrom: 23,
+      trainPlan: [],
+      steps: [
+        { key: "1", src: "plan", exam: false, cls: "剑客", frm: 23, gains: ["速"], cnt: 1, score: 5, opts: [] },
+      ],
+    },
+    {
+      ...SAMPLE_CHAR,
+      tier: "P0",
+      strengthTier: "S",
+      trainPlan: [{ key: "1", lv: 23, cls: "恶棍", train: ["斧术 D→C"], ranks: 2 }],
+    },
+  ];
+  const rows = RL.summarizeNextActions(chars, {}, {});
+  assert.deepEqual(rows.map(r => r.name), ["迪托利希", "伊欧", "努蒂奴"]);
+  assert.deepEqual(rows.map(r => r.tier), ["P0", "P1", "P2"]);
+
+  // 迪托利希: immediate exam + nextSwitch to 恶棍 + trainPlan
+  assert.equal(rows[0].immediate.kind, "exam");
+  assert.equal(rows[0].nextExam.cls, "恶棍");
+  assert.equal(rows[0].nextExam.stepsAway, 0);
+  assert.equal(rows[0].nextSwitch.toCls, "恶棍");
+  assert.equal(rows[0].nextTrain.cls, "恶棍");
+  assert.equal(rows[0].nextSkip, null);
+
+  // 伊欧: immediate class switch 轻骑兵 -> 剑客
+  assert.equal(rows[1].immediate.kind, "switch");
+  assert.equal(rows[1].nextSwitch.fromCls, "轻骑兵");
+  assert.equal(rows[1].nextSwitch.toCls, "剑客");
+
+  // 努蒂奴: immediate level up, nextSkip 1 step away
+  assert.equal(rows[2].immediate.kind, "level");
+  assert.equal(rows[2].nextSkip.lv, 17);
+  assert.equal(rows[2].nextSkip.stepsAway, 1);
+});
+
+

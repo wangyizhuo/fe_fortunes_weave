@@ -20,6 +20,7 @@ if str(RNG_DIR) not in sys.path:
 from fe_growth import STATS, exam_roll, level_up  # noqa: E402
 from planner import _TIER, _TIER_RANK, plan_all, score  # noqa: E402
 import run_plans as R  # noqa: E402
+from modules.character_tiers import get_character_tier, load_character_tiers  # noqa: E402
 from .config_loader import load_route_config  # noqa: E402
 
 
@@ -92,11 +93,12 @@ def _load_json(name: str, default: Any = None) -> Any:
         return json.load(f)
 
 
-def build_rules_meta(cfg: Any) -> dict[str, Any]:
+def build_rules_meta(cfg: Any, tiers_data: dict[str, Any] | None = None) -> dict[str, Any]:
     """把当前生效的规则元数据导出给前端说明区，避免 HTML 模板硬编码过时规则。"""
     p0_list = [n for n in cfg.order if n in cfg.p0]
     p2_list = [n for n in cfg.order if n in cfg.p2]
     p1_list = [n for n in cfg.order if n not in cfg.p0 and n not in cfg.p2]
+    td = tiers_data if tiers_data is not None else load_character_tiers()
     return {
         "shotKey": cfg.shot_key,
         "renown": cfg.renown,
@@ -107,6 +109,9 @@ def build_rules_meta(cfg: Any) -> dict[str, Any]:
         "trainCase": cfg.train_case,
         "requireMidRule": True,
         "balanceMinWeight": 4,
+        "characterTierSource": td.get("source", ""),
+        "characterTierScale": td.get("scale", []),
+        "priorityLinkNote": td.get("priorityLinkNote", ""),
     }
 
 
@@ -123,11 +128,13 @@ def build_route_data() -> dict[str, Any]:
     options_map = _load_json("options.json", {})
     reasons_map = _load_json("reasons.json", {})
     decisions = _load_json("decisions.json", [])
+    tiers_data = load_character_tiers()
 
     chars: list[dict[str, Any]] = []
     for name in R.ORDER:
         shot = R.shot(name)
         w = R.W[name]
+        ct = get_character_tier(name, tiers_data)
         # 严格以 R.OWNED 为单一数据源（移除已过时的 CUR_CLASS_EXTRA 脏补丁）
         owned = list(dict.fromkeys(R.OWNED.get(name, [])))
         opts_pool = list(dict.fromkeys(owned + R.EXAM_OPTIONS.get(name, [])))
@@ -142,6 +149,12 @@ def build_route_data() -> dict[str, Any]:
             "classChoices": opts_pool,
             "weights": w,
             "required": R.REQUIRED.get(name, []),
+            "strengthTier": ct["strengthTier"],
+            "pserTier": ct["pserTier"],
+            "role": ct["role"],
+            "defaultPriority": ct["defaultPriority"],
+            "priorityNote": ct["priorityNote"],
+            "tierSummary": ct["tierSummary"],
             "steps": [],
         }
 
@@ -458,7 +471,7 @@ def build_route_data() -> dict[str, Any]:
         "schemaVersion": 2,
         "stats": list(STATS),
         "skills": list(cfg.skills),
-        "rulesMeta": build_rules_meta(cfg),
+        "rulesMeta": build_rules_meta(cfg, tiers_data),
         "chars": chars,
         "options": options_map,
         "reasons": reasons_map,

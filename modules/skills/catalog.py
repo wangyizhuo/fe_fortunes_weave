@@ -7,6 +7,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+from modules.character_tiers import STRENGTH_ORDER, get_character_tier, load_character_tiers
+
 ROOT = Path(__file__).resolve().parents[2]
 
 DISCIPLINES = [
@@ -246,7 +248,9 @@ def build_skills_catalog() -> dict[str, Any]:
                     "rating": e["rating"],
                 })
 
-    # 3) 计算 scope（角色特有 / 稀有 / 通用·职业 / 通用·熟练度）与排序
+    # 3) 计算 scope（角色特有 / 稀有 / 全员通用·职业 / 角色表限定·多人熟练度）与排序
+    tiers_data = load_character_tiers()
+    total_chars = len(chars_raw)
     skills_list: list[dict[str, Any]] = []
     for name, e in entries.items():
         # 去重并排序角色来源（已招 9 人优先）
@@ -269,19 +273,19 @@ def build_skills_catalog() -> dict[str, Any]:
 
         if has_class and owner_cnt == 0:
             scope = "common_class"
-            scope_label = "通用（职业精通/固有）"
+            scope_label = "全员通用（职业精通/固有）"
         elif has_class and owner_cnt > 0:
             scope = "common_class"
-            scope_label = f"通用（职业 + {owner_cnt} 人习得）"
+            scope_label = f"全员通用（职业 + {owner_cnt}/{total_chars} 人习得）"
         elif owner_cnt <= 1:
             scope = "unique"
             scope_label = "角色特有（唯一）"
         elif owner_cnt <= 5:
             scope = "rare"
-            scope_label = f"稀有（仅 {owner_cnt} 人）"
+            scope_label = f"稀有习得（仅 {owner_cnt}/{total_chars} 人）"
         else:
             scope = "common_learn"
-            scope_label = f"通用（{owner_cnt} 人熟练度）"
+            scope_label = f"角色表限定（{owner_cnt}/{total_chars} 人熟练度）"
 
         e["charSources"] = char_sources
         e["ownerCount"] = owner_cnt
@@ -302,12 +306,13 @@ def build_skills_catalog() -> dict[str, Any]:
     )
     scope_by_name = {s["name"]: s["scope"] for s in skills_list}
 
-    # 4) 组装全 63 位角色技能速览表（已招 9 人优先，其次迪线，其余按原序）
+    # 4) 组装全 63 位角色技能速览表（已招 9 人优先，其次迪线，其余按 SS~D 强度排序）
     characters_list: list[dict[str, Any]] = []
     for idx, c in enumerate(chars_raw):
         ch_name = c.get("name", "")
         is_rec = ch_name in recruited_set
         in_diet = ch_name in dietrich_set
+        ct = get_character_tier(ch_name, tiers_data)
 
         matrix: dict[str, list[dict[str, Any]]] = {}
         s_skills: list[str] = []
@@ -355,6 +360,13 @@ def build_skills_catalog() -> dict[str, Any]:
             "skillsGood": list(c.get("skillsGood") or []),
             "recruited": is_rec,
             "dietrichRoute": in_diet,
+            "strengthTier": ct["strengthTier"],
+            "pserTier": ct["pserTier"],
+            "role": ct["role"],
+            "defaultPriority": ct["defaultPriority"],
+            "dietrichPriority": ct["dietrichPriority"],
+            "priorityNote": ct["priorityNote"],
+            "tierSummary": ct["tierSummary"],
             "personalSkill": personal_obj,
             "lvSkills": lv_list,
             "bloodMarks": [
@@ -373,7 +385,8 @@ def build_skills_catalog() -> dict[str, Any]:
     characters_list.sort(
         key=lambda x: (
             0 if x["recruited"] else (1 if x["dietrichRoute"] else 2),
-            recruited_rank.get(x["name"], 999),
+            recruited_rank.get(x["name"], 999) if x["recruited"] else STRENGTH_ORDER.get(x["strengthTier"], 9),
+            STRENGTH_ORDER.get(x["strengthTier"], 9),
             x["_order"],
         )
     )
@@ -387,10 +400,17 @@ def build_skills_catalog() -> dict[str, Any]:
         "common_learn": sum(1 for s in skills_list if s["scope"] == "common_learn"),
         "common_class": sum(1 for s in skills_list if s["scope"] == "common_class"),
     }
+    strength_counts = {
+        k: sum(1 for ch in characters_list if ch["strengthTier"] == k)
+        for k in ("SS", "S", "A", "B", "C", "D")
+    }
 
     return {
         "meta": skills_cfg["meta"],
         "tiers": skills_cfg["tiers"],
+        "characterTierScale": tiers_data.get("scale", []),
+        "characterTierSource": tiers_data.get("source", ""),
+        "priorityLinkNote": tiers_data.get("priorityLinkNote", ""),
         "categories": CATEGORY_ORDER,
         "disciplines": DISCIPLINES,
         "summary": {
@@ -399,6 +419,7 @@ def build_skills_catalog() -> dict[str, Any]:
             "recruitedCount": len(recruited_set),
             "tierCounts": tier_counts,
             "scopeCounts": scope_counts,
+            "strengthCounts": strength_counts,
         },
         "skills": skills_list,
         "characters": characters_list,

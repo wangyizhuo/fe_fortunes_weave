@@ -65,16 +65,18 @@
   }
 
   /**
-   * 筛选角色技能速览列表（recruited: 已招 9 人 | dietrich: 迪线角色 | all: 全部 63 人）。
+   * 筛选角色技能速览列表（recruited: 已招 9 人 | dietrich: 迪线角色 | all: 全部 63 人，并可按 SS~D 强度筛选）。
    */
   function filterSkillChars(characters, opts) {
     const o = opts || {};
     const q = norm(o.query);
     const group = o.group || "recruited";
+    const strengthTier = o.strengthTier || "全部";
 
     return (characters || []).filter(ch => {
       if (group === "recruited" && !ch.recruited) return false;
       if (group === "dietrich" && !ch.dietrichRoute) return false;
+      if (strengthTier !== "全部" && ch.strengthTier !== strengthTier) return false;
       if (q) {
         const matNames = [];
         for (const list of Object.values(ch.matrix || {})) {
@@ -85,6 +87,10 @@
           ch.enName,
           ch.faction,
           ch.startClass,
+          ch.strengthTier,
+          ch.pserTier,
+          ch.role,
+          ch.tierSummary,
           ch.note,
           ch.personalSkill ? `${ch.personalSkill.name} ${ch.personalSkill.text}` : "",
           ...(ch.lvSkills || []).map(x => x.name),

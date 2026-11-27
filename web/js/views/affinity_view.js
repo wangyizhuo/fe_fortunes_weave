@@ -16,12 +16,16 @@
     const matrix = AL.buildTargetDishMatrix(D);
     const lv2 = AL.listSupportTwoTargets(D);
 
+    const ctierBadge = x => x.strengthTier
+      ? ` <span class="ctier ctier-${U.esc(x.strengthTier)}" title="综合强度 ${U.esc(x.strengthTier)}（憨色 ${U.esc(x.pserTier || "")}）${x.role ? " · " + U.esc(x.role) : ""}">${U.esc(x.strengthTier)}</span>`
+      : "";
+
     // 1) 四大主角（领主）卡片
     const lordsHtml = (D.lords || []).length ? `<section class="alerts">
       <h2>主角 / 领主（4 位 · 当前主线：${U.esc(D.lord || "迪托利希")}${D.currentRenown != null ? ` · 当前声望 Lv${D.currentRenown}` : ""}）</h2>
       <div class="grid">${D.lords.map(l => `<article class="card">
         <div class="ch"><div class="ct">
-          <h3>${U.esc(l.name)}</h3>
+          <h3>${U.esc(l.name)}</h3>${ctierBadge(l)}
           ${l.isCurrent ? `<span class="tag ok">当前主角</span>` : `<span class="cat-pill">其他路线领主</span>`}
           <span class="r">待刷目标 ${l.activeTargets.length} 人 · 已达标 ${l.doneTargets.length} 人</span>
         </div></div>
@@ -65,7 +69,7 @@
     };
 
     const rosterRows = filteredRoster.map(x => `<tr class="${x.statusKey === "met" ? "cur" : ""}">
-      <td><b>${U.esc(x.name)}</b>${x.isLord ? ` <span class="cat-pill">主角</span>` : ""}${x.jpName ? `<br><span class="jp">${U.esc(x.jpName)}</span>` : ""}</td>
+      <td><b>${U.esc(x.name)}</b>${ctierBadge(x)}${x.isLord ? ` <span class="cat-pill">主角</span>` : ""}${x.jpName ? `<br><span class="jp">${U.esc(x.jpName)}</span>` : ""}</td>
       <td><span class="cat-pill">${U.esc(x.dietTier || "—")}</span></td>
       <td class="n">${renownCell(x)}</td>
       <td class="n">${x.dietSupport != null ? `支援 ${x.dietSupport}` : "—"}</td>

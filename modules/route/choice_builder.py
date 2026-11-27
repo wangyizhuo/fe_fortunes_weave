@@ -21,6 +21,7 @@ if str(RNG_DIR) not in sys.path:
 from fe_growth import STATS  # noqa: E402
 from planner import _TIER, plan_all  # noqa: E402
 import run_plans as R  # noqa: E402
+from modules.character_tiers import get_character_tier, load_character_tiers  # noqa: E402
 from .objective import DEFAULT_TIER_POLICIES  # noqa: E402
 from .two_stage_planner import (  # noqa: E402
     EvaluatedPlan,
@@ -188,10 +189,12 @@ def _pack_evaluated(
 def build_route_proposals() -> list[dict[str, Any]]:
     """生成全 9 位角色的交互式候选方案对照（含 9 项具体能力差、转职保底明细、边际收益与 S/L 预警）。"""
     proposals: list[dict[str, Any]] = []
+    tiers_data = load_character_tiers()
 
     for name in R.ORDER:
         if name not in R.OWNED:
             continue
+        ct = get_character_tier(name, tiers_data)
         tier = R.tier_of(name)
         pol = DEFAULT_TIER_POLICIES[tier]
         _, lv = R.current_state(name)
@@ -332,6 +335,11 @@ def build_route_proposals() -> list[dict[str, Any]]:
         proposals.append({
             "name": name,
             "tier": tier,
+            "strengthTier": ct["strengthTier"],
+            "pserTier": ct["pserTier"],
+            "role": ct["role"],
+            "defaultPriority": ct["defaultPriority"],
+            "priorityNote": ct["priorityNote"],
             "level": lv,
             "target": target,
             "seeds": p_new.n_seeds,

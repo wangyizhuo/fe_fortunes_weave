@@ -1,0 +1,612 @@
+{
+  "schemaVersion": 1,
+  "source": "综合参考 B 站 UP 主 @Pser_hanser（憨色）《火焰纹章：万缕千丝全角色分析与推荐指南 Ver1.0》与仓库《角色强弱评价框架》（含成长率、法表、个人特技、入场时机与多线融合价值）。",
+  "scale": [
+    {
+      "tier": "SS",
+      "pserMap": "T0（规则级）",
+      "defaultP": "P0",
+      "desc": "改变机制/全程破格的顶峰核心（救世主、蕾达、赛奥朵拉）"
+    },
+    {
+      "tier": "S",
+      "pserMap": "T0 战神 / T0.5",
+      "defaultP": "P0",
+      "desc": "顶级战力或不可替代功能核心（含迪托利希、凯伊、法毕欧、艾丝、索绯雅等）"
+    },
+    {
+      "tier": "A",
+      "pserMap": "T1 / T1.5",
+      "defaultP": "P1",
+      "desc": "入队及时、全面拔尖或中后期潜力优秀的主力人选"
+    },
+    {
+      "tier": "B",
+      "pserMap": "T2",
+      "defaultP": "P2",
+      "desc": "需较多资源/多线合成补强，按路线需求培养（如伊欧、努蒂奴、乌尔坦德）"
+    },
+    {
+      "tier": "C",
+      "pserMap": "T2.5",
+      "defaultP": "P2 / 过渡",
+      "desc": "数值偏平庸但有局部特色，仅在路线缺口且低成本时过渡（如杨界）"
+    },
+    {
+      "tier": "D",
+      "pserMap": "NPC",
+      "defaultP": "不主练",
+      "desc": "入队极晚或机制缺陷，基本不投入养成资源"
+    }
+  ],
+  "priorityLinkNote": "路线优先级（P0/P1/P2）以角色综合强度（SS~D）为基准挂钩（SS/S→P0、A→P1、B→P2、C/D→不主练），但因多线因果融合分工、单线开荒阵容缺口与个人培养需求，各路线实操 P 级可与基准上下浮动（例如迪线：米迦 A→P0、法毕欧 S→P1、伊欧 B 由 P0 下调至 P1、杨界 C→P1）。",
+  "characters": {
+    "救世主": {
+      "rating": "SS",
+      "pserTier": "T0",
+      "role": "12项全能主核",
+      "defaultPriority": "P0",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "390均衡成长，全游戏唯一12项全能且全战斗出场，自带破冥府加护，任意顶级职业皆可兜底清图。"
+    },
+    "凯伊": {
+      "rating": "S",
+      "pserTier": "T0",
+      "role": "高机动双刀主",
+      "defaultPriority": "P0",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "个人特技移动力+1，370均衡成长，白魔习得【传送】，圣焰破盾兼顾范围输出，走地机动超越飞行。"
+    },
+    "迪托利希": {
+      "rating": "S",
+      "pserTier": "T0",
+      "role": "必杀战神主角",
+      "defaultPriority": "P0",
+      "dietrichPriority": "P0",
+      "priorityNote": "强度 S（主角必出击），迪线绝对核心 P0",
+      "summary": "415总成长全游第一（60技/50速/50HP），搭配杀意与必杀体系从头杀穿到尾；迪线绝对核心 P0。"
+    },
+    "赛奥朵拉": {
+      "rating": "SS",
+      "pserTier": "T0",
+      "role": "全能前排领主",
+      "defaultPriority": "P0",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "380成长且70HP/50力/40双防，7格超远圣焰输出，重装/巨象或飞行路线皆可无双。"
+    },
+    "蕾达": {
+      "rating": "SS",
+      "pserTier": "T0",
+      "role": "圣焰跳舞再动",
+      "defaultPriority": "P0",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "370成长且速技顶尖（65速/50技），圣焰战技集范围再动、加攻防、混乱、召唤与破冥魔于一体，战略上限最高。"
+    },
+    "媞雅拉": {
+      "rating": "B",
+      "pserTier": "T2",
+      "role": "唯一两格舞娘",
+      "defaultPriority": "P2",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "军师之才可扩战技射程实现两格跳舞，但防速成长太差，硬走舞娘性价比偏低。"
+    },
+    "皮特鲁": {
+      "rating": "A",
+      "pserTier": "T1",
+      "role": "射程+1弓MVP",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "全游戏唯一弓射程+1且60技巧成长第一，P2/P3弓手绝对MVP，适合猎兵→战车/狙击养成。"
+    },
+    "乌尔坦德": {
+      "rating": "B",
+      "pserTier": "T2",
+      "role": "高成长工具奶",
+      "defaultPriority": "P2",
+      "dietrichPriority": "P2",
+      "priorityNote": "强度 B（T2），与基准一致定为 P2（省资源早转牧师）",
+      "summary": "385高综合成长且三线早来、迷宫被动实用，但进攻成长与白魔法表偏平庸，省资源 P2 牧师即可。"
+    },
+    "法毕欧": {
+      "rating": "S",
+      "pserTier": "T0.5",
+      "role": "顶级黑魔核心",
+      "defaultPriority": "P0",
+      "dietrichPriority": "P1",
+      "priorityNote": "强度 S（T0.5 黑魔顶级），结合多线培养分工与迪线资源节奏定为 P1",
+      "summary": "初始10魔/50魔成长，等级精通3格光环+全队必杀+5；法表含3格史莱姆、死神、唯一无视魔防【月神Λ】与暗黑冲击。"
+    },
+    "艾丝梅拉尔达": {
+      "rating": "S",
+      "pserTier": "T0.5",
+      "role": "专属遗产战神",
+      "defaultPriority": "P0",
+      "dietrichPriority": "P0",
+      "priorityNote": "强度 S（T0.5 顶级前排），迪线物攻核心 P0",
+      "summary": "55HP/55力/45防顶尖物攻前排，擅长枪斧带投掷技能与中期专属遗产，多线合成上限极高。"
+    },
+    "米迦艾拉": {
+      "rating": "A",
+      "pserTier": "T1",
+      "role": "高机动前排",
+      "defaultPriority": "P1",
+      "dietrichPriority": "P0",
+      "priorityNote": "强度 A（T1），因开局即入队且承担迪线物理开荒主力，从基准 P1 上调为 P0",
+      "summary": "开局入队、力防HP成长均前四，兼备重装移动术与步行再移动，P3要塞或飞龙都能独自牵制援军。"
+    },
+    "波拿帕尔特": {
+      "rating": "B",
+      "pserTier": "T2",
+      "role": "光环黑魔副手",
+      "defaultPriority": "P2",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "350成长标准黑魔模板，被动概率给相邻队友加属性，但法表与魔力不够突出。"
+    },
+    "托比亚斯": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "巨象兵顶配",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "60力第一/55HP/45防第三，完美契合重甲→要塞→巨象兵正统物坦大核。"
+    },
+    "莉利安": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "P3指挥弓手",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "55技/50幸，对无法反击敌人加命中，等级被动补攻，精通指挥可赋能队友，P3好用。"
+    },
+    "莱桑达": {
+      "rating": "B",
+      "pserTier": "T2",
+      "role": "小回避前排",
+      "defaultPriority": "P2",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "女王线初始角色，320成长偏力速防，小回避T定位但技能普通，不值得双线重投。"
+    },
+    "巴卡尼亚": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "减伤守护重甲",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "50HP/50力/45防，个人特技稳定减伤，稳健前排重装选择。"
+    },
+    "西洛可": {
+      "rating": "S",
+      "pserTier": "T0.5",
+      "role": "无短板步兵王",
+      "defaultPriority": "P0",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "380惊人成长无短板，步兵同时拥有闪身、步行移动术与步行再移动，单线培养即独一档。"
+    },
+    "奥琳琵娅": {
+      "rating": "S",
+      "pserTier": "T0.5",
+      "role": "高爆必杀法师",
+      "defaultPriority": "P0",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "50魔成长一线法师，个人特技装备魔法+10必杀，搭死神轻松堆到70%+必杀，黑白双修。"
+    },
+    "穆": {
+      "rating": "A",
+      "pserTier": "T1",
+      "role": "良成长融合王",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "自带良成长全属性加成，剑斧拳白魔均衡，多线因果融合收益最高的万能大西瓜。"
+    },
+    "贝特兰": {
+      "rating": "A",
+      "pserTier": "T1",
+      "role": "圣言破防辅核",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "55力/50技/45防，圣言提供高额命中双防回避，自带破冥府加护战技，唯一缺点是个人被动看概率。"
+    },
+    "谭利穆恩": {
+      "rating": "S",
+      "pserTier": "T0",
+      "role": "10格圣焰控制",
+      "defaultPriority": "P0",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "400高成长与60幸运第一，10格超远圣焰可减半敌人命中攻速幸运或互换双攻双防，Boss战神效。"
+    },
+    "欧露赫露": {
+      "rating": "A",
+      "pserTier": "T1",
+      "role": "双60最硬奶妈",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "力60/防60/魔防60全游第一坦度，45魔成长，奶队友同时回自己血，打不动的铁壁圣职。"
+    },
+    "爱娜特莉亚": {
+      "rating": "S",
+      "pserTier": "T0.5",
+      "role": "传沉全能法王",
+      "defaultPriority": "P0",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "385无短板成长，白魔【传送】【沉默】，黑魔独占【裁决之剑】【彷徨之壁】【玻璃车轮】【托隆】，圣转神职首选。"
+    },
+    "盛托利翁": {
+      "rating": "B",
+      "pserTier": "T2",
+      "role": "开箱即用重装",
+      "defaultPriority": "P2",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "敌方回合首击减半伤害，入队即高攻防体格，适合临时顶线但培养上限一般。"
+    },
+    "特洛伊亚": {
+      "rating": "S",
+      "pserTier": "T0.5",
+      "role": "魔拳克飞神将",
+      "defaultPriority": "P0",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "力魔双45且带魔攻克飞专属遗产，拳系高命中与反击机制顶尖，直通破拳神将。"
+    },
+    "红花": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "传送造墙法师",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "350均衡法系成长（45魔/45速/45魔防），同时习得【传送】与【彷徨之壁】，战略功能极强。"
+    },
+    "盖茨": {
+      "rating": "C",
+      "pserTier": "T2.5",
+      "role": "关底圣枪底子",
+      "defaultPriority": "P2",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "特技给队友加防、标准卫士→圣枪模板，但入队接近第1部关底，出场窗口太晚。"
+    },
+    "乌修拉": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "2格道具袋挂件",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "2格内队友共用道具袋，Boss战提供命中回避+15，P3战术功能价值极高（Pser_hanser称T1.5都嫌低）。"
+    },
+    "迪雅各": {
+      "rating": "D",
+      "pserTier": "NPC",
+      "role": "低力保镖",
+      "defaultPriority": "P3",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "需做猫猫外传且入队极晚，初始力量与成长均差，速技再高也打不出伤害。"
+    },
+    "沙兰": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "全能救援奶妈",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "魔与双防优秀，拉近后可接辅助魔法，白魔含圣疗/圣愈/救援/群体圣疗，黑魔还有彷徨之壁。"
+    },
+    "丹提": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "法系支援位",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "45魔/40速/40技，自带托隆与风系魔法，适合作为法系副手与支援位补充。"
+    },
+    "希蒙": {
+      "rating": "B",
+      "pserTier": "T2",
+      "role": "幸运概率赌狗",
+      "defaultPriority": "P2",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "50HP/50力/50幸，被动依赖幸运触发，后期打Boss可当垫子，日常偏白板。"
+    },
+    "妮涅": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "高成长多面辅",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "375总成长与50幸运，攻防魔均衡且兼具白魔支援能力，可补位辅助或前排副手。"
+    },
+    "哪吒": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "剑拳高速输出",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "50技/45速/45力，先攻概率增伤，推荐主拳路线搭配土匪补力。"
+    },
+    "古扎岚": {
+      "rating": "A",
+      "pserTier": "T1",
+      "role": "全能物理上位",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "低级高白值且除魔系外全面拔尖，剑拳步兵擅长且多线早来，打拳玩剑或游侠均强势。"
+    },
+    "努蒂奴": {
+      "rating": "B",
+      "pserTier": "T2",
+      "role": "穿越机动救援",
+      "defaultPriority": "P2",
+      "dietrichPriority": "P2",
+      "priorityNote": "强度 B（T2），与基准一致定为 P2（省资源早转重装吃转职保底）",
+      "summary": "初始飞鸵+穿行被动+白魔【救援】，三线早来，省资源 P2 早转重装补防兼顾机动救援。"
+    },
+    "伊欧": {
+      "rating": "B",
+      "pserTier": "T2",
+      "role": "骑兵机动特化",
+      "defaultPriority": "P2",
+      "dietrichPriority": "P1",
+      "priorityNote": "强度 B（T2 骑兵特化），从 P0 下调为 P1：减少金币与训练投入，保留中期机动过渡",
+      "summary": "初始Lv20骑兵特化，被动全绑骑兵而后期骑兵成长空间有限，Pser_hanser归T2建议背包养着；迪线现下调至 P1。"
+    },
+    "卡塔妮雅": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "高速雷电剑",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "360成长（55速/50技），双攻均衡且白魔法表极佳，可走高速雷电剑或回避T。"
+    },
+    "班迪兹": {
+      "rating": "C",
+      "pserTier": "T2.5",
+      "role": "战车特化副手",
+      "defaultPriority": "P2",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "个人特技绑定战车猛攻，但双防与力量偏低且入队晚，仅特定场合可用。"
+    },
+    "亚历珊德拉": {
+      "rating": "B",
+      "pserTier": "T2",
+      "role": "高速魔剑飞马",
+      "defaultPriority": "P2",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "370成长（55速/45技/40魔防），天生飞马剑模板但缺上级魔法飞行职，需多资源开发。"
+    },
+    "诺克裘拉": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "早来回避拳",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "50HP/45力/45速，多线早来收益高，战后叠回避+拳系回避精通，斗士/斗拳路线顺滑。"
+    },
+    "杨界": {
+      "rating": "C",
+      "pserTier": "T2.5",
+      "role": "幸运续航僧侣",
+      "defaultPriority": "P2",
+      "dietrichPriority": "P1",
+      "priorityNote": "强度 C（T2.5），因迪线前期法系/辅助缺口且 0 训练转萨满低成本，从基准 P2 上调为 P1",
+      "summary": "被动按幸运回血与高血加防，但双防与力魔平庸、斧精通配白魔割裂；迪线靠0训练萨满过渡维持 P1。"
+    },
+    "索绯雅": {
+      "rating": "S",
+      "pserTier": "T0.5",
+      "role": "救命顶级神奶",
+      "defaultPriority": "P0",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "回复+10且等级精通回复射程+2，圣疗变圣愈还能3格触发；四线皆可入队且单线即完全体，Pser_hanser盛赞可排主角头顶。"
+    },
+    "努佐": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "克制追击男弓",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "50HP/50力/55速/45技，对克制目标追加攻击/增益，皮特鲁之下最强男弓。"
+    },
+    "马吉迪": {
+      "rating": "D",
+      "pserTier": "NPC",
+      "role": "传送冰冻工具",
+      "defaultPriority": "P3",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "260成长全游垫底且缺技缺速，仅凭白魔【传送】【冻结】偶有工具人出场，无需练级。"
+    },
+    "札可捏": {
+      "rating": "D",
+      "pserTier": "NPC",
+      "role": "缺攻杂技位",
+      "defaultPriority": "P3",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "285成长且60点歪到技巧，攻击严重缺失、各系技能无化学反应，不建议投入。"
+    },
+    "哥莱亚斯": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "卡位一夫当关",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "60力/55HP/50防极限物坦，Lv35精通减敌5移动实现卡位封路，配传送极强。"
+    },
+    "杰斯塔": {
+      "rating": "B",
+      "pserTier": "T2",
+      "role": "剑系回避T",
+      "defaultPriority": "P2",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "60速高回避剑士，但基础力量偏低、入队晚且招募条件苛刻。"
+    },
+    "露露蒂雅": {
+      "rating": "B",
+      "pserTier": "T2",
+      "role": "下位剑回避",
+      "defaultPriority": "P2",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "55速成长但初始力量仅9、总成长305偏低，相比同定位回避T属下位替代。"
+    },
+    "绯亚娜": {
+      "rating": "B",
+      "pserTier": "T2",
+      "role": "高魔缺远奶",
+      "defaultPriority": "P2",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "55魔成长第一且45魔防，但缺乏远程圣疗且低幸运难触发省回数被动，可作替补奶或雷电剑。"
+    },
+    "大刀": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "力防血重击手",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "55力/50HP/45防，双方无法追击时攻+5，技能按力/防增伤，适合重装或战车短弓。"
+    },
+    "哈尔温": {
+      "rating": "B",
+      "pserTier": "T2",
+      "role": "高技低力弓骑",
+      "defaultPriority": "P2",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "60技巧突出但力量偏低、被动协同弱，擅长弓骑但难弥补输出面板差距。"
+    },
+    "西提司": {
+      "rating": "C",
+      "pserTier": "T2.5",
+      "role": "平庸水桶副手",
+      "defaultPriority": "P2",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "360成长看似不差，但特技与技能精通表毫无亮点，整体偏平庸。"
+    },
+    "罗蕾塔": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "满血回避T",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "55速成长，满血稳定+20回避，双攻平均，参考卡塔妮雅走高速回避流。"
+    },
+    "内森": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "暴力重装传送",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "55HP/60力/60技/45防顶尖物理成长且白魔习得【传送】，高难兼具爆发与战略价值。"
+    },
+    "齐利科": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "万能补位砖块",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "50力/60速/50技高机动面板，不局限于骑兵，卫士/圣枪或补强队伍短板都很舒服。"
+    },
+    "嘉丝敏": {
+      "rating": "A",
+      "pserTier": "T1",
+      "role": "多重反击重装",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "被动高命中，枪斧重装精通，重装S解锁多重反击术（后攻无视攻速追击），重装系断档领先。"
+    },
+    "奇洛伊卡": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "高速暴虐物攻",
+      "defaultPriority": "P1",
+      "dietrichPriority": "P1",
+      "priorityNote": "强度 A（T1.5），与基准一致定为 P1（0 训练弓手稳健副核）",
+      "summary": "55HP/55速/50技暴虐物攻手，0训练转弓箭手/猎兵线极为省心，P1稳定主力。"
+    },
+    "易尼奥尼": {
+      "rating": "A",
+      "pserTier": "T1.5",
+      "role": "极致暴力弓",
+      "defaultPriority": "P1",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "26初始力+50力成长，放弃速度换极致单发暴力，装备弓力+3且强化弓战技必杀。"
+    },
+    "佩佩": {
+      "rating": "D",
+      "pserTier": "NPC",
+      "role": "晚来脆皮伏击",
+      "defaultPriority": "P3",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "全路线入队很晚且成长歪在速技，概率先攻缺乏伤害支撑，基本无培养价值。"
+    },
+    "亚丝望": {
+      "rating": "D",
+      "pserTier": "NPC",
+      "role": "倒数第二章",
+      "defaultPriority": "P3",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "270成长且倒数第二章才加入，属性与成长已无意义，最多客串看板舞娘。"
+    },
+    "塔霍尼雅": {
+      "rating": "C",
+      "pserTier": "T2.5",
+      "role": "P3临时拳手",
+      "defaultPriority": "P2",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "入队自带43力/33防且概率无视攻速追击，可当P3临时打拳工具人，但无法转职无培养空间。"
+    },
+    "库拉普卡": {
+      "rating": "D",
+      "pserTier": "NPC",
+      "role": "饮水机机长",
+      "defaultPriority": "P3",
+      "dietrichPriority": null,
+      "priorityNote": "",
+      "summary": "最终章才入队且无法转职，属性低于同期平均线，纯饮水机角色。"
+    }
+  }
+}

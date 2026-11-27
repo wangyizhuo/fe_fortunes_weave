@@ -141,12 +141,30 @@
       return `<div class="sec"><h4>要练的技能</h4><ul class="txt">${todo.map(t => `<li>🎯 <b>Lv${t.lv}</b> 考${U.esc(t.cls)}之前练好：${U.esc(t.train.join("、"))}（共 ${t.ranks} 段；训练场、指南书、委托都不涨人物经验，不影响种子）</li>`).join("")}</ul></div>`;
     }
 
+    function renderStrengthBadge(obj) {
+      if (!obj || !obj.strengthTier) return "";
+      const tip = [
+        `综合强度 ${obj.strengthTier}`,
+        obj.pserTier ? `憨色 ${obj.pserTier}` : "",
+        obj.role || "",
+        obj.priorityNote || "",
+      ].filter(Boolean).join(" · ");
+      return `<span class="ctier ctier-${U.esc(obj.strengthTier)}" title="${U.esc(tip)}">${U.esc(obj.strengthTier)}</span>`;
+    }
+
+    function renderPTierBadge(tier, note) {
+      if (!tier) return "";
+      const cls = tier === "P0" ? "r1" : tier === "P1" ? "r2" : "r3";
+      return `<span class="rec ${cls}"${note ? ` title="${U.esc(note)}"` : ""}>${U.esc(tier)}</span>`;
+    }
+
     function head(c, w, right) {
       const n = w.rows.filter(r => r.done).length;
       const cmtBtn = renderCommentBtn("route:" + c.name, `${c.name}（路线规划）`, "批注");
-      return `<div class="ch" data-cmt-target="route:${U.esc(c.name)}" data-cmt-label="${U.esc(c.name)}（路线规划）"><div class="ct"><h3>${U.esc(c.name)}</h3><span class="lv">Lv${w.ci.level ?? "?"} ${U.esc(w.cur || "")}</span><span class="r">${right} ${cmtBtn}</span></div>
+      return `<div class="ch" data-cmt-target="route:${U.esc(c.name)}" data-cmt-label="${U.esc(c.name)}（路线规划）"><div class="ct"><h3>${U.esc(c.name)}</h3>${renderPTierBadge(c.tier, c.priorityNote)}${renderStrengthBadge(c)}<span class="lv">Lv${w.ci.level ?? "?"} ${U.esc(w.cur || "")}</span><span class="r">${right} ${cmtBtn}</span></div>
         ${c.steps.length ? `<div class="meter" title="完成 ${n} / ${c.steps.length}"><i style="width:${100 * n / c.steps.length}%"></i></div>` : ""}
         ${c.weights ? `<div class="wts" title="能力权重，加权分 = 每项加点 × 权重">${ST.map((k, i) => `<span class="w${c.weights[i]}">${k}<b>${c.weights[i]}</b></span>`).join("")}</div>` : ""}
+        ${c.priorityNote ? `<p class="intro note2">📌 <b>路线优先级：</b>${U.esc(c.priorityNote)}</p>` : ""}
         ${c.text ? `<p class="intro">${U.esc(c.text.intro)}</p>` : ""}${c.text && c.text.note ? `<p class="intro note2">${U.esc(c.text.note)}</p>` : ""}${c.guide ? `<p class="intro note2"><b>攻略评价 ${U.esc(c.guide.tier)}</b>（憨色 Ver1.0）：${U.esc(c.guide.t)}</p>` : ""}
         ${renderCommentThread("route:" + c.name, `${c.name}（路线规划）`)}</div>`;
     }
@@ -215,9 +233,11 @@
 
     // ---------- 1. 下一步 ----------
     function viewNext() {
+      const visibleChars = RL.sortCharsByTier(CH.filter(c => !focus || U.slug(c) === focus));
+      const summaryRows = RL.summarizeNextActions(visibleChars, prog, info);
+
       const stop = [], go = [], alertRows = [];
-      for (const c of CH) {
-        if (focus && U.slug(c) !== focus) continue;
+      for (const c of visibleChars) {
         const w = walkOf(c), nx = w.rows.filter(r => !r.done);
         if (!nx.length) continue;
         const a = `<a href="#next" data-go="${U.slug(c)}">${U.esc(U.shortName(c.name))}</a>`;
@@ -245,11 +265,84 @@
         }
       }
       if (!alertRows.length) alertRows.push(["ok", "最近几步没有要特别注意的。"]);
+
+      const fmtImmediate = im => {
+        if (im.kind === "exam") return `<span class="sev warn">先考试</span> <b>Lv${im.lv} 考 ${U.esc(im.cls)}</b>${im.roll != null ? `<span class="next-sub">判定 ${im.roll}%${im.pct != null ? ` / 估 ${im.pct}%` : ""}</span>` : ""}`;
+        if (im.kind === "skip") return `<span class="sev warn">先跳过</span> <b>Lv${im.lv} 跳过</b>${im.roll != null ? `<span class="next-sub">任意初级考试（判定 ${im.roll}%）</span>` : ""}`;
+        if (im.kind === "switch") return `<span class="sev ok">先转职</span> <b>${U.esc(im.fromCls)} → ${U.esc(im.cls)}</b><span class="next-sub">转完升 Lv${im.lv}→${im.to}</span>`;
+        if (im.kind === "missing") return `<span class="sev bad">缺职业</span> <b>需先考 ${U.esc(im.cls)}</b><span class="next-sub">用于 Lv${im.lv}→${im.to}</span>`;
+        if (im.kind === "level") return `<span class="sev ok">直升</span> <b>Lv${im.lv}→${im.to}</b>（${U.esc(im.cls)}）`;
+        return `<span class="hint">全部完成</span>`;
+      };
+
+      const fmtTransfer = row => {
+        const parts = [];
+        if (row.nextExam) {
+          const e = row.nextExam;
+          const soon = e.stepsAway === 0 ? "<b>立刻</b>" : `${e.stepsAway} 步后`;
+          parts.push(`<div class="next-step-line"><span class="cat-pill">考试</span><b>Lv${e.lv} 考 ${U.esc(e.cls)}</b> <small class="hint">(${soon}${e.roll != null ? ` · 判定${e.roll}%` : ""}${e.pct != null ? `/估${e.pct}%` : ""})</small></div>`);
+        }
+        if (row.nextSwitch) {
+          const sw = row.nextSwitch;
+          const soon = sw.stepsAway === 0 ? "<b>立刻</b>" : `${sw.stepsAway} 步后`;
+          parts.push(`<div class="next-step-line"><span class="cat-pill">换职</span><b>Lv${sw.frm}→${sw.to}</b> ${U.esc(sw.fromCls)}→<b>${U.esc(sw.toCls)}</b> <small class="hint">(${soon})</small></div>`);
+        }
+        return parts.length ? parts.join("") : `<span class="hint">无（全程 ${U.esc(row.curClass || "原职业")}）</span>`;
+      };
+
+      const fmtSkip = row => {
+        if (!row.nextSkip) return `<span class="hint">无</span>`;
+        const sk = row.nextSkip;
+        const soon = sk.stepsAway === 0 ? "<b>立刻</b>" : `${sk.stepsAway} 步后`;
+        return `<b>Lv${sk.lv} 跳过</b><span class="next-sub">${soon}${sk.roll != null ? ` · 判定 ${sk.roll}%` : ""}</span>`;
+      };
+
+      const fmtTrain = row => {
+        if (!row.nextTrain) return `<span class="hint">无需额外练习</span>`;
+        const t = row.nextTrain;
+        const more = row.allTrains.length > 1 ? ` <small class="hint">（另有 ${row.allTrains.length - 1} 项）</small>` : "";
+        return `<b>Lv${t.lv} 考${U.esc(t.cls)}前</b>：${U.esc(t.train.join("、"))}<span class="next-sub">共 ${t.ranks} 段${more}</span>`;
+      };
+
+      const overviewTableHtml = `<section class="alerts" data-cmt-target="summary:next-overview" data-cmt-label="全员下一步总览（按 P0→P1→P2）">
+        <div class="pm-sec-head">
+          <h2>全员下一步总览（按 P0 → P1 → P2 排序 · 共 ${summaryRows.length} 人）</h2>
+          ${renderCommentBtn("summary:next-overview", "全员下一步总览（按 P0→P1→P2）", "批注总览")}
+        </div>
+        ${RM.priorityLinkNote ? `<p class="hint" style="margin:4px 0 8px">${U.esc(RM.priorityLinkNote)}（完整 63 人 SS~D 评级见 <a href="#skills">「技能图鉴 → 全 63 角色评级」</a>）</p>` : ""}
+        ${renderCommentThread("summary:next-overview", "全员下一步总览（按 P0→P1→P2）")}
+        <div class="scroll"><table class="next-tbl">
+          <tr>
+            <th>角色（P 级 · 强度）</th>
+            <th>现在 Lv / 职业</th>
+            <th>立刻要做</th>
+            <th>下一次转职 / 考试</th>
+            <th>下一次跳过</th>
+            <th>下一次练习技能</th>
+          </tr>
+          ${summaryRows.map(r => {
+            const needStop = ["exam", "skip", "switch", "missing"].includes(r.immediate.kind);
+            return `<tr class="${needStop ? "cur" : ""}" data-next-row="${U.esc(r.name)}" data-tier="${U.esc(r.tier)}">
+              <td class="next-who">
+                <a href="#next" data-go="${U.slug(r.char)}"><b>${U.esc(U.shortName(r.name))}</b></a>
+                <span class="next-badges">${renderPTierBadge(r.tier, r.priorityNote)}${renderStrengthBadge(r)}</span>
+                ${r.role ? `<span class="next-sub">${U.esc(r.role)}</span>` : ""}
+              </td>
+              <td class="next-who"><b>Lv${r.curLv ?? "?"}</b> ${U.esc(r.curClass || "—")}<span class="next-sub">规划终点 Lv${r.endLevel ?? "?"}</span></td>
+              <td>${fmtImmediate(r.immediate)}</td>
+              <td>${fmtTransfer(r)}</td>
+              <td>${fmtSkip(r)}</td>
+              <td>${fmtTrain(r)}</td>
+            </tr>`;
+          }).join("")}
+        </table></div>
+      </section>`;
+
       const tag = { exam: ["warn", "考试"], skip: ["warn", "跳过"], miss: ["bad", "缺职业"], cls: ["ok", "转职"] };
       const gateHtml = `<section class="alerts"><h2>暂时不能直接升级</h2><ul>${stop.length ? stop.map(([k, a, t]) => `<li><span class="sev ${tag[k][0]}">${tag[k][1]}</span><span>${a}：${t}</span></li>`).join("") : `<li><span class="sev ok">无</span><span>所有人都可以直接升级</span></li>`}</ul>${go.length ? `<p class="txt" style="font-size:13px"><span class="lab">可以直接升级</span>${go.join("；")}</p>` : ""}</section>`;
       const alertsHtml = `<section class="alerts" aria-label="要注意"><h2>升级前先看</h2><ul>${alertRows.map(([k, t]) => `<li><span class="sev ${k}">${k === "bad" ? "会失败" : k === "warn" ? "注意" : "正常"}</span><span>${t}</span></li>`).join("")}</ul></section>`;
 
-      const cards = CH.filter(c => !focus || U.slug(c) === focus).map(c => {
+      const cards = visibleChars.map(c => {
         const w = walkOf(c), leftRows = w.rows.filter(r => !r.done), nx = leftRows.slice(0, 3), rm = remainOf(c, w);
         const items = nx.map((row, i) => {
           const s = row.s, r = row.r, first = i === 0;
@@ -280,8 +373,8 @@
           <div class="cfoot">${c.steps.length ? `<span>按现在的选择到 Lv${w.endLevel} 还会升 <b>${rm.lv}</b> 级、涨 <b>${rm.cnt}</b> 点，加权分 <b>${rm.sc}</b>。<a href="#plan" data-go="${U.slug(c)}">看完整路线</a></span>` : ""}${stateHtml(c, w)}</div>
         </article>`;
       }).join("");
-      return `<p class="lede">每人最近 3 步，第一步是现在要做的。</p>${gateHtml}${alertsHtml}<div class="grid">${cards}</div>` + notesBox([
-        "做完一步点「✓ 做完了」，等级和已完成会自动往后推。",
+      return `<p class="lede">按优先级（P0 → P1 → P2）总览全员当前 Lv 与下一个跳过 / 转职 / 练习技能步骤；下方展开每人最近 3 步详情。</p>${overviewTableHtml}${gateHtml}${alertsHtml}<div class="grid">${cards}</div>` + notesBox([
+        "做完一步点「✓ 做完了」，等级、总览表和已完成状态会自动往后推。",
         "考试步骤把游戏里显示的成功率填进来，页面会直接判断能不能过：<b>判定值</b>低于游戏显示的成功率才过（等于也算失败）。考试不管过不过都消耗一个种子。",
         N_PTS,
       ]);
@@ -701,10 +794,11 @@
         return `<article class="card rp-card" data-rp-char="${U.esc(pr.name)}" data-cmt-target="${U.esc(charTid)}" data-cmt-label="${U.esc(charLbl)}">
           <div class="ch"><div class="ct">
             <h3>${U.esc(pr.name)}</h3>
-            <span class="rec ${pr.tier === "P0" ? "r1" : pr.tier === "P1" ? "r2" : "r3"}">${U.esc(pr.tier)}</span>
+            ${renderPTierBadge(pr.tier, pr.priorityNote)}
+            ${renderStrengthBadge(pr)}
             <span class="lv">Lv${pr.level}→目标 Lv${pr.target}（${pr.seeds} 个乱数）</span>
             <span class="r">${statusBadge} ${renderCommentBtn(charTid, charLbl, "批注")}</span>
-          </div></div>
+          </div>${pr.priorityNote ? `<p class="intro note2">📌 ${U.esc(pr.priorityNote)}</p>` : ""}</div>
           <div class="sec rp-opts">
             ${renderCommentThread(charTid, charLbl)}
             ${optHtml}
@@ -726,7 +820,7 @@
         const cCnt = (cmtSum.byTarget["char:" + pr.name]?.open || 0)
           + (pr.options || []).reduce((acc, o) => acc + (cmtSum.byTarget[`opt:${pr.name}:${o.id}`]?.open || 0), 0);
         return `<tr class="${r.source === "pending" ? "cur" : ""}">
-          <td><b>${U.esc(U.shortName(pr.name))}</b> <small>${U.esc(pr.tier)}</small>${cCnt ? ` <span class="cmt-cnt">💬${cCnt}</span>` : ""}</td>
+          <td><b>${U.esc(U.shortName(pr.name))}</b> ${renderPTierBadge(pr.tier, pr.priorityNote)} ${renderStrengthBadge(pr)}${cCnt ? ` <span class="cmt-cnt">💬${cCnt}</span>` : ""}</td>
           <td>${srcTag}</td>
           <td>${r.option ? `<b>${U.esc(r.option.title)}</b>` : `<span class="hint">尚未选择</span>`}</td>
           <td class="n">${r.option ? `${r.option.net}${d && r.option.id !== "old_baseline" ? ` (${U.sgn(d.net)})` : ""}` : "—"}</td>
@@ -743,6 +837,7 @@
             ${renderCommentBtn("summary:proposals", "全 9 人方案对比总表", "批注总表")}
           </div>
           <p class="txt">每个候选方案均已展开<b>相对旧路线的 9 项具体能力差</b>、<b>转职保底</b>、金币/训练/精通差（职业精通不计入虚拟加权分，由你 case by case 拍板）与 S/L 提醒。你的每次点选与 Plan Mode 批注都会<b>自动保存在当前浏览器</b>。</p>
+          ${RM.priorityLinkNote ? `<p class="hint" style="margin:2px 0 6px">${U.esc(RM.priorityLinkNote)}</p>` : ""}
           <div class="rp-toolbar">
             <button type="button" class="btn pri" data-rpick-copy>仅复制路线选择</button>
             ${sumAll.userPicked ? `<button type="button" class="btn ghost" data-rpick-reset>重置全部网页选择</button>` : ""}

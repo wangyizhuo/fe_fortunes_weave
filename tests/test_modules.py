@@ -138,11 +138,14 @@ class TestClassesModule(unittest.TestCase):
         from modules.route.choice_builder import build_route_proposals
         props = build_route_proposals()
         self.assertEqual(len(props), 9)
-        # 严格按档位 P0 -> P1 -> P2 排序
+        # 严格按档位 P0 -> P1 -> P2 排序，且伊欧已下调至 P1
         tier_rank = {"P0": 0, "P1": 1, "P2": 2}
         ranks = [tier_rank[p["tier"]] for p in props]
         self.assertEqual(ranks, sorted(ranks))
         by_name = {p["name"]: p for p in props}
+        self.assertEqual(by_name["伊欧"]["tier"], "P1")
+        self.assertEqual(by_name["伊欧"]["strengthTier"], "B")
+        self.assertEqual(by_name["迪托利希"]["strengthTier"], "S")
         for confirmed in ("伊欧", "奇洛伊卡", "米迦艾拉", "杨界"):
             self.assertEqual(by_name[confirmed]["defaultPick"], "new_best")
         for pending in ("迪托利希", "努蒂奴", "乌尔坦德", "法毕欧", "艾丝梅拉尔达"):
@@ -166,12 +169,27 @@ class TestSkillsModule(unittest.TestCase):
         by_name = {s["name"]: s for s in d["skills"]}
         self.assertEqual(by_name["传送"]["rating"], "S")
         self.assertEqual(by_name["体格+"]["rating"], "S")
+        # 体格/体格+ 属于角色个人熟练度习得表，而非职业固有技能
+        self.assertEqual(by_name["体格"]["scope"], "common_learn")
+        self.assertIn("角色表限定", by_name["体格"]["scopeLabel"])
+        self.assertEqual(len(by_name["体格"]["classSources"]), 0)
+        self.assertEqual(by_name["体格"]["ownerCount"], 39)
+        self.assertEqual(by_name["体格+"]["ownerCount"], 24)
         self.assertEqual(by_name["秘传·落燕+"]["scope"], "unique")
         self.assertEqual(by_name["秘传·落燕+"]["charSources"][0]["char"], "迪托利希")
         self.assertEqual(by_name["大反击"]["scope"], "common_class")
+        self.assertIn("全员通用", by_name["大反击"]["scopeLabel"])
         self.assertEqual(by_name["大反击"]["classSources"][0]["cls"], "重装步兵")
-        # 角色表已招 9 人排在最前面
+        # 角色表已招 9 人排在最前面，且全部 63 人均配有 SS~D 综合强度评级
         self.assertTrue(all(c["recruited"] for c in d["characters"][:9]))
+        valid_tiers = {"SS", "S", "A", "B", "C", "D"}
+        self.assertTrue(all(c["strengthTier"] in valid_tiers for c in d["characters"]))
+        c_by_name = {c["name"]: c for c in d["characters"]}
+        self.assertEqual(c_by_name["迪托利希"]["strengthTier"], "S")
+        self.assertEqual(c_by_name["救世主"]["strengthTier"], "SS")
+        self.assertEqual(c_by_name["蕾达"]["strengthTier"], "SS")
+        self.assertEqual(c_by_name["伊欧"]["strengthTier"], "B")
+        self.assertEqual(c_by_name["伊欧"]["dietrichPriority"], "P1")
 
 
 if __name__ == "__main__":

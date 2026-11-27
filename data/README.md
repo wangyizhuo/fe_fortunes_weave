@@ -11,7 +11,7 @@
 | [艾丝梅拉尔达](characters/艾丝梅拉尔达.md) | P0 | Lv21 | 飞鸵兵 | 208 | 378 |
 | [米迦艾拉](characters/米迦艾拉.md) | P0 | Lv20 | 士兵 | 261 | 392 |
 | [杨界](characters/杨界.md) | P1 | Lv20 | 诅咒师 | 215 | 387 |
-| [伊欧](characters/伊欧.md) | P0 | Lv23 | 轻骑兵 | 224 | 305 |
+| [伊欧](characters/伊欧.md) | P1 | Lv23 | 轻骑兵 | 234 | 339 |
 | [奇洛伊卡](characters/奇洛伊卡.md) | P1 | Lv15 | 猎兵 | 261 | 391 |
 | [努蒂奴](characters/努蒂奴.md) | P2 | Lv15 | 飞鸵兵 | 258 | 376 |
 | [乌尔坦德](characters/乌尔坦德.md) | P2 | Lv15 | 诅咒师 | 264 | 397 |

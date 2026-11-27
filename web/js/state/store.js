@@ -48,6 +48,7 @@
       skillsDiscipline: "全部",
       skillsOnlyRecruited: false,
       skillsCharGroup: "recruited", // recruited | dietrich | all
+      skillsCharTier: "全部", // 全部 | SS | S | A | B | C | D
       skillsShowAll: false,
       copyFeedback: "",
       db: null,

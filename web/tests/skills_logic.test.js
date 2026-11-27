@@ -80,13 +80,16 @@ test("filterSkills filters by rating, scope, discipline, recruited and query", (
   assert.equal(SL.filterSkills(SAMPLE_SKILLS, { query: "warp" }).map(s => s.name).join(","), "传送");
 });
 
-test("filterSkillChars filters by group and skill keyword", () => {
+test("filterSkillChars filters by group, strengthTier, and skill keyword", () => {
   const chars = [
-    { name: "迪托利希", enName: "Dietrich", recruited: true, dietrichRoute: true, matrix: { 剑术: [{ name: "秘传·落燕+" }] } },
-    { name: "凯伊", enName: "Cai", recruited: false, dietrichRoute: false, matrix: { 白魔术: [{ name: "传送" }] } },
+    { name: "迪托利希", enName: "Dietrich", recruited: true, dietrichRoute: true, strengthTier: "S", pserTier: "T0", role: "必杀战神主角", matrix: { 剑术: [{ name: "秘传·落燕+" }] } },
+    { name: "凯伊", enName: "Cai", recruited: false, dietrichRoute: false, strengthTier: "S", pserTier: "T0", role: "高机动双刀主", matrix: { 白魔术: [{ name: "传送" }] } },
+    { name: "蕾达", enName: "Leda", recruited: false, dietrichRoute: false, strengthTier: "SS", pserTier: "T0", role: "圣焰跳舞再动", matrix: {} },
   ];
   assert.equal(SL.filterSkillChars(chars, { group: "recruited" }).length, 1);
   assert.equal(SL.filterSkillChars(chars, { group: "all", query: "传送" }).map(c => c.name).join(","), "凯伊");
+  assert.equal(SL.filterSkillChars(chars, { group: "all", strengthTier: "SS" }).map(c => c.name).join(","), "蕾达");
+  assert.equal(SL.filterSkillChars(chars, { group: "all", strengthTier: "S" }).length, 2);
 });
 
 test("summarizeSkills counts ratings and scopes accurately", () => {

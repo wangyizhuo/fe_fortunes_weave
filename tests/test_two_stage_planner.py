@@ -123,8 +123,9 @@ class TestPurifiedGoalFirstPlanner(unittest.TestCase):
         self.assertEqual(r_di.best.breakdown.skips, 0)
         self.assertEqual(r_di.best.breakdown.pure_stat_score, 263)
 
-        # 伊欧：不人工锁种子，最终面板与净值显著高于锁种子旧方案（224分 / 206.4净值）
+        # 伊欧：已调整为 P1，且不人工锁种子，最终面板与净值显著高于锁种子旧方案（224分 / 206.4净值）
         p_io, t_io = prepare_goal_first_planner("伊欧")
+        self.assertEqual(t_io, "P1")
         self.assertEqual(p_io.no_skip_seeds, set())
         r_io = plan_two_stage(p_io, t_io)
         self.assertGreater(r_io.best.breakdown.pure_stat_score, 224)

@@ -412,6 +412,12 @@
         render();
         return;
       }
+      const skCtier = e.target.closest("[data-sk-ctier]");
+      if (skCtier) {
+        store.state.skillsCharTier = skCtier.dataset.skCtier;
+        render();
+        return;
+      }
       if (e.target.closest("[data-sk-all]")) {
         store.state.skillsShowAll = true;
         render();
@@ -423,6 +429,7 @@
         store.state.skillsCategory = "全部";
         store.state.skillsDiscipline = "全部";
         store.state.skillsOnlyRecruited = false;
+        store.state.skillsCharTier = "全部";
         store.state.skillsQuery = "";
         store.state.skillsShowAll = false;
         render();

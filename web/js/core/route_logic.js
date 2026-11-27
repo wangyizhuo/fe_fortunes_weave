@@ -288,9 +288,149 @@
     return lines.join("\n");
   }
 
+  const TIER_ORDER = { P0: 0, P1: 1, P2: 2 };
+
+  function tierOrderOf(tier) {
+    return Object.prototype.hasOwnProperty.call(TIER_ORDER, tier) ? TIER_ORDER[tier] : 9;
+  }
+
+  function sortCharsByTier(chars) {
+    return (chars || [])
+      .map((c, idx) => ({ c, idx }))
+      .sort((a, b) => {
+        const d = tierOrderOf(a.c && a.c.tier) - tierOrderOf(b.c && b.c.tier);
+        return d !== 0 ? d : a.idx - b.idx;
+      })
+      .map(x => x.c);
+  }
+
+  function summarizeNextActions(chars, prog, infoMap) {
+    const ordered = sortCharsByTier(chars);
+    return ordered.map(c => {
+      const w = walk(c, prog, infoMap);
+      const nx = w.rows.filter(r => !r.done);
+      const doneKeys = new Set(w.rows.filter(r => r.done).map(r => r.s.key));
+      const curLv = w.ci.level ?? c.level ?? null;
+      const curClass = w.cur || c.curClass || "";
+
+      let immediate = { kind: "done", lv: curLv, to: null, cls: curClass, fromCls: curClass, roll: null, pct: null };
+      if (nx.length) {
+        const first = nx[0];
+        const s = first.s;
+        if (first.r.exam) {
+          const ex = examName(s);
+          immediate = {
+            kind: ex ? "exam" : "skip",
+            lv: first.frm,
+            to: null,
+            cls: ex || "",
+            fromCls: curClass,
+            roll: s.roll ?? null,
+            pct: s.pct ?? null,
+          };
+        } else if (first.missing) {
+          immediate = {
+            kind: "missing",
+            lv: first.frm,
+            to: first.to,
+            cls: first.choice,
+            fromCls: curClass,
+            roll: null,
+            pct: null,
+          };
+        } else if (curClass && first.choice && first.choice !== curClass) {
+          immediate = {
+            kind: "switch",
+            lv: first.frm,
+            to: first.to,
+            cls: first.choice,
+            fromCls: curClass,
+            roll: null,
+            pct: null,
+          };
+        } else {
+          immediate = {
+            kind: "level",
+            lv: first.frm,
+            to: first.to,
+            cls: eqName(first),
+            fromCls: curClass,
+            roll: null,
+            pct: null,
+          };
+        }
+      }
+
+      let nextExam = null;
+      let nextSkip = null;
+      let nextSwitch = null;
+      let prevCls = curClass;
+
+      for (let i = 0; i < nx.length; i++) {
+        const row = nx[i];
+        const s = row.s;
+        if (row.r.exam) {
+          const ex = examName(s);
+          if (ex && !nextExam) {
+            nextExam = {
+              lv: row.frm,
+              cls: ex,
+              roll: s.roll ?? null,
+              pct: s.pct ?? null,
+              stepsAway: i,
+              train: s.train && s.trainOk ? [...s.train] : [],
+            };
+          } else if (!ex && !nextSkip) {
+            nextSkip = {
+              lv: row.frm,
+              roll: s.roll ?? null,
+              stepsAway: i,
+            };
+          }
+        } else {
+          if (prevCls && row.choice && row.choice !== prevCls && !nextSwitch) {
+            nextSwitch = {
+              frm: row.frm,
+              to: row.to,
+              fromCls: prevCls,
+              toCls: row.choice,
+              stepsAway: i,
+              missing: !!row.missing,
+            };
+          }
+          if (row.choice) prevCls = row.choice;
+        }
+      }
+
+      const allTrains = (c.trainPlan || []).filter(t => !doneKeys.has(t.key));
+      const nextTrain = allTrains.length ? allTrains[0] : null;
+
+      return {
+        char: c,
+        name: c.name,
+        tier: c.tier || "P1",
+        strengthTier: c.strengthTier || "",
+        pserTier: c.pserTier || "",
+        role: c.role || "",
+        priorityNote: c.priorityNote || "",
+        curLv,
+        curClass,
+        endLevel: w.endLevel,
+        remainingCount: nx.length,
+        immediate,
+        nextExam,
+        nextSwitch,
+        nextSkip,
+        nextTrain,
+        allTrains,
+      };
+    });
+  }
+
   return {
     charInfo, examName, recOf, choiceOf, resultOf, stepName, eqName,
     examVerdict, walk, remain, findDecisions, compactRouteSegments, skipLevelsFor, buildSheetValues,
     resolveRoutePick, summarizeRoutePicks, formatRoutePicksExport,
+    tierOrderOf, sortCharsByTier, summarizeNextActions,
   };
 });
