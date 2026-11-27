@@ -530,10 +530,43 @@
         if (pr) {
           store.state.explorePriorities = [...pr.priorities];
           store.state.exploreTypes = [...pr.types];
+          store.state.exploreOnlyBarterLack = !!pr.onlyBarterLack;
           store.state.exploreQuery = "";
+          store.state.exploreViewBox = null;
           store.state.exploreFeedback = "";
           render();
         }
+        return;
+      }
+      const expMatBtn = e.target.closest("[data-exp-mat]");
+      if (expMatBtn && DATA.explore) {
+        const mat = expMatBtn.dataset.expMat || "";
+        store.state.exploreQuery = mat;
+        store.state.exploreFeedback = "";
+        if (mat) {
+          store.state.explorePriorities = ["P0", "P1", "P2"];
+          store.state.exploreTypes = ["矿石", "道具", "鱼", "蔬菜"];
+          store.state.exploreOnlyBarterLack = false;
+          const rObj = DATA.explore.routes[store.state.exploreRoute || DATA.explore.defaultRoute];
+          const hits = EL.filterExploreSpots((rObj && rObj.spots) || [], {
+            priorities: store.state.explorePriorities,
+            types: store.state.exploreTypes,
+            query: mat,
+            hideVisited: store.state.exploreHideVisited,
+            visitedMap: store.state.exploreVisited,
+          });
+          store.state.exploreSelectedId = hits[0] ? hits[0].id : "";
+          store.state.exploreViewBox = EL.computeFitViewBox(
+            hits,
+            DATA.explore.defaultViewBox,
+            DATA.explore.mapWidth || 3328,
+            DATA.explore.mapHeight || 2560
+          );
+        } else {
+          store.state.explorePriorities = ["P0"];
+          store.state.exploreViewBox = null;
+        }
+        render();
         return;
       }
       const expPin = e.target.closest("[data-exp-pin]");
@@ -586,6 +619,7 @@
             types: store.state.exploreTypes,
             query: store.state.exploreQuery,
             hideVisited: store.state.exploreHideVisited,
+            onlyBarterLack: store.state.exploreOnlyBarterLack,
             visitedMap: store.state.exploreVisited,
           });
           store.state.exploreViewBox = EL.computeFitViewBox(fSpots, defVb, mw, mh);
@@ -613,6 +647,7 @@
           types: store.state.exploreTypes,
           query: store.state.exploreQuery,
           hideVisited: store.state.exploreHideVisited,
+          onlyBarterLack: store.state.exploreOnlyBarterLack,
           visitedMap: store.state.exploreVisited,
         });
         const info = EL.extractFwCollectItems(fSpots, rk);
@@ -849,6 +884,7 @@
         else if (opt === "stations") store.state.exploreShowStations = e.target.checked;
         else if (opt === "arrows") store.state.exploreShowArrows = e.target.checked;
         else if (opt === "hideVisited") store.state.exploreHideVisited = e.target.checked;
+        else if (opt === "onlyBarterLack") store.state.exploreOnlyBarterLack = e.target.checked;
         render();
         return;
       }
@@ -1086,6 +1122,7 @@
       types: store.state.exploreTypes,
       query: store.state.exploreQuery,
       hideVisited: store.state.exploreHideVisited,
+      onlyBarterLack: store.state.exploreOnlyBarterLack,
       visitedMap: store.state.exploreVisited,
     });
     return { rk, rObj, spots };

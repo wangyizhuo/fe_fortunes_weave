@@ -58,6 +58,7 @@
       exploreQuery: "",
       exploreVisited: {},
       exploreHideVisited: false,
+      exploreOnlyBarterLack: false,
       exploreShowLabels: true,
       exploreShowStations: true,
       exploreShowArrows: false,

@@ -53,14 +53,23 @@ class TestBrowserE2E(unittest.TestCase):
         cls.thread = threading.Thread(target=cls.httpd.serve_forever, daemon=True)
         cls.thread.start()
         cls.pw = sync_playwright().start()
-        cls.browser = cls.pw.chromium.launch(args=["--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage"])
 
     @classmethod
     def tearDownClass(cls):
-        cls.browser.close()
         cls.pw.stop()
         cls.httpd.shutdown()
         cls.httpd.server_close()
+
+    def setUp(self):
+        args = ["--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage"]
+        try:
+            self.browser = self.pw.chromium.launch(channel="chromium", args=args)
+        except Exception:
+            self.browser = self.pw.chromium.launch(args=args)
+
+    def tearDown(self):
+        if getattr(self, "browser", None):
+            self.browser.close()
 
     def _new_ctx_page(self, width: int, height: int):
         ctx = self.browser.new_context(viewport={"width": width, "height": height})
@@ -164,22 +173,27 @@ class TestBrowserE2E(unittest.TestCase):
         self.assertIn("采集 / 钓鱼材料反查表", mat_txt)
         self.assertIn("斩马刀", mat_txt)
 
-        # 2.5) 探索规划：高显眼世界地图标记 + 优先级/类型筛选 + 搜索「巨人戒指」定位布隆提斯湖
+        # 2.5) 探索规划：高显眼世界地图标记 + PR#31 重整商会看板 + 缺口直达定位（尤那魅→达玛先海岬/流浪者古庭）
         page.click('#domains a[data-domain="explore"]')
         page.wait_for_selector("#expMapSvg")
-        self.assertGreater(page.locator("#expMapSvg .exp-pin").count(), 20)
+        self.assertGreater(page.locator("#expMapSvg .exp-pin").count(), 15)
         exp_txt = page.inner_text("#view")
         self.assertIn("亚特拉山顶", exp_txt)
+        self.assertIn("旺达尔商会置换优先级", exp_txt)
         self.assertIn("下载高清标记地图 PNG", exp_txt)
-        page.fill("#expSearch", "巨人戒指")
+        page.click('button[data-exp-mat="尤那魅"]')
         page.wait_for_timeout(100)
         exp_q_txt = page.inner_text("#view")
-        self.assertIn("布隆提斯湖", exp_q_txt)
-        self.assertIn("辉光鱼", exp_q_txt)
-        page.fill("#expSearch", "")
+        self.assertIn("达玛先海岬", exp_q_txt)
+        self.assertIn("流浪者古庭", exp_q_txt)
+        page.click('button[data-exp-preset="barter_p0"]')
+        page.wait_for_timeout(100)
+        bp0_txt = page.inner_text("#view")
+        self.assertIn("观日岭", bp0_txt)
+        self.assertIn("阳光花园", bp0_txt)
         page.click('button[data-exp-preset="dungeons"]')
         page.wait_for_timeout(100)
-        self.assertIn("禁忌之森", page.inner_text("#view"))
+        self.assertIn("迦连堡垒残迹", page.inner_text("#view"))
         page.click('button[data-exp-preset="p0_gather"]')
         page.wait_for_timeout(80)
 

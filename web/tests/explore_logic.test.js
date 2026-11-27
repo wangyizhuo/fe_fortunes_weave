@@ -33,6 +33,7 @@ const SAMPLE_SPOTS = [
     score: 112,
     region: "帝都正南",
     nearestStation: "萨拉基亚站",
+    hasBarterLack: true,
     highlights: ["辉光鱼"],
     items: [
       { name: "辉光鱼", tier: "P0", score: 96, tag: "换巨人戒指", reason: "换巨人戒指", exchanges: [{ place: "海都阿雷库托", reward: "巨人戒指", qty: 1 }] },
@@ -50,6 +51,7 @@ const SAMPLE_SPOTS = [
     score: 74,
     region: "帝都正西",
     nearestStation: "凯隆站",
+    hasBarterLack: false,
     highlights: ["椰枣"],
     items: [
       { name: "椰枣", tier: "P1", score: 74, tag: "高频兑换材", reason: "换达米纳弓" },
@@ -67,6 +69,7 @@ const SAMPLE_SPOTS = [
     score: 20,
     region: "帝都周边",
     nearestStation: "西阿玛尔忒娅站",
+    hasBarterLack: false,
     highlights: ["姬金鱼草"],
     items: [
       { name: "姬金鱼草", tier: "P2", score: 15, tag: "", reason: "" },
@@ -74,10 +77,14 @@ const SAMPLE_SPOTS = [
   },
 ];
 
-test("filterExploreSpots filters by priority, type, query, and hideVisited", () => {
+test("filterExploreSpots filters by priority, type, query, onlyBarterLack, and hideVisited", () => {
   assert.deepEqual(
     EL.filterExploreSpots(SAMPLE_SPOTS, { priorities: ["P0"] }).map(s => s.name),
     ["亚特拉山顶", "布隆提斯湖"]
+  );
+  assert.deepEqual(
+    EL.filterExploreSpots(SAMPLE_SPOTS, { onlyBarterLack: true }).map(s => s.name),
+    ["布隆提斯湖"]
   );
   assert.deepEqual(
     EL.filterExploreSpots(SAMPLE_SPOTS, { types: ["蔬菜"] }).map(s => s.name),

@@ -6,39 +6,52 @@
   const PRESETS = [
     {
       id: "p0_gather",
-      label: "🔴 P0 必抢采集点（默认）",
+      label: "🔴 P0 必抢采集（缺口+神矿+指南书）",
       priorities: ["P0"],
       types: ["矿石", "道具", "鱼", "蔬菜"],
+      onlyBarterLack: false,
+    },
+    {
+      id: "barter_p0",
+      label: "🎯 仅看商会 P0 缺口（9 处）",
+      priorities: ["P0"],
+      types: ["矿石", "道具", "鱼", "蔬菜"],
+      onlyBarterLack: true,
+    },
+    {
+      id: "barter_p01",
+      label: "🛒 全部商会缺口（P0+P1）",
+      priorities: ["P0", "P1"],
+      types: ["矿石", "道具", "鱼", "蔬菜"],
+      onlyBarterLack: true,
     },
     {
       id: "p01_gather",
       label: "🔥 P0 + P1 全部重点采集",
       priorities: ["P0", "P1"],
       types: ["矿石", "道具", "鱼", "蔬菜"],
+      onlyBarterLack: false,
     },
     {
       id: "ores",
       label: "⛏ 全图矿石点",
       priorities: ["P0", "P1", "P2"],
       types: ["矿石"],
+      onlyBarterLack: false,
     },
     {
       id: "dungeons",
-      label: "🏰 迷宫指南书 / 能力露 / 神装",
+      label: "🏰 迷宫 S 武器 / 指南书 / 能力露",
       priorities: ["P0", "P1"],
       types: ["迷宫"],
+      onlyBarterLack: false,
     },
     {
       id: "p0_barter",
-      label: "🏪 P0 采集 + 旺达尔商会",
+      label: "🏪 P0 缺口 + 旺达尔商会",
       priorities: ["P0"],
       types: ["矿石", "道具", "鱼", "蔬菜", "商会"],
-    },
-    {
-      id: "all_spots",
-      label: "🗺 全部点位",
-      priorities: ["P0", "P1", "P2"],
-      types: ["矿石", "道具", "鱼", "蔬菜", "迷宫", "商会"],
+      onlyBarterLack: true,
     },
   ];
 
@@ -141,6 +154,74 @@
     </div>`;
   }
 
+  function renderBarterBoard(bs, query) {
+    if (!bs || !bs.entries || !bs.entries.length) return "";
+    const lackMats = (bs.materials || []).filter(m => m.hasShortage);
+    const curQ = String(query || "").trim();
+    const matBtns = lackMats.map(m => {
+      const isP0 = m.shortageTier === "P0";
+      const lackN = isP0 ? m.lackP0 : m.lackP01;
+      const on = curQ === m.material;
+      const cls = isP0 ? "t-P0" : "t-P1";
+      return `<button type="button" class="pill${on ? " on" : ""}" data-exp-mat="${U.esc(m.material)}" title="${U.esc(m.reason)}">
+        <span class="exp-tier ${cls}">${U.esc(m.shortageTier)}</span> ${U.esc(m.material)} <b>缺${lackN}</b><small style="opacity:.8">（${m.dietrichSpots.length}处）</small>
+      </button>`;
+    }).join("");
+
+    const changedList = (bs.entries || []).filter(e => e.changed);
+    const changedText = changedList.map(e =>
+      `<b>${U.esc(e.item)}</b>（${U.esc(e.changeReason)}）`
+    ).join(" · ");
+
+    const rows = (bs.entries || []).map(e => {
+      const pCls = e.done ? "" : `t-${U.esc(e.priority)}`;
+      const wBadge = e.weaponTier ? `<span class="sk-tier tier-${U.esc(e.weaponTier === "SS" ? "S" : e.weaponTier)}">${U.esc(e.weaponTier)}</span> ` : "";
+      const chgBadge = e.changed ? `<span class="cat-pill" style="background:#fef3c7;color:#92400e">${U.esc(e.origPriority)}→${U.esc(e.priority)}</span>` : "";
+      const costStr = (e.cost || []).map(c => `${c.mat}×${c.qty}（有${c.have}）`).join("；");
+      return `<tr class="${e.done ? "exp-row vis" : ""}">
+        <td>${e.done ? `<span class="cat-pill">已换</span>` : `<span class="exp-tier ${pCls}">${U.esc(e.priority)}</span>`} ${chgBadge}</td>
+        <td>${wBadge}<b>${U.esc(e.item)}</b> <span class="hint">${U.esc(e.type)}</span></td>
+        <td>${U.esc(e.place)}</td>
+        <td>${U.esc(costStr)}</td>
+        <td><b>${U.esc(e.lackText)}</b></td>
+        <td class="hint">${U.esc(e.note)}</td>
+      </tr>`;
+    }).join("");
+
+    const cnt = bs.counts || {};
+    return `<section class="card" style="margin-top:10px">
+      <div class="ch"><div class="ct">
+        <h3>📋 旺达尔商会置换优先级（按 PR #31 武器榜 SS/S→P0 重整 · ${U.esc(bs.snapshotDate || "")} 库存）</h3>
+        <span class="r">
+          <span class="exp-tier t-P0">P0×${cnt.P0 || 0}</span>
+          <span class="exp-tier t-P1">P1×${cnt.P1 || 0}</span>
+          <span class="exp-tier t-P2">P2×${cnt.P2 || 0}</span>
+          <span class="cat-pill">已换 ${cnt.done || 0}</span>
+          ${bs.sheetUrl ? `<a class="btn ghost" href="${U.esc(bs.sheetUrl)}" target="_blank" rel="noopener">原 Google Sheet ↗</a>` : ""}
+        </span>
+      </div></div>
+      <div class="sec">
+        ${changedText ? `<p class="hint" style="margin:0 0 8px">🔄 <b>本次按 PR #31 调整：</b>${changedText}；已换完的 <b>巨人戒指 / 必圣宝珠</b> 素材（辉光鱼/赤金拜/红烁）及库存已够的 <b>太阳果 / 金鳟</b> 自动移出地图 P0。</p>` : ""}
+        <div class="sk-filter-row" style="margin-top:0">
+          <span class="sk-flbl">缺口直达</span>
+          <div class="pills">
+            ${matBtns}
+            ${curQ ? `<button type="button" class="btn ghost" data-exp-mat="">清除素材聚焦</button>` : ""}
+          </div>
+        </div>
+        <details class="more" style="margin-top:8px">
+          <summary>展开完整 29 项商会置换重整表（含武器评级、实测库存与缺口）</summary>
+          <div class="scroll" style="margin-top:8px">
+            <table class="exp-tbl">
+              <thead><tr><th>新优先级</th><th>道具（PR#31评级）</th><th>地点</th><th>配方（有/需）</th><th>缺口状态</th><th>理由与来源</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+    </section>`;
+  }
+
   function renderExploreView(data, state) {
     if (!data) return `<p class="lede">探索规划数据加载中…</p>`;
     const routeKey = state.exploreRoute || data.defaultRoute || "dietrich";
@@ -152,6 +233,7 @@
     const types = state.exploreTypes || ["矿石", "道具", "鱼", "蔬菜"];
     const query = state.exploreQuery || "";
     const hideVisited = !!state.exploreHideVisited;
+    const onlyBarterLack = !!state.exploreOnlyBarterLack;
     const showLabels = state.exploreShowLabels !== false;
     const showStations = state.exploreShowStations !== false;
     const showArrows = !!state.exploreShowArrows;
@@ -162,6 +244,7 @@
       types,
       query,
       hideVisited,
+      onlyBarterLack,
       visitedMap,
     });
     const sum = EL.summarizeExplore(filtered, visitedMap);
@@ -188,6 +271,7 @@
     // 2) 快捷场景预设
     const presetBtns = PRESETS.map(pr => {
       const active =
+        !!pr.onlyBarterLack === onlyBarterLack &&
         pr.priorities.length === priorities.length &&
         pr.priorities.every(x => priorities.includes(x)) &&
         pr.types.length === types.length &&
@@ -295,7 +379,8 @@
         <div class="sk-filter-row"><span class="sk-flbl">优先级</span><div class="skill-cbs">${tierChecks}</div></div>
         <div class="sk-filter-row"><span class="sk-flbl">点位类型</span><div class="skill-cbs">${typeChecks}</div></div>
         <div class="toolbar" style="margin:6px 0 0">
-          <input type="search" id="expSearch" data-exp-q value="${U.esc(query)}" placeholder="搜地名、素材（奥利哈钢 / 辉光鱼 / 驱虫菊 / 巴谷 / 椰枣）或兑换目标（巨人戒指 / 追击宝珠 / 指南书）…">
+          <input type="search" id="expSearch" data-exp-q value="${U.esc(query)}" placeholder="搜地名、素材（尤那魅 / 挪亚果 / 恩黎艾特 / 青津吉 / 亚尔玛梅托 / 奥利哈钢）或目标（雷电剑 / 伏力萨 / 屠马弓 / 指南书）…">
+          <label class="chk"><input type="checkbox" data-exp-opt="onlyBarterLack"${onlyBarterLack ? " checked" : ""}> 只看商会实测缺口</label>
           <label class="chk"><input type="checkbox" data-exp-opt="labels"${showLabels ? " checked" : ""}> 常驻醒目标签</label>
           <label class="chk"><input type="checkbox" data-exp-opt="stations"${showStations ? " checked" : ""}> 驿站路标</label>
           <label class="chk"><input type="checkbox" data-exp-opt="arrows"${showArrows ? " checked" : ""}> 通行箭头</label>
@@ -310,6 +395,8 @@
         </div>
         ${feedback}
       </section>
+
+      ${renderBarterBoard(data.barterSummary, query)}
 
       <section class="exp-stage">
         <div class="exp-hud">
