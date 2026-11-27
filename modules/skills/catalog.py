@@ -34,6 +34,29 @@ CATEGORY_ORDER = [
     "熟练度特技", "战技", "黑魔术", "白魔术", "血印",
 ]
 
+UNIT_TYPE_ORDER = [
+    "重装", "步兵", "骑兵", "飞行", "仅限本职业", "无限制",
+]
+
+_UNIT_TYPE_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
+    ("重装", re.compile(r"(?:\[Armored\]|【重装】)", re.IGNORECASE)),
+    ("步兵", re.compile(r"(?:\[Infantry\]|【步兵】)", re.IGNORECASE)),
+    ("骑兵", re.compile(r"(?:\[Cavalry\]|【骑兵】)", re.IGNORECASE)),
+    ("飞行", re.compile(r"(?:\[Flying\]|【飞行】)", re.IGNORECASE)),
+]
+
+
+def _extract_unit_types(effect: str, class_sources: list[dict[str, Any]]) -> list[str]:
+    """提取技能生效的自身兵种限制（严格区分自身兵种条件与对敌特攻 Effective vs.）。"""
+    eff = effect or ""
+    tags: list[str] = []
+    for label, pat in _UNIT_TYPE_PATTERNS:
+        if pat.search(eff):
+            tags.append(label)
+    if not tags and class_sources and all(cs.get("how") == "固有" for cs in class_sources):
+        tags.append("仅限本职业")
+    return tags
+
 
 def _load_json(path: Path) -> Any:
     with open(path, encoding="utf-8") as f:
@@ -298,6 +321,7 @@ def build_skills_catalog() -> dict[str, Any]:
         e["recruitedOwners"] = rec_owners
         e["scope"] = scope
         e["scopeLabel"] = scope_label
+        e["unitTypes"] = _extract_unit_types(e.get("effect", ""), e["classSources"])
         skills_list.append(e)
 
     cat_rank = {c: i for i, c in enumerate(CATEGORY_ORDER)}
@@ -410,6 +434,14 @@ def build_skills_catalog() -> dict[str, Any]:
         k: sum(1 for ch in characters_list if ch["strengthTier"] == k)
         for k in ("SS", "S", "A", "B", "C", "D")
     }
+    unit_type_counts = {
+        ut: (
+            sum(1 for s in skills_list if not (s.get("unitTypes") or []))
+            if ut == "无限制"
+            else sum(1 for s in skills_list if ut in (s.get("unitTypes") or []))
+        )
+        for ut in UNIT_TYPE_ORDER
+    }
 
     return {
         "meta": skills_cfg["meta"],
@@ -419,6 +451,7 @@ def build_skills_catalog() -> dict[str, Any]:
         "priorityLinkNote": tiers_data.get("priorityLinkNote", ""),
         "categories": CATEGORY_ORDER,
         "disciplines": DISCIPLINES,
+        "unitTypes": UNIT_TYPE_ORDER,
         "summary": {
             "skillCount": len(skills_list),
             "charCount": len(characters_list),
@@ -426,6 +459,7 @@ def build_skills_catalog() -> dict[str, Any]:
             "tierCounts": tier_counts,
             "scopeCounts": scope_counts,
             "strengthCounts": strength_counts,
+            "unitTypeCounts": unit_type_counts,
         },
         "skills": skills_list,
         "characters": characters_list,

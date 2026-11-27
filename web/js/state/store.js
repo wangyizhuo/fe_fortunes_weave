@@ -47,10 +47,23 @@
       skillsScope: "全部",
       skillsCategory: "全部",
       skillsDiscipline: "全部",
+      skillsUnitTypes: [],
       skillsOnlyRecruited: false,
       skillsCharGroup: "recruited", // recruited | dietrich | all
       skillsCharTier: "全部", // 全部 | SS | S | A | B | C | D
       skillsShowAll: false,
+      exploreRoute: "dietrich",
+      explorePriorities: ["P0"],
+      exploreTypes: ["矿石", "道具", "鱼", "蔬菜"],
+      exploreQuery: "",
+      exploreVisited: {},
+      exploreHideVisited: false,
+      exploreShowLabels: true,
+      exploreShowStations: true,
+      exploreShowArrows: false,
+      exploreSelectedId: "",
+      exploreViewBox: null,
+      exploreFeedback: "",
       copyFeedback: "",
       db: null,
       writing: false,
@@ -66,6 +79,7 @@
             info: state.info,
             routePicks: state.routePicks,
             planComments: state.planComments,
+            exploreVisited: state.exploreVisited,
           })
         );
       } catch (_) {}
@@ -78,6 +92,7 @@
         state.info = v.info || {};
         state.routePicks = v.routePicks || {};
         state.planComments = Array.isArray(v.planComments) ? v.planComments : [];
+        state.exploreVisited = (v.exploreVisited && typeof v.exploreVisited === "object") ? v.exploreVisited : {};
       } catch (_) {}
     }
 
@@ -286,10 +301,19 @@
       }
     }
 
+    function setExploreVisited(spotId, checked) {
+      if (!spotId) return;
+      state.exploreVisited = { ...(state.exploreVisited || {}) };
+      if (checked) state.exploreVisited[spotId] = true;
+      else delete state.exploreVisited[spotId];
+      saveLocal();
+    }
+
     return {
       state, loadLocal, loadFocus, setFocus, setProg, setCharInfo,
       setRoutePick, clearRoutePick, resetAllRoutePicks,
       addPlanComment, updatePlanComment, toggleResolvePlanComment, deletePlanComment, clearAllPlanComments,
+      setExploreVisited,
       initSync, syncSheet,
     };
   }

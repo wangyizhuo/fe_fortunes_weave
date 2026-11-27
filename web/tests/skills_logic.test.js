@@ -63,9 +63,44 @@ const SAMPLE_SKILLS = [
     rating: "C",
     effect: "Grants Hit/Avo when flying.",
     review: "收益偏低",
+    unitTypes: ["飞行"],
     classSources: [],
     charSources: [{ char: "伊欧", recruited: true, how: "飞行术 C" }],
     recruitedOwners: ["伊欧"],
+  },
+  {
+    name: "重装移动术+1",
+    enName: "Armored Mobility+1",
+    category: "熟练度特技",
+    categories: ["熟练度特技"],
+    discipline: "重装术",
+    disciplines: ["重装术"],
+    scope: "common_learn",
+    scopeLabel: "角色表限定（16/63 人熟练度）",
+    rating: "A",
+    effect: "[Armored] Grants Mov+1 (+2).",
+    review: "重装限定生效",
+    unitTypes: ["重装"],
+    classSources: [],
+    charSources: [{ char: "努蒂奴", recruited: true, how: "重装术 A" }],
+    recruitedOwners: ["努蒂奴"],
+  },
+  {
+    name: "穿铠",
+    enName: "Armor Piercer",
+    category: "战技",
+    categories: ["战技"],
+    discipline: "剑术",
+    disciplines: ["剑术"],
+    scope: "common_learn",
+    scopeLabel: "角色表限定（12/63 人熟练度）",
+    rating: "B",
+    effect: "Effective against armor.",
+    review: "对重装特攻，但任意兵种都能用",
+    unitTypes: [],
+    classSources: [],
+    charSources: [{ char: "迪托利希", recruited: true, how: "剑术 C" }],
+    recruitedOwners: ["迪托利希"],
   },
 ];
 
@@ -73,11 +108,26 @@ test("filterSkills filters by rating, scope, discipline, recruited and query", (
   assert.equal(SL.filterSkills(SAMPLE_SKILLS, { rating: "S" }).length, 2);
   assert.equal(SL.filterSkills(SAMPLE_SKILLS, { scope: "unique" }).map(s => s.name).join(","), "秘传·落燕+");
   assert.equal(SL.filterSkills(SAMPLE_SKILLS, { scope: "common_class" }).map(s => s.name).join(","), "大反击");
-  assert.equal(SL.filterSkills(SAMPLE_SKILLS, { scope: "common" }).length, 3);
+  assert.equal(SL.filterSkills(SAMPLE_SKILLS, { scope: "common" }).length, 5);
   assert.equal(SL.filterSkills(SAMPLE_SKILLS, { discipline: "白魔术" }).map(s => s.name).join(","), "传送");
-  assert.equal(SL.filterSkills(SAMPLE_SKILLS, { onlyRecruited: true }).length, 3); // 秘传·落燕+ + 飞行战斗术 + 通用职业大反击
+  assert.equal(SL.filterSkills(SAMPLE_SKILLS, { onlyRecruited: true }).length, 5);
   assert.equal(SL.filterSkills(SAMPLE_SKILLS, { query: "重装步兵" }).map(s => s.name).join(","), "大反击");
   assert.equal(SL.filterSkills(SAMPLE_SKILLS, { query: "warp" }).map(s => s.name).join(","), "传送");
+});
+
+test("filterSkills filters by unitTypes checkboxes without confusing Effective-vs-armor", () => {
+  assert.deepEqual(
+    SL.filterSkills(SAMPLE_SKILLS, { unitTypes: ["重装"] }).map(s => s.name),
+    ["重装移动术+1"]
+  );
+  assert.deepEqual(
+    SL.filterSkills(SAMPLE_SKILLS, { unitTypes: ["重装", "飞行"] }).map(s => s.name),
+    ["飞行战斗术", "重装移动术+1"]
+  );
+  const unrestricted = SL.filterSkills(SAMPLE_SKILLS, { unitTypes: ["无限制"] }).map(s => s.name);
+  assert.ok(unrestricted.includes("穿铠"));
+  assert.ok(unrestricted.includes("传送"));
+  assert.ok(!unrestricted.includes("重装移动术+1"));
 });
 
 test("filterSkillChars filters by group, strengthTier, and skill keyword", () => {
@@ -92,12 +142,16 @@ test("filterSkillChars filters by group, strengthTier, and skill keyword", () =>
   assert.equal(SL.filterSkillChars(chars, { group: "all", strengthTier: "S" }).length, 2);
 });
 
-test("summarizeSkills counts ratings and scopes accurately", () => {
+test("summarizeSkills counts ratings, scopes, and unitTypes accurately", () => {
   const s = SL.summarizeSkills(SAMPLE_SKILLS);
-  assert.equal(s.total, 4);
+  assert.equal(s.total, 6);
   assert.equal(s.byRating.S, 2);
-  assert.equal(s.byRating.A, 1);
+  assert.equal(s.byRating.A, 2);
+  assert.equal(s.byRating.B, 1);
   assert.equal(s.byRating.C, 1);
   assert.equal(s.byScope.unique, 1);
   assert.equal(s.byScope.common_class, 1);
+  assert.equal(s.byUnitType["重装"], 1);
+  assert.equal(s.byUnitType["飞行"], 1);
+  assert.equal(s.byUnitType["无限制"], 4);
 });

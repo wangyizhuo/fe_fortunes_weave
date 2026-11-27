@@ -439,4 +439,63 @@ th.grp { text-align: center; border-bottom: 1px solid var(--line); } td.cur, th.
 .sk-c-eff .sk-review { margin: 3px 0 0; font-size: 12px; color: var(--muted); }
 .sk-c-src { width: 30%; font-size: 12.5px; }
 .sk-c-src .sk-src-line, .sk-c-src .sk-owners { margin: 2px 0; }
+.sk-ut { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; white-space: nowrap; }
+.sk-ut.ut-重装 { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+.sk-ut.ut-步兵 { background: #dcfce7; color: #166534; border-color: #86efac; }
+.sk-ut.ut-骑兵 { background: #ffedd5; color: #9a3412; border-color: #fdba74; }
+.sk-ut.ut-飞行 { background: #e0f2fe; color: #075985; border-color: #7dd3fc; }
+.sk-ut.ut-仅限本职业 { background: #f3e8ff; color: #6b21a8; border-color: #d8b4fe; }
 @media (max-width: 760px) { .sk-tbl { table-layout: auto; min-width: 680px; } }
+
+/* 探索规划：高显眼交互式世界地图与采集优先级面板 */
+.exp-ctrl { display: grid; gap: 6px; }
+.exp-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 6px; }
+.exp-toast { margin-top: 6px; padding: 6px 10px; border-radius: 7px; background: var(--good-bg); color: var(--good); font-size: 12.5px; font-weight: 600; }
+.exp-stage { margin-top: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.exp-hud { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; padding: 8px 12px; background: var(--bg); border-bottom: 1px solid var(--line); }
+.exp-hud-legend { margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; font-size: 12px; color: var(--muted); }
+.exp-hud-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.exp-hud-legend .dot { display: inline-block; width: 11px; height: 11px; border-radius: 99px; border: 1.5px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.22); }
+.exp-hud-legend .dot.p0 { background: #dc2626; }
+.exp-hud-legend .dot.p1 { background: #ea580c; }
+.exp-hud-legend .dot.p2 { background: #2563eb; }
+.exp-hud-legend .dot.dg { background: #7c3aed; border-radius: 2px; transform: rotate(45deg); }
+.exp-hud-legend .dot.mer { background: #b45309; border-radius: 3px; }
+.exp-hud-legend .dot.stn { background: #0f766e; border-radius: 3px; }
+.exp-canvas-wrap { position: relative; background: #0b1b33; cursor: grab; overflow: hidden; user-select: none; touch-action: none; }
+.exp-canvas-wrap.dragging { cursor: grabbing; }
+.exp-svg { display: block; width: 100%; height: auto; max-height: 76vh; }
+.exp-pin { cursor: pointer; }
+.exp-pin:hover { filter: brightness(1.12); }
+@keyframes expPulse { 0% { opacity: .95; } 50% { opacity: .28; } 100% { opacity: .95; } }
+.exp-pulse { animation: expPulse 1.8s ease-in-out infinite; }
+.exp-detail { padding: 11px 14px; border-top: 1px solid var(--line); background: var(--panel); }
+.exp-detail.empty { font-size: 13px; color: var(--muted); }
+.exp-det-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.exp-det-head h3 { margin: 0; font-size: 16px; }
+.exp-det-head .r { margin-left: auto; display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.exp-rank-big { font-family: var(--mono); font-size: 13px; font-weight: 800; padding: 2px 8px; border-radius: 99px; color: #fff; }
+.exp-rank-big.t-P0, .exp-tier.t-P0 { background: #dc2626; color: #fff; }
+.exp-rank-big.t-P1, .exp-tier.t-P1 { background: #ea580c; color: #fff; }
+.exp-rank-big.t-P2, .exp-tier.t-P2 { background: #2563eb; color: #fff; }
+.exp-tier { display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 800; padding: 1px 6px; border-radius: 4px; }
+.exp-items-list { display: grid; gap: 5px; margin-top: 8px; }
+.exp-item-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; font-size: 13px; padding: 4px 8px; border-radius: 6px; background: var(--bg); }
+.exp-ex { font-size: 12px; color: var(--good); font-weight: 600; }
+.exp-ext-mini { font-size: 11.5px; color: var(--accent-ink); text-decoration: none; margin-left: auto; }
+.exp-ext-mini:hover { text-decoration: underline; }
+.exp-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.exp-tbl th, .exp-tbl td { padding: 7px 9px; border-top: 1px solid var(--line); vertical-align: top; text-align: left; }
+.exp-row { cursor: pointer; }
+.exp-row:hover { background: var(--bg); }
+.exp-row.on { background: var(--tint); }
+.exp-row.vis { opacity: .55; }
+.exp-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.exp-ichip { display: inline-flex; align-items: baseline; gap: 3px; font-size: 12px; padding: 1px 7px; border-radius: 4px; border: 1px solid var(--line); background: var(--bg); }
+.exp-ichip.t-P0 { background: #fee2e2; border-color: #fca5a5; color: #991b1b; font-weight: 700; }
+.exp-ichip.t-P1 { background: #ffedd5; border-color: #fdba74; color: #9a3412; font-weight: 600; }
+.exp-ichip small { opacity: .82; font-size: 11px; }
+.skill-cb.exp-cb-P0.on { border-color: #dc2626; background: #fee2e2; color: #991b1b; }
+.skill-cb.exp-cb-P1.on { border-color: #ea580c; background: #ffedd5; color: #9a3412; }
+.skill-cb.exp-cb-P2.on { border-color: #2563eb; background: #dbeafe; color: #1e40af; }
+

@@ -24,6 +24,7 @@ if str(ROOT) not in sys.path:
 
 from modules.affinity.service import build_affinity_data  # noqa: E402
 from modules.classes.service import build_classes_data  # noqa: E402
+from modules.explore.service import build_explore_data  # noqa: E402
 from modules.items.service import build_items_data  # noqa: E402
 from modules.route.service import build_route_data  # noqa: E402
 from modules.skills.service import build_skills_data  # noqa: E402
@@ -59,6 +60,7 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
 
     affinity = build_affinity_data()
     items = build_items_data()
+    explore = build_explore_data()
     classes = build_classes_data()
     skills = build_skills_data()
     route = build_route_data()
@@ -77,6 +79,11 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
             "items": {
                 "path": "./data/items.json",
                 **items["summary"],
+            },
+            "explore": {
+                "path": "./data/explore.json",
+                "routeCount": explore["summary"]["routeCount"],
+                "totalSpots": explore["summary"]["totalSpots"],
             },
             "classes": {
                 "path": "./data/classes.json",
@@ -99,6 +106,7 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
     _write_json(data_dir / "manifest.json", manifest)
     _write_json(data_dir / "affinity.json", affinity)
     _write_json(data_dir / "items.json", items)
+    _write_json(data_dir / "explore.json", explore)
     _write_json(data_dir / "classes.json", classes)
     _write_json(data_dir / "skills.json", skills)
     _write_json(data_dir / "route.json", route)
@@ -108,6 +116,7 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
         "manifest": manifest,
         "affinity": affinity,
         "items": items,
+        "explore": explore,
         "classes": classes,
         "skills": skills,
         "route": route,
@@ -117,7 +126,7 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
         json.dump(bundle_payload, f, ensure_ascii=False)
         f.write(";\n")
 
-    # 兼容 checks.py 的 page_data.json（保留旧字段，同时新增 items / classes / skillsCatalog / manifest）
+    # 兼容 checks.py 的 page_data.json（保留旧字段，同时新增 items / explore / classes / skillsCatalog / manifest）
     compat_page_data = {
         "schemaVersion": 2,
         "manifest": manifest,
@@ -125,6 +134,7 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
         "reasons": route["reasons"],
         "meals": affinity,
         "items": items,
+        "explore": explore,
         "classes": classes,
         "skillsCatalog": skills,
         "chars": route["chars"],
@@ -140,6 +150,7 @@ def build_data(out_dir: Path = DEFAULT_OUT) -> dict[str, Any]:
         f"[data] ok ({dt:.2f}s) -> {data_dir} | "
         f"affinity:{len(affinity['dishes'])} dishes, "
         f"items:{items['summary']['townCount']} towns/{items['summary']['barterCount']} barter/{items['summary']['materialCount']} materials, "
+        f"explore:{explore['summary']['totalSpots']} spots ({explore['summary']['routeCount']} routes), "
         f"classes:{classes['summary']['classCount']} classes, "
         f"skills:{skills['summary']['skillCount']} skills/{skills['summary']['charCount']} chars, "
         f"route:{len(route['chars'])} chars"
@@ -170,6 +181,16 @@ def build_web(out_dir: Path = DEFAULT_OUT) -> list[str]:
     shutil.copytree(js_src, js_dst)
     for p in js_dst.rglob("*.js"):
         copied.append(str(p.relative_to(out_dir)))
+
+    assets_src = WEB_SRC / "assets"
+    if assets_src.exists():
+        assets_dst = out_dir / "assets"
+        if assets_dst.exists():
+            shutil.rmtree(assets_dst)
+        shutil.copytree(assets_src, assets_dst)
+        for p in assets_dst.rglob("*"):
+            if p.is_file():
+                copied.append(str(p.relative_to(out_dir)))
 
     dt = time.perf_counter() - t0
     print(f"[web]  ok ({dt:.2f}s) -> {out_dir} ({len(copied)} static files)")

@@ -3,12 +3,13 @@
   const U = root.FE.utils;
   const RL = root.FE.routeLogic;
   const CL = root.FE.commentsLogic;
+  const EL = root.FE.exploreLogic;
 
   const ROUTE_VIEWS = ["next", "plan", "past", "l45", "long", "opts", "mine"];
-  const ALL_VIEWS = ["meal", "items", "classes", "skills", ...ROUTE_VIEWS];
+  const ALL_VIEWS = ["meal", "items", "explore", "classes", "skills", ...ROUTE_VIEWS];
 
   let MANIFEST = null;
-  let DATA = { affinity: null, items: null, classes: null, skills: null, route: null };
+  let DATA = { affinity: null, items: null, explore: null, classes: null, skills: null, route: null };
   let pending = false;
   let pendingSelection = null; // { targetId, targetLabel, quote }
 
@@ -29,6 +30,7 @@
   function domainOf(v) {
     if (v === "meal") return "affinity";
     if (v === "items") return "items";
+    if (v === "explore") return "explore";
     if (v === "classes") return "classes";
     if (v === "skills") return "skills";
     return "route";
@@ -49,16 +51,17 @@
     // 1) HTTP(S) 访问时，按功能模块独立 fetch JSON，彻底分离网页与数据（不重复下载 bundle_data.js）
     if (location.protocol === "http:" || location.protocol === "https:") {
       try {
-        const [manifest, affinity, items, classes, skills, route] = await Promise.all([
+        const [manifest, affinity, items, explore, classes, skills, route] = await Promise.all([
           fetch("./data/manifest.json", { cache: "no-store" }).then(r => r.json()),
           fetch("./data/affinity.json", { cache: "no-store" }).then(r => r.json()),
           fetch("./data/items.json", { cache: "no-store" }).then(r => r.json()),
+          fetch("./data/explore.json", { cache: "no-store" }).then(r => r.json()),
           fetch("./data/classes.json", { cache: "no-store" }).then(r => r.json()),
           fetch("./data/skills.json", { cache: "no-store" }).then(r => r.json()),
           fetch("./data/route.json", { cache: "no-store" }).then(r => r.json()),
         ]);
         MANIFEST = manifest;
-        DATA = { affinity, items, classes, skills, route };
+        DATA = { affinity, items, explore, classes, skills, route };
         return;
       } catch (err) {
         const b = await loadBundleScript().catch(() => null);
@@ -142,6 +145,7 @@
     let html = "";
     if (view === "meal") html = V.renderAffinityView(DATA.affinity, store.state);
     else if (view === "items") html = V.renderItemsView(DATA.items, store.state);
+    else if (view === "explore") html = V.renderExploreView(DATA.explore, store.state);
     else if (view === "classes") html = V.renderClassesView(DATA.classes, store.state);
     else if (view === "skills") html = V.renderSkillsView(DATA.skills, store.state);
     else html = V.renderRouteView(view, DATA.route, store.state);
@@ -159,7 +163,7 @@
       const rm = DATA.route.rulesMeta || {};
       const ver = MANIFEST && MANIFEST.version ? ` · 版本 v${MANIFEST.version}` : "";
       const built = MANIFEST && MANIFEST.builtAt ? ` · 数据构建于 ${MANIFEST.builtAt}` : "";
-      foot.textContent = `架构：五大模块（友好度培养 / 道具与材料采集 / 职业图鉴 / 技能图鉴 / 路线规划）前后端数据与逻辑解耦加载（当前快照 ${rm.shotKey || "latest"}，名声 Lv${rm.renown ?? "?"}${ver}${built}）。页面勾选、选择与 Plan Mode 批注均保存在当前浏览器本地存储。`;
+      foot.textContent = `架构：六大模块（友好度培养 / 道具与材料采集 / 探索规划 / 职业图鉴 / 技能图鉴 / 路线规划）前后端数据与逻辑解耦加载（当前快照 ${rm.shotKey || "latest"}，名声 Lv${rm.renown ?? "?"}${ver}${built}）。页面勾选、采集进度、选择与 Plan Mode 批注均保存在当前浏览器本地存储。`;
     }
 
     if (focusInputId) {
@@ -208,6 +212,9 @@
         render();
       } else if (e.target.matches("[data-item-q]")) {
         store.state.itemsQuery = e.target.value;
+        render();
+      } else if (e.target.matches("[data-exp-q]")) {
+        store.state.exploreQuery = e.target.value;
         render();
       } else if (e.target.matches("[data-cls-q]")) {
         store.state.classesQuery = e.target.value;
@@ -498,11 +505,141 @@
         store.state.skillsScope = "全部";
         store.state.skillsCategory = "全部";
         store.state.skillsDiscipline = "全部";
+        store.state.skillsUnitTypes = [];
         store.state.skillsOnlyRecruited = false;
         store.state.skillsCharTier = "全部";
         store.state.skillsQuery = "";
         store.state.skillsShowAll = false;
         render();
+        return;
+      }
+
+      // --- 探索规划：路线/预设/缩放定位/PNG 与 HTML 导出/外部地图同步 ---
+      const expRouteBtn = e.target.closest("[data-exp-route]");
+      if (expRouteBtn) {
+        store.state.exploreRoute = expRouteBtn.dataset.expRoute;
+        store.state.exploreSelectedId = "";
+        store.state.exploreViewBox = null;
+        store.state.exploreFeedback = "";
+        render();
+        return;
+      }
+      const expPresetBtn = e.target.closest("[data-exp-preset]");
+      if (expPresetBtn) {
+        const pr = (root.FE.views.EXPLORE_PRESETS || []).find(x => x.id === expPresetBtn.dataset.expPreset);
+        if (pr) {
+          store.state.explorePriorities = [...pr.priorities];
+          store.state.exploreTypes = [...pr.types];
+          store.state.exploreQuery = "";
+          store.state.exploreFeedback = "";
+          render();
+        }
+        return;
+      }
+      const expPin = e.target.closest("[data-exp-pin]");
+      if (expPin) {
+        store.state.exploreSelectedId = expPin.dataset.expPin;
+        render();
+        return;
+      }
+      const expFocusBtn = e.target.closest("[data-exp-focus]");
+      if (expFocusBtn) {
+        const sid = expFocusBtn.dataset.expFocus;
+        const rObj = DATA.explore && DATA.explore.routes && DATA.explore.routes[store.state.exploreRoute || DATA.explore.defaultRoute];
+        const sp = rObj && (rObj.spots || []).find(x => x.id === sid);
+        if (sp) {
+          store.state.exploreSelectedId = sid;
+          const mw = DATA.explore.mapWidth || 3328;
+          const mh = DATA.explore.mapHeight || 2560;
+          const w = 1150, h = 860;
+          store.state.exploreViewBox = [
+            Math.max(0, Math.min(mw - w, Math.round(sp.x - w / 2))),
+            Math.max(0, Math.min(mh - h, Math.round(sp.y - h / 2))),
+            w,
+            h,
+          ];
+          render();
+          const stg = document.getElementById("expCanvasWrap");
+          if (stg) stg.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        return;
+      }
+      const expRow = e.target.closest("tr[data-exp-row]");
+      if (expRow && !e.target.closest("a,button,input,label")) {
+        store.state.exploreSelectedId = expRow.dataset.expRow;
+        render();
+        return;
+      }
+      const expZoom = e.target.closest("[data-exp-zoom]");
+      if (expZoom && DATA.explore) {
+        const act = expZoom.dataset.expZoom;
+        const mw = DATA.explore.mapWidth || 3328;
+        const mh = DATA.explore.mapHeight || 2560;
+        const defVb = DATA.explore.defaultViewBox || [210, 230, 2900, 2100];
+        const cur = Array.isArray(store.state.exploreViewBox) ? store.state.exploreViewBox : defVb;
+        if (act === "reset") {
+          store.state.exploreViewBox = defVb.slice();
+        } else if (act === "fit") {
+          const rObj = DATA.explore.routes[store.state.exploreRoute || DATA.explore.defaultRoute];
+          const fSpots = EL.filterExploreSpots((rObj && rObj.spots) || [], {
+            priorities: store.state.explorePriorities,
+            types: store.state.exploreTypes,
+            query: store.state.exploreQuery,
+            hideVisited: store.state.exploreHideVisited,
+            visitedMap: store.state.exploreVisited,
+          });
+          store.state.exploreViewBox = EL.computeFitViewBox(fSpots, defVb, mw, mh);
+        } else {
+          const factor = act === "in" ? 0.72 : 1.38;
+          const nw = Math.max(520, Math.min(mw, Math.round(cur[2] * factor)));
+          const nh = Math.max(400, Math.min(mh, Math.round(cur[3] * factor)));
+          const cx = cur[0] + cur[2] / 2;
+          const cy = cur[1] + cur[3] / 2;
+          store.state.exploreViewBox = [
+            Math.max(0, Math.min(mw - nw, Math.round(cx - nw / 2))),
+            Math.max(0, Math.min(mh - nh, Math.round(cy - nh / 2))),
+            nw,
+            nh,
+          ];
+        }
+        render();
+        return;
+      }
+      if (e.target.closest("[data-exp-fwcopy]") && DATA.explore) {
+        const rk = store.state.exploreRoute || DATA.explore.defaultRoute;
+        const rObj = DATA.explore.routes[rk];
+        const fSpots = EL.filterExploreSpots((rObj && rObj.spots) || [], {
+          priorities: store.state.explorePriorities,
+          types: store.state.exploreTypes,
+          query: store.state.exploreQuery,
+          hideVisited: store.state.exploreHideVisited,
+          visitedMap: store.state.exploreVisited,
+        });
+        const info = EL.extractFwCollectItems(fSpots, rk);
+        const script =
+          `localStorage.setItem("route",${JSON.stringify(info.routeKey)});` +
+          `localStorage.setItem("collect",JSON.stringify(${JSON.stringify(info.items)}));` +
+          `location.hash="#c";location.reload();`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(script).then(() => {
+            store.state.exploreFeedback = `✓ 已复制同步脚本（含 ${info.items.length} 种高优先素材）：打开 fire-emblem-fw.site/map.html 按 F12 在 Console 粘贴回车即可批量写入原站「收集清单」`;
+            render();
+          }).catch(() => {
+            store.state.exploreFeedback = `同步脚本（${info.items.length} 种素材）：${script}`;
+            render();
+          });
+        } else {
+          store.state.exploreFeedback = `同步脚本（${info.items.length} 种素材）：${script}`;
+          render();
+        }
+        return;
+      }
+      if (e.target.closest("[data-exp-png]") && DATA.explore) {
+        exportExplorePng();
+        return;
+      }
+      if (e.target.closest("[data-exp-html]") && DATA.explore) {
+        exportExploreHtml();
         return;
       }
 
@@ -676,6 +813,50 @@
         render();
         return;
       }
+      if (e.target.matches("[data-sk-ut]")) {
+        const ut = e.target.dataset.skUt;
+        const cur = new Set(store.state.skillsUnitTypes || []);
+        if (e.target.checked) cur.add(ut);
+        else cur.delete(ut);
+        store.state.skillsUnitTypes = [...cur];
+        store.state.skillsShowAll = false;
+        render();
+        return;
+      }
+      if (e.target.matches("[data-exp-prio]")) {
+        const pr = e.target.dataset.expPrio;
+        const cur = new Set(store.state.explorePriorities || []);
+        if (e.target.checked) cur.add(pr);
+        else cur.delete(pr);
+        store.state.explorePriorities = [...cur];
+        store.state.exploreFeedback = "";
+        render();
+        return;
+      }
+      if (e.target.matches("[data-exp-type]")) {
+        const tp = e.target.dataset.expType;
+        const cur = new Set(store.state.exploreTypes || []);
+        if (e.target.checked) cur.add(tp);
+        else cur.delete(tp);
+        store.state.exploreTypes = [...cur];
+        store.state.exploreFeedback = "";
+        render();
+        return;
+      }
+      if (e.target.matches("[data-exp-opt]")) {
+        const opt = e.target.dataset.expOpt;
+        if (opt === "labels") store.state.exploreShowLabels = e.target.checked;
+        else if (opt === "stations") store.state.exploreShowStations = e.target.checked;
+        else if (opt === "arrows") store.state.exploreShowArrows = e.target.checked;
+        else if (opt === "hideVisited") store.state.exploreHideVisited = e.target.checked;
+        render();
+        return;
+      }
+      if (e.target.matches("[data-exp-visit]")) {
+        store.setExploreVisited(e.target.dataset.expVisit, e.target.checked);
+        render();
+        return;
+      }
       if (e.target.matches("[data-aff-pf]")) {
         store.state.affinityOnlyPerfect = e.target.checked;
         render();
@@ -838,6 +1019,236 @@
     if (syncBtn) {
       syncBtn.addEventListener("click", () => store.syncSheet(DATA.route, syncBtn, setSyncStatus));
     }
+
+    // --- 探索规划 SVG 地图滚轮缩放与鼠标拖拽平移（直接改 viewBox 保持 60fps 流畅） ---
+    let dragState = null;
+    viewEl.addEventListener("mousedown", e => {
+      const wrap = e.target.closest("#expCanvasWrap");
+      if (!wrap || e.button !== 0 || e.target.closest("[data-exp-pin]")) return;
+      const svg = wrap.querySelector("#expMapSvg");
+      if (!svg) return;
+      const vb = (svg.getAttribute("viewBox") || "210 230 2900 2100").split(/\s+/).map(Number);
+      const rect = svg.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      dragState = { wrap, svg, startX: e.clientX, startY: e.clientY, vb, rect, moved: false };
+      wrap.classList.add("dragging");
+    });
+    document.addEventListener("mousemove", e => {
+      if (!dragState) return;
+      const dxPx = e.clientX - dragState.startX;
+      const dyPx = e.clientY - dragState.startY;
+      if (Math.abs(dxPx) > 3 || Math.abs(dyPx) > 3) dragState.moved = true;
+      const mw = Number(dragState.svg.dataset.mapW) || 3328;
+      const mh = Number(dragState.svg.dataset.mapH) || 2560;
+      const [vx, vy, vw, vh] = dragState.vb;
+      const nx = Math.max(0, Math.min(mw - vw, vx - (dxPx / dragState.rect.width) * vw));
+      const ny = Math.max(0, Math.min(mh - vh, vy - (dyPx / dragState.rect.height) * vh));
+      const nextVb = [Math.round(nx), Math.round(ny), Math.round(vw), Math.round(vh)];
+      dragState.svg.setAttribute("viewBox", nextVb.join(" "));
+      store.state.exploreViewBox = nextVb;
+    });
+    document.addEventListener("mouseup", () => {
+      if (!dragState) return;
+      dragState.wrap.classList.remove("dragging");
+      dragState = null;
+    });
+    viewEl.addEventListener("wheel", e => {
+      const wrap = e.target.closest("#expCanvasWrap");
+      if (!wrap) return;
+      const svg = wrap.querySelector("#expMapSvg");
+      if (!svg) return;
+      e.preventDefault();
+      const mw = Number(svg.dataset.mapW) || 3328;
+      const mh = Number(svg.dataset.mapH) || 2560;
+      const [vx, vy, vw, vh] = (svg.getAttribute("viewBox") || "210 230 2900 2100").split(/\s+/).map(Number);
+      const rect = svg.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const rx = (e.clientX - rect.left) / rect.width;
+      const ry = (e.clientY - rect.top) / rect.height;
+      const factor = e.deltaY > 0 ? 1.18 : 0.84;
+      const nw = Math.max(520, Math.min(mw, vw * factor));
+      const nh = Math.max(400, Math.min(mh, vh * factor));
+      const nx = Math.max(0, Math.min(mw - nw, vx + rx * (vw - nw)));
+      const ny = Math.max(0, Math.min(mh - nh, vy + ry * (vh - nh)));
+      const nextVb = [Math.round(nx), Math.round(ny), Math.round(nw), Math.round(nh)];
+      svg.setAttribute("viewBox", nextVb.join(" "));
+      store.state.exploreViewBox = nextVb;
+    }, { passive: false });
+  }
+
+  function getExploreExportContext() {
+    if (!DATA.explore) return null;
+    const rk = store.state.exploreRoute || DATA.explore.defaultRoute || "dietrich";
+    const rObj = DATA.explore.routes && DATA.explore.routes[rk];
+    if (!rObj) return null;
+    const spots = EL.filterExploreSpots(rObj.spots || [], {
+      priorities: store.state.explorePriorities,
+      types: store.state.exploreTypes,
+      query: store.state.exploreQuery,
+      hideVisited: store.state.exploreHideVisited,
+      visitedMap: store.state.exploreVisited,
+    });
+    return { rk, rObj, spots };
+  }
+
+  function loadImageEl(src) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("地图底图加载失败"));
+      img.src = src;
+    });
+  }
+
+  function triggerDownload(url, filename) {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  async function exportExplorePng() {
+    const ctxInfo = getExploreExportContext();
+    if (!ctxInfo) return;
+    try {
+      const img = await loadImageEl(DATA.explore.mapImage || "./assets/world_map.jpg");
+      const W = 1664, H = 1280;
+      const sx = W / (DATA.explore.mapWidth || 3328);
+      const sy = H / (DATA.explore.mapHeight || 2560);
+      const cv = document.createElement("canvas");
+      cv.width = W;
+      cv.height = H;
+      const g = cv.getContext("2d");
+      g.drawImage(img, 0, 0, W, H);
+
+      // 1) 驿站路标
+      if (store.state.exploreShowStations !== false) {
+        for (const st of ctxInfo.rObj.stations || []) {
+          const x = st.x * sx, y = st.y * sy;
+          g.fillStyle = "#0f766e";
+          g.strokeStyle = "#ffffff";
+          g.lineWidth = 2;
+          g.fillRect(x - 8, y - 8, 16, 16);
+          g.strokeRect(x - 8, y - 8, 16, 16);
+          g.fillStyle = "#ffffff";
+          g.font = "bold 10px sans-serif";
+          g.textAlign = "center";
+          g.textBaseline = "middle";
+          g.fillText("站", x, y + 0.5);
+        }
+      }
+
+      // 2) 高显眼优先级标记（P2 -> P1 -> P0）
+      const ordered = [...ctxInfo.spots].sort((a, b) => {
+        const tr = { P2: 0, P1: 1, P0: 2 };
+        return (tr[a.priority] || 0) - (tr[b.priority] || 0) || (b.rank - a.rank);
+      });
+      for (const sp of ordered) {
+        const tm = EL.TIER_META[sp.priority] || EL.TIER_META.P2;
+        const vis = !!(store.state.exploreVisited && store.state.exploreVisited[sp.id]);
+        const x = sp.x * sx, y = sp.y * sy;
+        const r = sp.priority === "P0" ? 14 : (sp.priority === "P1" ? 11 : 8);
+        g.save();
+        g.globalAlpha = vis ? 0.45 : 1;
+        // 外光环
+        g.beginPath();
+        g.arc(x, y, r + 6, 0, Math.PI * 2);
+        g.fillStyle = vis ? "rgba(100,116,139,0.22)" : tm.halo;
+        g.fill();
+        // 主体
+        g.fillStyle = vis ? "#64748b" : (sp.type === "商会" ? "#b45309" : tm.color);
+        g.strokeStyle = sp.type === "商会" ? "#fef08a" : "#ffffff";
+        g.lineWidth = 2.5;
+        g.beginPath();
+        if (sp.type === "迷宫") {
+          g.moveTo(x, y - r - 2);
+          g.lineTo(x + r + 2, y);
+          g.lineTo(x, y + r + 2);
+          g.lineTo(x - r - 2, y);
+          g.closePath();
+        } else if (sp.type === "商会") {
+          g.rect(x - r, y - r, r * 2, r * 2);
+        } else {
+          g.arc(x, y, r, 0, Math.PI * 2);
+        }
+        g.fill();
+        g.stroke();
+        // 序号
+        g.fillStyle = "#ffffff";
+        g.font = `bold ${sp.priority === "P0" ? 11 : 9}px sans-serif`;
+        g.textAlign = "center";
+        g.textBaseline = "middle";
+        g.fillText(vis ? "✓" : String(sp.rank), x, y + 0.5);
+
+        // 常驻高对比度标签
+        if (store.state.exploreShowLabels !== false && !vis && (sp.priority === "P0" || (sp.priority === "P1" && sp.score >= 70))) {
+          const hi = sp.highlights && sp.highlights[0] ? ` · ${sp.highlights[0]}` : "";
+          const txt = `${sp.name.replace("（旺达尔商会）", "·商")}${hi}`;
+          g.font = "bold 11px sans-serif";
+          const tw = Math.min(180, g.measureText(txt).width + 12);
+          const lx = x > W * 0.78 ? x - r - 6 - tw : x + r + 6;
+          g.fillStyle = "rgba(15,23,42,0.88)";
+          g.strokeStyle = tm.color;
+          g.lineWidth = 1.5;
+          g.fillRect(lx, y - 10, tw, 20);
+          g.strokeRect(lx, y - 10, tw, 20);
+          g.fillStyle = "#ffffff";
+          g.textAlign = "left";
+          g.textBaseline = "middle";
+          g.fillText(txt, lx + 6, y + 0.5, tw - 10);
+        }
+        g.restore();
+      }
+
+      // 3) 左上角标题与色标图例条
+      g.fillStyle = "rgba(15,23,42,0.88)";
+      g.fillRect(16, 16, 560, 44);
+      g.fillStyle = "#ffffff";
+      g.font = "bold 15px sans-serif";
+      g.textAlign = "left";
+      g.textBaseline = "middle";
+      g.fillText(`万紫千红 · 探索规划（${ctxInfo.rObj.name}｜共 ${ctxInfo.spots.length} 处）  🔴P0必抢  🟠P1重点  🔵P2常规  ◇迷宫  ■商会`, 28, 38);
+
+      const url = cv.toDataURL("image/png");
+      triggerDownload(url, `万紫千红-探索规划-${ctxInfo.rObj.name}.png`);
+      store.state.exploreFeedback = `✓ 已导出高清标记地图 PNG（1664×1280，共 ${ctxInfo.spots.length} 处标记）`;
+      render();
+    } catch (err) {
+      store.state.exploreFeedback = "导出 PNG 失败：" + (err && err.message ? err.message : String(err));
+      render();
+    }
+  }
+
+  async function exportExploreHtml() {
+    const ctxInfo = getExploreExportContext();
+    if (!ctxInfo) return;
+    let imgDataUrl = DATA.explore.mapImage || "./assets/world_map.jpg";
+    try {
+      const img = await loadImageEl(imgDataUrl);
+      const cv = document.createElement("canvas");
+      cv.width = img.naturalWidth || 1664;
+      cv.height = img.naturalHeight || 1280;
+      cv.getContext("2d").drawImage(img, 0, 0);
+      imgDataUrl = cv.toDataURL("image/jpeg", 0.82);
+    } catch (_) {}
+    const html = EL.buildStandaloneMapHtml({
+      title: `万紫千红 · 探索规划（${ctxInfo.rObj.name}）`,
+      mapImageDataUrl: imgDataUrl,
+      mapWidth: DATA.explore.mapWidth || 3328,
+      mapHeight: DATA.explore.mapHeight || 2560,
+      viewBox: store.state.exploreViewBox || DATA.explore.defaultViewBox,
+      spots: ctxInfo.spots,
+      stations: store.state.exploreShowStations !== false ? (ctxInfo.rObj.stations || []) : [],
+    });
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    triggerDownload(url, `万紫千红-探索规划-${ctxInfo.rObj.name}.html`);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    store.state.exploreFeedback = `✓ 已导出离线独立标记地图 HTML（含内嵌高清世界底图与 ${ctxInfo.spots.length} 处优先级清单）`;
+    render();
   }
 
   async function boot() {
