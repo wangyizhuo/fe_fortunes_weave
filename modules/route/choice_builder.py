@@ -20,7 +20,7 @@ if str(RNG_DIR) not in sys.path:
     sys.path.insert(0, str(RNG_DIR))
 
 from fe_growth import STATS  # noqa: E402
-from planner import _TIER, plan_all  # noqa: E402
+from planner import _TIER, exam_rate, plan_all  # noqa: E402
 import run_plans as R  # noqa: E402
 from modules.character_tiers import char_sort_key, get_character_tier, get_current_lord, load_character_tiers  # noqa: E402
 from .objective import DEFAULT_TIER_POLICIES  # noqa: E402
@@ -48,17 +48,13 @@ def _fmt_promo_lifts(lifts: dict[int, list[tuple[int, int, int]]]) -> list[str]:
     return out
 
 
-def _exam_skill_details(p: Any, cls: str, lv: int) -> dict[str, Any]:
-    """解析职业考试所需的技能与等级门槛，并结合当前快照技能与考前训练估算考前预估技能等级。"""
+def _exam_skill_details(p: Any, cls: str, lv: int, roll: float | None = None) -> dict[str, Any]:
+    """按当前快照技能与考试等级计算真实预估通过率（不假定已练满）；若不足 100%，按乱数判定值反推最低训练要求。"""
     name = getattr(p, "name", "") or getattr(p, "character", "")
     skills = (R.shot(name) or {}).get("skills", {})
     req_text = R._CLS_REQ.get(cls, "")
     m_lv = re.search(r"推荐 Lv(\d+)", req_text)
     rec_lv = int(m_lv.group(1)) if m_lv else None
-
-    tr_rk = (getattr(p, "exam_train_ranks", {}) or {}).get(cls, 0)
-    is_trained = tr_rk > 0
-    is_conf = cls in (getattr(p, "confident", ()) or ())
     ranks = R.RANKS
 
     def eval_pair(sk: str, rk: str) -> tuple[int, int, str]:
@@ -71,7 +67,7 @@ def _exam_skill_details(p: Any, cls: str, lv: int) -> dict[str, Any]:
         return max(0, need - cur_idx), cur_idx, cur
 
     checks: list[dict[str, Any]] = []
-    parts_txt: list[str] = []
+    cur_parts: list[str] = []
 
     for part in req_text.split("·"):
         part = part.strip()
@@ -80,61 +76,108 @@ def _exam_skill_details(p: Any, cls: str, lv: int) -> dict[str, Any]:
             continue
         if part.startswith("主要"):
             for sk, rk in pairs:
-                gap, _, cur = eval_pair(sk, rk)
-                will_train = bool((is_trained or is_conf) and gap > 0)
-                est = rk if will_train else cur
+                gap, cur_idx, cur = eval_pair(sk, rk)
                 checks.append({
                     "group": "主要",
                     "skill": sk,
                     "cur": cur,
-                    "est": est,
+                    "curIdx": cur_idx,
                     "req": rk,
                     "gap": gap,
-                    "trained": will_train,
                 })
-                if will_train:
-                    parts_txt.append(f"{sk} {cur}→预估{est}（练{gap}段，要求 {rk}）")
-                elif gap == 0:
-                    parts_txt.append(f"{sk} {cur}（要求 {rk}，已达标）")
+                if gap == 0:
+                    cur_parts.append(f"{sk} {cur}（要求 {rk}，已达标）")
                 else:
-                    parts_txt.append(f"{sk} {cur}（要求 {rk}，差{gap}段未练）")
+                    cur_parts.append(f"{sk} {cur}（要求 {rk}，差{gap}段）")
         elif part.startswith("任选其一"):
             best = min(
                 ((eval_pair(sk, rk), sk, rk) for sk, rk in pairs),
                 key=lambda item: (item[0][0], -item[0][1]),
             )
-            (gap, _, cur), sk, rk = best
-            will_train = bool((is_trained or is_conf) and gap > 0)
-            est = rk if will_train else cur
+            (gap, cur_idx, cur), sk, rk = best
             alts = "/".join(f"{a}{b}" for a, b in pairs)
             checks.append({
                 "group": "任选其一",
                 "skill": sk,
                 "cur": cur,
-                "est": est,
+                "curIdx": cur_idx,
                 "req": rk,
                 "gap": gap,
-                "trained": will_train,
                 "alts": alts,
             })
-            if will_train:
-                parts_txt.append(f"{sk} {cur}→预估{est}（练{gap}段，任选 {alts}）")
-            elif gap == 0:
-                parts_txt.append(f"{sk} {cur}（任选 {alts}，已达标）")
+            if gap == 0:
+                cur_parts.append(f"{sk} {cur}（任选 {alts}，已达标）")
             else:
-                parts_txt.append(f"{sk} {cur}（任选 {alts}，差{gap}段未练）")
+                cur_parts.append(f"{sk} {cur}（任选 {alts}，差{gap}段）")
 
     if rec_lv is not None:
         if lv >= rec_lv:
-            parts_txt.append(f"Lv{lv}≥推荐Lv{rec_lv}")
+            cur_parts.append(f"Lv{lv}≥推荐Lv{rec_lv}")
         else:
-            parts_txt.append(f"Lv{lv}<推荐Lv{rec_lv}（差{rec_lv - lv}级）")
+            cur_parts.append(f"Lv{lv}<推荐Lv{rec_lv}（差{rec_lv - lv}级）")
+
+    raw_gap = sum(ch["gap"] for ch in checks)
+    cur_pct = exam_rate(lv - rec_lv, raw_gap) if rec_lv is not None else None
+    full_pct = exam_rate(lv - rec_lv, 0) if rec_lv is not None else None
+
+    min_train_ranks: int | None = None
+    min_pass_pct: int | None = None
+    min_req_text = ""
+
+    if cur_pct is not None and cur_pct < 100 and roll is not None and rec_lv is not None:
+        for t in range(raw_gap + 1):
+            cand_pct = exam_rate(lv - rec_lv, raw_gap - t)
+            if cand_pct > roll:
+                min_train_ranks = t
+                min_pass_pct = cand_pct
+                break
+
+        if min_train_ranks == 0:
+            tail = f"；练满 {raw_gap} 段可到 {full_pct}%" if raw_gap > 0 and full_pct != cur_pct else ""
+            min_req_text = f"按判定 {roll:.2f}% 最低要求：当前无需练技能即可过（估 {cur_pct}% > {roll:.2f}%{tail}）"
+        elif min_train_ranks is not None and min_pass_pct is not None:
+            rem = min_train_ranks
+            step_parts: list[str] = []
+            full_parts: list[str] = []
+            for ch in checks:
+                g = ch["gap"]
+                if g <= 0:
+                    continue
+                full_parts.append(f"{ch['skill']} {ch['cur']}→{ch['req']}")
+                take = min(rem, g)
+                if take > 0:
+                    if ch["curIdx"] >= 0 and ch["curIdx"] + take < len(ranks):
+                        tgt_rk = ranks[ch["curIdx"] + take]
+                    else:
+                        tgt_rk = ch["req"]
+                    step_parts.append(f"{ch['skill']} {ch['cur']}→{tgt_rk}")
+                    rem -= take
+            lv_cap = f"，受 Lv{lv}<推荐Lv{rec_lv} 限制" if lv < rec_lv else ""
+            margin_min = round(min_pass_pct - roll, 2)
+            warn_s = f"，余量 +{margin_min}% ⚠️建议S/L" if min_pass_pct < 100 and margin_min < 5 else ""
+            extra_full = (
+                f"；练满 {raw_gap} 段（{'、'.join(full_parts)}）可到 {full_pct}% 稳过"
+                if min_train_ranks < raw_gap and full_pct is not None and full_pct > min_pass_pct
+                else ""
+            )
+            min_req_text = (
+                f"按判定 {roll:.2f}% 最低要求：{'、'.join(step_parts)}"
+                f"（练 {min_train_ranks} 段 → 估 {min_pass_pct}%{lv_cap}{warn_s}{extra_full}）"
+            )
+        else:
+            min_req_text = f"按判定 {roll:.2f}%：即使练满技能也仅估 {full_pct}% ≤ {roll:.2f}%，本步考不过"
 
     return {
         "clsReq": req_text,
         "recLv": rec_lv,
-        "skillChecks": checks,
-        "skillSummary": "、".join(parts_txt),
+        "rawGap": raw_gap,
+        "curPct": cur_pct,
+        "fullPct": full_pct,
+        "minTrainRanks": min_train_ranks,
+        "minPassPct": min_pass_pct,
+        "minReqText": min_req_text,
+        "skillChecks": [{k: v for k, v in ch.items() if k != "curIdx"} for ch in checks],
+        "skillSummary": "、".join(cur_parts),
     }
 
 
@@ -152,13 +195,18 @@ def _describe_exams(p: Any, acts: tuple[tuple[str, str], ...]) -> list[dict[str,
         tr_rk = (getattr(p, "exam_train_ranks", {}) or {}).get(c, 0)
         tr_sk = (getattr(p, "exam_train", {}) or {}).get(c, []) if tr_rk else []
         fl = [f"{STATS[i]} {o}→{n}" for i, o, n in lifts.get(st, [])]
-        sk_det = _exam_skill_details(p, c, lv)
+        sk_det = _exam_skill_details(p, c, lv, roll=round(roll, 2))
         exams.append({
             "step": st + 1,
             "lv": lv,
             "cls": c,
             "tier": _TIER.get(c, "中级"),
             "pct": pct,
+            "curPct": sk_det["curPct"],
+            "fullPct": sk_det["fullPct"],
+            "minTrainRanks": sk_det["minTrainRanks"],
+            "minPassPct": sk_det["minPassPct"],
+            "minReqText": sk_det["minReqText"],
             "roll": round(roll, 2),
             "margin": margin,
             "isCertain": is_certain,

@@ -197,11 +197,12 @@
         ).join("");
 
         const examLine = (opt.exams || []).map(e => {
-          const pctStr = e.pct != null ? `估 ${e.pct}%` : "—";
-          const trStr = e.trainRanks ? ` · 练 ${e.trainRanks} 段` : "";
-          const skStr = e.skillSummary ? `｜技能与等级预估：${U.esc(e.skillSummary)}` : "";
+          const curP = e.curPct != null ? e.curPct : e.pct;
+          const pctStr = curP != null ? `当前预估 ${curP}%` : "—";
+          const skStr = e.skillSummary ? `｜当前：${U.esc(e.skillSummary)}` : "";
+          const minStr = e.minReqText ? `｜<span class="changed">🎯 ${U.esc(e.minReqText)}</span>` : "";
           const flStr = e.promoFloor && e.promoFloor.length ? ` · 转职保底 ${U.esc(e.promoFloor.join("、"))}` : "";
-          return `<div>Lv${e.lv}(第${e.step}步) <b>${U.esc(e.cls)}</b>（判定 ${e.roll}% / ${pctStr}${trStr}${flStr}${skStr}）</div>`;
+          return `<div>Lv${e.lv}(第${e.step}步) <b>${U.esc(e.cls)}</b>（判定 ${e.roll}% / ${pctStr}${flStr}${skStr}${minStr}）</div>`;
         }).join("") || "不考新职业";
 
         const deltaBadge = (label, val, unit, invertColor) => {
@@ -349,8 +350,10 @@
       const v = verdictOf(c, s), n = RL.examName(s);
       const verdict = v.pass == null ? "" : v.pass ? `<span class="ok">✓ 能过${n ? "，拿到" + U.esc(n) : ""}</span>`
         : `<span class="bad">✗ 会失败${n ? "，拿不到" + U.esc(n) + "，后面用它的步骤要改" : "，没关系，只当跳过"}</span>`;
-      const skHint = s.skillSummary ? `（${U.esc(s.skillSummary)}）` : "";
-      return `<div class="exambox"><div>判定值 <b>${s.roll}%</b>：游戏里显示的成功率要<b>高于</b>它才能过。过不过种子都前进一步。${s.pct != null ? ` 按${shotLabel}技能和考试时的等级估计显示 <b>${s.pct}%</b>${skHint}${s.pct > s.roll ? "，能过" : "，过不了"}。` : ""}</div>
+      const curP = s.curPct != null ? s.curPct : s.pct;
+      const skHint = s.skillSummary ? `（当前：${U.esc(s.skillSummary)}）` : "";
+      const minHint = s.minReqText ? `<div class="changed" style="margin-top:3px">🎯 ${U.esc(s.minReqText)}</div>` : "";
+      return `<div class="exambox"><div>判定值 <b>${s.roll}%</b>：游戏里显示的成功率要<b>高于</b>它才能过。过不过种子都前进一步。${curP != null ? ` 按${shotLabel}当前技能和考试等级预估显示 <b>${curP}%</b>${skHint}${curP > s.roll ? "，当前能过" : "，当前过不了"}。` : ""}</div>${minHint}
         <div><label>游戏显示 <input type="number" min="0" max="100" step="0.01" data-f="chance" id="ch-${U.keyOf(c, s)}" value="${v.ch ?? ""}" aria-label="游戏显示的考试成功率">%</label> ${verdict}</div></div>`;
     }
 
@@ -653,10 +656,11 @@
           const exCls = r.exam ? (r.examCls || "") : "";
           const isOrigExam = r.exam && s.exam && s.cls === exCls;
           const customExamPct = r.exam && exCls && !isOrigExam ? ((s.routes && s.routes.exams || []).find(e => e.cls === exCls)?.pct ?? null) : s.pct;
+          const curP = isOrigExam && s.curPct != null ? s.curPct : customExamPct;
           return `<li class="${row.done ? "done" : ""} ${r.exam ? "isx" : ""}" data-key="${s.key}">
             <input type="checkbox" data-f="done" id="d-${U.keyOf(c, s)}"${row.done ? " checked" : ""} aria-label="已完成">
             <label class="lvl" for="d-${U.keyOf(c, s)}">${r.exam ? (exCls ? "考试" : "跳过") : `Lv${row.frm}→${row.to}`}</label>
-            <div class="body">${r.exam ? `${exCls ? "考试（到 " + U.esc(exCls) + "）" : (s.skipNone ? `跳过 <span class="changed">没有可用的初级考试</span>` : s.skipFail && s.skipFail.length ? `跳过（考 ${U.esc(s.skipFail.join(" / "))}，会考不过，不拿职业）` : s.skipCls ? `跳过（只能考 ${U.esc(s.skipCls)}，会考过，用掉一个可跳过的职业，还剩 ${s.skipLeft} 个）` : "跳过")}${isOrigExam && s.train ? (s.trainOk ? ` <span class="changed">🎯 Lv${s.trainLv} 考试前练好：${U.esc(s.train.join("、"))}</span>` : ` <span class="changed">技能差：${U.esc(s.train.join("、"))}（不练，按实际成功率）</span>`) : ""}<span class="hint">　判定值 ${s.roll}%${exCls && customExamPct != null ? `｜估计成功率 ${customExamPct}%${isOrigExam && s.train && s.trainOk ? "（练够之后）" : ""}` : ""}${isOrigExam && s.skillSummary ? `｜${U.esc(s.skillSummary)}` : ""}${isOrigExam && s.renown ? `｜要名声 Lv${s.renown}` : ""}</span>${isOrigExam && s.floor && s.floor.length ? ` <span class="changed">转职保底：${U.esc(s.floor.join("、"))}</span>` : ""}${!exCls ? smHint(c, s) : ""}${isOrigExam && s.use ? `<span class="hint">　之后到 Lv${c.planTo} 用它升 ${s.use[0]} 级${s.use[0] ? `：${U.esc(s.use[1])}（${U.sgn(s.use[2])} 分）` : ""}</span>` : ""}` : `<b>${U.esc(RL.eqName(row))}</b>　${U.esc(r.gains.join(" ") || "—")}`}${row.choice !== RL.recOf(s) ? ` <span class="changed">已改</span>` : ""}${row.missing ? ` <span class="changed">还没考到</span>` : ""}${row.fail ? ` <span class="changed">估计考不过</span>` : ""}
+            <div class="body">${r.exam ? `${exCls ? "考试（到 " + U.esc(exCls) + "）" : (s.skipNone ? `跳过 <span class="changed">没有可用的初级考试</span>` : s.skipFail && s.skipFail.length ? `跳过（考 ${U.esc(s.skipFail.join(" / "))}，会考不过，不拿职业）` : s.skipCls ? `跳过（只能考 ${U.esc(s.skipCls)}，会考过，用掉一个可跳过的职业，还剩 ${s.skipLeft} 个）` : "跳过")}<span class="hint">　判定值 ${s.roll}%${exCls && curP != null ? `｜当前预估 ${curP}%` : ""}${isOrigExam && s.skillSummary ? `｜当前：${U.esc(s.skillSummary)}` : ""}${isOrigExam && s.renown ? `｜要名声 Lv${s.renown}` : ""}</span>${isOrigExam && s.minReqText ? ` <span class="changed">🎯 ${U.esc(s.minReqText)}</span>` : (isOrigExam && s.train ? (s.trainOk ? ` <span class="changed">🎯 Lv${s.trainLv} 考试前练好：${U.esc(s.train.join("、"))}</span>` : ` <span class="changed">技能差：${U.esc(s.train.join("、"))}（不练，按实际成功率）</span>`) : "")}${isOrigExam && s.floor && s.floor.length ? ` <span class="changed">转职保底：${U.esc(s.floor.join("、"))}</span>` : ""}${!exCls ? smHint(c, s) : ""}${isOrigExam && s.use ? `<span class="hint">　之后到 Lv${c.planTo} 用它升 ${s.use[0]} 级${s.use[0] ? `：${U.esc(s.use[1])}（${U.sgn(s.use[2])} 分）` : ""}</span>` : ""}` : `<b>${U.esc(RL.eqName(row))}</b>　${U.esc(r.gains.join(" ") || "—")}`}${row.choice !== RL.recOf(s) ? ` <span class="changed">已改</span>` : ""}${row.missing ? ` <span class="changed">还没考到</span>` : ""}${row.fail ? ` <span class="changed">估计考不过</span>` : ""}
               ${row.done ? "" : `<details class="more"><summary>选择</summary>${optsHtml(c, s, row, "f", w)}</details>`}</div>
             <span class="sc">${r.exam ? "—" : U.PW(r.cnt, r.score)}</span></li>`;
         }).join("")}</ol></div>`;

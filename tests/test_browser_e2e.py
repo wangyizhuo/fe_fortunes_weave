@@ -20,7 +20,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "out"
-ALL_TABS = ["meal", "items", "classes", "skills", "next", "plan", "past", "l45", "long", "opts", "mine"]
+ALL_TABS = ["meal", "items", "explore", "classes", "skills", "next", "plan", "past", "l45", "long", "opts", "mine"]
 
 
 class _QuietUTF8Handler(http.server.SimpleHTTPRequestHandler):
@@ -53,7 +53,7 @@ class TestBrowserE2E(unittest.TestCase):
         cls.thread = threading.Thread(target=cls.httpd.serve_forever, daemon=True)
         cls.thread.start()
         cls.pw = sync_playwright().start()
-        cls.browser = cls.pw.chromium.launch(args=["--disable-gpu", "--no-sandbox"])
+        cls.browser = cls.pw.chromium.launch(args=["--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage"])
 
     @classmethod
     def tearDownClass(cls):
@@ -118,7 +118,7 @@ class TestBrowserE2E(unittest.TestCase):
 
         # 确认浏览器通过 HTTP 动态拉取了全部独立 JSON 数据文件
         self.assertTrue(
-            {"manifest.json", "affinity.json", "items.json", "classes.json", "skills.json", "route.json"} <= fetched_json,
+            {"manifest.json", "affinity.json", "items.json", "explore.json", "classes.json", "skills.json", "route.json"} <= fetched_json,
             f"未检测到独立 JSON 加载，实际加载: {fetched_json}",
         )
 
@@ -164,6 +164,25 @@ class TestBrowserE2E(unittest.TestCase):
         self.assertIn("采集 / 钓鱼材料反查表", mat_txt)
         self.assertIn("斩马刀", mat_txt)
 
+        # 2.5) 探索规划：高显眼世界地图标记 + 优先级/类型筛选 + 搜索「巨人戒指」定位布隆提斯湖
+        page.click('#domains a[data-domain="explore"]')
+        page.wait_for_selector("#expMapSvg")
+        self.assertGreater(page.locator("#expMapSvg .exp-pin").count(), 20)
+        exp_txt = page.inner_text("#view")
+        self.assertIn("亚特拉山顶", exp_txt)
+        self.assertIn("下载高清标记地图 PNG", exp_txt)
+        page.fill("#expSearch", "巨人戒指")
+        page.wait_for_timeout(100)
+        exp_q_txt = page.inner_text("#view")
+        self.assertIn("布隆提斯湖", exp_q_txt)
+        self.assertIn("辉光鱼", exp_q_txt)
+        page.fill("#expSearch", "")
+        page.click('button[data-exp-preset="dungeons"]')
+        page.wait_for_timeout(100)
+        self.assertIn("禁忌之森", page.inner_text("#view"))
+        page.click('button[data-exp-preset="p0_gather"]')
+        page.wait_for_timeout(80)
+
         # 3) 职业图鉴：按阶级分组 + 可用技能 Checkbox 筛选（AND / OR + 清空）
         page.click('#domains a[data-domain="classes"]')
         page.wait_for_selector("#clsQuery")
@@ -194,10 +213,25 @@ class TestBrowserE2E(unittest.TestCase):
         page.click('button[data-cls-clear]')
         page.wait_for_timeout(80)
 
-        # 4) 技能图鉴：一个技能一行表格 + 评级筛选 S + 角色表限定说明 + 角色特有筛选 + 切换角色 SS~D 评级与 12 项熟练度矩阵
+        # 4) 技能图鉴：一个技能一行表格 + 生效兵种 Checkbox 筛选 + 评级筛选 S + 角色表限定说明 + 角色特有筛选 + 切换角色 SS~D 评级与 12 项熟练度矩阵
         page.click('#domains a[data-domain="skills"]')
         page.wait_for_selector("#skSearch")
         self.assertGreater(page.locator("table.sk-tbl tbody tr.sk-row").count(), 20)
+        # 生效兵种 Checkbox：勾选重装 -> 命中重装移动术+1、排除体格+（无兵种限制）与穿铠（对敌特攻）
+        page.check('input[data-sk-ut="重装"]')
+        page.wait_for_timeout(100)
+        arm_txt = page.inner_text("#view")
+        self.assertIn("重装移动术+1", arm_txt)
+        self.assertIn("限 重装", arm_txt)
+        self.assertNotIn("穿铠", arm_txt)
+        self.assertNotIn("传送", arm_txt)
+        page.check('input[data-sk-ut="飞行"]')
+        page.wait_for_timeout(100)
+        arm_fly_txt = page.inner_text("#view")
+        self.assertIn("高速飞行术+", arm_fly_txt)
+        self.assertIn("限 飞行", arm_fly_txt)
+        page.click('button[data-sk-clear]')
+        page.wait_for_timeout(80)
         page.click('button[data-sk-rating="S"]')
         page.wait_for_timeout(100)
         s_txt = page.inner_text("#view")
@@ -285,7 +319,8 @@ class TestBrowserE2E(unittest.TestCase):
         mine_txt = page.inner_text("#view")
         self.assertIn("新路线方案选择与确认", mine_txt)
         self.assertIn("防+3", mine_txt)
-        self.assertIn("格斗术 E→预估C", mine_txt)
+        self.assertIn("当前预估 8%", mine_txt)
+        self.assertIn("格斗术 E→D+", mine_txt)
         self.assertIn("需提前 NS Online S/L 实测", mine_txt)
         self.assertIn("Plan Mode 批注：已开启", mine_txt)
         page.click('input[data-rpick="努蒂奴"][value="safe_fallback"]')

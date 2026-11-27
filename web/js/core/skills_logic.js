@@ -11,8 +11,10 @@
     return String(s || "").trim().toLowerCase();
   }
 
+  const UNIT_TYPE_ORDER = ["重装", "步兵", "骑兵", "飞行", "仅限本职业", "无限制"];
+
   /**
-   * 按评级、获取范围（特有/稀有/通用）、分类、熟练度、已招角色与关键字筛选技能。
+   * 按评级、获取范围（特有/稀有/通用）、分类、熟练度、生效兵种限制、已招角色与关键字筛选技能。
    */
   function filterSkills(skills, opts) {
     const o = opts || {};
@@ -22,6 +24,7 @@
     const category = o.category || "全部";
     const discipline = o.discipline || "全部";
     const onlyRecruited = !!o.onlyRecruited;
+    const unitTypes = Array.isArray(o.unitTypes) ? o.unitTypes.filter(Boolean) : [];
 
     return (skills || []).filter(sk => {
       if (rating !== "全部" && sk.rating !== rating) return false;
@@ -42,6 +45,11 @@
         const discs = sk.disciplines && sk.disciplines.length ? sk.disciplines : [sk.discipline];
         if (!discs.includes(discipline)) return false;
       }
+      if (unitTypes.length) {
+        const uts = Array.isArray(sk.unitTypes) ? sk.unitTypes : [];
+        const hit = unitTypes.some(u => (u === "无限制" ? uts.length === 0 : uts.includes(u)));
+        if (!hit) return false;
+      }
       if (onlyRecruited) {
         const hasRec = (sk.recruitedOwners && sk.recruitedOwners.length > 0) || sk.scope === "common_class";
         if (!hasRec) return false;
@@ -53,6 +61,7 @@
           sk.category,
           sk.discipline,
           sk.scopeLabel,
+          ...(sk.unitTypes || []),
           sk.effect,
           sk.review,
           ...(sk.classSources || []).map(cs => cs.cls),
@@ -104,19 +113,29 @@
   }
 
   /**
-   * 汇总筛选后技能的评级分布与获取范围统计。
+   * 汇总筛选后技能的评级分布、获取范围与生效兵种统计。
    */
   function summarizeSkills(skills) {
     const byRating = { S: 0, A: 0, B: 0, C: 0 };
     const byScope = { unique: 0, rare: 0, common_learn: 0, common_class: 0 };
+    const byUnitType = Object.fromEntries(UNIT_TYPE_ORDER.map(u => [u, 0]));
     for (const sk of skills || []) {
       if (byRating[sk.rating] != null) byRating[sk.rating] += 1;
       if (byScope[sk.scope] != null) byScope[sk.scope] += 1;
+      const uts = Array.isArray(sk.unitTypes) ? sk.unitTypes : [];
+      if (!uts.length) {
+        byUnitType["无限制"] += 1;
+      } else {
+        for (const u of uts) {
+          if (byUnitType[u] != null) byUnitType[u] += 1;
+        }
+      }
     }
-    return { total: (skills || []).length, byRating, byScope };
+    return { total: (skills || []).length, byRating, byScope, byUnitType };
   }
 
   return {
+    UNIT_TYPE_ORDER,
     filterSkills,
     filterSkillChars,
     summarizeSkills,

@@ -164,12 +164,14 @@ class TestClassesModule(unittest.TestCase):
         self.assertEqual(len(nu_opts["new_best"]["diffVsBaseline"]["statDiff"]), 9)
         self.assertIn("防+3", nu_opts["new_best"]["diffVsBaseline"]["statDiffText"])
         self.assertGreaterEqual(len(nu_opts["new_best"]["slWarnings"]), 1)
-        # 艾丝梅拉尔达 斗拳手必须写明当前与考前预估技能等级（格斗术 E→预估C）
+        # 艾丝梅拉尔达 斗拳手按当前等级与技能计算真实预估率（8%），并按判定值 45.60% 反推最低要求（格斗术 E→D+，练 3 段 → 估 50%）
         es_best = next(o for o in by_name["艾丝梅拉尔达"]["options"] if o["id"] == "new_best")
         brawler_ex = next(e for e in es_best["exams"] if e["cls"] == "斗拳手")
-        self.assertEqual(brawler_ex["pct"], 100.0)
-        self.assertIn("格斗术 E→预估C", brawler_ex["skillSummary"])
-        self.assertEqual(brawler_ex["trainRanks"], 4)
+        self.assertEqual(brawler_ex["curPct"], 8)
+        self.assertEqual(brawler_ex["minTrainRanks"], 3)
+        self.assertEqual(brawler_ex["minPassPct"], 50)
+        self.assertIn("格斗术 E→D+", brawler_ex["minReqText"])
+        self.assertIn("格斗术 E（要求 C，差4段）", brawler_ex["skillSummary"])
 
 
 class TestSkillsModule(unittest.TestCase):
@@ -193,6 +195,21 @@ class TestSkillsModule(unittest.TestCase):
         self.assertEqual(by_name["大反击"]["scope"], "common_class")
         self.assertIn("全员通用", by_name["大反击"]["scopeLabel"])
         self.assertEqual(by_name["大反击"]["classSources"][0]["cls"], "重装步兵")
+        # 生效兵种限制校验：严格区分自身兵种条件（如 [Armored]）与对敌特攻/通用重装术习得（如体格）
+        self.assertEqual(by_name["重装移动术+1"]["unitTypes"], ["重装"])
+        self.assertEqual(by_name["步行再移动"]["unitTypes"], ["步兵"])
+        self.assertEqual(by_name["骑兵移动术+"]["unitTypes"], ["骑兵"])
+        self.assertEqual(by_name["与爱马连携"]["unitTypes"], ["骑兵"])
+        self.assertEqual(by_name["高速飞行术+"]["unitTypes"], ["飞行"])
+        self.assertEqual(by_name["乘降术"]["unitTypes"], ["仅限本职业"])
+        self.assertEqual(by_name["体格+"]["unitTypes"], [])
+        self.assertEqual(by_name["穿铠"]["unitTypes"], [])
+        utc = d["summary"]["unitTypeCounts"]
+        self.assertGreaterEqual(utc["重装"], 15)
+        self.assertGreaterEqual(utc["步兵"], 25)
+        self.assertGreaterEqual(utc["骑兵"], 7)
+        self.assertGreaterEqual(utc["飞行"], 4)
+        self.assertGreaterEqual(utc["仅限本职业"], 45)
         # 角色表已招 9 人排在最前面，且全部 63 人均配有 SS~D 综合强度评级
         self.assertTrue(all(c["recruited"] for c in d["characters"][:9]))
         valid_tiers = {"SS", "S", "A", "B", "C", "D"}
@@ -203,6 +220,25 @@ class TestSkillsModule(unittest.TestCase):
         self.assertEqual(c_by_name["蕾达"]["strengthTier"], "SS")
         self.assertEqual(c_by_name["伊欧"]["strengthTier"], "B")
         self.assertEqual(c_by_name["伊欧"]["dietrichPriority"], "P1")
+
+
+class TestExploreModule(unittest.TestCase):
+    def test_build_explore_data_priorities_and_spots(self):
+        from modules.explore.service import build_explore_data
+        d = build_explore_data()
+        self.assertEqual(d["module"], "explore")
+        self.assertEqual(d["defaultRoute"], "dietrich")
+        self.assertIn("dietrich", d["routes"])
+        dt = d["routes"]["dietrich"]
+        self.assertGreater(dt["summary"]["totalSpots"], 150)
+        self.assertGreater(dt["summary"]["tierCounts"]["P0"], 30)
+        by_name = {s["name"]: s for s in dt["spots"]}
+        self.assertEqual(by_name["亚特拉山顶"]["priority"], "P0")
+        self.assertIn("奥利哈钢", by_name["亚特拉山顶"]["highlights"])
+        self.assertEqual(by_name["布隆提斯湖"]["priority"], "P0")
+        self.assertIn("辉光鱼", by_name["布隆提斯湖"]["highlights"])
+        self.assertTrue(by_name["亚特拉山顶"]["nearestStation"])
+        self.assertTrue(by_name["亚特拉山顶"]["fwMapUrl"].startswith("https://fire-emblem-fw.site/map.html#n:"))
 
 
 if __name__ == "__main__":

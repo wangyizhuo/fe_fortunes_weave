@@ -20,10 +20,11 @@
           <button class="btn pri" id="syncBtn" type="button">同步到 Google Sheet</button>
         </span>
       </div>
-      <!-- 一级功能模块导航：友好度培养 / 道具与材料采集 / 职业图鉴 / 技能图鉴 / 路线规划 -->
+      <!-- 一级功能模块导航：友好度培养 / 道具与材料采集 / 探索规划 / 职业图鉴 / 技能图鉴 / 路线规划 -->
       <nav class="domains" id="domains" aria-label="功能模块">
         <a href="#meal" data-domain="affinity">友好度培养<small>吃饭组合 · 支援挖角</small></a>
         <a href="#items" data-domain="items">道具 / 材料采集<small>商店 · 以物易物 · 材料反查</small></a>
+        <a href="#explore" data-domain="explore">探索规划<small>优先级采集 · 地图标记</small></a>
         <a href="#classes" data-domain="classes">职业图鉴<small>阶级总览 · 可用技能筛选</small></a>
         <a href="#skills" data-domain="skills">技能图鉴<small>评级 · 通用/特有 · 角色表</small></a>
         <a href="#next" data-domain="route">路线规划<small>种子推演 · 转职 · 批注模式</small></a>
@@ -55,6 +56,7 @@
   <script src="./js/core/route_logic.js"></script>
   <script src="./js/core/affinity_logic.js"></script>
   <script src="./js/core/items_logic.js"></script>
+  <script src="./js/core/explore_logic.js"></script>
   <script src="./js/core/classes_logic.js"></script>
   <script src="./js/core/skills_logic.js"></script>
   <script src="./js/core/comments_logic.js"></script>
@@ -63,6 +65,7 @@
   <!-- 按功能域拆分的视图层 -->
   <script src="./js/views/affinity_view.js"></script>
   <script src="./js/views/items_view.js"></script>
+  <script src="./js/views/explore_view.js"></script>
   <script src="./js/views/classes_view.js"></script>
   <script src="./js/views/skills_view.js"></script>
   <script src="./js/views/route_views.js"></script>

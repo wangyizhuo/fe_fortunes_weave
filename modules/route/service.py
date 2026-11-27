@@ -476,6 +476,12 @@ def build_route_data() -> dict[str, Any]:
                 if exam and r.cls in R.EXAM_OPTIONS[name] and r.cls not in have:
                     have.append(r.cls)
                 pct = p.exam_pct(r.cls, lv) if exam and r.cls in R.EXAM_OPTIONS[name] else None
+                roll_v = round(p.exam_value(r.step), 2)
+                sk_det = (
+                    _exam_skill_details(p, r.cls, lv, roll=roll_v)
+                    if exam and r.cls in R.EXAM_OPTIONS[name]
+                    else None
+                )
                 routes = step_routes(name, p, r.step, lv, have_before)
                 c["steps"].append({
                     "routes": routes,
@@ -483,6 +489,10 @@ def build_route_data() -> dict[str, Any]:
                     "src": "plan",
                     "exam": exam,
                     "pct": pct,
+                    "curPct": sk_det["curPct"] if sk_det else None,
+                    "minTrainRanks": sk_det["minTrainRanks"] if sk_det else None,
+                    "minPassPct": sk_det["minPassPct"] if sk_det else None,
+                    "minReqText": sk_det["minReqText"] if sk_det else None,
                     "cls": r.cls if (not exam or r.cls in R.EXAM_OPTIONS[name]) else "",
                     "frm": lv if not exam else None,
                     "gains": gain_names(r.gains) if not exam else [],
@@ -491,7 +501,7 @@ def build_route_data() -> dict[str, Any]:
                     "note": "；".join(x for x in (r.balance_note, r.str_note) if x),
                     "opts": opts,
                     "ownedAfter": list(have),
-                    "roll": round(p.exam_value(r.step), 2),
+                    "roll": roll_v,
                     "use": use_info.get(r.cls) if exam else None,
                     "train": (getattr(p, "exam_train", {}) or {}).get(r.cls) if exam else None,
                     "trainOk": bool(
@@ -500,11 +510,7 @@ def build_route_data() -> dict[str, Any]:
                         or (getattr(p, "exam_train_ranks", {}) or {}).get(r.cls)
                     ),
                     "trainLv": lv if exam else None,
-                    "skillSummary": (
-                        _exam_skill_details(p, r.cls, lv)["skillSummary"]
-                        if exam and r.cls in R.EXAM_OPTIONS[name]
-                        else None
-                    ),
+                    "skillSummary": sk_det["skillSummary"] if sk_det else None,
                     "floor": [f"{a} {x}→{v}" for a, x, v in (r.floor or [])] if exam else None,
                     "skipCls": r.skip_class if exam else None,
                     "skipFail": r.skip_fail if exam else None,
