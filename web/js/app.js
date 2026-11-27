@@ -118,9 +118,20 @@
     const whoEl = document.getElementById("who");
     whoEl.hidden = dom !== "route";
     if (dom === "route") {
-      whoEl.innerHTML = [["", "全部"], ...chars.map(c => [U.slug(c), U.shortName(c.name)])]
-        .map(([k, t]) => `<button type="button" data-who="${k}" aria-pressed="${store.state.focus === k}">${U.esc(t)}</button>`)
-        .join("");
+      const lord = (DATA.route && DATA.route.rulesMeta && DATA.route.rulesMeta.currentLord) || "";
+      const groups = RL.groupCharsByTier(chars, lord);
+      const allBtn = `<button type="button" data-who="" aria-pressed="${store.state.focus === ""}">全部</button>`;
+      const grpHtml = groups.map(g => {
+        const cls = g.tier === "P0" ? "r1" : g.tier === "P1" ? "r2" : "r3";
+        const btns = g.chars.map(c => {
+          const slug = U.slug(c);
+          const crown = c.isLord || (lord && c.name === lord) ? "★" : "";
+          const st = c.strengthTier ? ` <small class="who-st">${U.esc(c.strengthTier)}</small>` : "";
+          return `<button type="button" data-who="${slug}" aria-pressed="${store.state.focus === slug}">${crown}${U.esc(U.shortName(c.name))}${st}</button>`;
+        }).join("");
+        return `<span class="who-grp" data-who-tier="${U.esc(g.tier)}"><span class="rec ${cls}">${U.esc(g.tier)}</span>${btns}</span>`;
+      }).join("");
+      whoEl.innerHTML = allBtn + grpHtml;
     }
 
     const syncBtn = document.getElementById("syncBtn");
@@ -574,10 +585,7 @@
       if (expBtn) {
         const w = expBtn.closest(".fullwrap");
         const open = expBtn.textContent === "展开所有等级";
-        const sd = w.querySelector(".sd");
-        if (sd) sd.checked = open;
-        w.querySelectorAll("ol.full details").forEach(d => { d.open = open; });
-        w.querySelectorAll("ol.full li.done .opts").forEach(o => { o.style.display = open ? "grid" : ""; });
+        w.querySelectorAll("ol.full li:not(.done) details").forEach(d => { d.open = open; });
         expBtn.textContent = open ? "收起所有等级" : "展开所有等级";
         return;
       }
@@ -599,6 +607,19 @@
         const v = ap.dataset.val;
         if (v != null) store.setProg(c, s, p => { p.choice = v === RL.recOf(s) ? undefined : v; });
         render();
+        return;
+      }
+      const ee = e.target.closest("[data-early-exam-cls]");
+      if (ee) {
+        const c = chars.find(x => U.slug(x) === ee.closest("[data-slug]").dataset.slug);
+        const sEarly = c && c.steps.find(x => x.key === ee.dataset.earlyExamKey);
+        const sUse = c && c.steps.find(x => x.key === ee.dataset.useKey);
+        const cls = ee.dataset.earlyExamCls;
+        if (c && sEarly && sUse && cls) {
+          store.setProg(c, sEarly, p => { p.choice = (sEarly.exam && sEarly.cls === cls) ? undefined : ("exam:" + cls); });
+          store.setProg(c, sUse, p => { p.choice = cls === RL.recOf(sUse) ? undefined : cls; });
+          render();
+        }
         return;
       }
       const decBtn = e.target.closest("[data-dec]");
@@ -705,7 +726,7 @@
         const btn = box.querySelector("[data-apply]") || box.querySelector('[data-dec="ok"]');
         if (!btn) return;
         const lab = t.closest("label"), need = t.dataset.need === "1";
-        const what = t.value === "exam"
+        const what = RL.isExamChoice(t.value)
           ? lab.querySelector(".oc").textContent.trim()
           : `用 ${t.value} 升级${need ? `（要先考试到 ${t.value}）` : ""}`;
         btn.dataset.val = t.value;

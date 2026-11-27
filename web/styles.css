@@ -58,6 +58,9 @@ nav.tabs a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--
 .who[hidden] { display: none; }
 .who button { font-size: 13px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 3px 12px; }
 .who button[aria-pressed="true"] { border-color: var(--accent); background: var(--tint); color: var(--accent-ink); font-weight: 700; }
+.who-grp { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 2px 6px; border: 1px solid var(--line); border-radius: 999px; background: color-mix(in srgb, var(--bg) 75%, var(--panel)); }
+.who-grp .rec { margin-right: 2px; }
+.who-st { font-family: var(--mono); font-size: 10.5px; opacity: .72; font-weight: 700; }
 
 main { padding-block: 16px 64px; display: grid; gap: 16px; }
 .lede { margin: 0; color: var(--muted); font-size: 13.5px; max-width: 78ch; }
@@ -418,6 +421,22 @@ th.grp { text-align: center; border-bottom: 1px solid var(--line); } td.cur, th.
 .st-pill.st-weak { background: var(--bad-bg); color: var(--bad); font-weight: 600; opacity: .88; }
 .cmt-loc { font-family: var(--mono); font-size: 11px; color: var(--accent-ink); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; }
 
-
-
-
+/* 技能图鉴：一个技能一行紧凑表格 */
+.sk-tbl { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--panel); table-layout: fixed; }
+.sk-tbl th { white-space: nowrap; text-align: left; }
+.sk-tbl td { vertical-align: top; padding: 7px 9px; border-top: 1px solid var(--line); word-break: break-word; overflow-wrap: anywhere; }
+.sk-tbl tr.tier-row-S td:first-child { border-left: 3px solid #c2185b; }
+.sk-tbl tr.tier-row-A td:first-child { border-left: 3px solid #d97706; }
+.sk-tbl tr.tier-row-B td:first-child { border-left: 3px solid #0284c7; }
+.sk-tbl tr.tier-row-C td:first-child { border-left: 3px solid var(--line); }
+.sk-c-tier { width: 44px; text-align: center; }
+.sk-c-name { width: 16%; }
+.sk-name-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px; }
+.sk-meta-line { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+.sk-c-scope { width: 15%; }
+.sk-c-eff { width: 35%; }
+.sk-c-eff .sk-eff { margin: 2px 0 0; line-height: 1.45; }
+.sk-c-eff .sk-review { margin: 3px 0 0; font-size: 12px; color: var(--muted); }
+.sk-c-src { width: 30%; font-size: 12.5px; }
+.sk-c-src .sk-src-line, .sk-c-src .sk-owners { margin: 2px 0; }
+@media (max-width: 760px) { .sk-tbl { table-layout: auto; min-width: 680px; } }

@@ -620,7 +620,10 @@ class Planner:
         if cur is None:
             return cur
         base_t = set(self.required)
+        ov_cls = set((getattr(self, "exam_at_override", None) or {}).keys())
         for c in list(targets):
+            if c in ov_cls:
+                continue
             n = len(cur[0])
             for st in range(n):
                 trial = dict(self.exam_at or {})
@@ -636,6 +639,8 @@ class Planner:
         # ③ 11-23 Yizhuo：差不多时早考（熟练度更高）。每个要考的职业，从最早的种子开始试，第一个「差不多」的就用
         tol = getattr(self, "early_exam_tol", self.EARLY_EXAM_TOL)
         for c in list(targets):
+            if c in ov_cls:
+                continue
             acts0 = list(cur[0])
             if ("考试", c) not in acts0:
                 continue

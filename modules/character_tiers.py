@@ -10,6 +10,20 @@ TIERS_PATH = ROOT / "config" / "character_tiers.json"
 
 STRENGTH_ORDER = {"SS": 0, "S": 1, "A": 2, "B": 3, "C": 4, "D": 5}
 PRIORITY_ORDER = {"P0": 0, "P1": 1, "P2": 2}
+MEAL_CONFIG_PATH = ROOT / "meals" / "meal_config.json"
+
+
+def get_current_lord(meal_config_path: str | Path = MEAL_CONFIG_PATH) -> str:
+    p = Path(meal_config_path)
+    if p.exists():
+        try:
+            with open(p, encoding="utf-8") as f:
+                lord = json.load(f).get("current_lord")
+                if lord:
+                    return str(lord)
+        except Exception:
+            pass
+    return "迪托利希"
 
 
 def zh_name_key(name: str) -> bytes:
@@ -17,9 +31,16 @@ def zh_name_key(name: str) -> bytes:
     return str(name or "").encode("gb18030", errors="replace")
 
 
-def char_sort_key(name: str, priority: str | None = None, strength_tier: str | None = None) -> tuple[int, int, bytes]:
-    """统一排序键：P 级（P0→P1→P2）→ 综合强度（SS→S→A→B→C→D）→ 名字升序。"""
+def char_sort_key(
+    name: str,
+    priority: str | None = None,
+    strength_tier: str | None = None,
+    current_lord: str | None = None,
+) -> tuple[int, int, int, bytes]:
+    """统一排序键：当前主角永远第一 → P 级（P0→P1→P2）→ 综合强度（SS→S→A→B→C→D）→ 名字升序。"""
+    lord = current_lord if current_lord is not None else get_current_lord()
     return (
+        0 if (lord and name == lord) else 1,
         PRIORITY_ORDER.get(priority or "", 9),
         STRENGTH_ORDER.get(strength_tier or "", 9),
         zh_name_key(name),

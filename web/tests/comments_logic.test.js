@@ -49,17 +49,29 @@ test("formatPlanReviewExport formats grouped quotes, locators, version, and rout
     text: "提前 S/L 测 Lv16 重装",
     at: "2026-11-26T10:00:00Z",
   });
-  const md = CL.formatPlanReviewExport({
+  // 无任何用户选择时，不应把空的「二、当前路线方案选择汇总」塞进 prompt
+  const mdNoPicks = CL.formatPlanReviewExport({
     comments,
     proposals: [{ name: "努蒂奴" }],
     routePicks: {},
     formatRoutePicksExport: () => "- 努蒂奴：Lv16 重装步兵",
     meta: { version: "b09bf2a", builtAt: "2026-11-27 02:10 UTC", shotKey: "shot_11_24", viewHash: "#plan" },
   });
-  assert.match(md, /版本：`b09bf2a`/);
-  assert.match(md, /### 努蒂奴 \(P2\)/);
-  assert.match(md, /引用：「转职保底 \+3」/);
-  assert.match(md, /定位：视图 `#plan` · id `#sec-midgain-nutinu` · XPath `\/\/\*\[@id="sec-midgain-nutinu"\]\/h4\[1\]` · 版本 `b09bf2a`/);
-  assert.match(md, /批注：提前 S\/L 测 Lv16 重装/);
-  assert.match(md, /- 努蒂奴：Lv16 重装步兵/);
+  assert.match(mdNoPicks, /版本：`b09bf2a`/);
+  assert.match(mdNoPicks, /### 努蒂奴 \(P2\)/);
+  assert.match(mdNoPicks, /引用：「转职保底 \+3」/);
+  assert.match(mdNoPicks, /定位：视图 `#plan` · id `#sec-midgain-nutinu` · XPath `\/\/\*\[@id="sec-midgain-nutinu"\]\/h4\[1\]` · 版本 `b09bf2a`/);
+  assert.match(mdNoPicks, /批注：提前 S\/L 测 Lv16 重装/);
+  assert.doesNotMatch(mdNoPicks, /二、当前路线方案选择汇总/);
+
+  // 当用户在网页做过选择或备注时，才附带「二、当前路线方案选择汇总」
+  const mdWithPicks = CL.formatPlanReviewExport({
+    comments,
+    proposals: [{ name: "努蒂奴" }],
+    routePicks: { 努蒂奴: { optionId: "new_best" } },
+    formatRoutePicksExport: () => "- 努蒂奴：Lv16 重装步兵",
+    meta: { version: "b09bf2a", builtAt: "2026-11-27 02:10 UTC", shotKey: "shot_11_24", viewHash: "#plan" },
+  });
+  assert.match(mdWithPicks, /二、当前路线方案选择汇总/);
+  assert.match(mdWithPicks, /- 努蒂奴：Lv16 重装步兵/);
 });
