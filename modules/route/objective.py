@@ -123,6 +123,7 @@ class ClassMarginalGain:
     cls: str
     is_required: bool
     delta_pts: int                # 多拿多少总点数
+    delta_stat_vector: tuple[int, ...]  # 9 项具体能力差（升级 + 转职保底）
     delta_stat_w: float           # 升级+体格加权分差
     delta_promo_floor_w: float    # 转职保底加权分差
     delta_mastery_lv: int         # 多拿多少级目标职业精通

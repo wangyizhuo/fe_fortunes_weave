@@ -37,8 +37,9 @@ class _QuietUTF8Handler(http.server.SimpleHTTPRequestHandler):
         pass
 
 
-class _ReuseTCPServer(socketserver.TCPServer):
+class _ReuseTCPServer(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
+    daemon_threads = True
 
 
 class TestBrowserE2E(unittest.TestCase):
@@ -53,7 +54,7 @@ class TestBrowserE2E(unittest.TestCase):
         cls.thread.start()
 
         cls.pw = sync_playwright().start()
-        cls.browser = cls.pw.chromium.launch(args=["--disable-dev-shm-usage"])
+        cls.browser = cls.pw.chromium.launch()
 
     @classmethod
     def tearDownClass(cls):
@@ -62,10 +63,14 @@ class TestBrowserE2E(unittest.TestCase):
         cls.httpd.shutdown()
         cls.httpd.server_close()
 
+    def _new_page(self, width: int, height: int):
+        return self.browser.new_page(viewport={"width": width, "height": height})
+
     def test_all_tabs_desktop_and_mobile_no_errors_no_overflow(self):
         fetched_json = set()
         for width, height in ((1200, 900), (390, 844)):
-            page = self.browser.new_page(viewport={"width": width, "height": height})
+            ctx = self.browser.new_context(viewport={"width": width, "height": height})
+            page = ctx.new_page()
             page_errors = []
             console_errors = []
             failed_reqs = []
@@ -80,19 +85,22 @@ class TestBrowserE2E(unittest.TestCase):
                 ),
             )
 
-            for tab in ALL_TABS:
-                page.goto(f"{self.base_url}#{tab}", wait_until="domcontentloaded")
+            for idx, tab in enumerate(ALL_TABS):
+                if idx == 0:
+                    page.goto(f"{self.base_url}#{tab}", wait_until="domcontentloaded")
+                else:
+                    page.evaluate("t => { location.hash = '#' + t; }", tab)
                 page.wait_for_selector("#view > *", timeout=8000)
-                page.wait_for_timeout(150)
+                page.wait_for_timeout(120)
 
                 # 展开所有折叠块一起检查排版和渲染内容
                 page.evaluate("() => document.querySelectorAll('#view details').forEach(d => d.open = true)")
-                page.wait_for_timeout(50)
+                page.wait_for_timeout(40)
 
                 check = page.evaluate(
                     """(vw) => {
                       const sw = document.documentElement.scrollWidth;
-                      const txt = document.querySelector('#view')?.innerText || '';
+                      const txt = document.querySelector('#view')?.textContent || '';
                       const badWords = ['undefined', 'NaN', '[object Object]'].filter(w => txt.includes(w));
                       return { overflow: sw > vw + 1 ? sw : 0, badWords, textLen: txt.trim().length };
                     }""",
@@ -105,7 +113,7 @@ class TestBrowserE2E(unittest.TestCase):
             self.assertEqual(page_errors, [], f"[{width}px] JS pageerror: {page_errors}")
             self.assertEqual(console_errors, [], f"[{width}px] console.error: {console_errors}")
             self.assertEqual(failed_reqs, [], f"[{width}px] HTTP 错误请求: {failed_reqs}")
-            page.close()
+            ctx.close()
 
         # 确认浏览器通过 HTTP 动态拉取了全部独立 JSON 数据文件
         self.assertTrue(
@@ -114,7 +122,7 @@ class TestBrowserE2E(unittest.TestCase):
         )
 
     def test_interactive_flows_across_three_domains(self):
-        page = self.browser.new_page(viewport={"width": 1200, "height": 900})
+        page = self._new_page(1200, 900)
         page_errors = []
         page.on("pageerror", lambda err: page_errors.append(str(err)))
 
@@ -192,11 +200,28 @@ class TestBrowserE2E(unittest.TestCase):
         es_txt = page.inner_text("#view")
         self.assertIn("考试（到 天翼兵）（新职业", es_txt)
 
+        # 5) 我的决定（#mine）：验证新路线方案选择、展开 9 项具体能力差，以及刷新后 localStorage 持久化记录
+        page.click('#who button[data-who=""]')
+        page.click('#routeTabs a[data-v="mine"]')
+        page.wait_for_selector('input[data-rpick="努蒂奴"]')
+        mine_txt = page.inner_text("#view")
+        self.assertIn("新路线方案选择与确认", mine_txt)
+        self.assertIn("防+3", mine_txt)
+        self.assertIn("需提前 NS Online S/L 实测", mine_txt)
+        page.click('input[data-rpick="努蒂奴"][value="safe_fallback"]')
+        page.wait_for_timeout(100)
+        self.assertIn("你已选择：Lv18 考重装步兵", page.inner_text("#view"))
+        # 刷新页面确认选择已保存在浏览器 localStorage
+        page.reload(wait_until="domcontentloaded")
+        page.wait_for_selector('input[data-rpick="努蒂奴"]')
+        self.assertTrue(page.is_checked('input[data-rpick="努蒂奴"][value="safe_fallback"]'))
+        self.assertIn("你已选择：Lv18 考重装步兵", page.inner_text("#view"))
+
         # 可选截图导出（供视觉验收）
         shot_dir = os.environ.get("FE_E2E_SCREENSHOT_DIR")
         if shot_dir:
             Path(shot_dir).mkdir(parents=True, exist_ok=True)
-            for tab, fname in (("meal", "01_affinity.png"), ("items", "02_items.png"), ("classes", "04_classes.png"), ("plan", "03_route.png")):
+            for tab, fname in (("meal", "01_affinity.png"), ("items", "02_items.png"), ("classes", "04_classes.png"), ("plan", "03_route.png"), ("mine", "05_mine.png")):
                 page.goto(f"{self.base_url}#{tab}", wait_until="domcontentloaded")
                 page.wait_for_selector("#view > *")
                 page.wait_for_timeout(200)

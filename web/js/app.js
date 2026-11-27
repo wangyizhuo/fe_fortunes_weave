@@ -31,8 +31,19 @@
     return "route";
   }
 
+  function loadBundleScript() {
+    return new Promise((resolve, reject) => {
+      if (root.FE_BUNDLE_DATA) return resolve(root.FE_BUNDLE_DATA);
+      const sc = document.createElement("script");
+      sc.src = "./data/bundle_data.js";
+      sc.onload = () => (root.FE_BUNDLE_DATA ? resolve(root.FE_BUNDLE_DATA) : reject(new Error("bundle_data.js 未导出数据")));
+      sc.onerror = () => reject(new Error("无法加载 ./data/bundle_data.js"));
+      document.head.appendChild(sc);
+    });
+  }
+
   async function loadModuleData() {
-    // 1) HTTP(S) 访问时，优先按功能模块独立 fetch JSON，彻底分离网页与数据
+    // 1) HTTP(S) 访问时，按功能模块独立 fetch JSON，彻底分离网页与数据（不重复下载 bundle_data.js）
     if (location.protocol === "http:" || location.protocol === "https:") {
       try {
         const [manifest, affinity, items, classes, route] = await Promise.all([
@@ -46,18 +57,20 @@
         DATA = { affinity, items, classes, route };
         return;
       } catch (err) {
-        if (root.FE_BUNDLE_DATA) {
-          MANIFEST = root.FE_BUNDLE_DATA.manifest;
-          DATA = root.FE_BUNDLE_DATA;
+        const b = await loadBundleScript().catch(() => null);
+        if (b) {
+          MANIFEST = b.manifest;
+          DATA = b;
           return;
         }
         throw err;
       }
     }
-    // 2) file:// 离线打开时，自动回退到独立数据文件 ./data/bundle_data.js
-    if (root.FE_BUNDLE_DATA) {
-      MANIFEST = root.FE_BUNDLE_DATA.manifest;
-      DATA = root.FE_BUNDLE_DATA;
+    // 2) file:// 离线打开时，动态回退到独立数据文件 ./data/bundle_data.js
+    const b = await loadBundleScript().catch(() => null);
+    if (b) {
+      MANIFEST = b.manifest;
+      DATA = b;
       return;
     }
     throw new Error("未找到模块数据（请通过本地 HTTP 服务打开，或先运行 build_site.py 生成 out/data/）");
@@ -209,6 +222,34 @@
         render();
         return;
       }
+      if (e.target.closest("[data-rpick-copy]")) {
+        const txt = RL.formatRoutePicksExport((DATA.route && DATA.route.routeProposals) || [], store.state.routePicks);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(txt).then(() => {
+            store.state.copyFeedback = "✓ 已复制到剪贴板，可以直接粘贴发给我";
+            render();
+          }).catch(() => {
+            store.state.copyFeedback = "已生成文本（浏览器限制剪贴板权限，请手动复制下方汇总表）";
+            render();
+          });
+        } else {
+          store.state.copyFeedback = "已汇总当前选择（请直接查看下方总览表）";
+          render();
+        }
+        return;
+      }
+      if (e.target.closest("[data-rpick-reset]")) {
+        store.resetAllRoutePicks();
+        store.state.copyFeedback = "已重置全部网页选择";
+        render();
+        return;
+      }
+      const rpickClr = e.target.closest("[data-rpick-clear]");
+      if (rpickClr) {
+        store.clearRoutePick(rpickClr.dataset.rpickClear);
+        render();
+        return;
+      }
       const longRec = e.target.closest("[data-longrec]");
       if (longRec) {
         e.preventDefault();
@@ -300,6 +341,20 @@
         if (e.target.checked) cur.add(sk);
         else cur.delete(sk);
         store.state.classesSkills = [...cur];
+        render();
+        return;
+      }
+      if (e.target.matches("[data-rpick]")) {
+        store.setRoutePick(e.target.dataset.rpick, e.target.value, undefined);
+        store.state.copyFeedback = "";
+        render();
+        return;
+      }
+      if (e.target.matches("[data-rpick-note]")) {
+        const charName = e.target.dataset.rpickNote;
+        const prop = ((DATA.route && DATA.route.routeProposals) || []).find(p => p.name === charName);
+        const curPick = RL.resolveRoutePick(prop, store.state.routePicks);
+        store.setRoutePick(charName, curPick.optionId || (prop && prop.defaultPick) || undefined, e.target.value.trim());
         render();
         return;
       }

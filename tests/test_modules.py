@@ -134,6 +134,23 @@ class TestClassesModule(unittest.TestCase):
         tier_indices = [d["tierOrder"].index(c["tier"]) for c in d["classes"]]
         self.assertEqual(tier_indices, sorted(tier_indices))
 
+    def test_route_proposals_include_9stat_diffs_and_defaults(self):
+        from modules.route.choice_builder import build_route_proposals
+        props = build_route_proposals()
+        self.assertEqual(len(props), 9)
+        by_name = {p["name"]: p for p in props}
+        for confirmed in ("伊欧", "奇洛伊卡", "米迦艾拉", "杨界"):
+            self.assertEqual(by_name[confirmed]["defaultPick"], "new_best")
+        for pending in ("努蒂奴", "乌尔坦德", "法毕欧", "艾丝梅拉尔达"):
+            self.assertIsNone(by_name[pending]["defaultPick"])
+        # 努蒂奴必须同时有 new_best (含 S/L 提醒 + 9项具体能力差) 与 safe_fallback
+        nu_opts = {o["id"]: o for o in by_name["努蒂奴"]["options"]}
+        self.assertIn("new_best", nu_opts)
+        self.assertIn("safe_fallback", nu_opts)
+        self.assertEqual(len(nu_opts["new_best"]["diffVsBaseline"]["statDiff"]), 9)
+        self.assertIn("防+3", nu_opts["new_best"]["diffVsBaseline"]["statDiffText"])
+        self.assertGreaterEqual(len(nu_opts["new_best"]["slWarnings"]), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

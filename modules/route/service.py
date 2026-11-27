@@ -451,9 +451,11 @@ def build_route_data() -> dict[str, Any]:
 
         chars.append(c)
 
+    from .choice_builder import build_route_proposals
+
     return {
         "module": "route",
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "stats": list(STATS),
         "skills": list(cfg.skills),
         "rulesMeta": build_rules_meta(cfg),
@@ -461,4 +463,5 @@ def build_route_data() -> dict[str, Any]:
         "options": options_map,
         "reasons": reasons_map,
         "decisions": decisions,
+        "routeProposals": build_route_proposals(),
     }

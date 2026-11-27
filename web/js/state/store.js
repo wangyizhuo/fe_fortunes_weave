@@ -20,6 +20,7 @@
     const state = {
       prog: {},
       info: {},
+      routePicks: {},
       focus: "",
       view: "meal",
       longS: {},
@@ -33,6 +34,7 @@
       classesSkills: [],
       classesMatchMode: "all", // all | any
       classesQuery: "",
+      copyFeedback: "",
       db: null,
       writing: false,
       dirty: new Map(),
@@ -40,7 +42,10 @@
 
     function saveLocal() {
       try {
-        localStorage.setItem("route-state2", JSON.stringify({ prog: state.prog, info: state.info }));
+        localStorage.setItem(
+          "route-state2",
+          JSON.stringify({ prog: state.prog, info: state.info, routePicks: state.routePicks })
+        );
       } catch (_) {}
     }
 
@@ -49,6 +54,7 @@
         const v = JSON.parse(localStorage.getItem("route-state2") || "{}");
         state.prog = v.prog || {};
         state.info = v.info || {};
+        state.routePicks = v.routePicks || {};
       } catch (_) {}
     }
 
@@ -120,6 +126,29 @@
       queue("chars/" + k, { ...state.info[k], at: new Date().toISOString() });
     }
 
+    function setRoutePick(charName, optionId, note) {
+      const prev = state.routePicks[charName] || {};
+      const next = {
+        optionId: optionId !== undefined ? optionId : prev.optionId,
+        note: note !== undefined ? note : (prev.note || ""),
+        at: new Date().toISOString(),
+      };
+      state.routePicks[charName] = next;
+      queue("routePicks/" + U.slug({ name: charName }), { name: charName, ...next });
+    }
+
+    function clearRoutePick(charName) {
+      delete state.routePicks[charName];
+      queue("routePicks/" + U.slug({ name: charName }), null);
+    }
+
+    function resetAllRoutePicks() {
+      const names = Object.keys(state.routePicks || {});
+      state.routePicks = {};
+      for (const n of names) queue("routePicks/" + U.slug({ name: n }), null);
+      if (!names.length) saveLocal();
+    }
+
     async function initSync() {
       const db = root.claude?.use ? await root.claude.use("db").catch(() => null) : null;
       state.db = db;
@@ -165,6 +194,14 @@
           if (d) state.info[k] = { level: d.level, owned: d.owned, skills: d.skills || {} };
         }
       });
+      watch("routePicks", v => {
+        state.routePicks = {};
+        for (const d of Object.values(v)) {
+          if (d && d.name && d.optionId) {
+            state.routePicks[d.name] = { optionId: d.optionId, note: d.note || "", at: d.at || null };
+          }
+        }
+      });
     }
 
     async function syncSheet(routeData, btn, setSyncText) {
@@ -188,7 +225,10 @@
       }
     }
 
-    return { state, loadLocal, loadFocus, setFocus, setProg, setCharInfo, initSync, syncSheet };
+    return {
+      state, loadLocal, loadFocus, setFocus, setProg, setCharInfo,
+      setRoutePick, clearRoutePick, resetAllRoutePicks, initSync, syncSheet,
+    };
   }
 
   root.FE = root.FE || {};

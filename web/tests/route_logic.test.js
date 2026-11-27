@@ -120,3 +120,45 @@ test("findDecisions detects tied score options with different stat gains", () =>
 test("skipLevelsFor maps seed skip indices to exact character levels", () => {
   assert.deepEqual(RL.skipLevelsFor(20, 2, [0, 3]), [20, 22]);
 });
+
+test("resolveRoutePick, summarizeRoutePicks and formatRoutePicksExport track user, default, and pending states", () => {
+  const proposals = [
+    {
+      name: "努蒂奴",
+      tier: "P2",
+      status: "pending",
+      defaultPick: null,
+      options: [
+        { id: "new_best", title: "Lv16 考重装步兵", net: 253.0, diffVsBaseline: { net: 11.0, statDiffText: "HP+1、力+1、防+3" } },
+        { id: "safe_fallback", title: "Lv18 考重装步兵", net: 248.0, diffVsBaseline: { net: 6.0, statDiffText: "防+2" } },
+      ],
+    },
+    {
+      name: "伊欧",
+      tier: "P0",
+      status: "confirmed_default",
+      defaultPick: "new_best",
+      options: [
+        { id: "new_best", title: "Lv23 考飞鸵兵", net: 230.2, diffVsBaseline: { net: 23.8, statDiffText: "HP+2、速+1" } },
+      ],
+    },
+  ];
+  const s0 = RL.summarizeRoutePicks(proposals, {});
+  assert.equal(s0.pending, 1);
+  assert.equal(s0.defaultConfirmed, 1);
+  assert.equal(s0.confirmed, 1);
+
+  const picks = { "努蒂奴": { optionId: "safe_fallback", note: "先稳过", at: "2026-11-26T23:00:00Z" } };
+  const r = RL.resolveRoutePick(proposals[0], picks);
+  assert.equal(r.source, "user");
+  assert.equal(r.optionId, "safe_fallback");
+  assert.equal(r.note, "先稳过");
+
+  const s1 = RL.summarizeRoutePicks(proposals, picks);
+  assert.equal(s1.pending, 0);
+  assert.equal(s1.userPicked, 1);
+  const txt = RL.formatRoutePicksExport(proposals, picks);
+  assert.match(txt, /努蒂奴 \[P2\]（网页已选）：Lv18 考重装步兵/);
+  assert.match(txt, /备注：先稳过/);
+});
+

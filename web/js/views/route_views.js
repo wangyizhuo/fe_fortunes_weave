@@ -25,7 +25,9 @@
     const OPTS = (D && D.options) || {};
     const REASONS = (D && D.reasons) || {};
     const RM = (D && D.rulesMeta) || {};
+    const PROPOSALS = (D && D.routeProposals) || [];
     const prog = state.prog, info = state.info, focus = state.focus, longS = state.longS;
+    const routePicks = state.routePicks || {};
 
     const walkOf = c => RL.walk(c, prog, info);
     const remainOf = (c, w) => RL.remain(c, w, ST);
@@ -210,7 +212,11 @@
     function viewPlan() {
       const ds = RL.findDecisions(CH, prog, info, focus);
       const pend = ds.filter(d => !(prog[U.keyOf(d.c, d.s)] || {}).ok);
-      const decBox = !ds.length
+      const rpSum = RL.summarizeRoutePicks(PROPOSALS, routePicks);
+      const rpBanner = PROPOSALS.length
+        ? `<section class="alerts"><h2>新路线方案待选（已确认 ${rpSum.confirmed}/${rpSum.total} 人${rpSum.pending ? ` · 待你选择 ${rpSum.pending} 人` : " · 全部已确认"}）</h2><p class="txt">全部 9 位角色的新旧路线对比（含<b>展开的 9 项具体能力差</b>与提前 S/L 提醒）已整理在 <a href="#mine">「我的决定」</a>，点选后会自动记录在本浏览器。</p></section>`
+        : "";
+      const decBox = rpBanner + (!ds.length
         ? `<section class="alerts"><h2>需要你决定</h2><p class="txt">${focus ? "这个角色" : "现在"}没有「加权分一样、加点不同」的级，全部按推荐走就行。</p></section>`
         : `<section class="alerts"><h2>需要你决定（${pend.length ? `还剩 ${pend.length} 处` : "都确认了"}）</h2><p class="txt">这些级换职业加权分一样（或只差一点），但涨的能力不同。点一下就改，下面的路线和总分跟着变。</p><ul class="decs">${ds.map(({ c, s, row, rec, alts, kind }) => {
             if ((prog[U.keyOf(c, s)] || {}).ok) return `<li data-slug="${U.slug(c)}"><div data-key="${s.key}" class="dh"><b>${U.esc(U.shortName(c.name))} Lv${row.frm}→${row.to}</b><span class="ok">✓ 已确认：${U.esc(row.choice)}（${U.esc(row.r.gains.join(" ") || "—")}）</span><button type="button" class="btn ghost" data-dec="undo">重新选</button></div></li>`;
@@ -221,7 +227,7 @@
               return `<label class="opt"><input type="radio" name="${name}" value="${U.esc(val)}" data-f="pick"${on ? " checked" : ""}><span><span class="oc">${U.esc(g.classes.filter((x, i) => g.owned[i]).join(" / "))}${g === rec ? "（推荐）" : ""}</span>　${U.esc(g.gains.join(" ") || "—")}</span><span class="on">${g.cnt}点 · ${g.score}分</span></label>`;
             };
             return `<li data-slug="${U.slug(c)}"><div data-key="${s.key}"><div class="dh"><b>${U.esc(U.shortName(c.name))} Lv${row.frm}→${row.to}</b><small>${kind}</small></div>${s.note ? `<div class="note">${U.esc(s.note)}</div>` : ""}<div class="opts" role="radiogroup" aria-label="这一步选哪个">${[rec, ...alts].map(opt).join("")}</div><button type="button" class="btn" data-dec="ok">确认：用 ${U.esc(row.choice)}</button></div></li>`;
-          }).join("")}</ul></section>`;
+          }).join("")}</ul></section>`);
 
       const ovRows = CH.filter(c => !focus || U.slug(c) === focus).map(c => {
         const a = c.avg; if (!a) return "";
@@ -483,8 +489,164 @@
       return `<p class="lede">每个可考职业单独算：一定考到它、其余照规则走，和基准路线按同样多的乱数比，点数/加权分/金币/训练段数分开展示。</p><div class="grid one">${cards}</div>`;
     }
 
-    // ---------- 7. 我的决定 ----------
+    // ---------- 7. 我的决定（含新路线方案交互选择 + 9 项具体能力差展开） ----------
+    function renderStatDiffChips(diffVec, isBaseline) {
+      if (isBaseline) return `<span class="hint">基准方案（对照原点）</span>`;
+      const parts = [];
+      for (let i = 0; i < ST.length; i++) {
+        const v = (diffVec || [])[i] || 0;
+        if (!v) continue;
+        parts.push(`<span class="sdiff ${v > 0 ? "up" : "dn"}">${U.esc(ST[i])}${v > 0 ? "+" + v : v}</span>`);
+      }
+      return parts.length ? parts.join("") : `<span class="sdiff eq">9 项能力完全相同</span>`;
+    }
+
     function viewMine() {
+      const visibleProps = PROPOSALS.filter(pr => !focus || U.slug({ name: pr.name }) === focus);
+      const sumAll = RL.summarizeRoutePicks(PROPOSALS, routePicks);
+      const sumVis = RL.summarizeRoutePicks(visibleProps, routePicks);
+
+      // 待选择的排在前面，方便一眼看到还没拍板的角色
+      const orderWeight = { pending: 0, user: 1, default: 2, identical: 3 };
+      const sortedRows = [...sumVis.rows].sort(
+        (a, b) => (orderWeight[a.resolved.source] ?? 9) - (orderWeight[b.resolved.source] ?? 9)
+      );
+
+      const proposalCards = sortedRows.map(({ proposal: pr, resolved: r }) => {
+        const statusBadge =
+          r.source === "user"
+            ? `<span class="rec r1">✓ 你已选择：${U.esc(r.option.title)}</span>`
+            : r.source === "default"
+              ? `<span class="rec r0">✓ 默认已确认：${U.esc(r.option.title)}</span>`
+              : r.source === "identical"
+                ? `<span class="rec r3">新旧一致：${U.esc(r.option.title)}</span>`
+                : `<span class="rec r2">⏳ 待你选择</span>`;
+
+        const optHtml = (pr.options || []).map(opt => {
+          const picked = r.optionId === opt.id;
+          const d = opt.diffVsBaseline || {};
+          const isBase = opt.id === "old_baseline";
+          const slHtml = (opt.slWarnings || []).map(w =>
+            `<div class="slwarn">⚠️ <b>需提前 NS Online S/L 实测</b>：${U.esc(w.message)}</div>`
+          ).join("");
+
+          const examLine = (opt.exams || []).map(e => {
+            const pctStr = e.pct != null ? `估 ${e.pct}%` : "—";
+            const trStr = e.trainRanks ? ` · 练 ${e.trainRanks} 段` : "";
+            const flStr = e.promoFloor && e.promoFloor.length ? ` · 转职保底 ${e.promoFloor.join("、")}` : "";
+            return `Lv${e.lv}(第${e.step}步) <b>${U.esc(e.cls)}</b>（判定 ${e.roll}% / ${pctStr}${trStr}${flStr}）`;
+          }).join("；") || "不考新职业";
+
+          const deltaBadge = (label, val, unit, invertColor) => {
+            if (isBase) return `<span>${label} <b>${val}${unit || ""}</b></span>`;
+            const sgn = val > 0 ? "+" + val : String(val);
+            const good = invertColor ? val < 0 : val > 0;
+            const bad = invertColor ? val > 0 : val < 0;
+            const cls = good ? "up" : bad ? "dn" : "";
+            return `<span>${label} <b class="${cls}">${sgn}${unit || ""}</b></span>`;
+          };
+
+          const metricsHtml = isBase
+            ? `<div class="rp-metrics">
+                <span>净值 <b>${opt.net}</b></span>
+                <span>总点数 <b>${opt.rawPoints}</b></span>
+                <span>升级分 <b>${opt.statWeighted}</b></span>
+                <span>转职保底 <b>${opt.promoFloorWeighted}</b></span>
+                <span>金币 <b>${opt.gold}G</b></span>
+                <span>训练 <b>${opt.trainRanks} 段</b></span>
+                <span>精通 <b>${opt.masteryLevels} 级</b></span>
+              </div>`
+            : `<div class="rp-metrics">
+                <span>净值 <b>${opt.net}</b> (${deltaBadge("Δ", d.net, "", false)})</span>
+                <span>点数 <b>${opt.rawPoints}</b> (${deltaBadge("Δ", d.pts, "", false)})</span>
+                <span>升级分 <b>${opt.statWeighted}</b> (${deltaBadge("Δ", d.statW, "", false)})</span>
+                <span>转职保底 <b>${opt.promoFloorWeighted}</b> (${deltaBadge("Δ", d.promoFloorW, "", false)})</span>
+                <span>金币 <b>${opt.gold}G</b> (${deltaBadge("Δ", d.gold, "G", true)})</span>
+                <span>训练 <b>${opt.trainRanks} 段</b> (${deltaBadge("Δ", d.trainRanks, "段", true)})</span>
+                <span>精通 <b>${opt.masteryLevels} 级</b> (${deltaBadge("Δ", d.masteryLevels, "级", false)})</span>
+              </div>`;
+
+          const promoHtml = (opt.promoFloorDetails || []).length
+            ? `<div class="hint">转职保底永久补足：<b>${U.esc(opt.promoFloorDetails.join("、"))}</b></div>`
+            : "";
+
+          const marginalsHtml = (opt.marginals || []).filter(m => !m.isRequired || m.usedLevels === 0).length
+            ? `<div class="rp-marg">${opt.marginals.map(m =>
+                `<div><span class="cat-pill">${m.isRequired ? "必考" : "额外"} ${U.esc(m.cls)}（升级用 ${m.usedLevels} 级）</span> 边际能力差：<b>${U.esc(m.statDiffText)}</b>｜Δ净值 ${U.sgn(m.deltaNet)}｜Δ金币 ${U.sgn(m.deltaGold)}G｜Δ训练 ${U.sgn(m.deltaTrainRanks)} 段</div>`
+              ).join("")}</div>`
+            : "";
+
+          const finalVec = (opt.statVec || []).map((v, i) => `${ST[i]}+${v}`).join(" ");
+
+          return `<label class="rp-opt${picked ? " on" : ""}">
+            <div class="rp-opt-head">
+              <input type="radio" name="rpick-${U.esc(U.slug({ name: pr.name }))}" value="${U.esc(opt.id)}" data-rpick="${U.esc(pr.name)}"${picked ? " checked" : ""}>
+              <b>${U.esc(opt.title)}</b>
+              <span class="cat-pill">${U.esc(opt.tag)}</span>
+            </div>
+            <div class="rp-opt-body">
+              ${slHtml}
+              <div class="rp-sdiff"><span class="lab">相对旧路线 9 项能力差</span><div class="sdiff-list">${renderStatDiffChips(d.statDiff, isBase)}</div></div>
+              ${metricsHtml}
+              ${promoHtml}
+              <div class="hint">考试安排：${examLine}${opt.skips ? `；纯跳过 ${opt.skips} 次` : ""}</div>
+              <div class="hint">窗口总增量（Lv${pr.level}→Lv${opt.endLevel}）：${U.esc(finalVec)}</div>
+              ${marginalsHtml}
+            </div>
+          </label>`;
+        }).join("");
+
+        return `<article class="card rp-card" data-rp-char="${U.esc(pr.name)}">
+          <div class="ch"><div class="ct">
+            <h3>${U.esc(pr.name)}</h3>
+            <span class="rec ${pr.tier === "P0" ? "r1" : pr.tier === "P1" ? "r2" : "r3"}">${U.esc(pr.tier)}</span>
+            <span class="lv">Lv${pr.level}→目标 Lv${pr.target}（${pr.seeds} 个乱数）</span>
+            <span class="r">${statusBadge}</span>
+          </div></div>
+          <div class="sec rp-opts">${optHtml}
+            <div class="rp-note-row">
+              <input type="text" class="rp-note" data-rpick-note="${U.esc(pr.name)}" placeholder="可选备注（例如 S/L 实测结果、个人偏好）" value="${U.esc(r.note || "")}">
+              ${r.source === "user" ? `<button type="button" class="btn ghost" data-rpick-clear="${U.esc(pr.name)}">恢复默认</button>` : ""}
+            </div>
+          </div>
+        </article>`;
+      }).join("");
+
+      const pickSummaryRows = sumAll.rows.map(({ proposal: pr, resolved: r }) => {
+        const d = r.option && r.option.diffVsBaseline ? r.option.diffVsBaseline : null;
+        const srcTag =
+          r.source === "user" ? `<span class="tag ok">网页已选</span>`
+          : r.source === "default" ? `<span class="cat-pill">默认已确认</span>`
+          : r.source === "identical" ? `<span class="cat-pill">新旧一致</span>`
+          : `<span class="tag warn">待选择</span>`;
+        return `<tr class="${r.source === "pending" ? "cur" : ""}">
+          <td><b>${U.esc(U.shortName(pr.name))}</b> <small>${U.esc(pr.tier)}</small></td>
+          <td>${srcTag}</td>
+          <td>${r.option ? `<b>${U.esc(r.option.title)}</b>` : `<span class="hint">尚未选择</span>`}</td>
+          <td class="n">${r.option ? `${r.option.net}${d && r.option.id !== "old_baseline" ? ` (${U.sgn(d.net)})` : ""}` : "—"}</td>
+          <td class="note">${r.option ? (r.option.id === "old_baseline" ? "沿用旧路线" : U.esc(d.statDiffText)) : "—"}</td>
+          <td class="note">${U.esc(r.note || "—")}</td>
+          <td class="n">${r.at ? U.esc(r.at.slice(5, 16).replace("T", " ")) : "—"}</td>
+        </tr>`;
+      }).join("");
+
+      const proposalSection = PROPOSALS.length ? `
+        <section class="alerts">
+          <h2>新路线方案选择与确认（已确认 ${sumAll.confirmed} / ${sumAll.total} 人 · 待你选择 ${sumAll.pending} 人）</h2>
+          <p class="txt">每个候选方案均已展开<b>相对旧路线的 9 项具体能力差</b>、转职保底、金币/训练/精通差与 S/L 提醒。你的每次点选与备注都会<b>自动保存在当前浏览器</b>；选完后可点右侧按钮一键复制结果发给我固化进配置和 golden 快照。</p>
+          <div class="rp-toolbar">
+            <button type="button" class="btn pri" data-rpick-copy>复制我的全部选择</button>
+            ${sumAll.userPicked ? `<button type="button" class="btn ghost" data-rpick-reset>重置全部网页选择</button>` : ""}
+            ${state.copyFeedback ? `<span class="ok" style="font-size:13px">${U.esc(state.copyFeedback)}</span>` : ""}
+          </div>
+          <div class="scroll" style="margin-top:8px"><table>
+            <tr><th>角色</th><th>状态</th><th>当前方案</th><th class="n">净值 (Δ)</th><th>相对旧路线 9 项能力差</th><th>备注</th><th class="n">更新时间</th></tr>
+            ${pickSummaryRows}
+          </table></div>
+        </section>
+        <div class="grid one">${proposalCards}</div>
+      ` : "";
+
       const rows = [];
       for (const c of CH) {
         if (focus && U.slug(c) !== focus) continue;
@@ -503,12 +665,13 @@
       rows.sort((a, b) => b[0].localeCompare(a[0]));
       const live = rows.length
         ? `<div class="scroll"><table><tr><th>角色</th><th class="n">哪一步</th><th>你的决定</th><th class="n">时间（UTC）</th></tr>${rows.map(r => r[1]).join("")}</table></div>`
-        : `<p class="txt">${focus ? "这个角色" : "页面上"}还没有确认或改过的选择。</p>`;
+        : `<p class="txt">${focus ? "这个角色" : "页面上"}还没有单步改选记录。</p>`;
       const focusChar = focus ? CH.find(c => U.slug(c) === focus) : null;
       const rules = DECISIONS.filter(d => !focusChar || d.scope === "全部" || (d.scope || "").split("、").includes(U.shortName(focusChar.name)) || (d.scope || "").split("、").includes(focusChar.name)).slice().reverse();
-      return `<p class="lede">你在页面上做的实时选择，以及固化在 config/route_config.json 与 decisions.json 中的历史规则。</p>
-        <section class="alerts"><h2>页面上的选择（${rows.length}）</h2>${live}</section>
-        <section class="alerts"><h2>规划规则（${rules.length}）</h2><div class="scroll"><table><tr><th class="n">日期</th><th>范围</th><th>规则</th></tr>${rules.map(d => `<tr><td class="n">${U.esc(d.date)}</td><td>${U.esc(d.scope)}</td><td class="note">${U.esc(d.rule)}</td></tr>`).join("")}</table></div></section>`;
+      return `<p class="lede">在这里对比并选择每位角色的新旧路线（展开全部 9 项具体能力差），页面会自动记录你的选择；下方保留单步微调与历史规划规则。</p>
+        ${proposalSection}
+        <section class="alerts"><h2>单步微调与实测记录（${rows.length}）</h2>${live}</section>
+        <section class="alerts"><h2>历史规划规则（${rules.length}）</h2><div class="scroll"><table><tr><th class="n">日期</th><th>范围</th><th>规则</th></tr>${rules.map(d => `<tr><td class="n">${U.esc(d.date)}</td><td>${U.esc(d.scope)}</td><td class="note">${U.esc(d.rule)}</td></tr>`).join("")}</table></div></section>`;
     }
 
     if (view === "plan") return viewPlan();

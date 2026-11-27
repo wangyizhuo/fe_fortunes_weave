@@ -208,8 +208,89 @@
     return v.map(r => [...r, ...Array(wd - r.length).fill("")]);
   }
 
+  function resolveRoutePick(proposal, routePicks) {
+    if (!proposal) return { optionId: null, source: "pending", at: null, note: "", option: null };
+    const saved = (routePicks || {})[proposal.name];
+    const opts = proposal.options || [];
+    if (saved && saved.optionId) {
+      const opt = opts.find(o => o.id === saved.optionId) || null;
+      if (opt) {
+        return {
+          optionId: opt.id,
+          source: "user",
+          at: saved.at || null,
+          note: saved.note || "",
+          option: opt,
+        };
+      }
+    }
+    if (proposal.defaultPick) {
+      const opt = opts.find(o => o.id === proposal.defaultPick) || null;
+      if (opt) {
+        return {
+          optionId: opt.id,
+          source: proposal.status === "identical" ? "identical" : "default",
+          at: null,
+          note: (saved && saved.note) || "",
+          option: opt,
+        };
+      }
+    }
+    return {
+      optionId: null,
+      source: "pending",
+      at: null,
+      note: (saved && saved.note) || "",
+      option: null,
+    };
+  }
+
+  function summarizeRoutePicks(proposals, routePicks) {
+    const list = proposals || [];
+    let userPicked = 0;
+    let defaultConfirmed = 0;
+    let identical = 0;
+    let pending = 0;
+    const rows = list.map(pr => {
+      const r = resolveRoutePick(pr, routePicks);
+      if (r.source === "user") userPicked++;
+      else if (r.source === "default") defaultConfirmed++;
+      else if (r.source === "identical") identical++;
+      else pending++;
+      return { proposal: pr, resolved: r };
+    });
+    return {
+      total: list.length,
+      confirmed: userPicked + defaultConfirmed + identical,
+      userPicked,
+      defaultConfirmed,
+      identical,
+      pending,
+      rows,
+    };
+  }
+
+  function formatRoutePicksExport(proposals, routePicks) {
+    const sum = summarizeRoutePicks(proposals, routePicks);
+    const lines = [`# 我的路线方案选择（已确认 ${sum.confirmed}/${sum.total}，待选 ${sum.pending}）`];
+    for (const { proposal: pr, resolved: r } of sum.rows) {
+      if (!r.option) {
+        lines.push(`- ${pr.name} [${pr.tier}]：待选择`);
+        continue;
+      }
+      const d = r.option.diffVsBaseline || {};
+      const tag = r.source === "user" ? "网页已选" : r.source === "default" ? "默认已确认" : "新旧一致";
+      const note = r.note ? `｜备注：${r.note}` : "";
+      lines.push(
+        `- ${pr.name} [${pr.tier}]（${tag}）：${r.option.title} [${r.option.id}]｜净值 ${r.option.net}（Δ${d.net >= 0 ? "+" : ""}${d.net ?? 0}）｜能力差：${d.statDiffText || "无"}${note}`
+      );
+    }
+    return lines.join("\n");
+  }
+
   return {
     charInfo, examName, recOf, choiceOf, resultOf, stepName, eqName,
     examVerdict, walk, remain, findDecisions, compactRouteSegments, skipLevelsFor, buildSheetValues,
+    resolveRoutePick, summarizeRoutePicks, formatRoutePicksExport,
   };
 });

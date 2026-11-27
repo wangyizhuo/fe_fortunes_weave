@@ -596,6 +596,7 @@ def compute_marginal_gains(
                     cls=cls,
                     is_required=cls in req_set,
                     delta_pts=bb.raw_points,
+                    delta_stat_vector=bb.stat_vector,
                     delta_stat_w=bb.stat_weighted + bb.physique_bonus,
                     delta_promo_floor_w=bb.promo_floor_weighted,
                     delta_mastery_lv=used_lv,
@@ -613,6 +614,7 @@ def compute_marginal_gains(
                 cls=cls,
                 is_required=cls in req_set,
                 delta_pts=bb.raw_points - sb.raw_points,
+                delta_stat_vector=tuple(a - b for a, b in zip(bb.stat_vector, sb.stat_vector)),
                 delta_stat_w=(bb.stat_weighted + bb.physique_bonus) - (sb.stat_weighted + sb.physique_bonus),
                 delta_promo_floor_w=bb.promo_floor_weighted - sb.promo_floor_weighted,
                 delta_mastery_lv=bb.mastery_levels - sb.mastery_levels,
@@ -630,11 +632,12 @@ def plan_two_stage(
     p: Planner,
     tier: str,
     policies: dict[str, TierPolicy] | None = None,
+    include_timing_matrix: bool = True,
 ) -> TwoStageResult:
     """运行完整的以终为始两阶段规划，返回：
       - best              : 含 S/L 风险提醒的全局最优方案
       - safe_fallback     : 若 best 存在 S/L 提醒，同时产出不赌公式的稳过备选方案
-      - marginal_gains    : 最佳方案里每个职业的精确边际收益拆解
+      - marginal_gains    : 最佳方案里每个职业的精确边际收益拆解（含 9 项具体能力差）
       - timing_candidates : 每场考试相对其他时机的区间 [t1, t2] 四项拆解
     """
     policy = (policies or DEFAULT_TIER_POLICIES)[tier]
@@ -643,26 +646,42 @@ def plan_two_stage(
 
     safe_fallback: EvaluatedPlan | None = None
     if best.sl_warnings:
-        try:
-            safe_fallback, _, _, _ = _search_best_class_set(p, policy, avoid_sl_warnings=True)
-        except RuntimeError:
-            safe_fallback = None
+        # 优先在当前最优职业集合及前 3 个候选集合上直接求稳过时机，兼顾完备性与速度
+        safe_cands: list[EvaluatedPlan] = []
+        seen_tgs: set[frozenset[str]] = set()
+        for ev in [best, *evaluated[:3]]:
+            fk = frozenset(ev.targets)
+            if fk in seen_tgs:
+                continue
+            seen_tgs.add(fk)
+            sf = optimize_exam_timings(p, ev.targets, policy, step_hints, avoid_sl_warnings=True)
+            if sf is not None:
+                safe_cands.append(sf)
+        if safe_cands:
+            safe_cands.sort(key=_rank_key, reverse=True)
+            safe_fallback = safe_cands[0]
+        else:
+            try:
+                safe_fallback, _, _, _ = _search_best_class_set(p, policy, avoid_sl_warnings=True)
+            except RuntimeError:
+                safe_fallback = None
 
     timing_candidates: dict[str, list[TimingIntervalDiff]] = {}
-    for st_best, cls in sorted(best.exam_at.items()):
-        diffs: list[TimingIntervalDiff] = []
-        base_others = {k: v for k, v in best.exam_at.items() if v != cls}
-        for st_alt in range(p.n_seeds):
-            if st_alt == st_best or st_alt in base_others:
-                continue
-            alt = simulate_fixed_exams(p, {**base_others, st_alt: cls}, policy, best.targets)
-            if alt is None:
-                continue
-            d = compare_timing_interval(
-                p, cls, best if st_best < st_alt else alt, alt if st_best < st_alt else best, policy
-            )
-            diffs.append(d)
-        timing_candidates[cls] = diffs
+    if include_timing_matrix:
+        for st_best, cls in sorted(best.exam_at.items()):
+            diffs: list[TimingIntervalDiff] = []
+            base_others = {k: v for k, v in best.exam_at.items() if v != cls}
+            for st_alt in range(p.n_seeds):
+                if st_alt == st_best or st_alt in base_others:
+                    continue
+                alt = simulate_fixed_exams(p, {**base_others, st_alt: cls}, policy, best.targets)
+                if alt is None:
+                    continue
+                d = compare_timing_interval(
+                    p, cls, best if st_best < st_alt else alt, alt if st_best < st_alt else best, policy
+                )
+                diffs.append(d)
+            timing_candidates[cls] = diffs
 
     return TwoStageResult(
         name=p.name,
