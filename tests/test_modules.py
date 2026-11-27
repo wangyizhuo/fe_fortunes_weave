@@ -144,10 +144,10 @@ class TestClassesModule(unittest.TestCase):
         from modules.route.choice_builder import build_route_proposals
         props = build_route_proposals()
         self.assertEqual(len(props), 9)
-        # 严格按 P -> 综合强度(SS~D) -> 名字(拼音) 排序，且伊欧已下调至 P1
+        # 严格按 当前主角 -> P -> 综合强度(SS~D) -> 名字(拼音) 排序，且伊欧已下调至 P1
         self.assertEqual(
             [p["name"] for p in props],
-            ["艾丝梅拉尔达", "迪托利希", "米迦艾拉", "法毕欧", "奇洛伊卡", "伊欧", "杨界", "努蒂奴", "乌尔坦德"],
+            ["迪托利希", "艾丝梅拉尔达", "米迦艾拉", "法毕欧", "奇洛伊卡", "伊欧", "杨界", "努蒂奴", "乌尔坦德"],
         )
         by_name = {p["name"]: p for p in props}
         self.assertEqual(by_name["伊欧"]["tier"], "P1")
@@ -164,6 +164,12 @@ class TestClassesModule(unittest.TestCase):
         self.assertEqual(len(nu_opts["new_best"]["diffVsBaseline"]["statDiff"]), 9)
         self.assertIn("防+3", nu_opts["new_best"]["diffVsBaseline"]["statDiffText"])
         self.assertGreaterEqual(len(nu_opts["new_best"]["slWarnings"]), 1)
+        # 艾丝梅拉尔达 斗拳手必须写明当前与考前预估技能等级（格斗术 E→预估C）
+        es_best = next(o for o in by_name["艾丝梅拉尔达"]["options"] if o["id"] == "new_best")
+        brawler_ex = next(e for e in es_best["exams"] if e["cls"] == "斗拳手")
+        self.assertEqual(brawler_ex["pct"], 100.0)
+        self.assertIn("格斗术 E→预估C", brawler_ex["skillSummary"])
+        self.assertEqual(brawler_ex["trainRanks"], 4)
 
 
 class TestSkillsModule(unittest.TestCase):

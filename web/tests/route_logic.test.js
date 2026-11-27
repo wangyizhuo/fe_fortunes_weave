@@ -220,18 +220,71 @@ test("summarizeNextActions sorts by P0→P1→P2 and extracts next exam, switch,
   assert.equal(rows[2].nextSkip.lv, 17);
   assert.equal(rows[2].nextSkip.stepsAway, 1);
 
-  // 严格按 P -> 强度 -> 名字（zh-CN 拼音）排序
+  // 严格按 当前主角 -> P -> 强度 -> 名字（zh-CN 拼音）排序
   const mixed = [
     { name: "米迦艾拉", tier: "P0", strengthTier: "A" },
-    { name: "迪托利希", tier: "P0", strengthTier: "S" },
+    { name: "迪托利希", tier: "P0", strengthTier: "S", isLord: true },
     { name: "艾丝梅拉尔达", tier: "P0", strengthTier: "S" },
+    { name: "法毕欧", tier: "P1", strengthTier: "S" },
     { name: "乌尔坦德", tier: "P2", strengthTier: "B" },
     { name: "努蒂奴", tier: "P2", strengthTier: "B" },
   ];
   assert.deepEqual(
-    RL.sortCharsByTier(mixed).map(c => c.name),
-    ["艾丝梅拉尔达", "迪托利希", "米迦艾拉", "努蒂奴", "乌尔坦德"]
+    RL.sortCharsByTier(mixed, "迪托利希").map(c => c.name),
+    ["迪托利希", "艾丝梅拉尔达", "米迦艾拉", "法毕欧", "努蒂奴", "乌尔坦德"]
   );
+  const groups = RL.groupCharsByTier(mixed, "迪托利希");
+  assert.deepEqual(groups.map(g => g.tier), ["P0", "P1", "P2"]);
+  assert.deepEqual(groups[0].chars.map(c => c.name), ["迪托利希", "艾丝梅拉尔达", "米迦艾拉"]);
+  assert.deepEqual(groups[1].chars.map(c => c.name), ["法毕欧"]);
+  assert.deepEqual(groups[2].chars.map(c => c.name), ["努蒂奴", "乌尔坦德"]);
 });
+
+test("diffOptionGains computes stat-by-stat deltas against preselected option", () => {
+  const d = RL.diffOptionGains(["力", "速", "技", "防", "魔防"], ["HP", "力", "速", "防"]);
+  assert.equal(d.text, "HP-1 技+1 魔防+1");
+  assert.deepEqual(d.diffItems, [
+    { stat: "HP", delta: -1 },
+    { stat: "技", delta: 1 },
+    { stat: "魔防", delta: 1 },
+  ]);
+  assert.equal(RL.diffOptionGains(["力", "速"], ["力", "速"]).text, "与预选相同");
+});
+
+test("walk supports custom exam:<cls> choices and findEarlyExamSlot picks worst earlier RNG step", () => {
+  const char = {
+    name: "杨界",
+    level: 20,
+    curClass: "诅咒师",
+    owned: ["诅咒师", "平民"],
+    planFrom: 20,
+    steps: [
+      { key: "1", src: "plan", exam: false, cls: "诅咒师", frm: 20, gains: ["魔", "速", "技"], cnt: 3, score: 18, roll: 15.26, routes: { exams: [{ cls: "牧师", pct: 100, pass: true }] }, opts: [{ classes: ["诅咒师"], owned: [true], gains: ["魔", "速", "技"], cnt: 3, score: 18 }] },
+      { key: "2", src: "plan", exam: false, cls: "平民", frm: 21, gains: ["HP", "幸"], cnt: 2, score: 7, roll: 36.85, routes: { exams: [{ cls: "牧师", pct: 100, pass: true }] }, opts: [{ classes: ["平民"], owned: [true], gains: ["HP", "幸"], cnt: 2, score: 7 }] },
+      { key: "3", src: "plan", exam: false, cls: "诅咒师", frm: 22, gains: ["魔", "技"], cnt: 2, score: 14, roll: 78.03, routes: { exams: [{ cls: "牧师", pct: 100, pass: true }] }, opts: [
+        { classes: ["牧师"], owned: [false], gains: ["HP", "魔", "速", "技", "幸"], cnt: 5, score: 22 },
+        { classes: ["诅咒师"], owned: [true], gains: ["魔", "技"], cnt: 2, score: 14 },
+      ] },
+    ],
+  };
+  const w0 = RL.walk(char, {}, {});
+  assert.deepEqual(RL.passableExamChoices(char.steps[1], w0.rows[1].ownedBefore).map(e => e.cls), ["牧师"]);
+  const slot = RL.findEarlyExamSlot(char, w0, "3", "牧师");
+  assert.equal(slot.key, "2");
+  assert.equal(slot.score, 7);
+
+  // Applying early exam on step 2 + using 牧师 on step 3 clears missing flag
+  const U = require("../js/core/utils.js");
+  const prog = {
+    [U.keyOf(char, char.steps[1])]: { choice: "exam:牧师" },
+    [U.keyOf(char, char.steps[2])]: { choice: "牧师" },
+  };
+  const w1 = RL.walk(char, prog, {});
+  assert.equal(w1.rows[1].r.exam, true);
+  assert.equal(w1.rows[1].r.examCls, "牧师");
+  assert.equal(w1.rows[2].choice, "牧师");
+  assert.equal(Boolean(w1.rows[2].missing), false);
+});
+
 
 

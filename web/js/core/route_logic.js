@@ -16,6 +16,12 @@
   }
 
   const examName = s => (s && s.exam && s.cls ? s.cls : "");
+  const isExamChoice = choice => choice === "exam" || (typeof choice === "string" && choice.startsWith("exam:"));
+  function examChoiceCls(choice, s) {
+    if (typeof choice === "string" && choice.startsWith("exam:")) return choice.slice(5);
+    if (choice === "exam" && s && s.exam && s.cls) return s.cls;
+    return "";
+  }
   const recOf = s => (s.exam ? "exam" : s.cls);
 
   function choiceOf(c, s, prog) {
@@ -23,7 +29,7 @@
   }
 
   function resultOf(s, choice) {
-    if (choice === "exam") return { exam: true };
+    if (isExamChoice(choice)) return { exam: true, examCls: examChoiceCls(choice, s) };
     const g = (s.opts || []).find(o => o.classes.includes(choice));
     if (g) return g;
     if (choice === s.cls || choice === s.seenCls) {
@@ -32,10 +38,10 @@
     return { classes: [choice], gains: [], cnt: 0, score: 0 };
   }
 
-  function stepName(s) {
-    const n = examName(s);
+  function stepName(s, row) {
+    const n = (row && row.r && row.r.exam) ? (row.r.examCls || "") : examName(s);
     if (!n) return "跳过";
-    const trainTxt = s.train && s.trainOk ? `，Lv${s.trainLv} 考前练好 ` + s.train.join("、") : "";
+    const trainTxt = s.exam && s.cls === n && s.train && s.trainOk ? `，Lv${s.trainLv} 考前练好 ` + s.train.join("、") : "";
     return `考试（到 ${n}${trainTxt}）`;
   }
 
@@ -73,11 +79,15 @@
     const have = new Set(ci.owned);
     for (const row of out) {
       const s = row.s;
+      row.ownedBefore = [...have];
       if (row.r.exam) {
-        if (s.exam && s.cls) {
+        const exCls = row.r.examCls || "";
+        if (exCls) {
           const ch = ((prog && prog[U.keyOf(c, s)]) || {}).chance;
-          const pass = ch != null ? s.roll < ch : (s.pct == null || s.roll < s.pct);
-          if (pass) have.add(s.cls);
+          const routeEx = (s.routes && s.routes.exams || []).find(e => e.cls === exCls);
+          const pct = (s.exam && s.cls === exCls) ? s.pct : (routeEx ? routeEx.pct : null);
+          const pass = ch != null ? s.roll < ch : (pct == null || s.roll < pct);
+          if (pass) have.add(exCls);
           row.fail = !pass;
         }
       } else if (!row.done && s.src === "plan" && !have.has(row.choice)) {
@@ -299,14 +309,29 @@
     return Object.prototype.hasOwnProperty.call(STRENGTH_ORDER, st) ? STRENGTH_ORDER[st] : 9;
   }
 
-  function sortCharsByTier(chars) {
+  function sortCharsByTier(chars, currentLord) {
     return [...(chars || [])].sort((a, b) => {
+      const al = (a && (a.isLord || (currentLord && a.name === currentLord))) ? 0 : 1;
+      const bl = (b && (b.isLord || (currentLord && b.name === currentLord))) ? 0 : 1;
+      if (al !== bl) return al - bl;
       const dp = tierOrderOf(a && a.tier) - tierOrderOf(b && b.tier);
       if (dp !== 0) return dp;
       const ds = strengthOrderOf(a && a.strengthTier) - strengthOrderOf(b && b.strengthTier);
       if (ds !== 0) return ds;
       return String((a && a.name) || "").localeCompare(String((b && b.name) || ""), "zh-CN");
     });
+  }
+
+  function groupCharsByTier(chars, currentLord) {
+    const sorted = sortCharsByTier(chars, currentLord);
+    const out = [];
+    for (const tier of ["P0", "P1", "P2"]) {
+      const items = sorted.filter(c => (c && c.tier) === tier);
+      if (items.length) out.push({ tier, chars: items });
+    }
+    const rest = sorted.filter(c => !c || !["P0", "P1", "P2"].includes(c.tier));
+    if (rest.length) out.push({ tier: "其他", chars: rest });
+    return out;
   }
 
   function summarizeNextActions(chars, prog, infoMap) {
@@ -432,10 +457,67 @@
     });
   }
 
+  function diffOptionGains(optGains, baseGains, stats = U.DEFAULT_STATS) {
+    const a = U.statVec(optGains || [], stats);
+    const b = U.statVec(baseGains || [], stats);
+    const diffVec = a.map((v, i) => v - b[i]);
+    const diffItems = [];
+    for (let i = 0; i < stats.length; i++) {
+      if (diffVec[i] !== 0) diffItems.push({ stat: stats[i], delta: diffVec[i] });
+    }
+    const text = diffItems.length
+      ? diffItems.map(x => `${x.stat}${x.delta > 0 ? "+" : ""}${x.delta}`).join(" ")
+      : "与预选相同";
+    return { diffVec, diffItems, text };
+  }
+
+  function passableExamChoices(s, ownedBefore) {
+    const ownedSet = new Set(ownedBefore || []);
+    const list = (s && s.routes && Array.isArray(s.routes.exams)) ? s.routes.exams : [];
+    const seen = new Set();
+    const out = [];
+    for (const e of list) {
+      if (!e || !e.cls || e.pass === false || ownedSet.has(e.cls) || seen.has(e.cls)) continue;
+      seen.add(e.cls);
+      out.push({ cls: e.cls, pct: e.pct ?? null, pass: e.pass !== false });
+    }
+    if (s && s.exam && s.cls && !ownedSet.has(s.cls) && !seen.has(s.cls)) {
+      out.unshift({ cls: s.cls, pct: s.pct ?? null, pass: s.pct == null || s.roll < s.pct });
+    }
+    return out;
+  }
+
+  function findEarlyExamSlot(c, w, targetStepKey, cls) {
+    if (!w || !Array.isArray(w.rows) || !cls) return null;
+    let best = null;
+    for (const row of w.rows) {
+      if (row.s.key === targetStepKey) break;
+      if (row.done || row.s.src !== "plan" || row.r.exam) continue;
+      const ownedSet = new Set(row.ownedBefore || []);
+      if (ownedSet.has(cls)) return null;
+      const ex = (row.s.routes && row.s.routes.exams || []).find(e => e.cls === cls && e.pass !== false);
+      if (!ex) continue;
+      const cand = {
+        key: row.s.key,
+        lv: row.frm,
+        score: row.r.score ?? 0,
+        cnt: row.r.cnt ?? 0,
+        roll: row.s.roll,
+        pct: ex.pct ?? null,
+        cls,
+      };
+      if (!best || cand.score < best.score || (cand.score === best.score && cand.cnt < best.cnt)) {
+        best = cand;
+      }
+    }
+    return best;
+  }
+
   return {
-    charInfo, examName, recOf, choiceOf, resultOf, stepName, eqName,
+    charInfo, examName, isExamChoice, examChoiceCls, recOf, choiceOf, resultOf, stepName, eqName,
     examVerdict, walk, remain, findDecisions, compactRouteSegments, skipLevelsFor, buildSheetValues,
     resolveRoutePick, summarizeRoutePicks, formatRoutePicksExport,
-    tierOrderOf, sortCharsByTier, summarizeNextActions,
+    tierOrderOf, sortCharsByTier, groupCharsByTier, summarizeNextActions, diffOptionGains,
+    passableExamChoices, findEarlyExamSlot,
   };
 });

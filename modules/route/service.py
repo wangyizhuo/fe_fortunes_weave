@@ -20,7 +20,8 @@ if str(RNG_DIR) not in sys.path:
 from fe_growth import STATS, exam_roll, level_up  # noqa: E402
 from planner import _TIER, _TIER_RANK, plan_all, score  # noqa: E402
 import run_plans as R  # noqa: E402
-from modules.character_tiers import get_character_tier, load_character_tiers  # noqa: E402
+from modules.character_tiers import char_sort_key, get_character_tier, get_current_lord, load_character_tiers  # noqa: E402
+from .choice_builder import _exam_skill_details, build_route_proposals  # noqa: E402
 from .config_loader import load_route_config  # noqa: E402
 
 
@@ -112,6 +113,7 @@ def build_rules_meta(cfg: Any, tiers_data: dict[str, Any] | None = None) -> dict
         "characterTierSource": td.get("source", ""),
         "characterTierScale": td.get("scale", []),
         "priorityLinkNote": td.get("priorityLinkNote", ""),
+        "currentLord": get_current_lord(),
     }
 
 
@@ -129,6 +131,7 @@ def build_route_data() -> dict[str, Any]:
     reasons_map = _load_json("reasons.json", {})
     decisions = _load_json("decisions.json", [])
     tiers_data = load_character_tiers()
+    current_lord = get_current_lord()
 
     chars: list[dict[str, Any]] = []
     for name in R.ORDER:
@@ -140,6 +143,7 @@ def build_route_data() -> dict[str, Any]:
         opts_pool = list(dict.fromkeys(owned + R.EXAM_OPTIONS.get(name, [])))
         c: dict[str, Any] = {
             "name": name,
+            "isLord": name == current_lord,
             "level": shot.get("level"),
             "curClass": shot.get("class"),
             "stats": shot.get("stats"),
@@ -217,41 +221,165 @@ def build_route_data() -> dict[str, Any]:
                 "thr": list(p.thresholds),
             })
 
-            # 多转一个中级对比（统一使用 p.plan_net 口径）
+            # 多转一个中级对比 + 替换当前中级对比（统一拆分为「升级乱数能力差」与「额外考试耗掉的乱数」，附带技能训练差与推荐度排序）
             gpp = p.gold_per_pt
             tg = list(getattr(plan, "targets", []))
-            base_net = p.plan_net(plan.raw_actions, plan.total, plan.gold)
+            base_acts = list(plan.raw_actions)
+            base_net = p.plan_net(base_acts, plan.total, plan.gold)
+            base_fl_lifts = p.floor_lifts(base_acts)
+            base_fl_g = [0] * 9
+            for ls_ in base_fl_lifts.values():
+                for i_, o_, n_ in ls_:
+                    base_fl_g[i_] += n_ - o_
+            base_ups = sum(1 for a_, _ in base_acts if a_ == "升级")
+            g_old = [0] * 9
+            for rr in plan.rows:
+                if rr.action == "升级":
+                    g_old = [u + v for u, v in zip(g_old, rr.gains)]
+
+            def _analyze_variant(cls_: str, new_acts: list[tuple[str, str]], new_total: int, new_gold: int, replaces: str = "") -> dict[str, Any]:
+                used_ = sum(1 for a_, x_ in new_acts if a_ == "升级" and x_ == cls_)
+                g_new, lv_o, lv_n = [0] * 9, p.level, p.level
+                same_up_diff = [0] * 9
+                lost_items: list[str] = []
+                gained_items: list[str] = []
+                exam_loss_w = 0
+                exam_loss_pts = 0
+                for st_ in range(min(len(base_acts), len(new_acts))):
+                    ao, co = base_acts[st_]
+                    an, cn = new_acts[st_]
+                    go = list(p.result(st_, lv_o, co)[1]) if ao == "升级" else [0] * 9
+                    gn = list(p.result(st_, lv_n, cn)[1]) if an == "升级" else [0] * 9
+                    if an == "升级":
+                        g_new = [u + v for u, v in zip(g_new, gn)]
+                    if ao == "升级" and an == "升级":
+                        for i_ in range(9):
+                            same_up_diff[i_] += gn[i_] - go[i_]
+                    elif ao == "升级" and an == "考试":
+                        sc_o = p.result(st_, lv_o, co)[0]
+                        g_txt = "/".join(STATS[i_] for i_ in range(9) if go[i_]) or "无"
+                        lost_items.append(f"第{st_+1}步 Lv{lv_o} 原用{co}升({g_txt}, -{sc_o}分)→改{cn}")
+                        exam_loss_w -= sc_o
+                        exam_loss_pts -= sum(go)
+                    elif ao == "考试" and an == "升级":
+                        sc_n = p.result(st_, lv_n, cn)[0]
+                        g_txt = "/".join(STATS[i_] for i_ in range(9) if gn[i_]) or "无"
+                        gained_items.append(f"第{st_+1}步 Lv{lv_n} 原{co}→改用{cn}升({g_txt}, +{sc_n}分)")
+                        exam_loss_w += sc_n
+                        exam_loss_pts += sum(gn)
+                    if ao == "升级":
+                        lv_o += 1
+                    if an == "升级":
+                        lv_n += 1
+
+                # 转职保底差并入升级纯能力差
+                new_fl_lifts = p.floor_lifts(new_acts)
+                new_fl_g = [0] * 9
+                for ls_ in new_fl_lifts.values():
+                    for i_, o_, n_ in ls_:
+                        new_fl_g[i_] += n_ - o_
+                fl_diff = [new_fl_g[i_] - base_fl_g[i_] for i_ in range(9)]
+                up_diff_vec = [same_up_diff[i_] + fl_diff[i_] for i_ in range(9)]
+                up_diff_w = sum(up_diff_vec[i_] * p.weights[i_] for i_ in range(9))
+                up_diff_txt = "、".join(f"{STATS[i_]}{up_diff_vec[i_]:+d}" for i_ in range(9) if up_diff_vec[i_]) or "无能力差"
+
+                new_ups = sum(1 for a_, _ in new_acts if a_ == "升级")
+                levels_lost = base_ups - new_ups
+                if not lost_items and not gained_items:
+                    exam_loss_txt = "0 消耗（未改变升级乱数）"
+                else:
+                    parts_l = []
+                    if levels_lost > 0:
+                        parts_l.append(f"少升 {levels_lost} 级")
+                    elif levels_lost < 0:
+                        parts_l.append(f"多升 {-levels_lost} 级")
+                    else:
+                        parts_l.append("同升级数（乱数置换）")
+                    parts_l.extend(lost_items + gained_items)
+                    exam_loss_txt = "；".join(parts_l)
+
+                dg = [(g_new[i_] + new_fl_g[i_]) - (g_old[i_] + base_fl_g[i_]) for i_ in range(9)]
+                pts_r = "、".join(f"{STATS[i_]}{dg[i_]:+d}" for i_ in range(9) if dg[i_]) or "能力一样"
+
+                raw_req = R.exam_req(name, cls_)
+                tr_ranks = raw_req[1] if raw_req else 0
+                tr_skills = R.train_need(name, cls_)
+                tr_text = "、".join(tr_skills) if tr_skills else "已达标（0 段）"
+
+                net_new = p.plan_net(new_acts, new_total, new_gold)
+                # 若旧规划器未将 P1/P2 训练成本计入 p.exam_train_ranks，这里也补算真实训练成本用于排序与展示
+                already_counted_tr = (getattr(p, "exam_train_ranks", {}) or {}).get(cls_, 0)
+                extra_uncounted_tr = max(0, tr_ranks - already_counted_tr)
+                dnet_raw = round(net_new - base_net, 1)
+                dnet_real = round(dnet_raw - extra_uncounted_tr * p.TRAIN_PTS_PER_RANK, 1)
+
+                if dnet_real > 0:
+                    rec_lv, rec_rk = "推荐", 3
+                elif up_diff_w > 0 and dnet_real >= -10 and tr_ranks <= 2:
+                    rec_lv, rec_rk = "可考虑", 2
+                else:
+                    rec_lv, rec_rk = "不推荐", 1
+
+                return {
+                    "cls": cls_,
+                    "replaces": replaces,
+                    "total": new_total,
+                    "gold": new_gold,
+                    "dgold": new_gold - plan.gold,
+                    "net": round(net_new, 1),
+                    "dsc": new_total - plan.total,
+                    "dnet": dnet_raw,
+                    "dnetReal": dnet_real,
+                    "used": used_,
+                    "diff": pts_r,
+                    "dpts": sum(dg),
+                    "upDiff": up_diff_txt,
+                    "upDiffPts": sum(up_diff_vec),
+                    "upDiffW": up_diff_w,
+                    "levelsLost": levels_lost,
+                    "examLoss": exam_loss_txt,
+                    "examLossW": exam_loss_w,
+                    "trainRanks": tr_ranks,
+                    "trainSkills": tr_skills,
+                    "trainText": tr_text,
+                    "recLevel": rec_lv,
+                    "_recRk": rec_rk,
+                }
+
+            mid_candidates = [x for x in p.exam_options if _TIER_RANK.get(_TIER.get(x, ""), 0) == 2 and x not in tg]
             mg = []
-            for cls in [x for x in p.exam_options if _TIER_RANK.get(_TIER.get(x, ""), 0) == 2 and x not in tg]:
+            for cls in mid_candidates:
                 r = p.rule_run(tg + [cls], (cls,))
                 if r is None or not any(a == "升级" and x == cls for a, x in r[0]):
                     continue
-                used = sum(1 for a, x in r[0] if a == "升级" and x == cls)
-                g_new, lv_ = [0] * 9, p.level
-                for i_, (a_, x_) in enumerate(r[0]):
-                    if a_ == "升级":
-                        g_new = [u + v for u, v in zip(g_new, p.result(i_, lv_, x_)[1])]
-                        lv_ += 1
-                g_old = [0] * 9
-                for rr in plan.rows:
-                    if rr.action == "升级":
-                        g_old = [u + v for u, v in zip(g_old, rr.gains)]
-                dg = [u - v for u, v in zip(g_new, g_old)]
-                pts_r = "、".join(f"{STATS[i_]}{dg[i_]:+d}" for i_ in range(9) if dg[i_]) or "能力一样"
-                net_new = p.plan_net(r[0], r[2], r[3])
-                mg.append({
-                    "cls": cls,
-                    "total": r[2],
-                    "gold": r[3],
-                    "net": round(net_new, 1),
-                    "dsc": r[2] - plan.total,
-                    "dnet": round(net_new - base_net, 1),
-                    "used": used,
-                    "diff": pts_r,
-                    "dpts": sum(dg),
-                })
-            mg.sort(key=lambda x: -x["dnet"])
-            c["midGain"] = mg[:5]
+                mg.append(_analyze_variant(cls, list(r[0]), r[2], r[3]))
+            mg.sort(key=lambda x: (-x["_recRk"], -x["dnetReal"], x["trainRanks"], -x["upDiffW"]))
+            for row_ in mg:
+                row_.pop("_recRk", None)
+            c["midGain"] = mg[:8]
+
+            # 替换当前单中级对比（例如杨界：只考牧师 vs 只考萨满巫师，不额外多考一场）
+            alt_mid = []
+            if len(tg) == 1 and _TIER_RANK.get(_TIER.get(tg[0], ""), 0) == 2:
+                base_mid = tg[0]
+                sv_ea = getattr(p, "exam_at", None)
+                try:
+                    for cls in mid_candidates:
+                        p.exam_at = {k_: cls for k_, v_ in (sv_ea or {}).items() if v_ == base_mid} or None
+                        r = p.rule_run([cls], (cls,))
+                        if r is None or ("考试", cls) not in r[0]:
+                            p.exam_at = None
+                            r = p.rule_run([cls], (cls,))
+                        if r is None or ("考试", cls) not in r[0]:
+                            continue
+                        alt_mid.append(_analyze_variant(cls, list(r[0]), r[2], r[3], replaces=base_mid))
+                finally:
+                    p.exam_at = sv_ea
+                alt_mid.sort(key=lambda x: (-x["dnetReal"], x["trainRanks"], -x["dsc"]))
+                for row_ in alt_mid:
+                    row_.pop("_recRk", None)
+            c["altMid"] = alt_mid[:6]
+
             c["planGold"], c["planNet"], c["targets"], c["gpp"] = plan.gold, round(base_net, 1), tg, round(gpp, 1)
             c["examWarn"] = plan.exams > 4
             c["p0"] = name in R.P0
@@ -372,6 +500,11 @@ def build_route_data() -> dict[str, Any]:
                         or (getattr(p, "exam_train_ranks", {}) or {}).get(r.cls)
                     ),
                     "trainLv": lv if exam else None,
+                    "skillSummary": (
+                        _exam_skill_details(p, r.cls, lv)["skillSummary"]
+                        if exam and r.cls in R.EXAM_OPTIONS[name]
+                        else None
+                    ),
                     "floor": [f"{a} {x}→{v}" for a, x, v in (r.floor or [])] if exam else None,
                     "skipCls": r.skip_class if exam else None,
                     "skipFail": r.skip_fail if exam else None,
@@ -443,7 +576,7 @@ def build_route_data() -> dict[str, Any]:
                 e, a, st0 = exp[i], act[i], c["trend"]["stay"][i]
                 wt = c["weights"][i]
                 tag = f"（权重 {wt}）" if wt <= 2 else ""
-                if a - e <= -2 and a <= 0.65 * e:
+                if a - e <= -2 and (a <= 0.70 * e or a - e <= -3.0):
                     flags.append({
                         "lv": "bad",
                         "t": f"{k_stat}到 Lv{to_lv} 只涨 {a}，平均 {e}{tag}，明显偏低"
@@ -464,7 +597,7 @@ def build_route_data() -> dict[str, Any]:
 
         chars.append(c)
 
-    from .choice_builder import build_route_proposals
+    chars.sort(key=lambda ch: char_sort_key(ch["name"], ch.get("tier", "P2"), ch.get("strengthTier", "D"), current_lord=current_lord))
 
     return {
         "module": "route",

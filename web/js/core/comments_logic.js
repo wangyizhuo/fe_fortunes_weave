@@ -131,10 +131,18 @@
       }
     }
 
-    if (typeof o.formatRoutePicksExport === "function" && (o.proposals || []).length) {
+    const picksMap = o.routePicks || {};
+    const hasUserPicks = Object.values(picksMap).some(
+      v => v && (v.optionId || (v.note && String(v.note).trim()))
+    );
+    if (
+      typeof o.formatRoutePicksExport === "function"
+      && (o.proposals || []).length
+      && (o.includePicks === true || hasUserPicks)
+    ) {
       lines.push("");
       lines.push("## 二、当前路线方案选择汇总");
-      lines.push(o.formatRoutePicksExport(o.proposals, o.routePicks || {}));
+      lines.push(o.formatRoutePicksExport(o.proposals, picksMap));
     }
 
     return lines.join("\n");

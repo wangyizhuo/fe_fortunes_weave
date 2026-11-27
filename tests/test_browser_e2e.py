@@ -52,9 +52,8 @@ class TestBrowserE2E(unittest.TestCase):
         cls.base_url = f"http://127.0.0.1:{cls.port}/index.html"
         cls.thread = threading.Thread(target=cls.httpd.serve_forever, daemon=True)
         cls.thread.start()
-
         cls.pw = sync_playwright().start()
-        cls.browser = cls.pw.chromium.launch(args=["--disable-gpu"])
+        cls.browser = cls.pw.chromium.launch(args=["--disable-gpu", "--no-sandbox"])
 
     @classmethod
     def tearDownClass(cls):
@@ -63,14 +62,16 @@ class TestBrowserE2E(unittest.TestCase):
         cls.httpd.shutdown()
         cls.httpd.server_close()
 
-    def _new_page(self, width: int, height: int):
-        return self.browser.new_page(viewport={"width": width, "height": height})
+    def _new_ctx_page(self, width: int, height: int):
+        ctx = self.browser.new_context(viewport={"width": width, "height": height})
+        ctx.route("**/*fonts.g*/*", lambda r: r.fulfill(status=200, content_type="text/css", body=""))
+        page = ctx.new_page()
+        return ctx, page
 
     def test_all_tabs_desktop_and_mobile_no_errors_no_overflow(self):
         fetched_json = set()
         for width, height in ((1200, 900), (390, 844)):
-            ctx = self.browser.new_context(viewport={"width": width, "height": height})
-            page = ctx.new_page()
+            ctx, page = self._new_ctx_page(width, height)
             page_errors = []
             console_errors = []
             failed_reqs = []
@@ -122,7 +123,7 @@ class TestBrowserE2E(unittest.TestCase):
         )
 
     def test_interactive_flows_across_three_domains(self):
-        page = self._new_page(1200, 900)
+        ctx, page = self._new_ctx_page(1200, 900)
         page_errors = []
         page.on("pageerror", lambda err: page_errors.append(str(err)))
 
@@ -193,9 +194,10 @@ class TestBrowserE2E(unittest.TestCase):
         page.click('button[data-cls-clear]')
         page.wait_for_timeout(80)
 
-        # 4) 技能图鉴：评级筛选 S + 角色表限定说明 + 角色特有筛选 + 切换角色 SS~D 评级与 12 项熟练度矩阵
+        # 4) 技能图鉴：一个技能一行表格 + 评级筛选 S + 角色表限定说明 + 角色特有筛选 + 切换角色 SS~D 评级与 12 项熟练度矩阵
         page.click('#domains a[data-domain="skills"]')
         page.wait_for_selector("#skSearch")
+        self.assertGreater(page.locator("table.sk-tbl tbody tr.sk-row").count(), 20)
         page.click('button[data-sk-rating="S"]')
         page.wait_for_timeout(100)
         s_txt = page.inner_text("#view")
@@ -220,9 +222,11 @@ class TestBrowserE2E(unittest.TestCase):
             self.assertIn(top3, ss_txt)
         self.assertIn("展示 3 位角色", ss_txt)
 
-        # 5) 路线规划：验证 #next 全员总览表严格按 P → 强度 → 名字排序（且伊欧在 P1）、角色筛选、动态规则说明
+        # 5) 路线规划：验证顶部 #who 分列 P0/P1/P2 且当前主角首位，#next 总览表同序
         page.click('#domains a[data-domain="route"]')
         page.wait_for_selector('tr[data-next-row]')
+        who_tiers = page.evaluate("""() => [...document.querySelectorAll('#who [data-who-tier]')].map(e => e.dataset.whoTier)""")
+        self.assertEqual(who_tiers, ["P0", "P1", "P2"])
         next_rows = page.evaluate(
             """() => [...document.querySelectorAll('tr[data-next-row]')].map(tr => ({
                 name: tr.dataset.nextRow, tier: tr.dataset.tier, strength: tr.dataset.strength
@@ -230,11 +234,11 @@ class TestBrowserE2E(unittest.TestCase):
         )
         self.assertEqual(
             [r["name"] for r in next_rows],
-            ["艾丝梅拉尔达", "迪托利希", "米迦艾拉", "法毕欧", "奇洛伊卡", "伊欧", "杨界", "努蒂奴", "乌尔坦德"],
+            ["迪托利希", "艾丝梅拉尔达", "米迦艾拉", "法毕欧", "奇洛伊卡", "伊欧", "杨界", "努蒂奴", "乌尔坦德"],
         )
         self.assertEqual(next(r["tier"] for r in next_rows if r["name"] == "伊欧"), "P1")
         next_txt = page.inner_text("#view")
-        self.assertIn("全员下一步总览（按 P 级 → 强度 → 名字排序", next_txt)
+        self.assertIn("全员下一步总览（主角优先 · 按 P 级 → 强度 → 名字排序", next_txt)
 
         page.wait_for_selector('#who button[data-who="esmeralda"]')
         page.click('#routeTabs a[data-v="plan"]')
@@ -242,21 +246,46 @@ class TestBrowserE2E(unittest.TestCase):
         plan_txt = page.inner_text("#view")
         self.assertNotIn("11-05 截图", plan_txt)
         self.assertNotIn("11-11 起不再要求", plan_txt)
+        self.assertIn("力 +5（平均 7.3", plan_txt)
+        self.assertIn("弓箭手（Lv25", plan_txt)
+
+        # 聚焦杨界验证「改考其他单中级对比（替 萨满巫师 -> 牧师）」及本步可考职业与提前考按钮
+        page.click('#who button[data-who="yokai"]')
+        page.wait_for_timeout(150)
+        page.evaluate("() => document.querySelectorAll('#view details').forEach(d => d.open = true)")
+        yk_txt = page.inner_text("#view")
+        self.assertIn("改考其他单中级对比（替换 萨满巫师", yk_txt)
+        self.assertIn("技-2、幸+2", yk_txt)
+        self.assertIn("考试（到 牧师）", yk_txt)
+        self.assertIn("提前考 牧师", yk_txt)
 
         # 聚焦艾丝梅拉尔达，确认天翼兵不再被误标为「已有」
         page.click('#who button[data-who="esmeralda"]')
         page.wait_for_timeout(150)
+        # 点击「展开所有等级」不得自动勾选「显示已经走过的 N 步」，且备选项展示相对预选的能力差
+        page.click('button[data-expand-all]')
+        page.wait_for_timeout(100)
+        sd_el = page.query_selector('.fullwrap input.sd')
+        if sd_el:
+            self.assertFalse(sd_el.is_checked(), "展开所有等级不应自动勾选显示已经走过的步骤")
+        self.assertIn("预选", page.inner_text("#view"))
         page.evaluate("() => document.querySelectorAll('#view details').forEach(d => d.open = true)")
         es_txt = page.inner_text("#view")
         self.assertIn("考试（到 天翼兵）（新职业", es_txt)
 
-        # 6) 我的决定（#mine）：验证新路线方案选择、展开 9 项具体能力差、Plan Mode 内联批注（含定位与版本号）与持久化
+        # 6) 我的决定（#mine）：验证角色排序同序、新路线方案选择、展开 9 项具体能力差、技能等级预估、Plan Mode 内联批注与持久化
         page.click('#who button[data-who=""]')
         page.click('#routeTabs a[data-v="mine"]')
         page.wait_for_selector('input[data-rpick="努蒂奴"]')
+        mine_chars = page.evaluate("""() => [...document.querySelectorAll('article[data-rp-char]')].map(el => el.dataset.rpChar)""")
+        self.assertEqual(
+            mine_chars,
+            ["迪托利希", "艾丝梅拉尔达", "米迦艾拉", "法毕欧", "奇洛伊卡", "伊欧", "杨界", "努蒂奴", "乌尔坦德"],
+        )
         mine_txt = page.inner_text("#view")
         self.assertIn("新路线方案选择与确认", mine_txt)
         self.assertIn("防+3", mine_txt)
+        self.assertIn("格斗术 E→预估C", mine_txt)
         self.assertIn("需提前 NS Online S/L 实测", mine_txt)
         self.assertIn("Plan Mode 批注：已开启", mine_txt)
         page.click('input[data-rpick="努蒂奴"][value="safe_fallback"]')
@@ -314,6 +343,7 @@ class TestBrowserE2E(unittest.TestCase):
 
         self.assertEqual(page_errors, [])
         page.close()
+        ctx.close()
 
 
 if __name__ == "__main__":

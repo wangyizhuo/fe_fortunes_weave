@@ -9,6 +9,7 @@
 """
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -21,7 +22,7 @@ if str(RNG_DIR) not in sys.path:
 from fe_growth import STATS  # noqa: E402
 from planner import _TIER, plan_all  # noqa: E402
 import run_plans as R  # noqa: E402
-from modules.character_tiers import char_sort_key, get_character_tier, load_character_tiers  # noqa: E402
+from modules.character_tiers import char_sort_key, get_character_tier, get_current_lord, load_character_tiers  # noqa: E402
 from .objective import DEFAULT_TIER_POLICIES  # noqa: E402
 from .two_stage_planner import (  # noqa: E402
     EvaluatedPlan,
@@ -47,6 +48,96 @@ def _fmt_promo_lifts(lifts: dict[int, list[tuple[int, int, int]]]) -> list[str]:
     return out
 
 
+def _exam_skill_details(p: Any, cls: str, lv: int) -> dict[str, Any]:
+    """解析职业考试所需的技能与等级门槛，并结合当前快照技能与考前训练估算考前预估技能等级。"""
+    name = getattr(p, "name", "") or getattr(p, "character", "")
+    skills = (R.shot(name) or {}).get("skills", {})
+    req_text = R._CLS_REQ.get(cls, "")
+    m_lv = re.search(r"推荐 Lv(\d+)", req_text)
+    rec_lv = int(m_lv.group(1)) if m_lv else None
+
+    tr_rk = (getattr(p, "exam_train_ranks", {}) or {}).get(cls, 0)
+    is_trained = tr_rk > 0
+    is_conf = cls in (getattr(p, "confident", ()) or ())
+    ranks = R.RANKS
+
+    def eval_pair(sk: str, rk: str) -> tuple[int, int, str]:
+        need = ranks.index(rk)
+        cur = skills.get(sk)
+        if cur not in ranks:
+            gap = 0 if need <= 1 else 1
+            return gap, -1, cur or "未知"
+        cur_idx = ranks.index(cur)
+        return max(0, need - cur_idx), cur_idx, cur
+
+    checks: list[dict[str, Any]] = []
+    parts_txt: list[str] = []
+
+    for part in req_text.split("·"):
+        part = part.strip()
+        pairs = re.findall(r"(\S+术) ([EDCBAS]\+?)", part)
+        if not pairs:
+            continue
+        if part.startswith("主要"):
+            for sk, rk in pairs:
+                gap, _, cur = eval_pair(sk, rk)
+                will_train = bool((is_trained or is_conf) and gap > 0)
+                est = rk if will_train else cur
+                checks.append({
+                    "group": "主要",
+                    "skill": sk,
+                    "cur": cur,
+                    "est": est,
+                    "req": rk,
+                    "gap": gap,
+                    "trained": will_train,
+                })
+                if will_train:
+                    parts_txt.append(f"{sk} {cur}→预估{est}（练{gap}段，要求 {rk}）")
+                elif gap == 0:
+                    parts_txt.append(f"{sk} {cur}（要求 {rk}，已达标）")
+                else:
+                    parts_txt.append(f"{sk} {cur}（要求 {rk}，差{gap}段未练）")
+        elif part.startswith("任选其一"):
+            best = min(
+                ((eval_pair(sk, rk), sk, rk) for sk, rk in pairs),
+                key=lambda item: (item[0][0], -item[0][1]),
+            )
+            (gap, _, cur), sk, rk = best
+            will_train = bool((is_trained or is_conf) and gap > 0)
+            est = rk if will_train else cur
+            alts = "/".join(f"{a}{b}" for a, b in pairs)
+            checks.append({
+                "group": "任选其一",
+                "skill": sk,
+                "cur": cur,
+                "est": est,
+                "req": rk,
+                "gap": gap,
+                "trained": will_train,
+                "alts": alts,
+            })
+            if will_train:
+                parts_txt.append(f"{sk} {cur}→预估{est}（练{gap}段，任选 {alts}）")
+            elif gap == 0:
+                parts_txt.append(f"{sk} {cur}（任选 {alts}，已达标）")
+            else:
+                parts_txt.append(f"{sk} {cur}（任选 {alts}，差{gap}段未练）")
+
+    if rec_lv is not None:
+        if lv >= rec_lv:
+            parts_txt.append(f"Lv{lv}≥推荐Lv{rec_lv}")
+        else:
+            parts_txt.append(f"Lv{lv}<推荐Lv{rec_lv}（差{rec_lv - lv}级）")
+
+    return {
+        "clsReq": req_text,
+        "recLv": rec_lv,
+        "skillChecks": checks,
+        "skillSummary": "、".join(parts_txt),
+    }
+
+
 def _describe_exams(p: Any, acts: tuple[tuple[str, str], ...]) -> list[dict[str, Any]]:
     exams = []
     lv = p.level
@@ -61,6 +152,7 @@ def _describe_exams(p: Any, acts: tuple[tuple[str, str], ...]) -> list[dict[str,
         tr_rk = (getattr(p, "exam_train_ranks", {}) or {}).get(c, 0)
         tr_sk = (getattr(p, "exam_train", {}) or {}).get(c, []) if tr_rk else []
         fl = [f"{STATS[i]} {o}→{n}" for i, o, n in lifts.get(st, [])]
+        sk_det = _exam_skill_details(p, c, lv)
         exams.append({
             "step": st + 1,
             "lv": lv,
@@ -72,6 +164,10 @@ def _describe_exams(p: Any, acts: tuple[tuple[str, str], ...]) -> list[dict[str,
             "isCertain": is_certain,
             "trainRanks": tr_rk,
             "trainSkills": list(tr_sk),
+            "clsReq": sk_det["clsReq"],
+            "recLv": sk_det["recLv"],
+            "skillChecks": sk_det["skillChecks"],
+            "skillSummary": sk_det["skillSummary"],
             "promoFloor": fl,
         })
     return exams
@@ -190,6 +286,7 @@ def build_route_proposals() -> list[dict[str, Any]]:
     """生成全 9 位角色的交互式候选方案对照（含 9 项具体能力差、转职保底明细、边际收益与 S/L 预警）。"""
     proposals: list[dict[str, Any]] = []
     tiers_data = load_character_tiers()
+    current_lord = get_current_lord()
 
     for name in R.ORDER:
         if name not in R.OWNED:
@@ -334,6 +431,7 @@ def build_route_proposals() -> list[dict[str, Any]]:
 
         proposals.append({
             "name": name,
+            "isLord": name == current_lord,
             "tier": tier,
             "strengthTier": ct["strengthTier"],
             "pserTier": ct["pserTier"],
@@ -344,10 +442,11 @@ def build_route_proposals() -> list[dict[str, Any]]:
             "target": target,
             "seeds": p_new.n_seeds,
             "weights": list(p_new.weights),
+            "curSkills": dict((R.shot(name) or {}).get("skills", {})),
             "defaultPick": default_pick,
             "status": status,  # identical | confirmed_default | pending
             "options": options,
         })
 
-    proposals.sort(key=lambda pr: char_sort_key(pr["name"], pr["tier"], pr["strengthTier"]))
+    proposals.sort(key=lambda pr: char_sort_key(pr["name"], pr["tier"], pr["strengthTier"], current_lord=current_lord))
     return proposals

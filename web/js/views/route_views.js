@@ -167,7 +167,8 @@
     function head(c, w, right) {
       const n = w.rows.filter(r => r.done).length;
       const cmtBtn = renderCommentBtn("route:" + c.name, `${c.name}（路线规划）`, "批注");
-      return `<div class="ch" data-cmt-target="route:${U.esc(c.name)}" data-cmt-label="${U.esc(c.name)}（路线规划）"><div class="ct"><h3>${U.esc(c.name)}</h3>${renderPTierBadge(c.tier, c.priorityNote)}${renderStrengthBadge(c)}<span class="lv">Lv${w.ci.level ?? "?"} ${U.esc(w.cur || "")}</span><span class="r">${right} ${cmtBtn}</span></div>
+      const isLord = Boolean(c.isLord || (RM.currentLord && c.name === RM.currentLord));
+      return `<div class="ch" data-cmt-target="route:${U.esc(c.name)}" data-cmt-label="${U.esc(c.name)}（路线规划）"><div class="ct"><h3>${isLord ? '<span title="当前路线主角">★</span> ' : ""}${U.esc(c.name)}</h3>${renderPTierBadge(c.tier, c.priorityNote)}${renderStrengthBadge(c)}<span class="lv">Lv${w.ci.level ?? "?"} ${U.esc(w.cur || "")}</span><span class="r">${right} ${cmtBtn}</span></div>
         ${c.steps.length ? `<div class="meter" title="完成 ${n} / ${c.steps.length}"><i style="width:${100 * n / c.steps.length}%"></i></div>` : ""}
         ${c.weights ? `<div class="wts" title="能力权重，加权分 = 每项加点 × 权重">${ST.map((k, i) => `<span class="w${c.weights[i]}">${k}<b>${c.weights[i]}</b></span>`).join("")}</div>` : ""}
         ${c.priorityNote ? `<p class="intro note2">📌 <b>路线优先级：</b>${U.esc(c.priorityNote)}</p>` : ""}
@@ -175,26 +176,181 @@
         ${renderCommentThread("route:" + c.name, `${c.name}（路线规划）`)}</div>`;
     }
 
-    function optsHtml(c, s, row, idp) {
+    function renderStatDiffChips(diffVec, isBaseline) {
+      if (isBaseline) return `<span class="hint">基准方案（对照原点）</span>`;
+      const parts = [];
+      for (let i = 0; i < ST.length; i++) {
+        const v = (diffVec || [])[i] || 0;
+        if (!v) continue;
+        parts.push(`<span class="sdiff ${v > 0 ? "up" : "dn"}">${U.esc(ST[i])}${v > 0 ? "+" + v : v}</span>`);
+      }
+      return parts.length ? parts.join("") : `<span class="sdiff eq">9 项能力完全相同</span>`;
+    }
+
+    function renderProposalOptionsBody(pr, r, radioPrefix) {
+      const optHtml = (pr.options || []).map(opt => {
+        const picked = r.optionId === opt.id;
+        const d = opt.diffVsBaseline || {};
+        const isBase = opt.id === "old_baseline";
+        const slHtml = (opt.slWarnings || []).map(w =>
+          `<div class="slwarn">⚠️ <b>需提前 NS Online S/L 实测</b>：${U.esc(w.message)}</div>`
+        ).join("");
+
+        const examLine = (opt.exams || []).map(e => {
+          const pctStr = e.pct != null ? `估 ${e.pct}%` : "—";
+          const trStr = e.trainRanks ? ` · 练 ${e.trainRanks} 段` : "";
+          const skStr = e.skillSummary ? `｜技能与等级预估：${U.esc(e.skillSummary)}` : "";
+          const flStr = e.promoFloor && e.promoFloor.length ? ` · 转职保底 ${U.esc(e.promoFloor.join("、"))}` : "";
+          return `<div>Lv${e.lv}(第${e.step}步) <b>${U.esc(e.cls)}</b>（判定 ${e.roll}% / ${pctStr}${trStr}${flStr}${skStr}）</div>`;
+        }).join("") || "不考新职业";
+
+        const deltaBadge = (label, val, unit, invertColor) => {
+          if (isBase) return `<span>${label} <b>${val}${unit || ""}</b></span>`;
+          const sgn = val > 0 ? "+" + val : String(val);
+          const good = invertColor ? val < 0 : val > 0;
+          const bad = invertColor ? val > 0 : val < 0;
+          const cls = good ? "up" : bad ? "dn" : "";
+          return `<span>${label} <b class="${cls}">${sgn}${unit || ""}</b></span>`;
+        };
+
+        const metricsHtml = isBase
+          ? `<div class="rp-metrics">
+              <span>净值 <b>${opt.net}</b></span>
+              <span>总点数 <b>${opt.rawPoints}</b></span>
+              <span>升级分 <b>${opt.statWeighted}</b></span>
+              <span>转职保底 <b>${opt.promoFloorWeighted}</b></span>
+              <span>金币 <b>${opt.gold}G</b></span>
+              <span>训练 <b>${opt.trainRanks} 段</b></span>
+              <span>精通 <b>${opt.masteryLevels} 级</b></span>
+            </div>`
+          : `<div class="rp-metrics">
+              <span>净值 <b>${opt.net}</b> (${deltaBadge("Δ", d.net, "", false)})</span>
+              <span>点数 <b>${opt.rawPoints}</b> (${deltaBadge("Δ", d.pts, "", false)})</span>
+              <span>升级分 <b>${opt.statWeighted}</b> (${deltaBadge("Δ", d.statW, "", false)})</span>
+              <span>转职保底 <b>${opt.promoFloorWeighted}</b> (${deltaBadge("Δ", d.promoFloorW, "", false)})</span>
+              <span>金币 <b>${opt.gold}G</b> (${deltaBadge("Δ", d.gold, "G", true)})</span>
+              <span>训练 <b>${opt.trainRanks} 段</b> (${deltaBadge("Δ", d.trainRanks, "段", true)})</span>
+              <span>精通 <b>${opt.masteryLevels} 级</b> (${deltaBadge("Δ", d.masteryLevels, "级", false)})</span>
+            </div>`;
+
+        const promoHtml = (opt.promoFloorDetails || []).length
+          ? `<div class="hint">转职保底永久补足：<b>${U.esc(opt.promoFloorDetails.join("、"))}</b></div>`
+          : "";
+
+        const marginalsHtml = (opt.marginals || []).filter(m => !m.isRequired || m.usedLevels === 0).length
+          ? `<div class="rp-marg">${opt.marginals.map(m =>
+              `<div><span class="cat-pill">${m.isRequired ? "必考" : "额外"} ${U.esc(m.cls)}（升级用 ${m.usedLevels} 级）</span> 边际能力差：<b>${U.esc(m.statDiffText)}</b>｜Δ净值 ${U.sgn(m.deltaNet)}｜Δ金币 ${U.sgn(m.deltaGold)}G｜Δ训练 ${U.sgn(m.deltaTrainRanks)} 段</div>`
+            ).join("")}</div>`
+          : "";
+
+        const finalVec = (opt.statVec || []).map((v, i) => `${ST[i]}+${v}`).join(" ");
+        const optTid = `opt:${pr.name}:${opt.id}`;
+        const optLbl = `${pr.name}（${pr.tier}）· ${opt.title}`;
+
+        return `<div class="rp-opt-wrap" data-cmt-target="${U.esc(optTid)}" data-cmt-label="${U.esc(optLbl)}">
+          <label class="rp-opt${picked ? " on" : ""}">
+            <div class="rp-opt-head">
+              <input type="radio" name="${U.esc(radioPrefix || "rpick-")}${U.esc(U.slug({ name: pr.name }))}" value="${U.esc(opt.id)}" data-rpick="${U.esc(pr.name)}"${picked ? " checked" : ""}>
+              <b>${U.esc(opt.title)}</b>
+              <span class="cat-pill">${U.esc(opt.tag)}</span>
+              <span class="r">${renderCommentBtn(optTid, optLbl, "批注此方案")}</span>
+            </div>
+            <div class="rp-opt-body">
+              ${slHtml}
+              <div class="rp-sdiff"><span class="lab">相对旧路线 9 项能力差</span><div class="sdiff-list">${renderStatDiffChips(d.statDiff, isBase)}</div></div>
+              ${metricsHtml}
+              ${promoHtml}
+              <div class="hint">考试安排：${examLine}${opt.skips ? `；纯跳过 ${opt.skips} 次` : ""}</div>
+              <div class="hint">窗口总增量（Lv${pr.level}→Lv${opt.endLevel}）：${U.esc(finalVec)}</div>
+              ${marginalsHtml}
+            </div>
+          </label>
+          ${renderCommentThread(optTid, optLbl)}
+        </div>`;
+      }).join("");
+
+      return `${optHtml}
+        <div class="rp-note-row">
+          <input type="text" class="rp-note" data-rpick-note="${U.esc(pr.name)}" placeholder="可选简短备注（例如 S/L 实测结果、个人偏好）" value="${U.esc(r.note || "")}">
+          ${r.source === "user" ? `<button type="button" class="btn ghost" data-rpick-clear="${U.esc(pr.name)}">恢复默认</button>` : ""}
+        </div>`;
+    }
+
+    function optsHtml(c, s, row, idp, w) {
       const name = idp + "o-" + U.keyOf(c, s);
       const groups = s.opts.length ? s.opts : (s.seenCls ? [{ classes: [s.seenCls], owned: [true], gains: s.gains, cnt: s.cnt, score: s.score }] : []);
+      const baseG = !row.r.exam
+        ? (groups.find(g => g.classes.includes(row.choice) || RL.resultOf(s, row.choice) === g) || null)
+        : null;
+      const ownedNow = new Set(row.ownedBefore || []);
+      const earlyBtns = [];
+      const seenEarly = new Set();
+
       const o = groups.map(g => {
-        const val = g.classes.includes(s.cls) ? s.cls : (g.classes.find((x, i) => g.owned[i]) || g.classes[0]);
-        const have = s.src === "record" ? g.classes : g.classes.filter((x, i) => g.owned[i]);
-        const need = s.src === "record" ? [] : g.classes.filter((x, i) => !g.owned[i]);
+        const val = g.classes.includes(s.cls) ? s.cls : (g.classes.find((x, i) => g.owned[i] || ownedNow.has(x)) || g.classes[0]);
+        const have = s.src === "record" ? g.classes : g.classes.filter((x, i) => g.owned[i] || ownedNow.has(x));
+        const need = s.src === "record" ? [] : g.classes.filter((x, i) => !g.owned[i] && !ownedNow.has(x));
+        for (const nc of need) {
+          if (seenEarly.has(nc)) continue;
+          seenEarly.add(nc);
+          const slot = w ? RL.findEarlyExamSlot(c, w, s.key, nc) : null;
+          if (slot) {
+            earlyBtns.push(`<button type="button" class="btn ghost" data-early-exam-key="${U.esc(slot.key)}" data-early-exam-cls="${U.esc(nc)}" data-use-key="${U.esc(s.key)}" title="把前面较差的乱数改为考${U.esc(nc)}，并把这一步改为用${U.esc(nc)}升级">🎯 在前面最差乱数 Lv${slot.lv}（${slot.score}分，判定 ${slot.roll}%${slot.pct != null ? ` / 估 ${slot.pct}%` : ""}）提前考 <b>${U.esc(nc)}</b>，这里改用 ${U.esc(nc)}</button>`);
+          }
+        }
         const label = U.esc(have.join(" / ")) + (need.length ? `<span class="need">${have.length ? "　" : ""}要先考试：${U.esc(need.join(" "))}</span>` : "");
         const on = row.choice === val || (!row.r.exam && row.r.classes && RL.resultOf(s, val) === row.r);
-        return `<label class="opt"><input type="radio" name="${name}" value="${U.esc(val)}" data-f="pick"${have.length ? "" : ' data-need="1"'}${on ? " checked" : ""}><span><span class="oc">${label}</span>　${U.esc(g.gains.join(" ") || "—")}</span><span class="on">${g.cnt}点 · ${g.score}分</span></label>`;
+        let gainBody = "";
+        let numBody = `${g.cnt}点 · ${g.score}分`;
+        if (on) {
+          gainBody = `<span class="tag ok">预选</span> ${U.esc(g.gains.join(" ") || "—")}`;
+        } else if (baseG) {
+          const df = RL.diffOptionGains(g.gains, baseG.gains, ST);
+          const chips = df.diffItems.length
+            ? df.diffItems.map(x => `<span class="sdiff ${x.delta > 0 ? "up" : "dn"}">${U.esc(x.stat)}${x.delta > 0 ? "+" : ""}${x.delta}</span>`).join(" ")
+            : `<span class="sdiff eq">与预选相同</span>`;
+          gainBody = `<span title="绝对加点：${U.esc(g.gains.join(" ") || "—")}（${g.cnt}点·${g.score}分）">${chips}</span>`;
+          const dCnt = g.cnt - baseG.cnt;
+          const dSc = g.score - baseG.score;
+          numBody = `<span class="${dSc > 0 ? "ok" : dSc < 0 ? "bad" : ""}">${U.sgn(dCnt)}点 · ${U.sgn(dSc)}分</span>`;
+        } else {
+          gainBody = U.esc(g.gains.join(" ") || "—");
+        }
+        return `<label class="opt"><input type="radio" name="${name}" value="${U.esc(val)}" data-f="pick"${have.length ? "" : ' data-need="1"'}${on ? " checked" : ""}><span><span class="oc">${label}</span>　${gainBody}</span><span class="on">${numBody}</span></label>`;
       }).join("");
-      const ex = `<label class="opt"><input type="radio" name="${name}" value="exam" data-f="pick"${row.r.exam ? " checked" : ""}><span><span class="oc">${RL.examName(s) ? "考试（到 " + U.esc(RL.examName(s)) + "）" : "跳过"}</span>　这一步不升级${s.roll != null ? `（判定值 ${s.roll}%）` : ""}</span><span class="on"></span></label>`;
-      return `<div class="opts" role="radiogroup" aria-label="这一步的选择">${o}${ex}</div><button type="button" class="btn pri" data-apply data-cur="${U.esc(row.r.exam ? "exam" : row.choice)}" data-lv="${s.exam ? "这一步" : `Lv${row.frm}→${row.to}`}" style="display:none">确认更改</button>`;
+
+      const curExamCls = row.r.exam ? (row.r.examCls || "") : "";
+      const passExams = RL.passableExamChoices(s, row.ownedBefore);
+      const examOpts = passExams.map(e => {
+        const val = (s.exam && s.cls === e.cls) ? "exam" : ("exam:" + e.cls);
+        const checked = row.r.exam && curExamCls === e.cls;
+        return `<label class="opt"><input type="radio" name="${name}" value="${U.esc(val)}" data-f="pick"${checked ? " checked" : ""}><span><span class="oc">考试（到 ${U.esc(e.cls)}）</span>　这一步不升级（判定值 ${s.roll ?? "—"}%${e.pct != null ? ` / 估 ${e.pct}%` : ""}）</span><span class="on">考试</span></label>`;
+      }).join("");
+      const skipVal = (s.exam && s.cls) ? "exam:" : "exam";
+      const skipChecked = row.r.exam && !curExamCls;
+      const skipOpt = `<label class="opt"><input type="radio" name="${name}" value="${U.esc(skipVal)}" data-f="pick"${skipChecked ? " checked" : ""}><span><span class="oc">跳过</span>　这一步不升级${s.roll != null ? `（判定值 ${s.roll}%）` : ""}</span><span class="on"></span></label>`;
+
+      // 对规划目标职业在本步考不过的情况给出明确提示（如努蒂奴 Lv19 重装步兵 估 50% ≤ 判定 79.35%）
+      const targetSet = new Set(c.targets || []);
+      const failTargets = ((s.routes && s.routes.exams) || [])
+        .filter(e => e && e.pass === false && targetSet.has(e.cls) && !ownedNow.has(e.cls));
+      const failHintHtml = failTargets.length
+        ? `<div class="hint" style="margin-top:4px">本步考不过：${failTargets.map(e => `<b>${U.esc(e.cls)}</b>（估 ${e.pct ?? "—"}% ≤ 判定 ${s.roll ?? "—"}%）`).join("、")}</div>`
+        : "";
+
+      const earlyHtml = earlyBtns.length
+        ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${earlyBtns.join("")}</div>`
+        : "";
+      const curVal = row.r.exam ? (curExamCls ? ((s.exam && s.cls === curExamCls) ? "exam" : ("exam:" + curExamCls)) : skipVal) : row.choice;
+      return `<div class="opts" role="radiogroup" aria-label="这一步的选择">${o}${examOpts}${skipOpt}</div>${failHintHtml}${earlyHtml}<button type="button" class="btn pri" data-apply data-cur="${U.esc(curVal)}" data-lv="${s.exam ? "这一步" : `Lv${row.frm}→${row.to}`}" style="display:none">确认更改</button>`;
     }
 
     function examBox(c, s) {
       const v = verdictOf(c, s), n = RL.examName(s);
       const verdict = v.pass == null ? "" : v.pass ? `<span class="ok">✓ 能过${n ? "，拿到" + U.esc(n) : ""}</span>`
         : `<span class="bad">✗ 会失败${n ? "，拿不到" + U.esc(n) + "，后面用它的步骤要改" : "，没关系，只当跳过"}</span>`;
-      return `<div class="exambox"><div>判定值 <b>${s.roll}%</b>：游戏里显示的成功率要<b>高于</b>它才能过。过不过种子都前进一步。${s.pct != null ? ` 按${shotLabel}技能和考试时的等级估计显示 <b>${s.pct}%</b>${s.pct > s.roll ? "，能过" : "，过不了"}。` : ""}</div>
+      const skHint = s.skillSummary ? `（${U.esc(s.skillSummary)}）` : "";
+      return `<div class="exambox"><div>判定值 <b>${s.roll}%</b>：游戏里显示的成功率要<b>高于</b>它才能过。过不过种子都前进一步。${s.pct != null ? ` 按${shotLabel}技能和考试时的等级估计显示 <b>${s.pct}%</b>${skHint}${s.pct > s.roll ? "，能过" : "，过不了"}。` : ""}</div>
         <div><label>游戏显示 <input type="number" min="0" max="100" step="0.01" data-f="chance" id="ch-${U.keyOf(c, s)}" value="${v.ch ?? ""}" aria-label="游戏显示的考试成功率">%</label> ${verdict}</div></div>`;
     }
 
@@ -239,7 +395,7 @@
 
     // ---------- 1. 下一步 ----------
     function viewNext() {
-      const visibleChars = RL.sortCharsByTier(CH.filter(c => !focus || U.slug(c) === focus));
+      const visibleChars = RL.sortCharsByTier(CH.filter(c => !focus || U.slug(c) === focus), RM.currentLord);
       const summaryRows = RL.summarizeNextActions(visibleChars, prog, info);
 
       const stop = [], go = [], alertRows = [];
@@ -310,13 +466,13 @@
         return `<b>Lv${t.lv} 考${U.esc(t.cls)}前</b>：${U.esc(t.train.join("、"))}<span class="next-sub">共 ${t.ranks} 段${more}</span>`;
       };
 
-      const overviewTableHtml = `<section class="alerts" id="sec-next-overview" data-cmt-target="summary:next-overview" data-cmt-label="全员下一步总览（按 P → 强度 → 名字）">
+      const overviewTableHtml = `<section class="alerts" id="sec-next-overview" data-cmt-target="summary:next-overview" data-cmt-label="全员下一步总览（主角优先 · 按 P → 强度 → 名字）">
         <div class="pm-sec-head">
-          <h2>全员下一步总览（按 P 级 → 强度 → 名字排序 · 共 ${summaryRows.length} 人）</h2>
-          ${renderCommentBtn("summary:next-overview", "全员下一步总览（按 P → 强度 → 名字）", "批注总览")}
+          <h2>全员下一步总览（主角优先 · 按 P 级 → 强度 → 名字排序 · 共 ${summaryRows.length} 人）</h2>
+          ${renderCommentBtn("summary:next-overview", "全员下一步总览（主角优先 · 按 P → 强度 → 名字）", "批注总览")}
         </div>
         ${RM.priorityLinkNote ? `<p class="hint" style="margin:4px 0 8px">${U.esc(RM.priorityLinkNote)}（完整 63 人 SS~D 评级见 <a href="#skills">「技能图鉴 → 全 63 角色评级」</a>）</p>` : ""}
-        ${renderCommentThread("summary:next-overview", "全员下一步总览（按 P → 强度 → 名字）")}
+        ${renderCommentThread("summary:next-overview", "全员下一步总览（主角优先 · 按 P → 强度 → 名字）")}
         <div class="scroll"><table class="next-tbl">
           <tr>
             <th>角色（P 级 · 强度）</th>
@@ -328,9 +484,10 @@
           </tr>
           ${summaryRows.map(r => {
             const needStop = ["exam", "skip", "switch", "missing"].includes(r.immediate.kind);
+            const isLord = Boolean((r.char && r.char.isLord) || (RM.currentLord && r.name === RM.currentLord));
             return `<tr class="${needStop ? "cur" : ""}" data-next-row="${U.esc(r.name)}" data-tier="${U.esc(r.tier)}" data-strength="${U.esc(r.strengthTier)}">
               <td class="next-who">
-                <a href="#next" data-go="${U.slug(r.char)}"><b>${U.esc(U.shortName(r.name))}</b></a>
+                <a href="#next" data-go="${U.slug(r.char)}"><b>${isLord ? '<span title="当前路线主角">★</span> ' : ""}${U.esc(U.shortName(r.name))}</b></a>
                 <span class="next-badges">${renderPTierBadge(r.tier, r.priorityNote)}${renderStrengthBadge(r)}</span>
                 ${r.role ? `<span class="next-sub">${U.esc(r.role)}</span>` : ""}
               </td>
@@ -371,7 +528,7 @@
             <div class="when"><span>${first ? "现在做" : i === 1 ? "然后" : "再然后"}</span><span class="src">${src}</span></div>
             ${body}${routesBox(c, w, row)}
             <div class="acts">${first ? `<button class="btn pri" type="button" data-do="done">✓ 做完了</button>` : ""}
-              <details class="more"><summary>换个选择（这一步所有职业）</summary>${optsHtml(c, s, row, "n")}</details></div>
+              <details class="more"><summary>换个选择（这一步所有职业）</summary>${optsHtml(c, s, row, "n", w)}</details></div>
           </li>`;
         }).join("");
         return `<article class="card" data-slug="${U.slug(c)}" id="${U.slug(c)}">${head(c, w, `还剩 ${leftRows.length} 步 → Lv${w.endLevel}`)}
@@ -420,21 +577,22 @@
             return `<li data-slug="${U.slug(c)}"><div data-key="${s.key}"><div class="dh"><b>${U.esc(U.shortName(c.name))} Lv${row.frm}→${row.to}</b><small>${kind}</small></div>${s.note ? `<div class="note">${U.esc(s.note)}</div>` : ""}<div class="opts" role="radiogroup" aria-label="这一步选哪个">${[rec, ...alts].map(opt).join("")}</div><button type="button" class="btn" data-dec="ok">确认：用 ${U.esc(row.choice)}</button></div></li>`;
           }).join("")}</ul></section>`);
 
-      const ovRows = CH.filter(c => !focus || U.slug(c) === focus).map(c => {
+      const sortedVisible = RL.sortCharsByTier(CH.filter(c => !focus || U.slug(c) === focus), RM.currentLord);
+      const ovRows = sortedVisible.map(c => {
         const a = c.avg; if (!a) return "";
         const ap = U.psum(a.act), dv = Math.round(a.ws - a.wexp);
         const ex = []; let lv = null;
         for (const x of c.route || []) { if (x[0] === "up") { lv = x[3]; continue; } ex.push(x[1] ? `${U.esc(x[1])}（Lv${lv ?? c.planFrom}，判定 ${x[2]}%）` : ""); }
         const skips = (c.route || []).filter(x => x[0] === "exam" && !x[1]).length;
         const exs = ex.filter(Boolean);
-        return `<tr><td><a href="#plan" data-go="${U.slug(c)}">${U.esc(U.shortName(c.name))}</a>${c.tier ? ` <span class="rec ${c.tier === "P0" ? "r1" : c.tier === "P1" ? "r2" : "r3"}">${c.tier}</span>` : ""}</td><td class="n">Lv${c.planFrom}→${c.planTo}</td><td class="n"><b>${a.ws}</b></td><td class="n">${ap}</td><td class="n ${dv >= 3 ? "up" : dv <= -3 ? "dn" : ""}">${U.sgn(dv)}</td><td class="note">${exs.length ? exs.join("、") : "不转新职业"}${skips ? `；跳过 ${skips} 次` : ""}</td></tr>`;
+        const isLord = Boolean(c.isLord || (RM.currentLord && c.name === RM.currentLord));
+        return `<tr><td><a href="#plan" data-go="${U.slug(c)}">${isLord ? "★ " : ""}${U.esc(U.shortName(c.name))}</a>${c.tier ? ` <span class="rec ${c.tier === "P0" ? "r1" : c.tier === "P1" ? "r2" : "r3"}">${c.tier}</span>` : ""} ${renderStrengthBadge(c)}</td><td class="n">Lv${c.planFrom}→${c.planTo}</td><td class="n"><b>${a.ws}</b></td><td class="n">${ap}</td><td class="n ${dv >= 3 ? "up" : dv <= -3 ? "dn" : ""}">${U.sgn(dv)}</td><td class="note">${exs.length ? exs.join("、") : "不转新职业"}${skips ? `；跳过 ${skips} 次` : ""}</td></tr>`;
       }).join("");
       const ovBox = `<section class="alerts"><h2>路线一览（到目标级）</h2><div class="scroll"><table class="ovt"><tr><th>角色</th><th class="n">等级</th><th class="n">加权分</th><th class="n">点数</th><th class="n">比平均</th><th>要考的职业</th></tr>${ovRows}</table></div></section>`;
 
       const odd = [];
       const shortFlag = t => t.replace(/到 Lv\d+ (只)?涨 /, " +").replace(/，平均 ([\d.]+)/, "（平均 $1").replace(/（权重 (\d)）/, "，权重 $1").replace(/，明显偏(高|低).*$/, "）");
-      for (const c of CH) {
-        if (focus && U.slug(c) !== focus) continue;
+      for (const c of sortedVisible) {
         const fs = ((c.trend && c.trend.flags) || []).filter(f => f.lv !== "warn");
         if (!fs.length) continue;
         const hi = fs.filter(f => f.lv === "good").map(f => U.esc(shortFlag(f.t)));
@@ -443,13 +601,14 @@
       }
       const oddBox = odd.length ? `<section class="alerts"><h2>明显异常的能力（不管权重高低）</h2><ul>${odd.join("")}</ul></section>` : "";
 
-      const balRows = CH.filter(c => !focus || U.slug(c) === focus).flatMap(c => (c.balance || []).map(b =>
+      const balRows = sortedVisible.flatMap(c => (c.balance || []).map(b =>
         `<li><span class="sev warn">均衡</span><span><a href="#plan" data-go="${U.slug(c)}">${U.esc(U.shortName(c.name))}</a> <b>${U.esc(b.lv)}</b>：用 <b>${U.esc(b.pick)}</b> 换 ${U.esc(b.orig)}（多 ${U.esc(b.more)}、少 ${U.esc(b.less)}；这一级加权 ${b.dsc > 0 ? "+" : ""}${b.dsc}）。原因：${U.esc(b.why)}</span></li>`
       ));
-      const noneBal = CH.filter(c => (!focus || U.slug(c) === focus) && !(c.balance || []).length).map(c => U.shortName(c.name));
+      const noneBal = sortedVisible.filter(c => !(c.balance || []).length).map(c => U.shortName(c.name));
       const balBox = `<section class="alerts"><h2>均衡加点换了职业的等级</h2>${balRows.length ? `<ul>${balRows.join("")}</ul>` : ""}<p class="hint" style="margin:4px 0 0">${noneBal.length ? U.esc(noneBal.join("、")) + "：没有。" : ""}</p></section>`;
 
-      const cards = CH.filter(c => !focus || U.slug(c) === focus).map(c => {
+      const propByName = new Map(PROPOSALS.map(pr => [pr.name, pr]));
+      const cards = sortedVisible.map(c => {
         const w = walkOf(c), rm = remainOf(c, w), a = c.avg;
         const ap = U.psum(a ? a.act : []), ep = Math.round(U.psum(a ? a.exp : []));
         const right = a ? `推荐路线 ${U.PW(ap, a.ws)} · 平均 ${U.PW(ep, a.wexp.toFixed(0))}（${U.sgn(ap - ep)} 点 · ${U.sgn(Math.round(a.ws - a.wexp))} 分）` : "";
@@ -491,11 +650,14 @@
         const nd = w.rows.filter(r => r.done).length;
         const fullList = `<div class="fullwrap"><div class="acts"><button type="button" class="btn ghost" data-expand-all>展开所有等级</button>${nd ? `<label class="showdone"><input type="checkbox" class="sd"> 显示已经走过的 ${nd} 步</label>` : ""}</div><ol class="full">${w.rows.map(row => {
           const s = row.s, r = row.r;
+          const exCls = r.exam ? (r.examCls || "") : "";
+          const isOrigExam = r.exam && s.exam && s.cls === exCls;
+          const customExamPct = r.exam && exCls && !isOrigExam ? ((s.routes && s.routes.exams || []).find(e => e.cls === exCls)?.pct ?? null) : s.pct;
           return `<li class="${row.done ? "done" : ""} ${r.exam ? "isx" : ""}" data-key="${s.key}">
             <input type="checkbox" data-f="done" id="d-${U.keyOf(c, s)}"${row.done ? " checked" : ""} aria-label="已完成">
-            <label class="lvl" for="d-${U.keyOf(c, s)}">${r.exam ? (RL.examName(s) ? "考试" : "跳过") : `Lv${row.frm}→${row.to}`}</label>
-            <div class="body">${r.exam ? `${RL.examName(s) ? "考试（到 " + U.esc(RL.examName(s)) + "）" : (s.skipNone ? `跳过 <span class="changed">没有可用的初级考试</span>` : s.skipFail && s.skipFail.length ? `跳过（考 ${U.esc(s.skipFail.join(" / "))}，会考不过，不拿职业）` : s.skipCls ? `跳过（只能考 ${U.esc(s.skipCls)}，会考过，用掉一个可跳过的职业，还剩 ${s.skipLeft} 个）` : "跳过")}${s.train && RL.examName(s) ? (s.trainOk ? ` <span class="changed">🎯 Lv${s.trainLv} 考试前练好：${U.esc(s.train.join("、"))}</span>` : ` <span class="changed">技能差：${U.esc(s.train.join("、"))}（不练，按实际成功率）</span>`) : ""}<span class="hint">　判定值 ${s.roll}%${RL.examName(s) && s.pct != null ? `｜估计成功率 ${s.pct}%${s.train && s.trainOk ? "（练够之后）" : ""}` : ""}${s.renown && RL.examName(s) ? `｜要名声 Lv${s.renown}` : ""}</span>${s.floor && s.floor.length ? ` <span class="changed">转职保底：${U.esc(s.floor.join("、"))}</span>` : ""}${!RL.examName(s) ? smHint(c, s) : ""}${s.use && RL.examName(s) ? `<span class="hint">　之后到 Lv${c.planTo} 用它升 ${s.use[0]} 级${s.use[0] ? `：${U.esc(s.use[1])}（${U.sgn(s.use[2])} 分）` : ""}</span>` : ""}` : `<b>${U.esc(RL.eqName(row))}</b>　${U.esc(r.gains.join(" ") || "—")}`}${row.choice !== RL.recOf(s) ? ` <span class="changed">已改</span>` : ""}${row.missing ? ` <span class="changed">还没考到</span>` : ""}${row.fail ? ` <span class="changed">估计考不过</span>` : ""}
-              ${row.done ? "" : `<details class="more"><summary>选择</summary>${optsHtml(c, s, row, "f")}</details>`}</div>
+            <label class="lvl" for="d-${U.keyOf(c, s)}">${r.exam ? (exCls ? "考试" : "跳过") : `Lv${row.frm}→${row.to}`}</label>
+            <div class="body">${r.exam ? `${exCls ? "考试（到 " + U.esc(exCls) + "）" : (s.skipNone ? `跳过 <span class="changed">没有可用的初级考试</span>` : s.skipFail && s.skipFail.length ? `跳过（考 ${U.esc(s.skipFail.join(" / "))}，会考不过，不拿职业）` : s.skipCls ? `跳过（只能考 ${U.esc(s.skipCls)}，会考过，用掉一个可跳过的职业，还剩 ${s.skipLeft} 个）` : "跳过")}${isOrigExam && s.train ? (s.trainOk ? ` <span class="changed">🎯 Lv${s.trainLv} 考试前练好：${U.esc(s.train.join("、"))}</span>` : ` <span class="changed">技能差：${U.esc(s.train.join("、"))}（不练，按实际成功率）</span>`) : ""}<span class="hint">　判定值 ${s.roll}%${exCls && customExamPct != null ? `｜估计成功率 ${customExamPct}%${isOrigExam && s.train && s.trainOk ? "（练够之后）" : ""}` : ""}${isOrigExam && s.skillSummary ? `｜${U.esc(s.skillSummary)}` : ""}${isOrigExam && s.renown ? `｜要名声 Lv${s.renown}` : ""}</span>${isOrigExam && s.floor && s.floor.length ? ` <span class="changed">转职保底：${U.esc(s.floor.join("、"))}</span>` : ""}${!exCls ? smHint(c, s) : ""}${isOrigExam && s.use ? `<span class="hint">　之后到 Lv${c.planTo} 用它升 ${s.use[0]} 级${s.use[0] ? `：${U.esc(s.use[1])}（${U.sgn(s.use[2])} 分）` : ""}</span>` : ""}` : `<b>${U.esc(RL.eqName(row))}</b>　${U.esc(r.gains.join(" ") || "—")}`}${row.choice !== RL.recOf(s) ? ` <span class="changed">已改</span>` : ""}${row.missing ? ` <span class="changed">还没考到</span>` : ""}${row.fail ? ` <span class="changed">估计考不过</span>` : ""}
+              ${row.done ? "" : `<details class="more"><summary>选择</summary>${optsHtml(c, s, row, "f", w)}</details>`}</div>
             <span class="sc">${r.exam ? "—" : U.PW(r.cnt, r.score)}</span></li>`;
         }).join("")}</ol></div>`;
 
@@ -503,30 +665,89 @@
         const tlRows = w.rows.filter(r => r.s.src === "plan" || !r.done);
         const mx = Math.max(20, ...tlRows.map(r => (r.r.exam ? 0 : r.r.score)));
         const tlHtml = tlRows.length ? `<div class="tl" role="img" aria-label="每一步的加权分">${tlRows.map(r => {
-          if (r.r.exam) return `<div title="${U.esc(RL.stepName(r.s))}"><i class="x${r.done ? " done" : ""}"></i><span>${RL.examName(r.s) ? "转" : "跳"}</span></div>`;
+          if (r.r.exam) return `<div title="${U.esc(RL.stepName(r.s, r))}"><i class="x${r.done ? " done" : ""}"></i><span>${r.r.examCls ? "转" : "跳"}</span></div>`;
           const es = r.s.es, d = es == null ? null : r.r.score - es, k = d == null ? "" : d >= 2 ? "up" : d <= -2 ? "dn" : "eq";
           const h = Math.max(4, 64 * r.r.score / mx);
           return `<div title="Lv${r.frm}→${r.to} ${U.esc(r.choice)}：${U.PW(r.r.cnt, r.r.score)}"><i class="${k}${r.done ? " done" : ""}" style="height:${h}px">${es != null ? `<b style="bottom:${64 * es / mx}px"></b>` : ""}</i><span>${r.to}</span></div>`;
         }).join("")}</div><div class="legend"><span style="--k:var(--good)">好于平均 2 分以上</span><span style="--k:var(--bad)">低于平均 2 分以上</span><span style="--k:var(--muted)">差不多</span><span style="--k:var(--exam)">考试或跳过</span><span>横线 = 平均运气</span></div>` : "";
 
-        // 每次考试值不值 + 多转一个中级（仅默认展示正净值收益项，负收益排雷表默认折叠避免视觉噪音）
+        // 每次考试值不值 + 替换当前单中级对比 + 多转一个中级（拆分为升级乱数能力差 vs 额外考试耗掉的乱数，附技能训练差与推荐度排序）
         const eb = (c.hist && c.hist.exam_benefit) || [];
+        const altMid = c.altMid || [];
         const mg = c.midGain || [];
-        const mgPos = mg.filter(r => r.dnet > 0);
-        const mgNeg = mg.filter(r => r.dnet <= 0);
-        const renderMidTable = list => `<div class="scroll"><table><tr><th>多转</th><th class="n">用它升级</th><th>能力差</th><th class="n">点数差</th><th class="n">加权分</th><th class="n">比现在</th><th class="n">手形</th><th>说明</th></tr>${list.map(r => `<tr><td>${U.esc(r.cls)}</td><td class="n">${r.used}</td><td class="note">${U.esc(r.diff || "")}</td><td class="n">${r.dpts == null ? "—" : U.sgn(r.dpts)}</td><td class="n">${r.total}</td><td class="n">${U.sgn(r.dsc)}</td><td class="n">${r.gold}G</td><td class="note">${r.dnet > 0 ? "净值略高（被组合顺序挡住），值得看看" : "综合金币与训练后无净收益（排雷参考）"}</td></tr>`).join("")}</table></div>`;
+        const recPill = lv => {
+          const cls = lv === "推荐" ? "r1" : lv === "可考虑" ? "r2" : "r3";
+          return `<span class="rec ${cls}">${U.esc(lv || "不推荐")}</span>`;
+        };
+        const renderVariantTable = (list, mode) => `<div class="scroll"><table>
+          <tr>
+            <th>${mode === "alt" ? "改考（替换）" : "多转"}</th>
+            <th>推荐度</th>
+            <th>额外需练技能</th>
+            <th>① 升级乱数能力差<br><small>（不含少升级）</small></th>
+            <th>② 考试耗掉 / 置换的乱数</th>
+            <th>合计能力差</th>
+            <th class="n">加权差 / 净值差</th>
+            <th class="n">手形</th>
+          </tr>
+          ${list.map(r => {
+            const dn = r.dnetReal != null ? r.dnetReal : r.dnet;
+            const upStr = r.upDiff ? `${U.esc(r.upDiff)}（${U.sgn(r.upDiffW ?? 0)}分，用${r.used}级）` : "—";
+            const lossStr = r.examLoss ? `${U.esc(r.examLoss)}${r.examLossW ? `（${U.sgn(r.examLossW)}分）` : ""}` : "—";
+            const clsLabel = mode === "alt" && r.replaces ? `<b>${U.esc(r.cls)}</b><br><small class="hint">替 ${U.esc(r.replaces)}</small>` : `<b>${U.esc(r.cls)}</b>`;
+            return `<tr>
+              <td>${clsLabel}</td>
+              <td>${recPill(r.recLevel)}</td>
+              <td class="note">${U.esc(r.trainText || "已达标（0 段）")}</td>
+              <td class="note">${upStr}</td>
+              <td class="note">${lossStr}</td>
+              <td class="note">${U.esc(r.diff || "")}（${r.dpts == null ? "—" : U.sgn(r.dpts)}点）</td>
+              <td class="n ${dn > 0 ? "up" : dn < 0 ? "dn" : ""}">${U.sgn(r.dsc)}分 / <b>${U.sgn(dn)}</b></td>
+              <td class="n">${r.gold}G${r.dgold ? `<br><small class="hint">${U.sgn(r.dgold)}G</small>` : ""}</td>
+            </tr>`;
+          }).join("")}
+        </table></div>`;
+
+        const altMidHtml = altMid.length
+          ? `<div id="sec-altmid-${U.slug(c)}" style="margin-top:8px" data-cmt-target="route:${U.esc(c.name)}" data-cmt-label="${U.esc(c.name)}（改考其他单中级对比）">
+              <h4>改考其他单中级对比（替换 ${U.esc(altMid[0].replaces)}，同样只考 1 场）</h4>
+              ${renderVariantTable(altMid, "alt")}
+            </div>`
+          : "";
+
+        const mgPos = mg.filter(r => (r.dnetReal != null ? r.dnetReal : r.dnet) > 0);
+        const mgNeg = mg.filter(r => (r.dnetReal != null ? r.dnetReal : r.dnet) <= 0);
         const midGainHtml = mg.length
           ? `<div id="sec-midgain-${U.slug(c)}" data-cmt-target="route:${U.esc(c.name)}" data-cmt-label="${U.esc(c.name)}（多转中级对比）">
-              ${mgPos.length ? `<h4 style="margin-top:8px">多转一个中级值多少（有正净值收益）</h4>${renderMidTable(mgPos)}` : ""}
-              ${mgNeg.length ? `<details class="more" style="margin-top:6px"><summary>多转一个中级排雷对比（以下 ${mgNeg.length} 个均无正净值收益，已折叠）</summary>${renderMidTable(mgNeg)}</details>` : ""}
+              ${mgPos.length ? `<h4 style="margin-top:8px">多转一个中级值多少（有正净值收益）</h4>${renderVariantTable(mgPos, "add")}` : ""}
+              ${mgNeg.length ? `<details class="more" style="margin-top:6px"><summary>多转一个中级排雷对比（以下 ${mgNeg.length} 个均无正净值收益，已按推荐度与净值排序并拆分少升级消耗）</summary>${renderVariantTable(mgNeg, "add")}</details>` : ""}
             </div>`
           : "";
         const examSec = `<div class="sec" id="sec-exam-${U.slug(c)}"><h4>每次考试值不值</h4>
           ${eb.length ? `<div class="scroll"><table><tr><th>考试</th><th class="n">判定值</th><th>比不考它的最好路线</th><th class="n">点数</th><th class="n">加权分</th><th class="n">多花</th></tr>${eb.map(e => `<tr><td>${U.esc(e.cls)}${e.req ? " · 必考" : ""}</td><td class="n">${e.roll}%</td><td>${U.esc(U.gtxt(e.diff, ST))}</td><td class="n">${U.sgn(U.psum(e.diff))}</td><td class="n">${U.sgn(e.wdiff)}</td><td class="n">${e.dgold == null ? "—" : e.dgold + "G"}</td></tr>`).join("")}</table></div>` : `<p class="txt">推荐路线不考试。</p>`}
+          ${altMidHtml}
           ${midGainHtml}
         </div>`;
 
+        // 该角色的待决定方案（直接嵌入角色卡内，与「我的决定」双向实时同步）
+        const pr = propByName.get(c.name);
+        let charDecisionHtml = "";
+        if (pr && (pr.options || []).length > 1) {
+          const rPick = RL.resolveRoutePick(pr, routePicks);
+          const isPending = rPick.source === "pending";
+          const decBadge = isPending
+            ? `<span class="rec r2">⏳ 待你决定路线方案</span>`
+            : `<span class="rec ${rPick.source === "user" ? "r1" : "r0"}">✓ 当前选择：${U.esc(rPick.option.title)}</span>`;
+          charDecisionHtml = `<div class="sec rp-opts" id="sec-decision-${U.slug(c)}" data-cmt-target="char:${U.esc(pr.name)}" data-cmt-label="${U.esc(pr.name)}（待决定方案）">
+            <details class="more"${isPending ? " open" : ""}>
+              <summary>${decBadge} <small>（含相对旧路线 9 项能力差，与「我的决定」自动同步）</small></summary>
+              <div class="rp-opts" style="margin-top:8px">${renderProposalOptionsBody(pr, rPick, "plan-rpick-")}</div>
+            </details>
+          </div>`;
+        }
+
         return `<article class="card" data-slug="${U.slug(c)}" id="${U.slug(c)}" data-cmt-target="route:${U.esc(c.name)}" data-cmt-label="${U.esc(c.name)}（路线规划）">${head(c, w, right)}
+          ${charDecisionHtml}
           <details class="more cbody"${focus ? " open" : ""}><summary>展开：路线、能力、考试和每一步</summary>
             ${c.examWarn ? `<div class="sec"><p class="txt"><span class="sev warn">注意</span> 这条路线考试 + 跳过一共 ${c.exams} 次，比较多（手形 ${c.planGold}G）。</p></div>` : ""}
             ${trainBox(c, w)}
@@ -694,23 +915,13 @@
     }
 
     // ---------- 7. 我的决定（按档位 P0->P1->P2 排序 + 9 项能力差展开 + Plan Mode 批注） ----------
-    function renderStatDiffChips(diffVec, isBaseline) {
-      if (isBaseline) return `<span class="hint">基准方案（对照原点）</span>`;
-      const parts = [];
-      for (let i = 0; i < ST.length; i++) {
-        const v = (diffVec || [])[i] || 0;
-        if (!v) continue;
-        parts.push(`<span class="sdiff ${v > 0 ? "up" : "dn"}">${U.esc(ST[i])}${v > 0 ? "+" + v : v}</span>`);
-      }
-      return parts.length ? parts.join("") : `<span class="sdiff eq">9 项能力完全相同</span>`;
-    }
-
     function viewMine() {
-      const visibleProps = PROPOSALS.filter(pr => !focus || U.slug({ name: pr.name }) === focus);
-      const sumAll = RL.summarizeRoutePicks(PROPOSALS, routePicks);
+      const sortedProps = RL.sortCharsByTier(PROPOSALS, RM.currentLord);
+      const visibleProps = sortedProps.filter(pr => !focus || U.slug({ name: pr.name }) === focus);
+      const sumAll = RL.summarizeRoutePicks(sortedProps, routePicks);
       const sumVis = RL.summarizeRoutePicks(visibleProps, routePicks);
 
-      // 严格按档位（P0 -> P1 -> P2）排序（PROPOSALS 已按档位排好）
+      // 严格按 当前主角 -> P -> 强度 -> 名字排序
       const sortedRows = [...sumVis.rows];
 
       const proposalCards = sortedRows.map(({ proposal: pr, resolved: r }) => {
@@ -725,90 +936,11 @@
 
         const charTid = "char:" + pr.name;
         const charLbl = `${pr.name}（${pr.tier}）`;
+        const isLord = Boolean(pr.isLord || (RM.currentLord && pr.name === RM.currentLord));
 
-        const optHtml = (pr.options || []).map(opt => {
-          const picked = r.optionId === opt.id;
-          const d = opt.diffVsBaseline || {};
-          const isBase = opt.id === "old_baseline";
-          const slHtml = (opt.slWarnings || []).map(w =>
-            `<div class="slwarn">⚠️ <b>需提前 NS Online S/L 实测</b>：${U.esc(w.message)}</div>`
-          ).join("");
-
-          const examLine = (opt.exams || []).map(e => {
-            const pctStr = e.pct != null ? `估 ${e.pct}%` : "—";
-            const trStr = e.trainRanks ? ` · 练 ${e.trainRanks} 段` : "";
-            const flStr = e.promoFloor && e.promoFloor.length ? ` · 转职保底 ${e.promoFloor.join("、")}` : "";
-            return `Lv${e.lv}(第${e.step}步) <b>${U.esc(e.cls)}</b>（判定 ${e.roll}% / ${pctStr}${trStr}${flStr}）`;
-          }).join("；") || "不考新职业";
-
-          const deltaBadge = (label, val, unit, invertColor) => {
-            if (isBase) return `<span>${label} <b>${val}${unit || ""}</b></span>`;
-            const sgn = val > 0 ? "+" + val : String(val);
-            const good = invertColor ? val < 0 : val > 0;
-            const bad = invertColor ? val > 0 : val < 0;
-            const cls = good ? "up" : bad ? "dn" : "";
-            return `<span>${label} <b class="${cls}">${sgn}${unit || ""}</b></span>`;
-          };
-
-          const metricsHtml = isBase
-            ? `<div class="rp-metrics">
-                <span>净值 <b>${opt.net}</b></span>
-                <span>总点数 <b>${opt.rawPoints}</b></span>
-                <span>升级分 <b>${opt.statWeighted}</b></span>
-                <span>转职保底 <b>${opt.promoFloorWeighted}</b></span>
-                <span>金币 <b>${opt.gold}G</b></span>
-                <span>训练 <b>${opt.trainRanks} 段</b></span>
-                <span>精通 <b>${opt.masteryLevels} 级</b></span>
-              </div>`
-            : `<div class="rp-metrics">
-                <span>净值 <b>${opt.net}</b> (${deltaBadge("Δ", d.net, "", false)})</span>
-                <span>点数 <b>${opt.rawPoints}</b> (${deltaBadge("Δ", d.pts, "", false)})</span>
-                <span>升级分 <b>${opt.statWeighted}</b> (${deltaBadge("Δ", d.statW, "", false)})</span>
-                <span>转职保底 <b>${opt.promoFloorWeighted}</b> (${deltaBadge("Δ", d.promoFloorW, "", false)})</span>
-                <span>金币 <b>${opt.gold}G</b> (${deltaBadge("Δ", d.gold, "G", true)})</span>
-                <span>训练 <b>${opt.trainRanks} 段</b> (${deltaBadge("Δ", d.trainRanks, "段", true)})</span>
-                <span>精通 <b>${opt.masteryLevels} 级</b> (${deltaBadge("Δ", d.masteryLevels, "级", false)})</span>
-              </div>`;
-
-          const promoHtml = (opt.promoFloorDetails || []).length
-            ? `<div class="hint">转职保底永久补足：<b>${U.esc(opt.promoFloorDetails.join("、"))}</b></div>`
-            : "";
-
-          const marginalsHtml = (opt.marginals || []).filter(m => !m.isRequired || m.usedLevels === 0).length
-            ? `<div class="rp-marg">${opt.marginals.map(m =>
-                `<div><span class="cat-pill">${m.isRequired ? "必考" : "额外"} ${U.esc(m.cls)}（升级用 ${m.usedLevels} 级）</span> 边际能力差：<b>${U.esc(m.statDiffText)}</b>｜Δ净值 ${U.sgn(m.deltaNet)}｜Δ金币 ${U.sgn(m.deltaGold)}G｜Δ训练 ${U.sgn(m.deltaTrainRanks)} 段</div>`
-              ).join("")}</div>`
-            : "";
-
-          const finalVec = (opt.statVec || []).map((v, i) => `${ST[i]}+${v}`).join(" ");
-          const optTid = `opt:${pr.name}:${opt.id}`;
-          const optLbl = `${pr.name}（${pr.tier}）· ${opt.title}`;
-
-          return `<div class="rp-opt-wrap" data-cmt-target="${U.esc(optTid)}" data-cmt-label="${U.esc(optLbl)}">
-            <label class="rp-opt${picked ? " on" : ""}">
-              <div class="rp-opt-head">
-                <input type="radio" name="rpick-${U.esc(U.slug({ name: pr.name }))}" value="${U.esc(opt.id)}" data-rpick="${U.esc(pr.name)}"${picked ? " checked" : ""}>
-                <b>${U.esc(opt.title)}</b>
-                <span class="cat-pill">${U.esc(opt.tag)}</span>
-                <span class="r">${renderCommentBtn(optTid, optLbl, "批注此方案")}</span>
-              </div>
-              <div class="rp-opt-body">
-                ${slHtml}
-                <div class="rp-sdiff"><span class="lab">相对旧路线 9 项能力差</span><div class="sdiff-list">${renderStatDiffChips(d.statDiff, isBase)}</div></div>
-                ${metricsHtml}
-                ${promoHtml}
-                <div class="hint">考试安排：${examLine}${opt.skips ? `；纯跳过 ${opt.skips} 次` : ""}</div>
-                <div class="hint">窗口总增量（Lv${pr.level}→Lv${opt.endLevel}）：${U.esc(finalVec)}</div>
-                ${marginalsHtml}
-              </div>
-            </label>
-            ${renderCommentThread(optTid, optLbl)}
-          </div>`;
-        }).join("");
-
-        return `<article class="card rp-card" data-rp-char="${U.esc(pr.name)}" data-cmt-target="${U.esc(charTid)}" data-cmt-label="${U.esc(charLbl)}">
+        return `<article class="card rp-card" id="rp-${U.esc(U.slug({ name: pr.name }))}" data-rp-char="${U.esc(pr.name)}" data-cmt-target="${U.esc(charTid)}" data-cmt-label="${U.esc(charLbl)}">
           <div class="ch"><div class="ct">
-            <h3>${U.esc(pr.name)}</h3>
+            <h3>${isLord ? '<span title="当前路线主角">★</span> ' : ""}${U.esc(pr.name)}</h3>
             ${renderPTierBadge(pr.tier, pr.priorityNote)}
             ${renderStrengthBadge(pr)}
             <span class="lv">Lv${pr.level}→目标 Lv${pr.target}（${pr.seeds} 个乱数）</span>
@@ -816,17 +948,15 @@
           </div>${pr.priorityNote ? `<p class="intro note2">📌 ${U.esc(pr.priorityNote)}</p>` : ""}</div>
           <div class="sec rp-opts">
             ${renderCommentThread(charTid, charLbl)}
-            ${optHtml}
-            <div class="rp-note-row">
-              <input type="text" class="rp-note" data-rpick-note="${U.esc(pr.name)}" placeholder="可选简短备注（例如 S/L 实测结果、个人偏好）" value="${U.esc(r.note || "")}">
-              ${r.source === "user" ? `<button type="button" class="btn ghost" data-rpick-clear="${U.esc(pr.name)}">恢复默认</button>` : ""}
-            </div>
+            ${renderProposalOptionsBody(pr, r, "rpick-")}
           </div>
         </article>`;
       }).join("");
 
       const pickSummaryRows = sumAll.rows.map(({ proposal: pr, resolved: r }) => {
-        const d = r.option && r.option.diffVsBaseline ? r.option.diffVsBaseline : null;
+        const previewOpt = r.option || (pr.options || []).find(o => o.id === "new_best") || null;
+        const d = previewOpt && previewOpt.diffVsBaseline ? previewOpt.diffVsBaseline : null;
+        const isLord = Boolean(pr.isLord || (RM.currentLord && pr.name === RM.currentLord));
         const srcTag =
           r.source === "user" ? `<span class="tag ok">网页已选</span>`
           : r.source === "default" ? `<span class="cat-pill">默认已确认</span>`
@@ -834,12 +964,23 @@
           : `<span class="tag warn">待选择</span>`;
         const cCnt = (cmtSum.byTarget["char:" + pr.name]?.open || 0)
           + (pr.options || []).reduce((acc, o) => acc + (cmtSum.byTarget[`opt:${pr.name}:${o.id}`]?.open || 0), 0);
+        const planCell = r.option
+          ? `<b>${U.esc(r.option.title)}</b>`
+          : (previewOpt ? `<span class="hint">候选：</span><b>${U.esc(previewOpt.title)}</b>` : `<span class="hint">尚未选择</span>`);
+        const netCell = previewOpt
+          ? `${previewOpt.net}${d && previewOpt.id !== "old_baseline" ? ` (${U.sgn(d.net)})` : ""}${!r.option ? `<br><small class="hint">候选</small>` : ""}`
+          : "—";
+        const diffCell = previewOpt
+          ? (previewOpt.id === "old_baseline"
+              ? `<span class="hint">沿用旧路线</span>`
+              : `<div class="sdiff-list">${renderStatDiffChips(d.statDiff, false)}</div>`)
+          : "—";
         return `<tr class="${r.source === "pending" ? "cur" : ""}">
-          <td><b>${U.esc(U.shortName(pr.name))}</b> ${renderPTierBadge(pr.tier, pr.priorityNote)} ${renderStrengthBadge(pr)}${cCnt ? ` <span class="cmt-cnt">💬${cCnt}</span>` : ""}</td>
+          <td><b>${isLord ? '<span title="当前路线主角">★</span> ' : ""}${U.esc(U.shortName(pr.name))}</b> ${renderPTierBadge(pr.tier, pr.priorityNote)} ${renderStrengthBadge(pr)}${cCnt ? ` <span class="cmt-cnt">💬${cCnt}</span>` : ""}</td>
           <td>${srcTag}</td>
-          <td>${r.option ? `<b>${U.esc(r.option.title)}</b>` : `<span class="hint">尚未选择</span>`}</td>
-          <td class="n">${r.option ? `${r.option.net}${d && r.option.id !== "old_baseline" ? ` (${U.sgn(d.net)})` : ""}` : "—"}</td>
-          <td class="note">${r.option ? (r.option.id === "old_baseline" ? "沿用旧路线" : U.esc(d.statDiffText)) : "—"}</td>
+          <td>${planCell}</td>
+          <td class="n">${netCell}</td>
+          <td class="note">${diffCell}</td>
           <td class="note">${U.esc(r.note || "—")}</td>
           <td class="n">${r.at ? U.esc(r.at.slice(5, 16).replace("T", " ")) : "—"}</td>
         </tr>`;
@@ -848,7 +989,7 @@
       const proposalSection = PROPOSALS.length ? `
         <section class="alerts" data-cmt-target="summary:proposals" data-cmt-label="全 9 人方案对比总表">
           <div class="pm-sec-head">
-            <h2>新路线方案选择与确认（按档位 P0→P1→P2 · 已确认 ${sumAll.confirmed} / ${sumAll.total} 人 · 待你选择 ${sumAll.pending} 人）</h2>
+            <h2>新路线方案选择与确认（主角优先 · 按 P0→P1→P2 与强度排序 · 已确认 ${sumAll.confirmed} / ${sumAll.total} 人 · 待你选择 ${sumAll.pending} 人）</h2>
             ${renderCommentBtn("summary:proposals", "全 9 人方案对比总表", "批注总表")}
           </div>
           <p class="txt">每个候选方案均已展开<b>相对旧路线的 9 项具体能力差</b>、<b>转职保底</b>、金币/训练/精通差（职业精通不计入虚拟加权分，由你 case by case 拍板）与 S/L 提醒。你的每次点选与 Plan Mode 批注都会<b>自动保存在当前浏览器</b>。</p>

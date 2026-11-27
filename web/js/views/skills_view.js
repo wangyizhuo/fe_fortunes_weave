@@ -96,22 +96,24 @@
     const showLimit = state.skillsShowAll ? filtered.length : 120;
     const shown = filtered.slice(0, showLimit);
 
-    const cards = shown.map(sk => `
-      <article class="sk-card tier-bd-${U.esc(sk.rating)}">
-        <div class="sk-head">
-          <span class="sk-tier tier-${U.esc(sk.rating)}">${U.esc(sk.rating)}</span>
-          <b class="sk-name">${U.esc(sk.name)}</b>
-          ${sk.enName ? `<span class="sk-en">${U.esc(sk.enName)}</span>` : ""}
-          ${renderScopePill(sk)}
-          <span class="cat-pill">${U.esc(sk.category)}</span>
-          ${sk.discipline && sk.discipline !== "角色" && sk.discipline !== "职业" ? `<span class="cat-pill">${U.esc(sk.discipline)}</span>` : ""}
-        </div>
-        ${renderParams(sk.params)}
-        ${sk.review ? `<p class="sk-review"><b>简评：</b>${U.esc(sk.review)}</p>` : ""}
-        ${sk.effect ? `<p class="sk-eff">${U.esc(sk.effect)}</p>` : ""}
-        ${renderClassSources(sk)}
-        ${renderOwners(sk)}
-      </article>
+    const rows = shown.map(sk => `
+      <tr class="sk-row tier-row-${U.esc(sk.rating)}">
+        <td class="sk-c-tier"><span class="sk-tier tier-${U.esc(sk.rating)}">${U.esc(sk.rating)}</span></td>
+        <td class="sk-c-name">
+          <div class="sk-name-line"><b class="sk-name">${U.esc(sk.name)}</b>${sk.enName ? ` <span class="sk-en">${U.esc(sk.enName)}</span>` : ""}</div>
+          <div class="sk-meta-line"><span class="cat-pill">${U.esc(sk.category)}</span>${sk.discipline && sk.discipline !== "角色" && sk.discipline !== "职业" ? ` <span class="cat-pill">${U.esc(sk.discipline)}</span>` : ""}</div>
+        </td>
+        <td class="sk-c-scope">${renderScopePill(sk)}</td>
+        <td class="sk-c-eff">
+          ${renderParams(sk.params)}
+          ${sk.effect ? `<div class="sk-eff">${U.esc(sk.effect)}</div>` : ""}
+          ${sk.review ? `<div class="sk-review"><b>简评：</b>${U.esc(sk.review)}</div>` : ""}
+        </td>
+        <td class="sk-c-src">
+          ${renderClassSources(sk)}
+          ${renderOwners(sk)}
+        </td>
+      </tr>
     `).join("");
 
     const moreBtn = filtered.length > showLimit
@@ -130,7 +132,7 @@
       <div class="sk-filter-row"><span class="sk-flbl">获取范围</span><div class="pills">${scopeBtns}</div></div>
       <div class="sk-filter-row"><span class="sk-flbl">分类</span><div class="pills">${catBtns}</div></div>
       <div class="sk-callout"><b>获取范围说明：</b>「<b>全员通用（职业获取）</b>」指任意角色转职该职业即可获得的职业固有/精通技能；「<b>角色表限定（N/63 人熟练度）</b>」指仅写在对应角色个人熟练度习得表里的技能——例如 <b>体格</b>（重装术 A，仅 39/63 人）与 <b>体格+</b>（重装术 S+，仅 24/63 人）均<b>不是职业固有技能</b>，不在习得名单内的角色即使练满重装术 S+ 也学不到。</div>
-      ${shown.length ? `<div class="sk-grid">${cards}</div>${moreBtn}` : `<section class="alerts"><p class="txt">没有符合条件的技能，试试放宽筛选或清空搜索词。</p></section>`}
+      ${shown.length ? `<div class="scroll"><table class="sk-tbl"><thead><tr><th>评级</th><th>技能名</th><th>获取范围</th><th>效果与数值</th><th>习得途径（职业 / 角色）</th></tr></thead><tbody>${rows}</tbody></table></div>${moreBtn}` : `<section class="alerts"><p class="txt">没有符合条件的技能，试试放宽筛选或清空搜索词。</p></section>`}
     `;
   }
 
