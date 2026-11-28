@@ -279,6 +279,17 @@ th.grp { text-align: center; border-bottom: 1px solid var(--line); } td.cur, th.
 .cls-neg { color: var(--bad); }
 .cls-z { color: var(--muted); opacity: .45; }
 .cls-min { font-family: var(--mono); font-size: 12px; min-width: 10em; }
+.cls-grp-sep { border-left: 2px solid var(--line); }
+.cls-min-val { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.cls-min-hi { color: var(--accent-ink); font-weight: 700; }
+.cls-min-tot { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.cls-sort-th { padding: 0; white-space: nowrap; }
+.cls-sort-btn { display: inline-flex; align-items: center; justify-content: flex-end; gap: 2px; width: 100%; padding: 6px 5px; border: 0; background: transparent; color: inherit; font: inherit; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.cls-sort-btn:hover { background: var(--tint); color: var(--accent-ink); }
+.cls-sort-ico { font-size: 10px; opacity: .45; }
+.cls-sort-th.on { background: var(--tint); color: var(--accent-ink); }
+.cls-sort-th.on .cls-sort-ico { opacity: 1; }
+.cls-sort-td { background: color-mix(in srgb, var(--tint) 55%, transparent); }
 
 /* 路线方案选择与 9 项具体能力差卡片 */
 .rp-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 6px; }

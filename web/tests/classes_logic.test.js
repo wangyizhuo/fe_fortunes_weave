@@ -126,3 +126,35 @@ test("filterClasses supports advantageStats checkbox filtering (AND/OR) and adva
   assert.equal(sum.advantageCounts["防"], 1);
   assert.equal(sum.advantageCounts["魔防"], 1);
 });
+
+test("nextSortState cycles desc -> asc -> default and sortLabelOf formats labels", () => {
+  assert.deepEqual(CL.nextSortState("", "desc", "min:def"), { key: "min:def", dir: "desc" });
+  assert.deepEqual(CL.nextSortState("min:def", "desc", "min:def"), { key: "min:def", dir: "asc" });
+  assert.deepEqual(CL.nextSortState("min:def", "asc", "min:def"), { key: "", dir: "desc" });
+  assert.deepEqual(CL.nextSortState("min:def", "asc", "min:spd"), { key: "min:spd", dir: "desc" });
+  assert.equal(CL.sortLabelOf("min:def"), "职业保底 · 防");
+  assert.equal(CL.sortLabelOf("min:total"), "职业保底 · 合计");
+  assert.equal(CL.sortLabelOf("growth:spd"), "成长率补正 · 速");
+});
+
+test("groupClassesByTier sorts strictly within each tier without mixing tiers", () => {
+  const mixed = [
+    { name: "斗士", tier: "初级", minStats: { hp: 20, str: 8, def: 3 }, growth: { str: 5 }, growthTotal: 10 },
+    { name: "士兵", tier: "初级", minStats: { hp: 20, str: 5, def: 5 }, growth: { str: 0 }, growthTotal: 10 },
+    { name: "诅咒师", tier: "初级", minStats: { hp: 20, str: 0, def: 0 }, growth: { mag: 10 }, growthTotal: 10 },
+    { name: "恶棍", tier: "中级", minStats: { hp: 23, str: 5, def: 3 }, growth: { spd: 10 }, growthTotal: 20 },
+    { name: "重装步兵", tier: "中级", minStats: { hp: 25, str: 10, def: 10 }, growth: { def: 15 }, growthTotal: 20 },
+    { name: "巨型重甲兵", tier: "上级", minStats: { hp: 27, str: 12, def: 13 }, growth: { def: 20 }, growthTotal: 30 },
+  ];
+  const descGroups = CL.groupClassesByTier(mixed, null, { key: "min:def", dir: "desc" });
+  assert.deepEqual(descGroups.map(g => g.tier), ["初级", "中级", "上级"]);
+  assert.deepEqual(descGroups[0].classes.map(c => c.name), ["士兵", "斗士", "诅咒师"]);
+  assert.deepEqual(descGroups[1].classes.map(c => c.name), ["重装步兵", "恶棍"]);
+  assert.deepEqual(descGroups[2].classes.map(c => c.name), ["巨型重甲兵"]);
+
+  const ascGroups = CL.groupClassesByTier(mixed, null, { key: "min:def", dir: "asc" });
+  assert.deepEqual(ascGroups[0].classes.map(c => c.name), ["诅咒师", "斗士", "士兵"]);
+  assert.deepEqual(ascGroups[1].classes.map(c => c.name), ["恶棍", "重装步兵"]);
+
+  assert.equal(CL.minStatsTotal(mixed[4].minStats), 45);
+});

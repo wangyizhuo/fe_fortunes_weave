@@ -43,6 +43,8 @@
       classesStats: [],
       classesMatchMode: "all", // all | any
       classesQuery: "",
+      classesSortKey: "", // "" | "min:<stat>" | "min:total" | "growth:<stat>" | "growth:total"
+      classesSortDir: "desc", // desc | asc
       skillsQuery: "",
       skillsRating: "全部",
       skillsScope: "全部",

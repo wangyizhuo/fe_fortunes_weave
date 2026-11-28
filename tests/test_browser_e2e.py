@@ -54,19 +54,23 @@ class TestBrowserE2E(unittest.TestCase):
         cls.thread = threading.Thread(target=cls.httpd.serve_forever, daemon=True)
         cls.thread.start()
         cls.pw = sync_playwright().start()
-        args = ["--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--disable-setuid-sandbox"]
-        try:
-            cls.browser = cls.pw.chromium.launch(args=args)
-        except Exception:
-            cls.browser = cls.pw.chromium.launch(channel="chromium", args=args)
 
     @classmethod
     def tearDownClass(cls):
-        if getattr(cls, "browser", None):
-            cls.browser.close()
         cls.pw.stop()
         cls.httpd.shutdown()
         cls.httpd.server_close()
+
+    def setUp(self):
+        args = ["--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--disable-setuid-sandbox"]
+        try:
+            self.browser = self.pw.chromium.launch(args=args)
+        except Exception:
+            self.browser = self.pw.chromium.launch(channel="chromium", args=args)
+
+    def tearDown(self):
+        if getattr(self, "browser", None):
+            self.browser.close()
 
     def _new_ctx_page(self, width: int, height: int):
         ctx = self.browser.new_context(viewport={"width": width, "height": height})
@@ -264,6 +268,26 @@ class TestBrowserE2E(unittest.TestCase):
         self.assertIn("重装步兵", adv_txt)
         self.assertNotIn("萨满巫师", adv_txt)
         page.click('button[data-cls-clear]')
+        page.wait_for_timeout(80)
+        # 职业保底每属性一列 + 阶段内独立排序（点击 防 降序/升序，初级与中级各自独立排序不跨阶段混排）
+        self.assertIn("职业保底 / 转职保底（每属性一列", page.inner_text("#view"))
+        page.locator('button[data-cls-sort="min:def"]').first.click()
+        page.wait_for_timeout(100)
+        sorted_desc = page.evaluate("""() => ({
+          basic: [...document.querySelectorAll('[data-cls-tier-sec="初级"] tr[data-cls-name]')].map(r => r.dataset.clsName),
+          mid: [...document.querySelectorAll('[data-cls-tier-sec="中级"] tr[data-cls-name]')].map(r => r.dataset.clsName),
+        })""")
+        self.assertEqual(len(sorted_desc["basic"]), 5)
+        self.assertEqual(len(sorted_desc["mid"]), 12)
+        self.assertEqual(sorted_desc["basic"][0], "士兵")
+        self.assertEqual(sorted_desc["basic"][-1], "诅咒师")
+        self.assertIn(sorted_desc["mid"][0], ("重装步兵", "轻骑兵", "战车兵", "骑甲鸵兵"))
+        page.locator('button[data-cls-sort="min:def"]').first.click()
+        page.wait_for_timeout(100)
+        sorted_asc_basic = page.evaluate("""() => [...document.querySelectorAll('[data-cls-tier-sec="初级"] tr[data-cls-name]')].map(r => r.dataset.clsName)""")
+        self.assertEqual(sorted_asc_basic[0], "诅咒师")
+        self.assertEqual(sorted_asc_basic[-1], "士兵")
+        page.click('button[data-cls-sort-reset]')
         page.wait_for_timeout(80)
 
         # 4) 技能图鉴：一个技能一行表格 + 生效兵种 Checkbox 筛选 + 评级筛选 S + 角色表限定说明 + 角色特有筛选 + 切换角色 SS~D 评级与 12 项熟练度矩阵

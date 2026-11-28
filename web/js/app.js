@@ -796,6 +796,21 @@
         render();
         return;
       }
+      const clsSort = e.target.closest("[data-cls-sort]");
+      if (clsSort) {
+        const CL = root.FE.classesLogic;
+        const nxt = CL.nextSortState(store.state.classesSortKey, store.state.classesSortDir, clsSort.dataset.clsSort);
+        store.state.classesSortKey = nxt.key;
+        store.state.classesSortDir = nxt.dir;
+        render();
+        return;
+      }
+      if (e.target.closest("[data-cls-sort-reset]")) {
+        store.state.classesSortKey = "";
+        store.state.classesSortDir = "desc";
+        render();
+        return;
+      }
       if (e.target.closest("[data-cls-clear]")) {
         clearEntityFocusFor("classes");
         store.state.classesTier = "全部";
@@ -803,6 +818,8 @@
         store.state.classesStats = [];
         store.state.classesMatchMode = "all";
         store.state.classesQuery = "";
+        store.state.classesSortKey = "";
+        store.state.classesSortDir = "desc";
         render();
         return;
       }

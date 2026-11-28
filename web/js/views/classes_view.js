@@ -4,10 +4,19 @@
   const CL = root.FE.classesLogic;
   const LL = root.FE.linksLogic;
 
-  function fmtGrowthCell(val) {
-    if (!val) return `<td class="n cls-z">—</td>`;
-    if (val > 0) return `<td class="n cls-pos">+${val}</td>`;
-    return `<td class="n cls-neg">${val}</td>`;
+  function fmtGrowthCell(val, isSorted) {
+    const cls = isSorted ? " cls-sort-td" : "";
+    if (!val) return `<td class="n cls-z${cls}">—</td>`;
+    if (val > 0) return `<td class="n cls-pos${cls}">+${val}</td>`;
+    return `<td class="n cls-neg${cls}">${val}</td>`;
+  }
+
+  function fmtMinCell(val, isSorted, isTierMax, isFirst) {
+    const sep = isFirst ? " cls-grp-sep" : "";
+    const sc = isSorted ? " cls-sort-td" : "";
+    if (!val || val <= 0) return `<td class="n cls-z${sep}${sc}">—</td>`;
+    const hi = isTierMax ? " cls-min-hi" : "";
+    return `<td class="n cls-min-val${sep}${sc}${hi}">${val}</td>`;
   }
 
   function renderClassesView(data, state, ctx) {
@@ -32,6 +41,9 @@
     const selectedStats = focusName ? [] : (state.classesStats || []);
     const matchMode = state.classesMatchMode === "any" ? "any" : "all";
     const query = focusName ? "" : (state.classesQuery || "");
+    const sortKey = state.classesSortKey || "";
+    const sortDir = state.classesSortDir === "asc" ? "asc" : "desc";
+    const sortLabel = CL.sortLabelOf(sortKey);
     const statLabels = D.statLabels || CL.STAT_LABELS;
 
     const sumAll = CL.summarizeClasses(allClasses, allSkills);
@@ -48,7 +60,7 @@
         query,
       });
     }
-    const groups = CL.groupClassesByTier(filtered, tierOrder);
+    const groups = CL.groupClassesByTier(filtered, tierOrder, { key: sortKey, dir: sortDir });
     const tierMetaMap = new Map((D.tiers || []).map(t => [t.tier, t]));
 
     const focusBanner = focusName
@@ -104,6 +116,10 @@
       </div>
     `;
 
+    const sortHintHtml = sortLabel
+      ? ` · 当前各阶段内排序：<b>${U.esc(sortLabel)} ${sortDir === "desc" ? "↓（从高到低）" : "↑（从低到高）"}</b>`
+      : ` · 提示：点击下方表格的<b>职业保底</b>或<b>成长率</b>任意属性列头即可在各阶段内排序`;
+
     const modeHtml = `<div class="skill-ctrl">
       <div class="subtabs">
         <button type="button" class="fchip" data-cls-mode="all" aria-pressed="${matchMode === "all"}">同时满足（AND）</button>
@@ -117,16 +133,36 @@
         selectedStats.length
           ? ` · 已选优势属性：<b>${U.esc(selectedStats.join(matchMode === "all" ? " + " : " / "))}</b>`
           : ""
-      }</span>
-      ${focusName || selectedSkills.length || selectedStats.length || selectedTier !== "全部" || query
+      }${sortHintHtml}</span>
+      ${sortKey ? `<button type="button" class="btn ghost" data-cls-sort-reset>恢复默认排序</button>` : ""}
+      ${focusName || selectedSkills.length || selectedStats.length || selectedTier !== "全部" || query || sortKey
         ? `<button type="button" class="btn" data-cls-clear>清空筛选</button>`
         : ""}
     </div>`;
 
-    // 3) 按阶级分组表格
+    const renderSortTh = (key, label, extraCls = "") => {
+      const active = sortKey === key;
+      const arrow = active ? (sortDir === "desc" ? "▼" : "▲") : "⇅";
+      const ariaSort = active ? (sortDir === "desc" ? "descending" : "ascending") : "none";
+      return `<th class="n cls-sort-th${active ? " on" : ""}${extraCls ? " " + extraCls : ""}" aria-sort="${ariaSort}"><button type="button" class="cls-sort-btn" data-cls-sort="${U.esc(key)}" title="按${U.esc(CL.sortLabelOf(key))}在各阶段内排序">${U.esc(label)}<span class="cls-sort-ico">${arrow}</span></button></th>`;
+    };
+
+    // 3) 按阶级分组表格（排序严格限定在每个阶级分组内部，不跨阶级混排）
     const groupsHtml = groups.length ? groups.map(grp => {
       const meta = tierMetaMap.get(grp.tier);
       const expNote = meta && meta.masteryExp ? ` · 精通 EXP ${meta.masteryExp}` : "";
+
+      // 计算本阶段内每项转职保底的最大值（>0 才高亮）
+      const tierMinMax = {};
+      for (const k of CL.STAT_KEYS) {
+        let mx = 0;
+        for (const c of grp.classes) {
+          const v = Number((c.minStats || {})[k] || 0);
+          if (v > mx) mx = v;
+        }
+        tierMinMax[k] = mx;
+      }
+
       const rows = grp.classes.map(c => {
         const isFocused = focusName && c.name === focusName;
         const badges = [
@@ -165,10 +201,17 @@
           : "";
 
         const g = c.growth || {};
-        const growthCells = CL.STAT_KEYS.map(k => fmtGrowthCell(g[k])).join("");
+        const growthCells = CL.STAT_KEYS.map(k => fmtGrowthCell(g[k], sortKey === `growth:${k}`)).join("");
         const growthLvExtra = (c.growthLv || []).length
           ? `<br><small class="hint">${U.esc(c.growthLvNote || "随等级提升成长率")}</small>`
           : "";
+
+        const ms = c.minStats || {};
+        const minTot = CL.minStatsTotal(ms);
+        const minCells = CL.STAT_KEYS.map((k, idx) => {
+          const v = Number(ms[k] || 0);
+          return fmtMinCell(v, sortKey === `min:${k}`, v > 0 && v === tierMinMax[k] && grp.classes.length > 1, idx === 0);
+        }).join("");
 
         const reqBits = [
           U.esc(c.requirement || "—"),
@@ -188,25 +231,34 @@
           <td class="cls-skills"><div class="sk-list">${skillPills}</div></td>
           <td class="cls-prof">${advPills}${weakPills}</td>
           ${growthCells}
-          <td class="n"><b>${c.growthTotal ?? 0}</b>${growthLvExtra}</td>
-          <td class="note cls-min">${(() => { const ms = CL.formatMinStats(c.minStats); return ms && ms !== "—" ? U.esc(ms) : `<span class="hint">无转职保底</span>`; })()}</td>
-          <td class="note">${reqBits}</td>
+          <td class="n${sortKey === "growth:total" ? " cls-sort-td" : ""}"><b>${c.growthTotal ?? 0}</b>${growthLvExtra}</td>
+          ${minCells}
+          <td class="n cls-min-tot${sortKey === "min:total" ? " cls-sort-td" : ""}">${minTot > 0 ? `<b>${minTot}</b>` : `<span class="cls-z">—</span>`}</td>
+          <td class="note cls-grp-sep">${reqBits}</td>
           <td class="note">${skillBits}</td>
         </tr>`;
       }).join("");
 
-      return `<section class="alerts">
-        <h2>${U.esc(grp.tier)}职业（${grp.classes.length} 个${U.esc(expNote)}）</h2>
+      const growthHeaders = CL.STAT_KEYS.map((k, i) => renderSortTh(`growth:${k}`, CL.STAT_LABELS[i])).join("")
+        + renderSortTh("growth:total", "合计");
+      const minHeaders = CL.STAT_KEYS.map((k, i) => renderSortTh(`min:${k}`, CL.STAT_LABELS[i], i === 0 ? "cls-grp-sep" : "")).join("")
+        + renderSortTh("min:total", "合计");
+
+      return `<section class="alerts" data-cls-tier-sec="${U.esc(grp.tier)}">
+        <h2>${U.esc(grp.tier)}职业（${grp.classes.length} 个${U.esc(expNote)}）${sortLabel ? `<small class="hint" style="margin-left:8px;font-weight:400">按 ${U.esc(sortLabel)} ${sortDir === "desc" ? "↓" : "↑"}</small>` : ""}</h2>
         <div class="scroll"><table class="cls-tbl">
           <tr>
-            <th>职业</th>
-            <th>可用技能</th>
-            <th>优势 / 劣势属性</th>
-            ${CL.STAT_LABELS.map(l => `<th class="n">${l}</th>`).join("")}
-            <th class="n">合计</th>
-            <th>转职保底</th>
-            <th>转职要求 / 技能 EXP</th>
-            <th>固有特技 / 精通</th>
+            <th rowspan="2">职业</th>
+            <th rowspan="2">可用技能</th>
+            <th rowspan="2">优势 / 劣势属性</th>
+            <th colspan="10" class="grp">成长率补正（%，点击属性可阶段内排序）</th>
+            <th colspan="10" class="grp cls-grp-sep">职业保底 / 转职保底（每属性一列，点击可阶段内排序）</th>
+            <th rowspan="2" class="cls-grp-sep">转职要求 / 技能 EXP</th>
+            <th rowspan="2">固有特技 / 精通</th>
+          </tr>
+          <tr>
+            ${growthHeaders}
+            ${minHeaders}
           </tr>
           ${rows}
         </table></div>
@@ -217,7 +269,7 @@
       `<li><a href="${U.esc(s.url)}" target="_blank" rel="noopener noreferrer">${U.esc(s.name)}</a>（${U.esc(s.url)}）</li>`
     ).join("");
 
-    return `<p class="lede">职业图鉴：整理全阶级职业的可用技能、<b>优势 / 劣势属性</b>、成长率补正（%）、转职保底、转职要求、固有特技与精通奖励。点击任意固有特技或精通技能可直接跳转 <a href="#skills" class="ent-link">技能图鉴</a>。</p>
+    return `<p class="lede">职业图鉴：整理全阶级职业的可用技能、<b>优势 / 劣势属性</b>、成长率补正（%）、<b>职业保底（转职保底，每属性一列）</b>、转职要求、固有特技与精通奖励。点击任意成长率或职业保底列头即可在<b>各自阶段（基础 / 初级 / 中级 / 上级 / 最上级 / 神将）内独立排序</b>；点击固有特技或精通技能可直接跳转 <a href="#skills" class="ent-link">技能图鉴</a>。</p>
       ${focusBanner}
       <div class="filterbar">
         <input type="search" id="clsQuery" data-cls-q placeholder="搜职业名、优势属性、特技、精通、转职要求，比如 重装、天翼、乘降术、流星" value="${U.esc(query)}" aria-label="搜索职业">
@@ -235,7 +287,7 @@
         <ul>
           ${D.advantageAlgorithm ? `<li><b>优势 / 劣势属性算法</b>：${U.esc(D.advantageAlgorithm)}（悬停属性徽章可查看该项成长率补正与常驻职业加成）。</li>` : ""}
           ${sourcesList}
-          <li>转职保底（minStats）：转职瞬间若裸属性低于该职业底线，将永久补足至底线值（参考 yuphastemple.com 实测数据）。</li>
+          <li><b>职业保底（转职保底 / minStats）</b>：转职瞬间若裸属性低于该职业底线，将永久补足至底线值（同阶段内每项属性最大值会加粗高亮；点击任意列头会在各阶段内独立按降序 → 升序 → 默认顺序切换）。</li>
           <li>「同时满足（AND）」适合找同时具备多种技能与优势属性的复合职业（如 重装术 + 优势「力、防」）；「任一满足（OR）」适合查看宽范围备选。</li>
         </ul>
       </details>`;
