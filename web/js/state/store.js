@@ -28,20 +28,21 @@
       commentDraft: null, // { targetId, targetLabel, section, quote, text }
       editingCommentId: null,
       focus: "",
-      view: "meal",
+      view: "next",
+      entityFocus: null, // { view, target }
       longS: {},
       affinityQuery: "",
       affinityOnlyPerfect: false,
       affinityRosterFilter: "important",
       itemsCategory: "全部",
       itemsQuery: "",
-      itemsTab: "all", // all | shops | barter | materials
+      itemsTab: "all", // all | tiers | shops | barter | materials
+      itemsWeaponTier: "全部", // 全部 | SS | S | A | B
       classesTier: "全部",
       classesSkills: [],
       classesStats: [],
       classesMatchMode: "all", // all | any
       classesQuery: "",
-      skillsTab: "skills", // skills | chars
       skillsQuery: "",
       skillsRating: "全部",
       skillsScope: "全部",
@@ -49,9 +50,10 @@
       skillsDiscipline: "全部",
       skillsUnitTypes: [],
       skillsOnlyRecruited: false,
-      skillsCharGroup: "recruited", // recruited | dietrich | all
-      skillsCharTier: "全部", // 全部 | SS | S | A | B | C | D
       skillsShowAll: false,
+      charsGroup: "recruited", // recruited | dietrich | all
+      charsTier: "全部", // 全部 | SS | S | A | B | C | D
+      charsQuery: "",
       exploreRoute: "dietrich",
       explorePriorities: ["P0"],
       exploreTypes: ["矿石", "道具", "鱼", "蔬菜"],

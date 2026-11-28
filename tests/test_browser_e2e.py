@@ -20,7 +20,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "out"
-ALL_TABS = ["meal", "items", "explore", "classes", "skills", "next", "plan", "past", "l45", "long", "opts", "mine"]
+ALL_TABS = ["next", "plan", "past", "l45", "long", "opts", "mine", "meal", "explore", "items", "classes", "skills", "chars"]
 
 
 class _QuietUTF8Handler(http.server.SimpleHTTPRequestHandler):
@@ -40,6 +40,7 @@ class _QuietUTF8Handler(http.server.SimpleHTTPRequestHandler):
 class _ReuseTCPServer(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
     daemon_threads = True
+    request_queue_size = 128
 
 
 class TestBrowserE2E(unittest.TestCase):
@@ -53,23 +54,19 @@ class TestBrowserE2E(unittest.TestCase):
         cls.thread = threading.Thread(target=cls.httpd.serve_forever, daemon=True)
         cls.thread.start()
         cls.pw = sync_playwright().start()
+        args = ["--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--disable-setuid-sandbox"]
+        try:
+            cls.browser = cls.pw.chromium.launch(channel="chromium", args=args)
+        except Exception:
+            cls.browser = cls.pw.chromium.launch(args=args)
 
     @classmethod
     def tearDownClass(cls):
+        if getattr(cls, "browser", None):
+            cls.browser.close()
         cls.pw.stop()
         cls.httpd.shutdown()
         cls.httpd.server_close()
-
-    def setUp(self):
-        args = ["--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage"]
-        try:
-            self.browser = self.pw.chromium.launch(channel="chromium", args=args)
-        except Exception:
-            self.browser = self.pw.chromium.launch(args=args)
-
-    def tearDown(self):
-        if getattr(self, "browser", None):
-            self.browser.close()
 
     def _new_ctx_page(self, width: int, height: int):
         ctx = self.browser.new_context(viewport={"width": width, "height": height})
@@ -78,7 +75,17 @@ class TestBrowserE2E(unittest.TestCase):
         return ctx, page
 
     def test_all_tabs_desktop_and_mobile_no_errors_no_overflow(self):
+        import json as _json
+        with open(OUT_DIR / "data" / "classes.json", encoding="utf-8") as fh:
+            cls_names = {c["name"] for c in _json.load(fh)["classes"]}
+        with open(OUT_DIR / "data" / "skills.json", encoding="utf-8") as fh:
+            sk_data = _json.load(fh)
+        sk_names = {s["name"] for s in sk_data["skills"]}
+        ch_names = {c["name"] for c in sk_data["characters"]}
+        valid_by_kind = {"class": cls_names, "skill": sk_names, "char": ch_names}
+
         fetched_json = set()
+        seen_link_kinds = set()
         for width, height in ((1200, 900), (390, 844)):
             ctx, page = self._new_ctx_page(width, height)
             page_errors = []
@@ -100,10 +107,18 @@ class TestBrowserE2E(unittest.TestCase):
                     page.goto(f"{self.base_url}#{tab}", wait_until="domcontentloaded")
                 else:
                     page.evaluate("t => { location.hash = '#' + t; }", tab)
-                page.wait_for_selector("#view > *", timeout=8000)
+                page.wait_for_selector("#view > *", timeout=20000)
                 page.wait_for_timeout(120)
 
-                # 展开所有折叠块一起检查排版和渲染内容
+                if idx == 0 and width == 1200:
+                    dom_order = page.evaluate("""() => [...document.querySelectorAll('#domains a')].map(a => a.dataset.domain)""")
+                    self.assertEqual(
+                        dom_order,
+                        ["route", "affinity", "explore", "items", "classes", "skills", "chars"],
+                        f"顶部导航 Tab 顺序不符: {dom_order}",
+                    )
+
+                # 展开所有折叠块一起检查排版、渲染内容和实体超链接有效性
                 page.evaluate("() => document.querySelectorAll('#view details').forEach(d => d.open = true)")
                 page.wait_for_timeout(40)
 
@@ -112,18 +127,31 @@ class TestBrowserE2E(unittest.TestCase):
                       const sw = document.documentElement.scrollWidth;
                       const txt = document.querySelector('#view')?.textContent || '';
                       const badWords = ['undefined', 'NaN', '[object Object]'].filter(w => txt.includes(w));
-                      return { overflow: sw > vw + 1 ? sw : 0, badWords, textLen: txt.trim().length };
+                      const entLinks = [...document.querySelectorAll('#view a[data-ent-kind]')].map(a => ({
+                        kind: a.dataset.entKind,
+                        name: a.dataset.entName,
+                        href: a.getAttribute('href') || '',
+                      }));
+                      return { overflow: sw > vw + 1 ? sw : 0, badWords, textLen: txt.trim().length, entLinks };
                     }""",
                     width,
                 )
                 self.assertGreater(check["textLen"], 50, f"[{width}px #{tab}] 页面渲染内容为空")
                 self.assertEqual(check["overflow"], 0, f"[{width}px #{tab}] 页面横向溢出 {check['overflow']}px > {width}px")
                 self.assertEqual(check["badWords"], [], f"[{width}px #{tab}] 页面出现异常文字: {check['badWords']}")
+                for lk in check["entLinks"]:
+                    k = lk["kind"]
+                    seen_link_kinds.add(k)
+                    self.assertIn(k, valid_by_kind, f"[{width}px #{tab}] 未知实体链接类型: {lk}")
+                    self.assertIn(lk["name"], valid_by_kind[k], f"[{width}px #{tab}] 死链实体: {lk}")
+                    self.assertTrue(lk["href"].startswith("#"), f"[{width}px #{tab}] 非规范 hash 链接: {lk}")
 
             self.assertEqual(page_errors, [], f"[{width}px] JS pageerror: {page_errors}")
             self.assertEqual(console_errors, [], f"[{width}px] console.error: {console_errors}")
             self.assertEqual(failed_reqs, [], f"[{width}px] HTTP 错误请求: {failed_reqs}")
             ctx.close()
+
+        self.assertEqual(seen_link_kinds, {"class", "skill", "char"}, f"应覆盖全部三类实体超链接，实际: {seen_link_kinds}")
 
         # 确认浏览器通过 HTTP 动态拉取了全部独立 JSON 数据文件
         self.assertTrue(
@@ -158,9 +186,18 @@ class TestBrowserE2E(unittest.TestCase):
         page.fill("#affQuery", "")
         page.wait_for_timeout(50)
 
-        # 2) 道具 / 材料采集：点一级导航切换 + 分类筛选 + 材料反查搜索
+        # 2) 道具 / 材料采集：点一级导航切换 + 武器评级总榜 + 分类筛选 + 材料反查搜索
         page.click('#domains a[data-domain="items"]')
         page.wait_for_selector("#itemQuery")
+        items_init_txt = page.inner_text("#view")
+        self.assertIn("最强武器评级总榜", items_init_txt)
+        page.click('button[data-item-tab="tiers"]')
+        page.wait_for_timeout(100)
+        wt_txt = page.inner_text("#view")
+        self.assertIn("雷电剑", wt_txt)
+        self.assertIn("净化剑", wt_txt)
+        self.assertIn("伏力萨", wt_txt)
+        page.click('button[data-item-tab="all"]')
         page.click('button[data-item-cat="教本"]')
         page.wait_for_timeout(100)
         self.assertIn("魔法教本", page.inner_text("#view"))
@@ -173,14 +210,16 @@ class TestBrowserE2E(unittest.TestCase):
         self.assertIn("采集 / 钓鱼材料反查表", mat_txt)
         self.assertIn("斩马刀", mat_txt)
 
-        # 2.5) 探索规划：高显眼世界地图标记 + PR#31 重整商会看板 + 缺口直达定位（尤那魅→达玛先海岬/流浪者古庭）
+        # 2.5) 探索规划：采集材料缺口交叉验证表 + 铁枪 P0 + 高显眼世界地图标记 + 缺口直达定位
         page.click('#domains a[data-domain="explore"]')
         page.wait_for_selector("#expMapSvg")
         self.assertGreater(page.locator("#expMapSvg .exp-pin").count(), 15)
         exp_txt = page.inner_text("#view")
         self.assertIn("亚特拉山顶", exp_txt)
-        self.assertIn("旺达尔商会置换优先级", exp_txt)
+        self.assertIn("采集材料缺口交叉验证", exp_txt)
+        self.assertIn("铁枪", exp_txt)
         self.assertIn("下载高清标记地图 PNG", exp_txt)
+        self.assertGreater(page.locator("table.exp-gap-tbl tbody tr").count(), 5)
         page.click('button[data-exp-mat="尤那魅"]')
         page.wait_for_timeout(100)
         exp_q_txt = page.inner_text("#view")
@@ -231,14 +270,50 @@ class TestBrowserE2E(unittest.TestCase):
         page.click('#domains a[data-domain="skills"]')
         page.wait_for_selector("#skSearch")
         self.assertGreater(page.locator("table.sk-tbl tbody tr.sk-row").count(), 20)
-        # 生效兵种 Checkbox：勾选重装 -> 命中重装移动术+1、排除体格+（无兵种限制）与穿铠（对敌特攻）
+        # 生效兵种 Checkbox：勾选重装 -> 命中重装移动术+1、排除体格+（无兵种限制）与穿铠（对敌特攻），并验证列间零重叠 + 点击角色跳转角色页
         page.check('input[data-sk-ut="重装"]')
         page.wait_for_timeout(100)
         arm_txt = page.inner_text("#view")
         self.assertIn("重装移动术+1", arm_txt)
         self.assertIn("限 重装", arm_txt)
+        self.assertIn("S 级", arm_txt)
+        self.assertIn("重装术 D", arm_txt)
+        self.assertIn("重装术 C", arm_txt)
+        self.assertIn("重装术 B", arm_txt)
         self.assertNotIn("穿铠", arm_txt)
         self.assertNotIn("传送", arm_txt)
+        # 校验表格所有单元格无横向文字溢出导致相邻列重叠，且评级列紧凑
+        layout_chk = page.evaluate("""() => {
+          const tbl = document.querySelector('table.sk-tbl');
+          const tierW = tbl.querySelector('td.sk-c-tier').getBoundingClientRect().width;
+          const overflows = [];
+          for (const td of tbl.querySelectorAll('tbody td')) {
+            if (td.scrollWidth > td.clientWidth + 2) {
+              overflows.push({ cls: td.className, sw: td.scrollWidth, cw: td.clientWidth });
+            }
+          }
+          return { tierW, overflows };
+        }""")
+        self.assertLess(layout_chk["tierW"], 95, f"评级列过宽: {layout_chk['tierW']}px")
+        self.assertEqual(layout_chk["overflows"], [], f"技能表单元格文字溢出重叠: {layout_chk['overflows']}")
+        # 点击技能行内角色超链接 -> 自动切到独立 #chars/努蒂奴 深链定位页
+        page.click('a.sk-char-link[data-ent-kind="char"][data-ent-name="努蒂奴"]')
+        page.wait_for_selector('[data-ent-focused="true"]')
+        jump_txt = page.inner_text("#view")
+        self.assertIn("当前定位角色：努蒂奴", jump_txt)
+        self.assertIn("查看路线规划", jump_txt)
+        # 在角色卡内点击初始职业「飞驼兵」（自动归一化至 飞鸵兵） -> 跳至 #classes/飞鸵兵 深链定位页
+        page.click('a.ent-link[data-ent-kind="class"][data-ent-name="飞鸵兵"]')
+        page.wait_for_selector('tr[data-cls-name="飞鸵兵"][data-ent-focused="true"]')
+        cls_jump_txt = page.inner_text("#view")
+        self.assertIn("当前定位职业：飞鸵兵", cls_jump_txt)
+        # 在职业行内点击技能超链接 -> 跳回 #skills/<技能名> 深链定位页
+        page.click('tr[data-cls-name="飞鸵兵"] a.ent-link[data-ent-kind="skill"]')
+        page.wait_for_selector('tr.sk-row[data-ent-focused="true"]')
+        self.assertIn("当前定位技能：", page.inner_text("#view"))
+
+        page.click('a[data-sk-clear]')
+        page.wait_for_timeout(80)
         page.check('input[data-sk-ut="飞行"]')
         page.wait_for_timeout(100)
         arm_fly_txt = page.inner_text("#view")
@@ -257,13 +332,15 @@ class TestBrowserE2E(unittest.TestCase):
         u_txt = page.inner_text("#view")
         self.assertIn("秘传·落燕+", u_txt)
         self.assertIn("角色特有（唯一）", u_txt)
-        page.click('button[data-sk-tab="chars"]')
-        page.wait_for_timeout(100)
+
+        # 4.5) 独立顶栏「角色图鉴」（#chars）：验证 63 角色筛选与 SS 档 3 人
+        page.click('#domains a[data-domain="chars"]')
+        page.wait_for_selector("#charSearch")
         ch_txt = page.inner_text("#view")
         self.assertIn("迪托利希", ch_txt)
         self.assertIn("个人特技", ch_txt)
-        page.click('button[data-sk-cgrp="all"]')
-        page.click('button[data-sk-ctier="SS"]')
+        page.click('button[data-ch-grp="all"]')
+        page.click('button[data-ch-tier="SS"]')
         page.wait_for_timeout(100)
         ss_txt = page.inner_text("#view")
         for top3 in ("救世主", "蕾达", "赛奥朵拉"):
@@ -287,6 +364,8 @@ class TestBrowserE2E(unittest.TestCase):
         self.assertEqual(next(r["tier"] for r in next_rows if r["name"] == "伊欧"), "P1")
         next_txt = page.inner_text("#view")
         self.assertIn("全员下一步总览（主角优先 · 按 P 级 → 强度 → 名字排序", next_txt)
+        self.assertIn("何时停下当前职业升级", next_txt)
+        self.assertNotIn("下一次跳过", next_txt)
 
         page.wait_for_selector('#who button[data-who="esmeralda"]')
         page.click('#routeTabs a[data-v="plan"]')
@@ -294,23 +373,25 @@ class TestBrowserE2E(unittest.TestCase):
         plan_txt = page.inner_text("#view")
         self.assertNotIn("11-05 截图", plan_txt)
         self.assertNotIn("11-11 起不再要求", plan_txt)
-        self.assertIn("力 +5（平均 7.3", plan_txt)
+        self.assertIn("恶棍（Lv25，判定 67.22%）", plan_txt)
+        self.assertIn("防 +10（平均 6.2）", plan_txt)
         self.assertIn("弓箭手（Lv25", plan_txt)
 
-        # 聚焦杨界验证「改考其他单中级对比（替 萨满巫师 -> 牧师）」及本步可考职业与提前考按钮
+        # 聚焦杨界验证「改考其他单中级对比（替 萨满巫师 -> 牧师）」及折叠式考试选择器、等级+考试标签与提前考按钮
         page.click('#who button[data-who="yokai"]')
         page.wait_for_timeout(150)
+        self.assertGreater(page.locator("details.exam-pick-fold").count(), 0)
         page.evaluate("() => document.querySelectorAll('#view details').forEach(d => d.open = true)")
         yk_txt = page.inner_text("#view")
         self.assertIn("改考其他单中级对比（替换 萨满巫师", yk_txt)
         self.assertIn("技-2、幸+2", yk_txt)
+        self.assertIn("Lv23 考试", yk_txt)
         self.assertIn("考试（到 牧师）", yk_txt)
         self.assertIn("提前考 牧师", yk_txt)
 
-        # 聚焦艾丝梅拉尔达，确认天翼兵不再被误标为「已有」
+        # 聚焦艾丝梅拉尔达：已移除天翼兵必考（仅保留重装步兵必考），确认「展开所有等级」不勾已完成
         page.click('#who button[data-who="esmeralda"]')
         page.wait_for_timeout(150)
-        # 点击「展开所有等级」不得自动勾选「显示已经走过的 N 步」，且备选项展示相对预选的能力差
         page.click('button[data-expand-all]')
         page.wait_for_timeout(100)
         sd_el = page.query_selector('.fullwrap input.sd')
@@ -319,7 +400,31 @@ class TestBrowserE2E(unittest.TestCase):
         self.assertIn("预选", page.inner_text("#view"))
         page.evaluate("() => document.querySelectorAll('#view details').forEach(d => d.open = true)")
         es_txt = page.inner_text("#view")
-        self.assertIn("考试（到 天翼兵）（新职业", es_txt)
+        self.assertIn("考试（到 重装步兵）（新职业", es_txt)
+
+        # 验证 #opts（职业选择）：移除 Lv35->45 额外影响列 + 明确标注转职保底/无转职保底 + 红绿着色 + 改去该级变化 + 核心属性速览
+        page.click('#who button[data-who="michaela"]')
+        page.click('#routeTabs a[data-v="opts"]')
+        page.wait_for_timeout(150)
+        page.evaluate("() => document.querySelectorAll('#view details').forEach(d => d.open = true)")
+        opts_txt = page.inner_text("#view")
+        self.assertNotIn("→45 额外影响", opts_txt)
+        self.assertNotIn("现在减它", opts_txt)
+        self.assertIn("无转职保底", opts_txt)
+        self.assertIn("已含转职保底口径", opts_txt)
+        self.assertIn("核心属性最高选项速览", opts_txt)
+        self.assertIn("改去该级变化", opts_txt)
+        self.assertGreater(page.locator("#view .sdiff.up, #view .sdiff.dn").count(), 0)
+
+        # 努蒂奴：展示 力+速 之和排行；杨界：说明 7.5 小数来源与具体成长项
+        page.click('#who button[data-who="nutino"]')
+        page.wait_for_timeout(120)
+        self.assertIn("力+速 之和排行", page.inner_text("#view"))
+        page.click('#who button[data-who="yokai"]')
+        page.wait_for_timeout(120)
+        yk_opts_txt = page.inner_text("#view")
+        self.assertIn("均衡加点微调", yk_opts_txt)
+        self.assertIn("原始加权", yk_opts_txt)
 
         # 6) 我的决定（#mine）：验证角色排序同序、新路线方案选择、展开 9 项具体能力差、技能等级预估、Plan Mode 内联批注与持久化
         page.click('#who button[data-who=""]')
@@ -369,26 +474,19 @@ class TestBrowserE2E(unittest.TestCase):
         if shot_dir:
             Path(shot_dir).mkdir(parents=True, exist_ok=True)
             for tab, fname in (
-                ("meal", "01_affinity.png"),
-                ("items", "02_items.png"),
-                ("classes", "04_classes.png"),
+                ("next", "01_next.png"),
+                ("meal", "02_affinity.png"),
+                ("explore", "03_explore.png"),
+                ("items", "04_items.png"),
+                ("classes", "05_classes.png"),
                 ("skills", "06_skills.png"),
-                ("plan", "03_route.png"),
-                ("mine", "05_mine.png"),
+                ("chars", "07_chars.png"),
+                ("opts", "08_opts.png"),
             ):
                 page.goto(f"{self.base_url}#{tab}", wait_until="domcontentloaded")
                 page.wait_for_selector("#view > *")
                 page.wait_for_timeout(200)
-                if tab == "plan":
-                    page.click('#who button[data-who=""]')
-                    page.wait_for_timeout(150)
                 page.screenshot(path=str(Path(shot_dir) / fname), full_page=False)
-            # 也截一张角色技能矩阵速览
-            page.goto(f"{self.base_url}#skills", wait_until="domcontentloaded")
-            page.wait_for_selector('button[data-sk-tab="chars"]')
-            page.click('button[data-sk-tab="chars"]')
-            page.wait_for_timeout(200)
-            page.screenshot(path=str(Path(shot_dir) / "07_skills_chars.png"), full_page=False)
 
         self.assertEqual(page_errors, [])
         page.close()

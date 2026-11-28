@@ -10,6 +10,7 @@
 import json, os
 import run_plans as R
 from planner import STATS
+from compare import seed_diff, exam_seed_summary
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -52,10 +53,13 @@ def eq(p, ta, tb):
     return run(p, ta), run(p, tb)
 
 
-def diff(a, b):
-    return {"g": [x - y for x, y in zip(a["g"], b["g"])], "total": a["total"] - b["total"],
-            "net": round(a["net"] - b["net"], 1), "gold": a["gold"] - b["gold"], "train": a["train"] - b["train"],
-            "seeds": len(a["acts"]), "endA": a["end"], "endB": b["end"]}
+def diff(a, b, p=None, label_a="考它", label_b="不考基准"):
+    out = {"g": [x - y for x, y in zip(a["g"], b["g"])], "total": a["total"] - b["total"],
+           "net": round(a["net"] - b["net"], 1), "gold": a["gold"] - b["gold"], "train": a["train"] - b["train"],
+           "seeds": len(a["acts"]), "endA": a["end"], "endB": b["end"]}
+    if p is not None:
+        out["seedDiff"] = exam_seed_summary(seed_diff(p, a["acts"], b["acts"]), label_a, label_b)
+    return out
 
 
 def now_pct(name, c, lv):
@@ -181,7 +185,7 @@ def build(name):
     # 现在规划器推荐的组合，和基准比（同一套计分）
     if out["recommended"]:
         (rT, bT), (r45, b45) = eq(pR, out["recommended"], []), eq(pR45, out["recommended"], [])
-        dT = diff(rT, bT)
+        dT = diff(rT, bT, pR, "推荐组合", "不考基准")
         d45 = diff(r45, b45) if r45 else None
         out["recRow"] = {"toT": dT, "after": None if d45 is None else {"g": [x - y for x, y in zip(d45["g"], dT["g"])],
                                                                         "total": d45["total"] - dT["total"], "net": round(d45["net"] - dT["net"], 1)}}
@@ -197,7 +201,9 @@ def build(name):
             out["options"].append({"cls": c, "tier": R._TIER_OF(c), "ok": False, "why": "到目标级前没有能考过的种子"})
             continue
         st, lv = aT["lv_exam"][c]
-        dT = diff(aT, bT)
+        dT = diff(aT, bT, P, f"考{c}", "不考基准")
+        if rec and rec.raw_actions:
+            dT["seedDiffVsRoute"] = exam_seed_summary(seed_diff(P, aT["acts"], rec.raw_actions), f"考{c}", "现在路线")
         d45 = diff(a45, b45) if a45 and c in a45["lv_exam"] else None
         after = None if d45 is None else {"g": [x - y for x, y in zip(d45["g"], dT["g"])], "total": d45["total"] - dT["total"],
                                           "net": round(d45["net"] - dT["net"], 1)}

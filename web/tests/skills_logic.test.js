@@ -155,3 +155,14 @@ test("summarizeSkills counts ratings, scopes, and unitTypes accurately", () => {
   assert.equal(s.byUnitType["飞行"], 1);
   assert.equal(s.byUnitType["无限制"], 4);
 });
+
+test("groupCharSourcesByCondition groups by learn condition ordered D->C->B with recruited first", () => {
+  const grouped = SL.groupCharSourcesByCondition([
+    { char: "米迦艾拉", recruited: true, how: "重装术 B", discipline: "重装术", rank: "B" },
+    { char: "凯伊", recruited: false, how: "重装术 C", discipline: "重装术", rank: "C" },
+    { char: "努蒂奴", recruited: true, how: "重装术 C", discipline: "重装术", rank: "C" },
+    { char: "妮涅", recruited: false, how: "重装术 D", discipline: "重装术", rank: "D" },
+  ]);
+  assert.deepEqual(grouped.map(g => g.condition), ["重装术 D", "重装术 C", "重装术 B"]);
+  assert.deepEqual(grouped[1].chars.map(c => c.char), ["努蒂奴", "凯伊"]);
+});

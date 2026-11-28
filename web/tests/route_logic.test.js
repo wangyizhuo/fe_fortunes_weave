@@ -206,17 +206,26 @@ test("summarizeNextActions sorts by P0→P1→P2 and extracts next exam, switch,
   assert.equal(rows[0].immediate.kind, "exam");
   assert.equal(rows[0].nextExam.cls, "恶棍");
   assert.equal(rows[0].nextExam.stepsAway, 0);
+  assert.equal(rows[0].nextStop.kind, "exam");
+  assert.equal(rows[0].nextStop.stepsAway, 0);
+  assert.equal(rows[0].followingStop.kind, "switch");
+  assert.equal(rows[0].followingStop.toCls, "恶棍");
   assert.equal(rows[0].nextSwitch.toCls, "恶棍");
   assert.equal(rows[0].nextTrain.cls, "恶棍");
   assert.equal(rows[0].nextSkip, null);
 
   // 伊欧: immediate class switch 轻骑兵 -> 剑客
   assert.equal(rows[1].immediate.kind, "switch");
+  assert.equal(rows[1].nextStop.kind, "switch");
+  assert.equal(rows[1].nextStop.stepsAway, 0);
   assert.equal(rows[1].nextSwitch.fromCls, "轻骑兵");
   assert.equal(rows[1].nextSwitch.toCls, "剑客");
 
-  // 努蒂奴: immediate level up, nextSkip 1 step away
+  // 努蒂奴: immediate level up, nextSkip 1 step away -> nextStop is skip at Lv17 (1 step away)
   assert.equal(rows[2].immediate.kind, "level");
+  assert.equal(rows[2].nextStop.kind, "skip");
+  assert.equal(rows[2].nextStop.lv, 17);
+  assert.equal(rows[2].nextStop.stepsAway, 1);
   assert.equal(rows[2].nextSkip.lv, 17);
   assert.equal(rows[2].nextSkip.stepsAway, 1);
 
@@ -238,6 +247,23 @@ test("summarizeNextActions sorts by P0→P1→P2 and extracts next exam, switch,
   assert.deepEqual(groups[0].chars.map(c => c.name), ["迪托利希", "艾丝梅拉尔达", "米迦艾拉"]);
   assert.deepEqual(groups[1].chars.map(c => c.name), ["法毕欧"]);
   assert.deepEqual(groups[2].chars.map(c => c.name), ["努蒂奴", "乌尔坦德"]);
+});
+
+test("summarizeOptionHighlights ranks top core-stat pair and single stats including baseline", () => {
+  const optObj = {
+    options: [
+      { cls: "重装步兵", ok: true, lv: 16, floor: ["防 7→10"], toT: { g: [0, 2, -1, -4, 2, 4, -1, 1, 2], total: 11, gold: 500 } },
+      { cls: "斗士", ok: true, lv: 21, floor: [], toT: { g: [0, 1, 0, -1, 0, 0, 0, -1, 0], total: -2, gold: 300 } },
+      { cls: "猎兵", ok: true, lv: 26, floor: [], toT: { g: [0, -1, 0, 0, 0, 0, 0, 0, 0], total: -8, gold: 300 } },
+    ],
+  };
+  const hi = RL.summarizeOptionHighlights(optObj, [1, 5, 1, 5, 3, 2, 1, 1, 1]);
+  assert.equal(hi.statA, "力");
+  assert.equal(hi.statB, "速");
+  assert.equal(hi.pairBest, 0);
+  assert.equal(hi.pairTop[0].cls, "不考新职业（基准）");
+  assert.equal(hi.statATop[0].cls, "重装步兵");
+  assert.equal(hi.weightedTop[0].cls, "重装步兵");
 });
 
 test("diffOptionGains computes stat-by-stat deltas against preselected option", () => {

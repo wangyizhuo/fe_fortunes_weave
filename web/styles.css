@@ -24,7 +24,7 @@
 body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.55; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--panel); }
 .gut { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-.in { max-width: 1060px; margin: 0 auto; }
+.in { max-width: min(1560px, 100%); margin: 0 auto; }
 header.top { background: var(--panel); border-bottom: 1px solid var(--line); padding-block: 14px 0; }
 .hrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
 h1 { font-family: var(--serif); font-weight: 800; font-size: 22px; margin: 0; text-wrap: balance; }
@@ -33,16 +33,16 @@ h1 { font-family: var(--serif); font-weight: 800; font-size: 22px; margin: 0; te
 .live.on i { background: var(--good); } .live.warn i { background: var(--exam); } .live.warn { color: var(--exam); }
 .hrow .sp { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 button { font: inherit; cursor: pointer; }
-.btn { font-size: 13px; font-weight: 700; border-radius: 6px; padding: 5px 12px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+.btn { font-size: 13px; font-weight: 700; border-radius: 6px; padding: 5px 12px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
 .btn.pri { background: var(--accent-ink); color: var(--panel); border-color: var(--accent-ink); }
 .btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); padding: 2px 10px; }
 .btn:disabled { opacity: .5; cursor: default; }
 .btn:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 #syncStatus { font-size: 12.5px; color: var(--muted); } #syncStatus.warn { color: var(--exam); }
 
-/* 一级三大模块导航 */
-nav.domains { display: flex; gap: 8px; margin-top: 12px; padding-bottom: 10px; overflow-x: auto; }
-nav.domains a { text-decoration: none; color: var(--muted); padding: 7px 14px; border: 1px solid var(--line); border-radius: 8px; white-space: nowrap; font-weight: 700; background: var(--bg); }
+/* 一级七大模块导航 */
+nav.domains { display: flex; gap: 7px; margin-top: 12px; padding-bottom: 10px; overflow-x: auto; }
+nav.domains a { flex: 1 0 auto; text-decoration: none; color: var(--muted); padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; white-space: nowrap; font-weight: 700; background: var(--bg); font-size: 14px; }
 nav.domains a small { display: block; font-size: 11px; font-weight: 400; color: var(--muted); }
 nav.domains a[aria-current="true"] { color: var(--accent-ink); border-color: var(--accent); background: var(--tint); }
 nav.domains a[aria-current="true"] small { color: var(--accent-ink); opacity: .85; }
@@ -63,7 +63,7 @@ nav.tabs a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--
 .who-st { font-family: var(--mono); font-size: 10.5px; opacity: .72; font-weight: 700; }
 
 main { padding-block: 16px 64px; display: grid; gap: 16px; }
-.lede { margin: 0; color: var(--muted); font-size: 13.5px; max-width: 78ch; }
+.lede { margin: 0; color: var(--muted); font-size: 13.5px; max-width: 112ch; }
 .pick { color: var(--good); white-space: nowrap; }
 
 .alerts { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; display: grid; gap: 6px; min-width: 0; }
@@ -217,7 +217,7 @@ td.wk { background: var(--bad-bg); } td.st { background: var(--good-bg); }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); }
 .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; background: var(--k); }
 ol.full { list-style: none; margin: 0; padding: 0; }
-ol.full li { display: grid; grid-template-columns: 24px 74px 1fr auto; gap: 2px 10px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 13px; align-items: start; }
+ol.full li { display: grid; grid-template-columns: 24px 96px 1fr auto; gap: 2px 10px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 13px; align-items: start; }
 ol.full li.done { color: var(--done); }
 .fullwrap li.done { display: none; }
 .fullwrap:has(.sd:checked) li.done { display: grid; }
@@ -423,29 +423,48 @@ th.grp { text-align: center; border-bottom: 1px solid var(--line); } td.cur, th.
 
 /* 技能图鉴：一个技能一行紧凑表格 */
 .sk-tbl { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--panel); table-layout: fixed; }
-.sk-tbl th { white-space: nowrap; text-align: left; }
-.sk-tbl td { vertical-align: top; padding: 7px 9px; border-top: 1px solid var(--line); word-break: break-word; overflow-wrap: anywhere; }
-.sk-tbl tr.tier-row-S td:first-child { border-left: 3px solid #c2185b; }
-.sk-tbl tr.tier-row-A td:first-child { border-left: 3px solid #d97706; }
-.sk-tbl tr.tier-row-B td:first-child { border-left: 3px solid #0284c7; }
-.sk-tbl tr.tier-row-C td:first-child { border-left: 3px solid var(--line); }
-.sk-c-tier { width: 44px; text-align: center; }
-.sk-c-name { width: 16%; }
+.sk-tbl col.sk-col-tier { width: 72px; }
+.sk-tbl col.sk-col-name { width: 19%; }
+.sk-tbl col.sk-col-scope { width: 15%; }
+.sk-tbl col.sk-col-eff { width: 34%; }
+.sk-tbl col.sk-col-src { width: auto; }
+.sk-tbl th { white-space: nowrap; text-align: left; padding: 8px 10px; background: var(--bg); border-bottom: 1.5px solid var(--line); }
+.sk-tbl th.sk-c-tier { text-align: center; }
+.sk-tbl td { vertical-align: top; padding: 9px 10px; border-top: 1px solid var(--line); border-right: 1px solid color-mix(in srgb, var(--line) 45%, transparent); white-space: normal; word-break: break-word; overflow-wrap: anywhere; overflow: hidden; }
+.sk-tbl td:last-child { border-right: 0; }
+.sk-tbl tr.tier-row-S td:first-child { border-left: 4px solid #be123c; }
+.sk-tbl tr.tier-row-A td:first-child { border-left: 4px solid #d97706; }
+.sk-tbl tr.tier-row-B td:first-child { border-left: 4px solid #0284c7; }
+.sk-tbl tr.tier-row-C td:first-child { border-left: 4px solid #94a3b8; }
+.sk-c-tier { text-align: center; }
+.sk-tier-badge { display: inline-block; min-width: 44px; text-align: center; font-size: 12.5px; font-weight: 900; padding: 2px 7px; border-radius: 6px; letter-spacing: .02em; }
+.sk-tier-badge.tier-S { background: #be123c; color: #fff; }
+.sk-tier-badge.tier-A { background: #d97706; color: #fff; }
+.sk-tier-badge.tier-B { background: #0284c7; color: #fff; }
+.sk-tier-badge.tier-C { background: #64748b; color: #fff; }
+.sk-tier-sub { font-size: 11px; color: var(--muted); margin-top: 3px; font-weight: 600; }
 .sk-name-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px; }
-.sk-meta-line { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
-.sk-c-scope { width: 15%; }
-.sk-c-eff { width: 35%; }
-.sk-c-eff .sk-eff { margin: 2px 0 0; line-height: 1.45; }
-.sk-c-eff .sk-review { margin: 3px 0 0; font-size: 12px; color: var(--muted); }
-.sk-c-src { width: 30%; font-size: 12.5px; }
+.sk-meta-line { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.sk-c-scope .sk-scope { display: inline-block; white-space: normal; line-height: 1.4; }
+.sk-c-eff .sk-eff { margin: 2px 0 0; line-height: 1.5; white-space: normal; }
+.sk-c-eff .sk-review { margin: 4px 0 0; font-size: 12px; color: var(--ink); line-height: 1.45; white-space: normal; }
+.sk-c-src { font-size: 12.5px; }
 .sk-c-src .sk-src-line, .sk-c-src .sk-owners { margin: 2px 0; }
+.sk-c-src .sk-owners:first-child { border-top: 0; padding-top: 0; }
+.sk-cond-list { display: grid; gap: 5px; }
+.sk-cond-row { display: grid; grid-template-columns: auto 1fr; gap: 5px 7px; align-items: start; }
+.sk-cond-row + .sk-cond-row { padding-top: 4px; border-top: 1px dashed var(--line); }
+.sk-cond-lbl { display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--muted); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; white-space: nowrap; margin-top: 1px; }
+.sk-cond-chars { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-width: 0; }
+a.sk-char-link { text-decoration: none; cursor: pointer; transition: background .12s, border-color .12s, color .12s; }
+a.sk-char-link:hover { border-color: var(--accent-ink); background: var(--tint); color: var(--accent-ink); text-decoration: underline; }
 .sk-ut { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; white-space: nowrap; }
 .sk-ut.ut-重装 { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
 .sk-ut.ut-步兵 { background: #dcfce7; color: #166534; border-color: #86efac; }
 .sk-ut.ut-骑兵 { background: #ffedd5; color: #9a3412; border-color: #fdba74; }
 .sk-ut.ut-飞行 { background: #e0f2fe; color: #075985; border-color: #7dd3fc; }
 .sk-ut.ut-仅限本职业 { background: #f3e8ff; color: #6b21a8; border-color: #d8b4fe; }
-@media (max-width: 760px) { .sk-tbl { table-layout: auto; min-width: 680px; } }
+@media (max-width: 760px) { .sk-tbl { table-layout: auto; min-width: 720px; } }
 
 /* 探索规划：高显眼交互式世界地图与采集优先级面板 */
 .exp-ctrl { display: grid; gap: 6px; }
@@ -486,6 +505,7 @@ th.grp { text-align: center; border-bottom: 1px solid var(--line); } td.cur, th.
 .exp-ext-mini:hover { text-decoration: underline; }
 .exp-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 .exp-tbl th, .exp-tbl td { padding: 7px 9px; border-top: 1px solid var(--line); vertical-align: top; text-align: left; }
+.exp-tbl td { white-space: normal; }
 .exp-row { cursor: pointer; }
 .exp-row:hover { background: var(--bg); }
 .exp-row.on { background: var(--tint); }
@@ -498,4 +518,38 @@ th.grp { text-align: center; border-bottom: 1px solid var(--line); } td.cur, th.
 .skill-cb.exp-cb-P0.on { border-color: #dc2626; background: #fee2e2; color: #991b1b; }
 .skill-cb.exp-cb-P1.on { border-color: #ea580c; background: #ffedd5; color: #9a3412; }
 .skill-cb.exp-cb-P2.on { border-color: #2563eb; background: #dbeafe; color: #1e40af; }
+
+/* 探索规划：采集材料缺口交叉验证总表 */
+.exp-gap-tbl th { font-size: 12px; color: var(--muted); background: var(--bg); }
+.exp-gap-p0 td:first-child { border-left: 3px solid #dc2626; }
+.exp-gap-p1 td:first-child { border-left: 3px solid #ea580c; }
+.exp-mat-link { background: transparent; border: 0; padding: 0; color: var(--accent-ink); font-weight: 700; text-align: left; text-decoration: underline dotted; text-underline-offset: 3px; }
+.exp-mat-link:hover { color: var(--ink); text-decoration: underline; }
+.exp-use-line { font-size: 12.5px; line-height: 1.5; }
+.exp-use-line + .exp-use-line { margin-top: 2px; }
+.exp-spot-chips { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.exp-spot-chip { font-size: 12px; padding: 2px 7px; border-radius: 5px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font-weight: 600; cursor: pointer; }
+.exp-spot-chip:hover, .exp-spot-chip.on { border-color: var(--accent); background: var(--tint); color: var(--accent-ink); }
+
+/* 全站实体稳定超链接（职业 / 技能 / 角色）与深链定位条 */
+a.ent-link { color: inherit; text-decoration: underline dotted color-mix(in srgb, var(--accent) 70%, transparent); text-underline-offset: 2px; transition: color .12s, background .12s, border-color .12s; }
+a.ent-link:hover { color: var(--accent-ink); text-decoration: underline solid var(--accent); }
+a.ent-link.ent-self { text-decoration: none; }
+a.ent-link.ent-self:hover { color: var(--accent-ink); text-decoration: underline; }
+a.ent-link.sk-mpill, a.ent-link.sk-cls-chip, a.ent-link.sk-owner { text-decoration: none; }
+a.ent-link.sk-mpill:hover, a.ent-link.sk-cls-chip:hover { filter: brightness(0.95); outline: 1.5px solid var(--accent); }
+.ent-focus-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 10px 14px; border-radius: 10px; border: 1.5px solid var(--accent); background: var(--tint); font-size: 13.5px; color: var(--ink); }
+.ent-focus-acts { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+tr.ent-focused td { background: color-mix(in srgb, var(--tint) 90%, var(--panel)) !important; }
+article.ent-focused { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
+
+/* 路线逐级「选择」里的折叠式考试职业选择器 */
+.exam-pick-fold { margin-top: 4px; border: 1px dashed var(--line); border-radius: 6px; padding: 4px 8px; background: color-mix(in srgb, var(--bg) 65%, var(--panel)); }
+.exam-pick-fold > summary { cursor: pointer; font-size: 12.5px; font-weight: 600; color: var(--accent-ink); padding: 2px 0; }
+.exam-pick-list { display: grid; gap: 2px; margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--line); }
+
+/* 道具模块：最强武器评级总表 */
+.wt-tbl td { white-space: normal; vertical-align: top; }
+.wt-tbl th { white-space: nowrap; }
+
 

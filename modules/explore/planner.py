@@ -85,7 +85,8 @@ def _build_barter_summary(
             change_reason = "已换完"
         elif raw.get("forcePriority"):
             new_p = raw["forcePriority"]
-            change_reason = f"{orig_p}→{new_p}（未入 38 强武器榜）" if orig_p != new_p else ""
+            f_reason = raw.get("forceReason") or "人工调整"
+            change_reason = f"{orig_p}→{new_p}（{f_reason}）" if orig_p != new_p else f_reason
         elif wtier:
             new_p = WEAPON_TO_PRIO.get(wtier, orig_p)
             if new_p != orig_p:
@@ -197,7 +198,11 @@ def _build_barter_summary(
                 score = 58
             first_u = next((u for u in uses if u["priority"] == "P1"), uses[0])
             tag = f"缺{lack_p01}·{(first_u['weaponTier'] or 'P1')}{first_u['item']}"
-            extra = "（P0 封魔盾 10/10 已够，P1 达·米纳盾缺 10）" if m == "姬金鱼草" else ""
+            extra = (
+                "（P0 封魔盾 10/10 已够，P1 达·米纳盾缺 10）" if m == "姬金鱼草"
+                else "（P0 铁枪 6/6 已够，P1 达·米纳盾缺 10）" if m == "津吉"
+                else ""
+            )
             reason = f"实测库存 {have}，P0+P1 需 {need_p01}（还缺 {lack_p01}）→ {use_label}{extra}"
         elif need_p01 > 0:
             # 已有库存已够 P0/P1！不再占地图 P0/P1 红橙大标
@@ -220,6 +225,7 @@ def _build_barter_summary(
         if buy_notes.get(m):
             reason = f"{reason}｜可买：{buy_notes[m]}" if reason else buy_notes[m]
 
+        need_all = sum(u["qty"] for u in uses)
         mat_obj = {
             "material": m,
             "priority": eff_tier,
@@ -227,8 +233,10 @@ def _build_barter_summary(
             "shortageTier": "P0" if lack_p0 > 0 else ("P1" if lack_p01 > 0 else ""),
             "have": have,
             "credit": credit_qty,
+            "creditNote": credit_info.get("note", ""),
             "needP0": need_p0,
             "needP01": need_p01,
+            "needAll": need_all,
             "lackP0": lack_p0,
             "lackP01": lack_p01,
             "buyNote": buy_notes.get(m, ""),

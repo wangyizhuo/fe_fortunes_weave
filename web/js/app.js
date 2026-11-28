@@ -4,12 +4,14 @@
   const RL = root.FE.routeLogic;
   const CL = root.FE.commentsLogic;
   const EL = root.FE.exploreLogic;
+  const LL = root.FE.linksLogic;
 
   const ROUTE_VIEWS = ["next", "plan", "past", "l45", "long", "opts", "mine"];
-  const ALL_VIEWS = ["meal", "items", "explore", "classes", "skills", ...ROUTE_VIEWS];
+  const ALL_VIEWS = [...ROUTE_VIEWS, "meal", "explore", "items", "classes", "skills", "chars"];
 
   let MANIFEST = null;
   let DATA = { affinity: null, items: null, explore: null, classes: null, skills: null, route: null };
+  let ENTITY_REGISTRY = null;
   let pending = false;
   let pendingSelection = null; // { targetId, targetLabel, quote }
 
@@ -33,7 +35,16 @@
     if (v === "explore") return "explore";
     if (v === "classes") return "classes";
     if (v === "skills") return "skills";
+    if (v === "chars") return "chars";
     return "route";
+  }
+
+  function refreshRegistry() {
+    ENTITY_REGISTRY = LL.buildEntityRegistry({
+      classes: (DATA.classes && DATA.classes.classes) || [],
+      skills: (DATA.skills && DATA.skills.skills) || [],
+      characters: (DATA.skills && DATA.skills.characters) || [],
+    });
   }
 
   function loadBundleScript() {
@@ -62,12 +73,14 @@
         ]);
         MANIFEST = manifest;
         DATA = { affinity, items, explore, classes, skills, route };
+        refreshRegistry();
         return;
       } catch (err) {
         const b = await loadBundleScript().catch(() => null);
         if (b) {
           MANIFEST = b.manifest;
           DATA = b;
+          refreshRegistry();
           return;
         }
         throw err;
@@ -78,12 +91,23 @@
     if (b) {
       MANIFEST = b.manifest;
       DATA = b;
+      refreshRegistry();
       return;
     }
     throw new Error("未找到模块数据（请通过本地 HTTP 服务打开，或先运行 build_site.py 生成 out/data/）");
   }
 
   const store = root.FE.createStore(() => render(), setStatus);
+
+  function clearEntityFocusFor(viewName) {
+    if (store.state.entityFocus && (!viewName || store.state.entityFocus.view === viewName)) {
+      store.state.entityFocus = null;
+      const targetHash = "#" + store.state.view;
+      if (location.hash !== targetHash) {
+        history.replaceState(null, "", targetHash);
+      }
+    }
+  }
 
   function hideSelPop() {
     const pop = document.getElementById("selCommentBtn");
@@ -142,13 +166,22 @@
 
     const opened = [...document.querySelectorAll("#view details[open][data-keep]")].map(d => d.dataset.keep);
     const V = root.FE.views;
+    const ef = store.state.entityFocus;
+    const focusTarget = ef && ef.view === view ? ef.target : "";
+    const ctx = {
+      registry: ENTITY_REGISTRY,
+      focusTarget,
+      routeData: DATA.route,
+      affinityData: DATA.affinity,
+    };
     let html = "";
-    if (view === "meal") html = V.renderAffinityView(DATA.affinity, store.state);
-    else if (view === "items") html = V.renderItemsView(DATA.items, store.state);
-    else if (view === "explore") html = V.renderExploreView(DATA.explore, store.state);
-    else if (view === "classes") html = V.renderClassesView(DATA.classes, store.state);
-    else if (view === "skills") html = V.renderSkillsView(DATA.skills, store.state);
-    else html = V.renderRouteView(view, DATA.route, store.state);
+    if (view === "meal") html = V.renderAffinityView(DATA.affinity, store.state, ctx);
+    else if (view === "items") html = V.renderItemsView(DATA.items, store.state, ctx);
+    else if (view === "explore") html = V.renderExploreView(DATA.explore, store.state, ctx);
+    else if (view === "classes") html = V.renderClassesView(DATA.classes, store.state, ctx);
+    else if (view === "skills") html = V.renderSkillsView(DATA.skills, store.state, ctx);
+    else if (view === "chars") html = V.renderCharsView(DATA.skills, store.state, ctx);
+    else html = V.renderRouteView(view, DATA.route, store.state, ctx);
 
     const viewEl = document.getElementById("view");
     viewEl.innerHTML = html;
@@ -163,7 +196,7 @@
       const rm = DATA.route.rulesMeta || {};
       const ver = MANIFEST && MANIFEST.version ? ` · 版本 v${MANIFEST.version}` : "";
       const built = MANIFEST && MANIFEST.builtAt ? ` · 数据构建于 ${MANIFEST.builtAt}` : "";
-      foot.textContent = `架构：六大模块（友好度培养 / 道具与材料采集 / 探索规划 / 职业图鉴 / 技能图鉴 / 路线规划）前后端数据与逻辑解耦加载（当前快照 ${rm.shotKey || "latest"}，名声 Lv${rm.renown ?? "?"}${ver}${built}）。页面勾选、采集进度、选择与 Plan Mode 批注均保存在当前浏览器本地存储。`;
+      foot.textContent = `架构：七大模块（路线规划 / 友好度培养 / 探索规划 / 道具与材料采集 / 职业图鉴 / 技能图鉴 / 角色图鉴）前后端数据与逻辑解耦加载，全站职业·技能·角色稳定深链互通（当前快照 ${rm.shotKey || "latest"}，名声 Lv${rm.renown ?? "?"}${ver}${built}）。页面勾选、采集进度、选择与 Plan Mode 批注均保存在当前浏览器本地存储。`;
     }
 
     if (focusInputId) {
@@ -187,14 +220,20 @@
   }
 
   function setViewFromHash() {
-    const h = location.hash.slice(1);
-    store.state.view = ALL_VIEWS.includes(h) ? h : "meal";
+    const parsed = LL.parseRouteHash(location.hash, ALL_VIEWS, "next");
+    store.state.view = parsed.view;
+    store.state.entityFocus = parsed.target ? { view: parsed.view, target: parsed.target } : null;
     render();
+    if (parsed.target) {
+      const hit = document.querySelector('[data-ent-focused="true"]');
+      if (hit) hit.scrollIntoView({ behavior: "smooth", block: "center" });
+      else scrollTo(0, 0);
+    }
   }
 
   function bindEvents() {
     document.addEventListener("focusout", () => { if (pending) setTimeout(render, 0); });
-    addEventListener("hashchange", () => { setViewFromHash(); scrollTo(0, 0); });
+    addEventListener("hashchange", () => { setViewFromHash(); if (!store.state.entityFocus) scrollTo(0, 0); });
 
     document.getElementById("who").addEventListener("click", e => {
       const b = e.target.closest("button[data-who]");
@@ -205,7 +244,7 @@
 
     const viewEl = document.getElementById("view");
 
-    // 输入过滤（友好度培养 / 道具与材料采集 / 职业图鉴 / 技能图鉴 / Plan Mode 草稿同步）
+    // 输入过滤（友好度培养 / 道具与材料采集 / 探索规划 / 职业图鉴 / 技能图鉴 / 角色图鉴 / Plan Mode 草稿同步）
     viewEl.addEventListener("input", e => {
       if (e.target.matches("[data-aff-q]")) {
         store.state.affinityQuery = e.target.value;
@@ -217,11 +256,17 @@
         store.state.exploreQuery = e.target.value;
         render();
       } else if (e.target.matches("[data-cls-q]")) {
+        clearEntityFocusFor("classes");
         store.state.classesQuery = e.target.value;
         render();
       } else if (e.target.matches("[data-sk-q]")) {
+        clearEntityFocusFor("skills");
         store.state.skillsQuery = e.target.value;
         store.state.skillsShowAll = false;
+        render();
+      } else if (e.target.matches("[data-ch-q]")) {
+        clearEntityFocusFor("chars");
+        store.state.charsQuery = e.target.value;
         render();
       } else if (e.target.matches("[data-cmt-draft-text]") && store.state.commentDraft) {
         store.state.commentDraft.text = e.target.value;
@@ -454,16 +499,48 @@
         return;
       }
 
-      // --- 技能图鉴筛选交互 ---
-      const skTab = e.target.closest("[data-sk-tab]");
-      if (skTab) {
-        store.state.skillsTab = skTab.dataset.skTab;
-        store.state.skillsShowAll = false;
+      // --- 通用实体深链返回上一页 ---
+      if (e.target.closest("[data-ent-back]")) {
+        e.preventDefault();
+        history.back();
+        return;
+      }
+
+      // --- 角色图鉴筛选交互 ---
+      const chGrp = e.target.closest("[data-ch-grp]");
+      if (chGrp) {
+        clearEntityFocusFor("chars");
+        store.state.charsGroup = chGrp.dataset.chGrp;
         render();
         return;
       }
+      const chTier = e.target.closest("[data-ch-tier]");
+      if (chTier) {
+        clearEntityFocusFor("chars");
+        store.state.charsTier = chTier.dataset.chTier;
+        render();
+        return;
+      }
+      if (e.target.closest("[data-ch-showall]")) {
+        clearEntityFocusFor("chars");
+        store.state.charsGroup = "all";
+        store.state.charsTier = "全部";
+        store.state.charsQuery = "";
+        render();
+        return;
+      }
+      if (e.target.closest("[data-ch-clear]")) {
+        clearEntityFocusFor("chars");
+        store.state.charsTier = "全部";
+        store.state.charsQuery = "";
+        render();
+        return;
+      }
+
+      // --- 技能图鉴筛选交互 ---
       const skRating = e.target.closest("[data-sk-rating]");
       if (skRating) {
+        clearEntityFocusFor("skills");
         store.state.skillsRating = skRating.dataset.skRating;
         store.state.skillsShowAll = false;
         render();
@@ -471,6 +548,7 @@
       }
       const skScope = e.target.closest("[data-sk-scope]");
       if (skScope) {
+        clearEntityFocusFor("skills");
         store.state.skillsScope = skScope.dataset.skScope;
         store.state.skillsShowAll = false;
         render();
@@ -478,20 +556,9 @@
       }
       const skCat = e.target.closest("[data-sk-cat]");
       if (skCat) {
+        clearEntityFocusFor("skills");
         store.state.skillsCategory = skCat.dataset.skCat;
         store.state.skillsShowAll = false;
-        render();
-        return;
-      }
-      const skCgrp = e.target.closest("[data-sk-cgrp]");
-      if (skCgrp) {
-        store.state.skillsCharGroup = skCgrp.dataset.skCgrp;
-        render();
-        return;
-      }
-      const skCtier = e.target.closest("[data-sk-ctier]");
-      if (skCtier) {
-        store.state.skillsCharTier = skCtier.dataset.skCtier;
         render();
         return;
       }
@@ -501,13 +568,13 @@
         return;
       }
       if (e.target.closest("[data-sk-clear]")) {
+        clearEntityFocusFor("skills");
         store.state.skillsRating = "全部";
         store.state.skillsScope = "全部";
         store.state.skillsCategory = "全部";
         store.state.skillsDiscipline = "全部";
         store.state.skillsUnitTypes = [];
         store.state.skillsOnlyRecruited = false;
-        store.state.skillsCharTier = "全部";
         store.state.skillsQuery = "";
         store.state.skillsShowAll = false;
         render();
@@ -567,6 +634,8 @@
           store.state.exploreViewBox = null;
         }
         render();
+        const stg = document.getElementById("expCanvasWrap");
+        if (mat && stg) stg.scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
       const expPin = e.target.closest("[data-exp-pin]");
@@ -581,6 +650,16 @@
         const rObj = DATA.explore && DATA.explore.routes && DATA.explore.routes[store.state.exploreRoute || DATA.explore.defaultRoute];
         const sp = rObj && (rObj.spots || []).find(x => x.id === sid);
         if (sp) {
+          // 确保目标点位的优先级与类型均处于开启状态，防止点击后因过滤隐藏
+          const prSet = new Set(store.state.explorePriorities || ["P0"]);
+          if (sp.priority) prSet.add(sp.priority);
+          store.state.explorePriorities = [...prSet];
+          const tpSet = new Set(store.state.exploreTypes || []);
+          if (sp.type) tpSet.add(sp.type);
+          store.state.exploreTypes = [...tpSet];
+          if (store.state.exploreOnlyBarterLack && !sp.hasBarterShortage) {
+            store.state.exploreOnlyBarterLack = false;
+          }
           store.state.exploreSelectedId = sid;
           const mw = DATA.explore.mapWidth || 3328;
           const mh = DATA.explore.mapHeight || 2560;
@@ -697,19 +776,28 @@
         render();
         return;
       }
+      const itemWt = e.target.closest("[data-item-wt]");
+      if (itemWt) {
+        store.state.itemsWeaponTier = itemWt.dataset.itemWt;
+        render();
+        return;
+      }
       const clsTier = e.target.closest("[data-cls-tier]");
       if (clsTier) {
+        clearEntityFocusFor("classes");
         store.state.classesTier = clsTier.dataset.clsTier;
         render();
         return;
       }
       const clsMode = e.target.closest("[data-cls-mode]");
       if (clsMode) {
+        clearEntityFocusFor("classes");
         store.state.classesMatchMode = clsMode.dataset.clsMode;
         render();
         return;
       }
       if (e.target.closest("[data-cls-clear]")) {
+        clearEntityFocusFor("classes");
         store.state.classesTier = "全部";
         store.state.classesSkills = [];
         store.state.classesStats = [];
@@ -837,18 +925,21 @@
     // 表单变更事件委托
     viewEl.addEventListener("change", e => {
       if (e.target.matches("[data-sk-disc]")) {
+        clearEntityFocusFor("skills");
         store.state.skillsDiscipline = e.target.value;
         store.state.skillsShowAll = false;
         render();
         return;
       }
       if (e.target.matches("[data-sk-rec]")) {
+        clearEntityFocusFor("skills");
         store.state.skillsOnlyRecruited = e.target.checked;
         store.state.skillsShowAll = false;
         render();
         return;
       }
       if (e.target.matches("[data-sk-ut]")) {
+        clearEntityFocusFor("skills");
         const ut = e.target.dataset.skUt;
         const cur = new Set(store.state.skillsUnitTypes || []);
         if (e.target.checked) cur.add(ut);
@@ -899,6 +990,7 @@
         return;
       }
       if (e.target.matches("[data-cls-skill]")) {
+        clearEntityFocusFor("classes");
         const sk = e.target.dataset.clsSkill;
         const cur = new Set(store.state.classesSkills || []);
         if (e.target.checked) cur.add(sk);
@@ -908,6 +1000,7 @@
         return;
       }
       if (e.target.matches("[data-cls-stat]")) {
+        clearEntityFocusFor("classes");
         const st = e.target.dataset.clsStat;
         const cur = new Set(store.state.classesStats || []);
         if (e.target.checked) cur.add(st);

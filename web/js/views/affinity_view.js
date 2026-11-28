@@ -2,12 +2,16 @@
 (function (root) {
   const U = root.FE.utils;
   const AL = root.FE.affinityLogic;
+  const LL = root.FE.linksLogic;
 
-  function renderAffinityView(data, state) {
+  function renderAffinityView(data, state, ctx) {
     const D = data || {
       lords: [], roster: [], dishes: [], weights: [], goals: [],
       maxed: [], absent: [], pairsDone: [], currentRenown: null,
     };
+    const reg = (ctx && ctx.registry) || null;
+    const chLink = (n, useShort) => LL.renderEntityLink(reg, "char", n, useShort ? { label: U.shortName(n) } : undefined);
+
     const summary = AL.summarizeAffinity(D);
     const rosterSum = AL.summarizeRoster(D.roster);
     const rFilter = state.affinityRosterFilter || "important";
@@ -22,10 +26,10 @@
 
     // 1) 四大主角（领主）卡片
     const lordsHtml = (D.lords || []).length ? `<section class="alerts">
-      <h2>主角 / 领主（4 位 · 当前主线：${U.esc(D.lord || "迪托利希")}${D.currentRenown != null ? ` · 当前声望 Lv${D.currentRenown}` : ""}）</h2>
+      <h2>主角 / 领主（4 位 · 当前主线：${chLink(D.lord || "迪托利希")}${D.currentRenown != null ? ` · 当前声望 Lv${D.currentRenown}` : ""}）</h2>
       <div class="grid">${D.lords.map(l => `<article class="card">
         <div class="ch"><div class="ct">
-          <h3>${U.esc(l.name)}</h3>${ctierBadge(l)}
+          <h3>${chLink(l.name)}</h3>${ctierBadge(l)}
           ${l.isCurrent ? `<span class="tag ok">当前主角</span>` : `<span class="cat-pill">其他路线领主</span>`}
           <span class="r">待刷目标 ${l.activeTargets.length} 人 · 已达标 ${l.doneTargets.length} 人</span>
         </div></div>
@@ -34,8 +38,8 @@
             ? `<p class="txt"><span class="lab">最爱的菜</span>${U.esc(l.favoriteDishes.join("、"))}</p>`
             : `<p class="txt"><span class="lab">喜欢的菜</span>${U.esc((l.likedDishes || []).join("、") || "—")}</p>`}
           ${(l.hatedDishes || []).length ? `<p class="hint" style="margin:0">讨厌：${U.esc(l.hatedDishes.join("、"))}</p>` : ""}
-          ${(l.activeTargets || []).length ? `<p class="hint" style="margin:0">本线当前刷支援对象：<b>${U.esc(l.activeTargets.join("、"))}</b></p>` : ""}
-          ${(l.doneTargets || []).length ? `<p class="hint" style="margin:0">本线友好度已达标：${U.esc(l.doneTargets.join("、"))}</p>` : ""}
+          ${(l.activeTargets || []).length ? `<p class="hint" style="margin:0">本线当前刷支援对象：<b>${LL.linkifyList(reg, "char", l.activeTargets, "、")}</b></p>` : ""}
+          ${(l.doneTargets || []).length ? `<p class="hint" style="margin:0">本线友好度已达标：${LL.linkifyList(reg, "char", l.doneTargets, "、")}</p>` : ""}
         </div>
       </article>`).join("")}</div>
     </section>` : "";
@@ -69,7 +73,7 @@
     };
 
     const rosterRows = filteredRoster.map(x => `<tr class="${x.statusKey === "met" ? "cur" : ""}">
-      <td><b>${U.esc(x.name)}</b>${ctierBadge(x)}${x.isLord ? ` <span class="cat-pill">主角</span>` : ""}${x.jpName ? `<br><span class="jp">${U.esc(x.jpName)}</span>` : ""}</td>
+      <td><b>${chLink(x.name)}</b>${ctierBadge(x)}${x.isLord ? ` <span class="cat-pill">主角</span>` : ""}${x.jpName ? `<br><span class="jp">${U.esc(x.jpName)}</span>` : ""}</td>
       <td><span class="cat-pill">${U.esc(x.dietTier || "—")}</span></td>
       <td class="n">${renownCell(x)}</td>
       <td class="n">${x.dietSupport != null ? `支援 ${x.dietSupport}` : "—"}</td>
@@ -96,10 +100,10 @@
 
     // 3) 吃饭三人一桌组合 + 目标反查
     const spk = t => (t.sparkle || []).join("+");
-    const who = t => (t.who || []).map(n => U.esc(U.shortName(n))).join(" + ");
+    const who = t => (t.who || []).map(n => chLink(n, true)).join(" + ");
     const tag = t => t.perfect ? `<span class="tag ok">perfect</span>` : `<span class="tag warn">非 perfect</span>`;
-    const why = t => (t.pairs || []).map(([a, b]) => `${U.esc(U.shortName(a))}–${U.esc(U.shortName(b))}`).join("、")
-      + (t.filler && t.filler.length ? `（${t.filler.map(n => U.esc(U.shortName(n))).join("、")} 凑数）` : "");
+    const why = t => (t.pairs || []).map(([a, b]) => `${chLink(a, true)}–${chLink(b, true)}`).join("、")
+      + (t.filler && t.filler.length ? `（${t.filler.map(n => chLink(n, true)).join("、")} 凑数）` : "");
 
     const rows = filteredDishes.map(r => r.options.map((t, k) =>
       `<tr>${k ? "" : `<td rowspan="${r.options.length}"><b>${U.esc(r.dish)}</b>${r.perfect ? "" : `<br><small class="note">没有 perfect，下面是备选</small>`}</td>`}
@@ -107,7 +111,7 @@
     ).join("") || `<tr><td><b>${U.esc(r.dish)}</b></td><td colspan="5" class="note">没有能用的组合</td></tr>`).join("");
 
     const tgtRows = matrix.map(x =>
-      `<tr><td>${U.esc(U.shortName(x.lord))}–${U.esc(U.shortName(x.target))}</td><td class="n">${x.score}</td>
+      `<tr><td>${chLink(x.lord, true)}–${chLink(x.target, true)}</td><td class="n">${x.score}</td>
       <td class="n">${x.support === 2 ? `<span class="tag ok">支援 2</span>` : x.support == null ? "—" : "支援 " + x.support}</td>
       <td class="note">${x.perfectDishes.length ? U.esc(x.perfectDishes.join("、")) : "—"}</td>
       <td class="note">${x.fallbackDishes.length ? U.esc(x.fallbackDishes.join("、")) : "—"}</td></tr>`
@@ -119,11 +123,11 @@
       "只有领主和还要挖的目标上桌，每个座位都要涨有用的支援；已入队的人不上桌（吃饭是为了挖角）。",
       ...(D.goals || []).map(g => "分数：" + U.esc(g)),
       "支援 1 就能招的人不列进吃饭组合（不用吃饭）。每桌主角排第一，其他领主第二。",
-      ...((D.pairsDone || []).length ? [`支援已经够了、不再刷：${D.pairsDone.map(([a, b]) => U.esc(U.shortName(a)) + "–" + U.esc(U.shortName(b))).join("、")}。`] : []),
-      ...([...(D.maxed || []), ...(D.absent || [])].length ? [`不上桌：${[...(D.maxed || []).map(n => U.esc(n) + "（好感满了）"), ...(D.absent || []).map(n => U.esc(n) + "（不在）")].join("、")}。`] : []),
+      ...((D.pairsDone || []).length ? [`支援已经够了、不再刷：${D.pairsDone.map(([a, b]) => chLink(a, true) + "–" + chLink(b, true)).join("、")}。`] : []),
+      ...([...(D.maxed || []), ...(D.absent || [])].length ? [`不上桌：${[...(D.maxed || []).map(n => chLink(n) + "（好感满了）"), ...(D.absent || []).map(n => chLink(n) + "（不在）")].join("、")}。`] : []),
     ];
 
-    return `<p class="lede">友好度培养模块：集中展示四大主角、全员挖角声望与友好度要求（标记迪线已满足状态），以及每道菜的三人 perfect 组合。</p>
+    return `<p class="lede">友好度培养模块：集中展示四大主角、全员挖角声望与友好度要求（标记迪线已满足状态），以及每道菜的三人 perfect 组合。点击任意角色名均可跳转 <a href="#chars" class="ent-link">角色图鉴</a>。</p>
       <div class="filterbar">
         <input type="search" id="affQuery" data-aff-q placeholder="搜角色、菜名或条件，比如 杰斯塔、哥莱亚斯、蕾达、糖浆炖梨" value="${U.esc(state.affinityQuery || "")}" aria-label="筛选角色或菜品">
         <label class="showdone" style="margin:0"><input type="checkbox" data-aff-pf${state.affinityOnlyPerfect ? " checked" : ""}> 菜单只看能 perfect 的菜</label>
@@ -133,7 +137,7 @@
       <section class="alerts"><h2>每道菜带谁（${summary.perfectCount}/${summary.totalDishes} 道能 perfect，当前显示 ${filteredDishes.length} 道）</h2>
         <div class="scroll"><table><tr><th>菜</th><th>三人</th><th></th><th class="n">闪光</th><th class="n">分</th><th>涨哪些支援</th></tr>${rows || `<tr><td colspan="6" class="note">没有匹配的菜品或角色</td></tr>`}</table></div>
       </section>
-      ${lv2.length ? `<section class="alerts"><h2>${U.esc(U.shortName(D.lord))}线还要招、支援 2 就能招（${lv2.length}）</h2><p class="txt">${lv2.map(x => U.esc(U.shortName(x.target))).join("、")}</p></section>` : ""}
+      ${lv2.length ? `<section class="alerts"><h2>${chLink(D.lord, true)}线还要招、支援 2 就能招（${lv2.length}）</h2><p class="txt">${lv2.map(x => chLink(x.target, true)).join("、")}</p></section>` : ""}
       <section class="alerts"><h2>从目标查菜</h2>
         <div class="scroll"><table><tr><th>支援</th><th class="n">分</th><th class="n">招募要</th><th>perfect 的菜</th><th>只有备选的菜</th></tr>${tgtRows}</table></div>
       </section>

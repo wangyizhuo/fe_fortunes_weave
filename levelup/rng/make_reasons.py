@@ -23,7 +23,7 @@ with contextlib.redirect_stdout(io.StringIO()):
 from planner import STATS, plan_all, plan_gold, _TIER
 from fe_growth import exam_roll
 import timing
-from compare import seed_diff, explain
+from compare import seed_diff, explain, exam_seed_summary
 
 def stats_after(p, acts):
     """按动作走完的能力（含考进新职业时的保底）和到达的等级。"""
@@ -48,7 +48,16 @@ def exam_why(p, c, mids_in_route):
     if fb and fb["how"] == "你指定":
         return f"你指定在第 {fb['step'] + 1} 个乱数考"
     if fb and fb["how"] == "第一个不好的乱数":
-        return f"默认：第一个不好、又能考过的乱数（这级最好 {fb['s']} 分，未来 15 级平均 {fb['avg15']}）。更早或更晚考的对比见下表，由你决定"
+        gains = "、".join(fb.get("gains") or []) or "无"
+        cls_txt = f"用{fb['best_cls']}升级" if fb.get("best_cls") else "这一级最好升级"
+        raw_s = fb.get("raw_s")
+        s_val = fb.get("s")
+        if raw_s is not None and s_val is not None and abs(float(s_val) - float(raw_s)) > 1e-6:
+            bal = fb.get("bal_why") or "高权重能力差 >3 时每点 ±0.5"
+            score_txt = f"涨 {gains}（原始加权 {raw_s} 分，因均衡加点微调「{bal}」权重按 ±0.5 浮动后为 {s_val} 分）"
+        else:
+            score_txt = f"涨 {gains}（加权 {s_val} 分）"
+        return f"默认：第一个不好、又能考过的乱数（{cls_txt}{score_txt}，未来 15 级平均 {fb['avg15']}）。更早或更晚考的对比见下表，由你决定"
     if fb:
         return fb["how"]
     if c in p.required:
@@ -62,7 +71,7 @@ def exam_why(p, c, mids_in_route):
 
 def timing_part(p, acts, step, c):
     """11-25 Yizhuo：这场考试换到别的乱数考（其余照规则走，同样多的乱数）会怎样。
-    每个能考过的乱数都算，差别按乱数对齐拆成 ①考试用掉的乱数 ②用不同职业升级 ③保底（compare.seed_diff，现在路线减另一条）。"""
+    每个能考过的乱数都算，差别按乱数对齐拆成 ①考试用掉的乱数 ②用不同职业升级 ③转职保底。"""
     targets = [x for a, x in acts if a == "考试" and x != "跳过"]
     base_at = {k: v for k, v in (getattr(p, "exam_at", None) or {}).items() if v != c}
     must = tuple(x for x in targets if x in p.keep_classes or x == c)
@@ -78,11 +87,13 @@ def timing_part(p, acts, step, c):
                 p.exam_at = sv
             if r is not None and st < len(r[0]) and r[0][st] == ("考试", c):
                 d = seed_diff(p, acts, r[0])
+                d_alt = seed_diff(p, r[0], acts)
                 lv_alt = p.level + sum(1 for a, _ in r[0][:st] if a == "升级")
                 out.append({"step": st, "lv": lv_alt, "roll": round(p.exam_value(st), 2), "pct": p.exam_pct(c, lv_alt),
                             "exam": d["examPart"], "cls": d["classPart"], "floor": d["floorPart"], "total": d["total"],
                             "gold": plan_gold_acts(p, acts) - plan_gold_acts(p, r[0]),
-                            "explain": explain(d, "现在", f"Lv{lv_alt} 考")})
+                            "explain": explain(d, "现在", f"Lv{lv_alt} 考"),
+                            "explainAlt": explain(d_alt, f"改在 Lv{lv_alt} 考", "现在")})
     out.sort(key=lambda x: (x["total"]["w"], x["total"]["pts"]))
     return out
 
@@ -101,6 +112,8 @@ def route_part(p, pl):
     acts = pl.raw_actions
     S = len(acts)
     st, lv = stats_after(p, acts)
+    lifts_now = p.floor_lifts(acts)
+    floor_w_now = p.floor_value(acts)
     gold, train = plan_gold(p, pl), p.train_ranks(acts)
     exams = [c for a, c in acts if a == "考试" and c != "跳过"]
     mids = [c for c in exams if _TIER.get(c) == "中级"]
@@ -112,8 +125,10 @@ def route_part(p, pl):
         if c == "跳过":
             continue
         used = sum(1 for x, y in acts if x == "升级" and y == c)
+        step_floor = [f"{STATS[i]}+{n - o}" for (i, o, n) in lifts_now.get(step, [])]
         row = {"cls": c, "tier": _TIER.get(c), "lv": lv_now, "roll": round(exam_roll(p.seed_at(step)) / 10_000, 2),
                "pct": p.exam_pct(c, lv_now), "used": used, "why": exam_why(p, c, mids),
+               "floor": step_floor,
                # 11-25 Yizhuo：要练的技能在哪一级练好（考试那一级之前）
                "trainRanks": (p.exam_train_ranks or {}).get(c, 0) if used else 0,
                "trainSkills": ((getattr(p, "exam_train", {}) or {}).get(c) or []) if used and (p.exam_train_ranks or {}).get(c) else []}
@@ -133,7 +148,10 @@ def route_part(p, pl):
             a2, _, g2, _ = r
             st2, lv2 = stats_after(p, a2)
             d = diff(p, st, st2)
+            sd = seed_diff(p, acts, a2)
             d.update(gold=gold - g2, train=train - p.train_ranks(a2), lvDrop=lv2,
+                     floorW=floor_w_now - p.floor_value(a2),
+                     seedDiff=exam_seed_summary(sd, f"考{c}", f"不考{c}"),
                      dropExams=[x for y, x in a2 if y == "考试" and x != "跳过"],
                      dropSkips=sum(1 for y, x in a2 if x == "跳过"))
             row["vsDrop"] = d
@@ -152,17 +170,22 @@ def mid_part(name, p, opts, route_classes):
     for o in opts.get("options", []):
         if o.get("tier") != "中级" or o["cls"] in route_classes:
             continue
-        row = {"cls": o["cls"]}
+        row = {"cls": o["cls"], "floor": o.get("floor", [])}
         if not o.get("ok"):
             row["why"] = o.get("why") or "考不过"
         else:
             t = o["toT"]
+            seed_diff_list = t.get("seedDiffVsRoute") if t.get("seedDiffVsRoute") is not None else (t.get("seedDiff") or [])
             if rec:
                 g = [x - y for x, y in zip(t["g"], rec["g"])]
                 row["vsRoute"] = {"g": g, "pts": sum(g), "w": t["total"] - rec["total"],
-                                  "gold": t["gold"] - rec["gold"], "train": t.get("train", 0) - rec.get("train", 0)}
+                                  "gold": t["gold"] - rec["gold"], "train": t.get("train", 0) - rec.get("train", 0),
+                                  "seeds": t.get("seeds"), "endA": t.get("endA"), "endB": rec.get("endA"),
+                                  "seedDiff": seed_diff_list}
             else:
-                row["vsRoute"] = {"g": t["g"], "pts": sum(t["g"]), "w": t["total"], "gold": t["gold"], "train": t.get("train", 0)}
+                row["vsRoute"] = {"g": t["g"], "pts": sum(t["g"]), "w": t["total"], "gold": t["gold"], "train": t.get("train", 0),
+                                  "seeds": t.get("seeds"), "endA": t.get("endA"), "endB": t.get("endB"),
+                                  "seedDiff": seed_diff_list}
             row.update(lv=o["lv"], roll=o["roll"], pctNow=o.get("pctNow"), pct=o.get("pct"), ranks=o.get("ranks", 0),
                        train=o.get("train", []))
             v = row["vsRoute"]

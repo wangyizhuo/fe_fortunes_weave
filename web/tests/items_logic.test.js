@@ -56,3 +56,14 @@ test("highlightMatch escapes HTML and wraps matched substring safely", () => {
   assert.equal(IL.highlightMatch("银剑 <test>", "银剑"), "<mark>银剑</mark> &lt;test&gt;");
   assert.equal(IL.highlightMatch("Dagsion", "dag"), "<mark>Dag</mark>sion");
 });
+
+test("filterWeaponTiers filters by tier, category, and keyword", () => {
+  const weapons = [
+    { tier: "SS", name: "雷电剑", jp: "サンダーソード", type: "剑", effect: "魔法攻击", reason: "射程1-2", shopPlaces: ["商会以物易物"] },
+    { tier: "S", name: "屠马弓", jp: "ホースキラーボウ", type: "弓", effect: "骑兵特效", reason: "高命中", shopPlaces: ["雅曼村（2000G）"] },
+    { tier: "A", name: "达·米纳手甲", jp: "ダミナナックル", type: "手甲", effect: "战技命中+10", reason: "稳定", shopPlaces: [] },
+  ];
+  assert.equal(IL.filterWeaponTiers(weapons, "全部", "", "SS").length, 1);
+  assert.equal(IL.filterWeaponTiers(weapons, "弓", "", "全部").length, 1);
+  assert.equal(IL.filterWeaponTiers(weapons, "全部", "雅曼", "全部")[0].name, "屠马弓");
+});

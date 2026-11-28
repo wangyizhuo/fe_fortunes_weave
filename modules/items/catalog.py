@@ -33,16 +33,47 @@ def parse_materials(cost_str: str) -> list[dict[str, Any]]:
     return out
 
 
-def build_catalog(cfg: dict[str, Any], weapons_tsv_path: str | Path) -> dict[str, Any]:
-    """根据纯配置与武器 TSV 构建商店、以物易物及采集材料反查数据结构。"""
+def _index_weapon_tiers(weapon_tiers: dict[str, Any] | None) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
+    by_jp: dict[str, dict[str, Any]] = {}
+    by_cn: dict[str, dict[str, Any]] = {}
+    if not weapon_tiers:
+        return by_jp, by_cn
+    for w in weapon_tiers.get("weapons") or []:
+        if w.get("jp"):
+            by_jp[w["jp"]] = w
+        for k in (w.get("name"), w.get("repoName"), w.get("officialName")):
+            if k:
+                by_cn[k] = w
+    return by_jp, by_cn
+
+
+def build_catalog(
+    cfg: dict[str, Any],
+    weapons_tsv_path: str | Path,
+    weapon_tiers: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """根据纯配置与武器 TSV 构建商店、以物易物及采集材料反查数据结构，并融合武器强度评级。"""
     weapon_names: dict[str, str] = cfg["weaponNames"]
     item_notes: dict[str, str] = cfg.get("itemNotes", {})
     town_meta: dict[str, dict[str, Any]] = cfg["towns"]
     type_map: dict[str, str] = cfg["typeMap"]
+    wt_by_jp, wt_by_cn = _index_weapon_tiers(weapon_tiers)
+
+    def _wt_fields(cn_name: str, jp_name: str) -> dict[str, Any]:
+        w = wt_by_jp.get(jp_name) or wt_by_cn.get(cn_name)
+        if not w:
+            return {}
+        return {
+            "weaponTier": w.get("tier", ""),
+            "weaponForge": w.get("forge", ""),
+            "weaponRank": w.get("rank", ""),
+            "weaponReason": w.get("reason", ""),
+        }
 
     towns: dict[str, dict[str, Any]] = {}
     barter: list[dict[str, Any]] = []
     csv_rows: list[list[Any]] = []
+    weapon_places: dict[str, list[str]] = {}
 
     def add_town_item(jp_town: str, row: dict[str, Any]) -> None:
         meta = town_meta[jp_town]
@@ -66,6 +97,7 @@ def build_catalog(cfg: dict[str, Any], weapons_tsv_path: str | Path) -> dict[str
             cn = weapon_names[name_jp]
             cat = type_map[typ_jp]
             note = item_notes.get(name_jp, "")
+            wtf = _wt_fields(cn, name_jp)
             if "ヴァンダル" in shop:
                 mats = parse_materials(price_str)
                 barter.append({
@@ -76,7 +108,10 @@ def build_catalog(cfg: dict[str, Any], weapons_tsv_path: str | Path) -> dict[str
                     "materials": mats,
                     "location": "帝都达格席翁 · 范达尔商会",
                     "note": note,
+                    **wtf,
                 })
+                if wtf:
+                    weapon_places.setdefault(name_jp, []).append("商会以物易物")
                 csv_rows.append([
                     "帝都达格席翁 · 范达尔商会", "Dagsion", cat, cn, name_jp,
                     "以物易物：" + price_str, "", note, "AppMedia",
@@ -92,12 +127,17 @@ def build_catalog(cfg: dict[str, Any], weapons_tsv_path: str | Path) -> dict[str
                 "stock": "" if stock == "-" else stock,
                 "note": note,
                 "src": "AppMedia",
+                **wtf,
             }
             add_town_item(shop, row)
             meta = town_meta[shop]
+            if wtf:
+                p_txt = f"{meta['cn']}（{price_val}G）" if price_val is not None else meta["cn"]
+                weapon_places.setdefault(name_jp, []).append(p_txt)
             csv_rows.append([meta["cn"], meta.get("en", ""), cat, cn, name_jp, price_clean, stock, note, "AppMedia"])
 
     for ex in cfg.get("extraShopItems", []):
+        wtf = _wt_fields(ex["cn"], ex["jp"])
         row = {
             "cat": ex["cat"],
             "cn": ex["cn"],
@@ -106,6 +146,7 @@ def build_catalog(cfg: dict[str, Any], weapons_tsv_path: str | Path) -> dict[str
             "stock": ex.get("stock", ""),
             "note": ex.get("note", ""),
             "src": ex.get("src", ""),
+            **wtf,
         }
         add_town_item(ex["town"], row)
         meta = town_meta[ex["town"]]
@@ -115,6 +156,7 @@ def build_catalog(cfg: dict[str, Any], weapons_tsv_path: str | Path) -> dict[str
         ])
 
     for b in cfg.get("extraBarter", []):
+        wtf = _wt_fields(b["cn"], b["jp"])
         barter.append({
             "cn": b["cn"],
             "jp": b["jp"],
@@ -123,20 +165,24 @@ def build_catalog(cfg: dict[str, Any], weapons_tsv_path: str | Path) -> dict[str
             "materials": parse_materials(b["cost"]),
             "location": b.get("location", "范达尔商会"),
             "note": b.get("note", ""),
+            **wtf,
         })
 
     # 按材料反查可兑换装备（道具/材料采集视图用）
     mat_map: dict[str, list[dict[str, Any]]] = {}
     for b in barter:
         for m in b["materials"]:
-            mat_map.setdefault(m["material"], []).append({
+            entry = {
                 "cn": b["cn"],
                 "jp": b["jp"],
                 "type": b["type"],
                 "qty": m["qty"],
                 "location": b["location"],
                 "note": b["note"],
-            })
+            }
+            if b.get("weaponTier"):
+                entry["weaponTier"] = b["weaponTier"]
+            mat_map.setdefault(m["material"], []).append(entry)
     materials = [
         {"material": mat, "totalUses": len(uses), "usedIn": uses}
         for mat, uses in sorted(mat_map.items(), key=lambda kv: (-len(kv[1]), kv[0]))
@@ -149,10 +195,42 @@ def build_catalog(cfg: dict[str, Any], weapons_tsv_path: str | Path) -> dict[str
     for t in ordered_towns:
         t.pop("priority", None)
 
+    wt_out: dict[str, Any] | None = None
+    if weapon_tiers:
+        wt_list = []
+        for w in weapon_tiers.get("weapons") or []:
+            jp = w.get("jp", "")
+            places = list(dict.fromkeys(weapon_places.get(jp, [])))
+            wt_list.append({
+                "tier": w.get("tier", ""),
+                "name": w.get("name", ""),
+                "repoName": w.get("repoName") or w.get("name", ""),
+                "forge": w.get("forge", ""),
+                "jp": jp,
+                "type": w.get("type", ""),
+                "rank": w.get("rank", ""),
+                "might": w.get("might"),
+                "hit": w.get("hit"),
+                "crit": w.get("crit"),
+                "avoid": w.get("avoid"),
+                "range": w.get("range", ""),
+                "weight": w.get("weight"),
+                "durability": w.get("durability"),
+                "effect": w.get("effect", ""),
+                "description": w.get("description", ""),
+                "reason": w.get("reason", ""),
+                "shopPlaces": places,
+            })
+        wt_out = {
+            "source": weapon_tiers.get("source", {}),
+            "weapons": wt_list,
+        }
+
     return {
         "towns": ordered_towns,
         "barter": barter,
         "materials": materials,
+        "weaponTiers": wt_out,
         "categories": cfg.get("categories", ["全部"]),
         "notes": cfg.get("notes", []),
         "sources": cfg.get("sources", ""),
