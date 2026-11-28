@@ -110,18 +110,18 @@ class TestPurifiedGoalFirstPlanner(unittest.TestCase):
         self.assertEqual(DEFAULT_TIER_POLICIES["P2"].mastery_pts_per_lv, 0.0)
         self.assertGreater(DEFAULT_TIER_POLICIES["P2"].min_marginal_gain, DEFAULT_TIER_POLICIES["P0"].min_marginal_gain)
 
-        # 迪托利希：不靠 no_skip_seeds，s3 恶棍 0 跳过（262分/254净值）；去掉精通虚拟分后，纯净值最高为 s8 恶棍（263分/255净值）
+        # 迪托利希：目标级封顶 Lv37，不靠 no_skip_seeds，s3 恶棍 0 跳过（246分）；纯净值最高为 s8 恶棍（247分）
         p_di, t_di = prepare_goal_first_planner("迪托利希")
         self.assertEqual(p_di.no_skip_seeds, set())
         ev_s3 = simulate_fixed_exams(p_di, {3: "恶棍"}, DEFAULT_TIER_POLICIES[t_di], ("恶棍",))
         self.assertIsNotNone(ev_s3)
         self.assertEqual(ev_s3.breakdown.skips, 0)
-        self.assertEqual(ev_s3.breakdown.pure_stat_score, 262)
+        self.assertEqual(ev_s3.breakdown.pure_stat_score, 246)
 
         r_di = plan_two_stage(p_di, t_di)
         self.assertEqual(r_di.best.exam_at, {8: "恶棍"})
         self.assertEqual(r_di.best.breakdown.skips, 0)
-        self.assertEqual(r_di.best.breakdown.pure_stat_score, 263)
+        self.assertEqual(r_di.best.breakdown.pure_stat_score, 247)
 
         # 伊欧：已调整为 P1，且不人工锁种子，最终面板与净值显著高于锁种子旧方案（224分 / 206.4净值）
         p_io, t_io = prepare_goal_first_planner("伊欧")

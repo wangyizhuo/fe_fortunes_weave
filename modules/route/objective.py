@@ -34,7 +34,7 @@ class TierPolicy:
 DEFAULT_TIER_POLICIES: dict[str, TierPolicy] = {
     "P0": TierPolicy(
         tier="P0",
-        gold_per_pt=500 / 8,       # 62.5 G/分（500G ≈ 8 分）
+        gold_per_pt=0.0,           # P0 不计手形金币成本，预设数值最高的选择
         train_pts_per_rank=0.5,    # 练 1 段 ≈ 0.5 分
         min_marginal_gain=2.0,     # P0 多考 1 个非必考职业至少净赚 2.0 分
         mastery_pts_per_lv=0.0,    # 精通由用户 case by case 决定，不计入虚拟加权分

@@ -124,14 +124,16 @@ def route_part(p, pl):
             continue
         if c == "跳过":
             continue
-        used = sum(1 for x, y in acts if x == "升级" and y == c)
+        ub = p.class_usage_breakdown(acts, c)
+        used = ub["used"]
         step_floor = [f"{STATS[i]}+{n - o}" for (i, o, n) in lifts_now.get(step, [])]
         row = {"cls": c, "tier": _TIER.get(c), "lv": lv_now, "roll": round(exam_roll(p.seed_at(step)) / 10_000, 2),
-               "pct": p.exam_pct(c, lv_now), "used": used, "why": exam_why(p, c, mids),
+               "pct": p.exam_pct(c, lv_now), "used": used, "usedStrict": ub["strict"], "usedTied": ub["tied"],
+               "strictLvs": ub["strictLvs"], "why": exam_why(p, c, mids),
                "floor": step_floor,
                # 11-25 Yizhuo：要练的技能在哪一级练好（考试那一级之前）
-               "trainRanks": (p.exam_train_ranks or {}).get(c, 0) if used else 0,
-               "trainSkills": ((getattr(p, "exam_train", {}) or {}).get(c) or []) if used and (p.exam_train_ranks or {}).get(c) else []}
+               "trainRanks": (p.exam_train_ranks or {}).get(c, 0) if (used or step_floor) else 0,
+               "trainSkills": ((getattr(p, "exam_train", {}) or {}).get(c) or []) if (used or step_floor) and (p.exam_train_ranks or {}).get(c) else []}
         rest = [x for x in exams if x != c]
         keep_req = tuple(x for x in rest if x in p.required)
         sv, sk = p.required, getattr(p, "skip_take", ())
@@ -159,7 +161,8 @@ def route_part(p, pl):
         rows.append(row)
     return {"seeds": S, "endLv": lv, "end": st, "pts": sum(st) - sum(p.stats),
             "w": sum(w * (x - y) for w, x, y in zip(p.weights, st, p.stats)),
-            "gold": gold, "train": train, "skips": sum(1 for a, c in acts if c == "跳过"), "exams": rows}
+            "gold": gold, "train": train, "skips": sum(1 for a, c in acts if c == "跳过"),
+            "stopAdv": getattr(pl, "stop_adv", None), "exams": rows}
 
 
 def mid_part(name, p, opts, route_classes):
@@ -168,7 +171,7 @@ def mid_part(name, p, opts, route_classes):
     tier_name = opts.get("tier")
     out = []
     for o in opts.get("options", []):
-        if o.get("tier") != "中级" or o["cls"] in route_classes:
+        if o.get("floorOnly") or o.get("tier") != "中级" or o["cls"] in route_classes:
             continue
         row = {"cls": o["cls"], "floor": o.get("floor", [])}
         if not o.get("ok"):

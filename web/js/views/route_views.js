@@ -154,6 +154,21 @@
       return `<b class="${cls}">${U.sgn(val)}${U.esc(unit)}</b>`;
     }
 
+    function fmtUsedLevels(used, strict, tied, hasFloor = false) {
+      const u = used || 0;
+      if (u === 0) return hasFloor ? "仅吃转职保底（不升级）" : "0 级";
+      if (strict != null && tied != null) {
+        return `共 ${u} 级（严格更优 ${strict} 级 + 同分 ${tied} 级）`;
+      }
+      return `${u} 级`;
+    }
+
+    function renderStopAdvBanner(c) {
+      const sa = c && c.stopAdv;
+      if (!sa) return "";
+      return `<div class="sec"><p class="txt"><span class="sev warn">Lv${sa.lv} 留作上级转职</span> 第 ${sa.step + 1} 个乱数（Lv${sa.lv}）${U.esc(sa.reason || "差乱数")}，假定该乱数用于上级职业转职考试，规划在此停止。</p></div>`;
+    }
+
     function timingBox(e) {
       const t = e.timing || [];
       if (!t.length) return `<br><span class="hint">考试时机：窗口里没有别的乱数能考过，只能在这一级考。</span>`;
@@ -279,7 +294,7 @@
 
         const marginalsHtml = (opt.marginals || []).filter(m => !m.isRequired || m.usedLevels === 0).length
           ? `<div class="rp-marg">${opt.marginals.map(m =>
-              `<div><span class="cat-pill">${m.isRequired ? "必考" : "额外"} ${clsLink(m.cls)}（升级用 ${m.usedLevels} 级）</span> 边际能力差：<b>${U.esc(m.statDiffText)}</b>｜Δ净值 ${U.sgn(m.deltaNet)}｜Δ金币 ${U.sgn(m.deltaGold)}G｜Δ训练 ${U.sgn(m.deltaTrainRanks)} 段</div>`
+              `<div><span class="cat-pill">${m.isRequired ? "必考" : "额外"} ${clsLink(m.cls)}（升级 ${fmtUsedLevels(m.usedLevels, m.strictUsedLevels, m.tiedUsedLevels)}）</span> 边际能力差：<b>${U.esc(m.statDiffText)}</b>｜Δ净值 ${U.sgn(m.deltaNet)}｜Δ金币 ${U.sgn(m.deltaGold)}G｜Δ训练 ${U.sgn(m.deltaTrainRanks)} 段</div>`
             ).join("")}</div>`
           : "";
 
@@ -557,7 +572,7 @@
                 <span class="next-badges">${renderPTierBadge(r.tier, r.priorityNote)}${renderStrengthBadge(r)}</span>
                 ${r.role ? `<span class="next-sub">${U.esc(r.role)} · ${chLink(r.name, false).replace(/>[^<]+<\/a>/, ">图鉴</a>")}</span>` : `<span class="next-sub">${chLink(r.name, false).replace(/>[^<]+<\/a>/, ">角色图鉴</a>")}</span>`}
               </td>
-              <td class="next-who"><b>Lv${r.curLv ?? "?"}</b> ${r.curClass ? clsLink(r.curClass) : "—"}<span class="next-sub">规划终点 Lv${r.endLevel ?? "?"}</span></td>
+              <td class="next-who"><b>Lv${r.curLv ?? "?"}</b> ${r.curClass ? clsLink(r.curClass) : "—"}<span class="next-sub">规划终点 Lv${r.endLevel ?? "?"}${r.char && r.char.stopAdv ? ` · 🛑 Lv${r.char.stopAdv.lv} 留作上级转职` : ""}</span></td>
               <td>${fmtImmediate(r.immediate)}</td>
               <td>${fmtNextStop(r)}</td>
               <td>${fmtTrain(r)}</td>
@@ -619,7 +634,7 @@
       if (!ok.length) return `<br><span class="hint">改考中级：判定值 ${r.roll}%，${nb ? `不练技能考不过任何中级（另有 ${nb} 个要先练，${U.esc(c.tier || "")} 规则不练）` : "没有能考过的中级"}</span>`;
       const b = ok.filter(x => x.used).sort((p, q) => q.d.total - p.d.total || q.d.pts - p.d.pts || (q.inner - p.inner))[0];
       if (!b) return `<br><span class="hint">改考中级：${ok.length} 个能考过，但考进去之后都用不上（等于跳过）→ 照跳过（见「职业选择」）</span>`;
-      return `<br><span class="hint">改考中级（${ok.length} 个能考过）：${b.d.total > 0 || b.d.pts > 0 ? "数值最好的是" : "用得上的最好是"} <b>${clsLink(b.cls)}</b>，${smDiff(b.d)}${b.ranks ? `、先练 ${b.ranks} 段` : ""}，用它升 ${b.used} 级 → ${b.worth ? "<b>值得</b>" : "不值得，照跳过"}（全部选项见「职业选择」）</span>`;
+      return `<br><span class="hint">改考中级（${ok.length} 个能考过）：${b.d.total > 0 || b.d.pts > 0 ? "数值最好的是" : "用得上的最好是"} <b>${clsLink(b.cls)}</b>，${smDiff(b.d)}${b.ranks ? `、先练 ${b.ranks} 段` : ""}，用它升级${fmtUsedLevels(b.used, b.usedStrict, b.usedTied, !!(b.floor && b.floor.length))} → ${b.worth ? "<b>值得</b>" : "不值得，照跳过"}（全部选项见「职业选择」）</span>`;
     }
 
     function viewPlan() {
@@ -651,7 +666,7 @@
         const skips = (c.route || []).filter(x => x[0] === "exam" && !x[1]).length;
         const exs = ex.filter(Boolean);
         const isLord = Boolean(c.isLord || (RM.currentLord && c.name === RM.currentLord));
-        return `<tr><td><a href="#plan" data-go="${U.slug(c)}">${isLord ? "★ " : ""}${U.esc(U.shortName(c.name))}</a>${c.tier ? ` <span class="rec ${c.tier === "P0" ? "r1" : c.tier === "P1" ? "r2" : "r3"}">${c.tier}</span>` : ""} ${renderStrengthBadge(c)}</td><td class="n">Lv${c.planFrom}→${c.planTo}</td><td class="n"><b>${a.ws}</b></td><td class="n">${ap}</td><td class="n ${dv >= 3 ? "up" : dv <= -3 ? "dn" : ""}">${U.sgn(dv)}</td><td class="note">${exs.length ? exs.join("、") : "不转新职业"}${skips ? `；跳过 ${skips} 次` : ""}</td></tr>`;
+        return `<tr><td><a href="#plan" data-go="${U.slug(c)}">${isLord ? "★ " : ""}${U.esc(U.shortName(c.name))}</a>${c.tier ? ` <span class="rec ${c.tier === "P0" ? "r1" : c.tier === "P1" ? "r2" : "r3"}">${c.tier}</span>` : ""} ${renderStrengthBadge(c)}</td><td class="n">Lv${c.planFrom}→${c.planTo}${c.stopAdv ? ` <small class="hint">🛑</small>` : ""}</td><td class="n"><b>${a.ws}</b></td><td class="n">${ap}</td><td class="n ${dv >= 3 ? "up" : dv <= -3 ? "dn" : ""}">${U.sgn(dv)}</td><td class="note">${exs.length ? exs.join("、") : "不转新职业"}${skips ? `；跳过 ${skips} 次` : ""}${c.stopAdv ? `；Lv${c.stopAdv.lv} 留作上级转职停止` : ""}</td></tr>`;
       }).join("");
       const ovBox = `<section class="alerts"><h2>路线一览（到目标级）</h2><div class="scroll"><table class="ovt"><tr><th>角色</th><th class="n">等级</th><th class="n">加权分</th><th class="n">点数</th><th class="n">比平均</th><th>要考的职业</th></tr>${ovRows}</table></div></section>`;
 
@@ -682,7 +697,7 @@
         const items = []; let cur = null; const ownedSet = new Set(c.owned);
         for (const x of c.route || []) {
           if (x[0] === "exam") {
-            if (x[1]) items.push(`考试（到 <b>${clsLink(x[1])}</b>）（${ownedSet.has(x[1]) ? "已有" : "新职业"}；判定值 ${x[2]}%${x[3] == null ? "" : `，估计显示 ${x[3]}%`}）${(c.trainPlan || []).filter(t => t.cls === x[1]).map(t => ` <span class="changed">🎯 Lv${t.lv} 考前练好：${U.esc(t.train.join("、"))}</span>`).join("")}${x[4] != null ? `<div class="hint" style="margin:2px 0 0">之后到 Lv${c.planTo} 用它升 <b>${x[4]}</b> 级${x[4] ? `，比每级改用已有职业里最好的：<b>${U.esc(x[5])}</b>（${U.sgn(x[6])} 分）` : "（只为拿到职业或精通，不用来升级）"}</div>` : ""}`);
+            if (x[1]) items.push(`考试（到 <b>${clsLink(x[1])}</b>）（${ownedSet.has(x[1]) ? "已有" : "新职业"}；判定值 ${x[2]}%${x[3] == null ? "" : `，估计显示 ${x[3]}%`}）${(c.trainPlan || []).filter(t => t.cls === x[1]).map(t => ` <span class="changed">🎯 Lv${t.lv} 考前练好：${U.esc(t.train.join("、"))}</span>`).join("")}${x[4] != null ? `<div class="hint" style="margin:2px 0 0">之后到 Lv${c.planTo} 用它升级：<b>${fmtUsedLevels(x[4], x[7], x[8])}</b>${x[4] ? `，比每级改用已有职业里最好的：<b>${U.esc(x[5])}</b>（${U.sgn(x[6])} 分）` : "（只为拿到职业、转职保底或精通，不用来升级）"}</div>` : ""}`);
             else items.push(`跳过一级（判定值 ${x[2]}%，过不过都行）`);
             if (x[1]) ownedSet.add(x[1]);
             continue;
@@ -722,7 +737,7 @@
           return `<li class="${row.done ? "done" : ""} ${r.exam ? "isx" : ""}" data-key="${s.key}">
             <input type="checkbox" data-f="done" id="d-${U.keyOf(c, s)}"${row.done ? " checked" : ""} aria-label="已完成">
             <label class="lvl" for="d-${U.keyOf(c, s)}">${r.exam ? `Lv${row.frm} ${exCls ? "考试" : "跳过"}` : `Lv${row.frm}→${row.to}`}</label>
-            <div class="body">${r.exam ? `${exCls ? "考试（到 " + clsLink(exCls) + "）" : (s.skipNone ? `跳过 <span class="changed">没有可用的初级考试</span>` : s.skipFail && s.skipFail.length ? `跳过（考 ${clsList(s.skipFail, " / ")}，会考不过，不拿职业）` : s.skipCls ? `跳过（只能考 ${clsLink(s.skipCls)}，会考过，用掉一个可跳过的职业，还剩 ${s.skipLeft} 个）` : "跳过")}<span class="hint">　判定值 ${s.roll}%${exCls && curP != null ? `｜当前预估 ${curP}%` : ""}${isOrigExam && s.skillSummary ? `｜当前：${U.esc(s.skillSummary)}` : ""}${isOrigExam && s.renown ? `｜要名声 Lv${s.renown}` : ""}</span>${exCls ? ` · ${floorBadgeOf(c.name, exCls, isOrigExam ? s.floor : null)}` : ""}${isOrigExam && s.minReqText ? ` <span class="changed">🎯 ${U.esc(s.minReqText)}</span>` : (isOrigExam && s.train ? (s.trainOk ? ` <span class="changed">🎯 Lv${s.trainLv} 考试前练好：${U.esc(s.train.join("、"))}</span>` : ` <span class="changed">技能差：${U.esc(s.train.join("、"))}（不练，按实际成功率）</span>`) : "")}${!exCls ? smHint(c, s) : ""}${isOrigExam && s.use ? `<span class="hint">　之后到 Lv${c.planTo} 用它升 ${s.use[0]} 级${s.use[0] ? `：${U.esc(s.use[1])}（${U.sgn(s.use[2])} 分）` : ""}</span>` : ""}` : `<b>${clsText(RL.eqName(row))}</b>　${U.esc(r.gains.join(" ") || "—")}`}${row.choice !== RL.recOf(s) ? ` <span class="changed">已改</span>` : ""}${row.missing ? ` <span class="changed">还没考到</span>` : ""}${row.fail ? ` <span class="changed">估计考不过</span>` : ""}
+            <div class="body">${r.exam ? `${exCls ? "考试（到 " + clsLink(exCls) + "）" : (s.skipNone ? `跳过 <span class="changed">没有可用的初级考试</span>` : s.skipFail && s.skipFail.length ? `跳过（考 ${clsList(s.skipFail, " / ")}，会考不过，不拿职业）` : s.skipCls ? `跳过（只能考 ${clsLink(s.skipCls)}，会考过，用掉一个可跳过的职业，还剩 ${s.skipLeft} 个）` : "跳过")}<span class="hint">　判定值 ${s.roll}%${exCls && curP != null ? `｜当前预估 ${curP}%` : ""}${isOrigExam && s.skillSummary ? `｜当前：${U.esc(s.skillSummary)}` : ""}${isOrigExam && s.renown ? `｜要名声 Lv${s.renown}` : ""}</span>${exCls ? ` · ${floorBadgeOf(c.name, exCls, isOrigExam ? s.floor : null)}` : ""}${isOrigExam && s.minReqText ? ` <span class="changed">🎯 ${U.esc(s.minReqText)}</span>` : (isOrigExam && s.train ? (s.trainOk ? ` <span class="changed">🎯 Lv${s.trainLv} 考试前练好：${U.esc(s.train.join("、"))}</span>` : ` <span class="changed">技能差：${U.esc(s.train.join("、"))}（不练，按实际成功率）</span>`) : "")}${!exCls ? smHint(c, s) : ""}${isOrigExam && s.use ? `<span class="hint">　之后到 Lv${c.planTo} 用它升级：${fmtUsedLevels(s.use[0], s.use[3], s.use[4], !!(s.floor && s.floor.length))}${s.use[0] ? `（${U.esc(s.use[1])}，${U.sgn(s.use[2])} 分）` : ""}</span>` : ""}` : `<b>${clsText(RL.eqName(row))}</b>　${U.esc(r.gains.join(" ") || "—")}`}${row.choice !== RL.recOf(s) ? ` <span class="changed">已改</span>` : ""}${row.missing ? ` <span class="changed">还没考到</span>` : ""}${row.fail ? ` <span class="changed">估计考不过</span>` : ""}
               ${row.done ? "" : `<details class="more"><summary>选择</summary>${optsHtml(c, s, row, "f", w)}</details>`}</div>
             <span class="sc">${r.exam ? "—" : U.PW(r.cnt, r.score)}</span></li>`;
         }).join("")}</ol></div>`;
@@ -758,7 +773,7 @@
           </tr>
           ${list.map(r => {
             const dn = r.dnetReal != null ? r.dnetReal : r.dnet;
-            const upStr = r.upDiff ? `${U.esc(r.upDiff)}（${U.sgn(r.upDiffW ?? 0)}分，用${r.used}级）` : "—";
+            const upStr = r.upDiff ? `${U.esc(r.upDiff)}（${U.sgn(r.upDiffW ?? 0)}分，${fmtUsedLevels(r.used, r.usedStrict, r.usedTied)}）` : "—";
             const lossStr = r.examLoss ? `${U.esc(r.examLoss)}${r.examLossW ? `（${U.sgn(r.examLossW)}分）` : ""}` : "—";
             const clsLabel = mode === "alt" && r.replaces ? `<b>${clsLink(r.cls)}</b><br><small class="hint">替 ${clsLink(r.replaces)}</small>` : `<b>${clsLink(r.cls)}</b>`;
             return `<tr>
@@ -816,6 +831,7 @@
           ${charDecisionHtml}
           <details class="more cbody"${focus ? " open" : ""}><summary>展开：路线、能力、考试和每一步</summary>
             ${c.examWarn ? `<div class="sec"><p class="txt"><span class="sev warn">注意</span> 这条路线考试 + 跳过一共 ${c.exams} 次，比较多（手形 ${c.planGold}G）。</p></div>` : ""}
+            ${renderStopAdvBanner(c)}
             ${trainBox(c, w)}
             ${c.route ? `<div class="sec" id="sec-route-${U.slug(c)}"><h4>推荐路线</h4>${changesHtml}<details class="more"><summary>逐级一览</summary><div class="route">${routeTxt}</div></details></div>` : ""}
             <div class="sec" id="sec-stats-${U.slug(c)}"><h4>能力到 Lv${w.endLevel}</h4>${statTable}</div>
@@ -833,13 +849,17 @@
         ? `① 这一级最好的分 ≤ 分数线（P0 ${sr.P0.cap}、P1 ${sr.other.cap}、P2 ${sr.P2.cap}）；② 比未来 15 级平均低 ≥ 百分比（P0 ${Math.round(sr.P0.pct * 100)}%、P1 ${Math.round(sr.other.pct * 100)}%、P2 ${Math.round(sr.P2.pct * 100)}%）。P0 满足其一就跳，P1/P2 两个都满足才跳。`
         : "按各档跳过规则执行。";
       const tierDesc = `P0 = ${(tiers.P0 || []).map(U.shortName).join("、")}；P1 = ${(tiers.P1 || []).map(U.shortName).join("、")}；P2 = ${(tiers.P2 || []).map(U.shortName).join("、")}。`;
+      const maxLvTxt = RM.horizonMaxLevel ? `min(Lv${RM.horizonMaxLevel}, max(Lv35, 当前+15))` : "max(Lv35, 当前+15)";
+      const stopTxt = RM.stopOnBadAtOrAfter ? `；Lv${RM.stopOnBadAtOrAfter} 及以后遇到很差的乱数时，假定留作上级职业转职并停止后续规划` : "";
+      const p0GoldTxt = RM.p0IgnoreGold ? " P0 角色不计手形金币成本，预设选数值最高的方案。" : "";
 
-      return `<p class="lede">每人到目标级（max(Lv35, 当前+15)）的推荐路线、终点能力和考试安排。改了某一步的职业，数字会即时重算。</p>${decBox}${ovBox}${oddBox}<div class="grid one">${cards}</div>${balBox}` + notesBox([
+      return `<p class="lede">每人到目标级（${maxLvTxt}${stopTxt}）的推荐路线、终点能力和考试安排。改了某一步的职业，数字会即时重算。</p>${decBox}${ovBox}${oddBox}<div class="grid one">${cards}</div>${balBox}` + notesBox([
         N_PTS,
         "<b>体格阈值</b>（所有人）：力量每涨到 5 的倍数，体格 +1，那一级额外 +3 分，已算进加权分和路线选择。",
-        `<b>跳过条件与优先级</b>：${skipDesc}${tierDesc}${RM.requireMidRule ? " 每人都要考进一个中级职业（已有中级的算满足）。" : ""}`,
+        `<b>跳过条件与优先级</b>：${skipDesc}${tierDesc}${RM.requireMidRule ? " 每人都要考进一个中级职业（已有中级的算满足）。" : ""}${p0GoldTxt}`,
         `<b>判定值与成功率</b>：判定值低于游戏显示成功率才过。估计成功率按 ${shotLabel} 的技能与拟合公式计算。`,
-        `<b>均衡加点</b>：在权重 ≥ ${RM.balanceMinWeight || 4} 的能力之间做均衡，只用来决定同一级选哪个已有职业。`,
+        `<b>均衡加点</b>：仅在权重为 4 或 5 的能力之间微调，且调整后权重锁定在 [4, 5] 区间内（不跌破 4、不超 5）；只用来决定同一级选哪个已有职业，跳过与考试时机判定统一使用纯原始整数加权分（含体格加分）。`,
+        "<b>用它升级口径</b>：统一拆分为「严格更优 X 级 + 同分 Y 级」，其中严格更优 = 只有切到该职业才能多拿属性/分，同分 = 与其他已有职业加点完全相同（仅按高阶级优先显示）。",
       ]);
     }
 
@@ -946,7 +966,7 @@
           for (const r of w.skips) for (const x of r.opts) if (x.ruleBlocked) blk.push(`Lv${r.lv} ${x.cls}（${x.ranks} 段）`);
           return `<p class="txt" style="font-size:13px"><span class="lab">跳过那一级改考中级 · ${w.target === o.target ? `到 Lv${w.target}` : "到 Lv45"}</span>同样 ${w.seeds} 个乱数对比</p>
             <div class="scroll"><table><tr><th class="n">跳过的等级</th><th class="n">判定值</th><th>改考</th><th class="n">成功率<br><small>练够 / 不练</small></th><th class="n">先练</th><th class="n">用它升级</th><th>能力差</th><th class="n">点数</th><th class="n">加权分</th><th class="n">转职保底</th><th class="n">金币</th><th>结论</th></tr>
-            ${w.skips.map(r => smOpts(r).map((x, i, a) => `<tr${x.worth ? ' class="cur"' : ""}>${i ? "" : `<td class="n" rowspan="${a.length}">Lv${r.lv}</td><td class="n" rowspan="${a.length}">${r.roll}%</td>`}<td><b>${clsLink(x.cls)}</b></td><td class="n">${x.pct ?? "—"}% / ${x.pctNow ?? "—"}%</td>${x.ok ? `<td class="n">${x.ranks ? x.ranks + " 段" : "—"}</td><td class="n">${x.used} 级</td><td class="note">${fmtSignedStats(x.d.g)}</td><td class="n">${fmtSignedNum(x.d.pts)}</td><td class="n">${fmtSignedNum(x.d.total)}</td><td class="n">${x.d.floorPts ? `<b class="ok">${U.sgn(x.d.floorPts)} 点</b>` : `<span class="hint">无转职保底</span>`}</td><td class="n">${fmtSignedNum(x.d.gold, "G", true)}</td><td class="note">${x.worth ? "值得" : x.used ? "不值得" : "考过但用不上"}</td>` : `<td colspan="8" class="note">${U.esc(x.why)}</td>`}</tr>`).join("")).join("")}</table></div>
+            ${w.skips.map(r => smOpts(r).map((x, i, a) => `<tr${x.worth ? ' class="cur"' : ""}>${i ? "" : `<td class="n" rowspan="${a.length}">Lv${r.lv}</td><td class="n" rowspan="${a.length}">${r.roll}%</td>`}<td><b>${clsLink(x.cls)}</b></td><td class="n">${x.pct ?? "—"}% / ${x.pctNow ?? "—"}%</td>${x.ok ? `<td class="n">${x.ranks ? x.ranks + " 段" : "—"}</td><td class="n">${fmtUsedLevels(x.used, x.usedStrict, x.usedTied, !!(x.floor && x.floor.length))}</td><td class="note">${fmtSignedStats(x.d.g)}</td><td class="n">${fmtSignedNum(x.d.pts)}</td><td class="n">${fmtSignedNum(x.d.total)}</td><td class="n">${x.d.floorPts ? `<b class="ok">${U.sgn(x.d.floorPts)} 点</b>` : `<span class="hint">无转职保底</span>`}</td><td class="n">${fmtSignedNum(x.d.gold, "G", true)}</td><td class="note">${x.worth ? "值得" : x.used ? "不值得" : "考过但用不上"}</td>` : `<td colspan="8" class="note">${U.esc(x.why)}</td>`}</tr>`).join("")).join("")}</table></div>
             ${blk.length ? `<p class="hint">规则不考虑（本档不练技能）：${U.esc(blk.join("、"))}</p>` : ""}`;
         }).join("");
       };
@@ -959,8 +979,11 @@
       const renderHighlightsBox = (c, o) => {
         const hi = RL.summarizeOptionHighlights(o, c.weights, ST);
         if (!hi) return "";
+        const fmtName = x => x.isBaseline
+          ? `<b>${U.esc(x.cls)}</b>`
+          : `<b>${clsLink(x.baseCls || x.cls)}</b>${x.floorOnly ? `<span class="cat-pill" style="margin-left:3px">仅吃转职保底</span>` : ""}`;
         const fmtCand = x => {
-          const nm = x.isBaseline ? `<b>${U.esc(x.cls)}</b>` : `<b>${clsLink(x.cls)}</b><small>（Lv${x.lv}${x.ruleBlocked ? "·本档不练" : ""}）</small>`;
+          const nm = `${fmtName(x)}${x.isBaseline ? "" : `<small>（Lv${x.lv}${x.ruleBlocked ? "·本档不练" : ""}）</small>`}`;
           const aV = x.g[hi.idxA] || 0;
           const bV = x.g[hi.idxB] || 0;
           const sumV = aV + bV;
@@ -968,14 +991,14 @@
           return `${nm}：${U.esc(hi.statA)}${fmtSignedNum(aV)} / ${U.esc(hi.statB)}${fmtSignedNum(bV)}（${U.esc(hi.statA)}+${U.esc(hi.statB)} ${fmtSignedNum(sumV)}；总点数 ${fmtSignedNum(x.pts)}，加权 ${fmtSignedNum(x.total)}，金币 ${fmtSignedNum(x.gold, "G", true)} ${fl}）`;
         };
         const fmtSingle = (x, idx, label) => {
-          const nm = x.isBaseline ? `<b>${U.esc(x.cls)}</b>` : `<b>${clsLink(x.cls)}</b>${x.ruleBlocked ? "<small>（本档不练）</small>" : ""}`;
+          const nm = `${fmtName(x)}${!x.isBaseline && x.ruleBlocked ? "<small>（本档不练）</small>" : ""}`;
           return `${nm} ${U.esc(label)}${fmtSignedNum(x.g[idx] || 0)}（加权 ${fmtSignedNum(x.total)}）`;
         };
         return `<div class="opts-hi" style="margin-bottom:10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg)">
-          <div style="font-weight:700;font-size:13px;margin-bottom:4px">🎯 核心属性最高选项速览（到目标 Lv${o.target}，相对不考基准 · 含转职保底）</div>
+          <div style="font-weight:700;font-size:13px;margin-bottom:4px">🎯 核心属性最高选项速览（到目标 Lv${o.target}，相对不考基准 · 含转职保底与「仅吃转职保底不升级」方案）</div>
           <ul class="txt" style="margin:4px 0 0 18px;font-size:13px">
             <li><b>${U.esc(hi.statA)}+${U.esc(hi.statB)} 之和排行</b>：${hi.pairTop.map(fmtCand).join("；")}</li>
-            <li><b>单项最高</b>：${U.esc(hi.statA)} 最高 → ${hi.statATop.map(x => fmtSingle(x, hi.idxA, hi.statA)).join(" / ")}；${U.esc(hi.statB)} 最高 → ${hi.statBTop.map(x => fmtSingle(x, hi.idxB, hi.statB)).join(" / ")}；加权分最高 → ${hi.weightedTop.map(x => `${x.isBaseline ? U.esc(x.cls) : clsLink(x.cls)}（${fmtSignedNum(x.total)} 分）`).join(" / ")}</li>
+            <li><b>单项最高</b>：${U.esc(hi.statA)} 最高 → ${hi.statATop.map(x => fmtSingle(x, hi.idxA, hi.statA)).join(" / ")}；${U.esc(hi.statB)} 最高 → ${hi.statBTop.map(x => fmtSingle(x, hi.idxB, hi.statB)).join(" / ")}；加权分最高 → ${hi.weightedTop.map(x => `${fmtName(x)}（${fmtSignedNum(x.total)} 分）`).join(" / ")}</li>
           </ul>
         </div>`;
       };
@@ -984,14 +1007,15 @@
         const r = REASONS[name]; if (!r) return "";
         const rt = r.route;
         const dtxt = d => `${fmtSignedStats(d.g)}；点数 ${fmtSignedNum(d.pts)}，加权分 ${fmtSignedNum(d.w)}${d.floorW != null ? `（已含转职保底差：${d.floorW ? fmtSignedNum(d.floorW, " 分") : `<span class="hint">无转职保底</span>`}）` : ""}；金币 ${fmtSignedNum(d.gold, "G", true)}；练技能 ${fmtSignedNum(d.train, " 段", true)}`;
-        const ex = rt.exams.map(e => `<li><b>Lv${e.lv} ${clsLink(e.cls)}</b> <small>${U.esc(e.tier || "")}｜判定值 ${e.roll}%｜成功率 ${e.pct ?? "—"}%｜用它升 ${e.used} 级｜${floorBadgeOf(name, e.cls, e.floor)}</small><br>${U.esc(e.why)}${e.trainSkills && e.trainSkills.length ? `<br><span class="changed">🎯 Lv${e.lv} 考前练好：${U.esc(e.trainSkills.join("、"))}（共 ${e.trainRanks} 段）</span>` : ""}${timingBox(e)}${e.vsDrop ? `<br><span class="hint">和不考它比（同 ${rt.seeds} 个乱数 · 考到 Lv${rt.endLv} vs 不考到 Lv${e.vsDrop.lvDrop ?? "?"}，已含转职保底口径）：</span>${dtxt(e.vsDrop)}${renderSeedDiffHtml(e.vsDrop.seedDiff)}` : `<br><span class="hint">${U.esc(e.dropNote || "")}</span>`}</li>`).join("") || "<li>不考新职业</li>";
+        const ex = rt.exams.map(e => `<li><b>Lv${e.lv} ${clsLink(e.cls)}</b> <small>${U.esc(e.tier || "")}｜判定值 ${e.roll}%｜成功率 ${e.pct ?? "—"}%｜用它升级：${fmtUsedLevels(e.used, e.usedStrict, e.usedTied, !!(e.floor && e.floor.length))}｜${floorBadgeOf(name, e.cls, e.floor)}</small><br>${U.esc(e.why)}${e.trainSkills && e.trainSkills.length ? `<br><span class="changed">🎯 Lv${e.lv} 考前练好：${U.esc(e.trainSkills.join("、"))}（共 ${e.trainRanks} 段）</span>` : ""}${timingBox(e)}${e.vsDrop ? `<br><span class="hint">和不考它比（同 ${rt.seeds} 个乱数 · 考到 Lv${rt.endLv} vs 不考到 Lv${e.vsDrop.lvDrop ?? "?"}，已含转职保底口径）：</span>${dtxt(e.vsDrop)}${renderSeedDiffHtml(e.vsDrop.seedDiff)}` : `<br><span class="hint">${U.esc(e.dropNote || "")}</span>`}</li>`).join("") || "<li>不考新职业</li>";
         const mids = r.mids.map(m => {
           const vr = m.vsRoute;
           const scopeStr = vr ? `同 ${vr.seeds || rt.seeds} 个乱数 · 考它到 Lv${vr.endA ?? "?"} vs 现路线到 Lv${vr.endB ?? rt.endLv}` : "";
           return `<li><b>${clsLink(m.cls)}</b> <small>（${floorBadgeOf(name, m.cls, m.floor)}）</small>：${U.esc(m.why)}${vr ? `<br><span class="hint">和现在路线比（${scopeStr}）：</span>${dtxt(vr)}${renderSeedDiffHtml(vr.seedDiff)}` : ""}</li>`;
         }).join("");
         const exc = r.excluded.length ? `<p class="hint">不考虑：${r.excluded.map(x => `${clsLink(x.cls)}（${U.esc(x.why)}）`).join("、")}</p>` : "";
-        return `<div class="sec"><h4>选择原因</h4><p class="txt">路线到 Lv${rt.endLv}（用 ${rt.seeds} 个乱数）：${U.esc(rt.end.map((v, i) => ST[i] + v).join(" "))}；点数 +${rt.pts}，加权分 +${rt.w}；金币 ${rt.gold}G；练技能 ${rt.train} 段；跳过 ${rt.skips} 次。${U.esc(r.tier)} ${r.trainAllowed ? "可以" : "不"}练技能考试。</p><h4>路线里的考试</h4><ul>${ex}</ul>${mids ? `<h4>没选的中级职业（均与当前路线按同样 ${rt.seeds} 个乱数比到目标 Lv${r.target} · 含转职保底）</h4><ul>${mids}</ul>` : ""}${exc}</div>`;
+        const stopNote = rt.stopAdv ? `<p class="txt"><span class="sev warn">Lv${rt.stopAdv.lv} 留作上级转职</span> 第 ${rt.stopAdv.step + 1} 个乱数（Lv${rt.stopAdv.lv}）${U.esc(rt.stopAdv.reason || "差乱数")}，假定用于上级职业转职并停止后续规划。</p>` : "";
+        return `<div class="sec"><h4>选择原因</h4><p class="txt">路线到 Lv${rt.endLv}（用 ${rt.seeds} 个乱数）：${U.esc(rt.end.map((v, i) => ST[i] + v).join(" "))}；点数 +${rt.pts}，加权分 +${rt.w}；金币 ${rt.gold}G；练技能 ${rt.train} 段；跳过 ${rt.skips} 次。${U.esc(r.tier)} ${r.trainAllowed ? "可以" : "不"}练技能考试。</p>${stopNote}<h4>路线里的考试</h4><ul>${ex}</ul>${mids ? `<h4>没选的中级职业（均与当前路线按同样 ${rt.seeds} 个乱数比到目标 Lv${r.target} · 含转职保底）</h4><ul>${mids}</ul>` : ""}${exc}</div>`;
       };
 
       const cards = CH.filter(c => !focus || U.slug(c) === focus).map(c => {
@@ -1001,9 +1025,9 @@
           : `<td>—</td><td class="n">—</td><td class="n">—</td>`;
         const blk = o.options.filter(x => x.ok && x.ruleBlocked);
         const rows = o.options.filter(x => !(x.ok && x.ruleBlocked)).map(x => x.ok
-          ? `<tr${x.rec ? ' class="cur"' : ""}><td><b>${clsLink(x.cls)}</b> <small>${U.esc(x.tier || "")}</small>${x.rec ? ' <span class="rec r1">现在推荐</span>' : ""}</td><td class="n">Lv${x.lv}</td><td class="n">${x.roll}%</td><td class="n">${o.trainAllowed ? `${x.pct ?? "—"}%${x.ranks ? `<br><small>不练 ${x.pctNow ?? "—"}%</small>` : ""}` : `${x.pctNow ?? "—"}%${x.ranks ? `<br><small>练后 ${x.pct ?? "—"}%</small>` : ""}`}</td><td class="note">${x.train.length ? U.esc(x.train.join("、")) : "无需练习"}<br>${x.floor && x.floor.length ? `<span class="ok">转职保底：${U.esc(x.floor.join("、"))}</span>` : `<span class="hint">无转职保底</span>`}</td><td class="n">${x.used} 级</td>${diffCell(x.toT)}<td class="n">${fmtSignedNum(x.toT.gold, "G", true)}</td></tr>`
+          ? `<tr${x.rec ? ' class="cur"' : ""}><td><b>${clsLink(x.cls)}</b> <small>${U.esc(x.tier || "")}</small>${x.floorOnly ? ' <span class="cat-pill">仅吃转职保底 · 不升级</span>' : ""}${x.rec ? ' <span class="rec r1">现在推荐</span>' : ""}</td><td class="n">Lv${x.lv}</td><td class="n">${x.roll}%</td><td class="n">${o.trainAllowed ? `${x.pct ?? "—"}%${x.ranks ? `<br><small>不练 ${x.pctNow ?? "—"}%</small>` : ""}` : `${x.pctNow ?? "—"}%${x.ranks ? `<br><small>练后 ${x.pct ?? "—"}%</small>` : ""}`}</td><td class="note">${x.train.length ? U.esc(x.train.join("、")) : "无需练习"}<br>${x.floor && x.floor.length ? `<span class="ok">转职保底：${U.esc(x.floor.join("、"))}</span>` : `<span class="hint">无转职保底</span>`}</td><td class="n">${fmtUsedLevels(x.used, x.usedStrict, x.usedTied, !!(x.floor && x.floor.length))}</td>${diffCell(x.toT)}<td class="n">${fmtSignedNum(x.toT.gold, "G", true)}</td></tr>`
           : `<tr><td><b>${clsLink(x.cls)}</b></td><td colspan="9" class="note">${U.esc(x.why)}（${floorBadgeOf(c.name, x.cls, x.floor)}）</td></tr>`
-        ).join("") + (blk.length ? `<tr><td colspan="10" class="note">规则不考虑（本档不练）：${blk.map(x => `${clsLink(x.cls)}（${x.ranks} 段，到目标 Lv${o.target} 加权分 ${fmtSignedNum(x.toT.total)}，${x.floor && x.floor.length ? "转职保底：" + U.esc(x.floor.join("、")) : "无转职保底"}）`).join("、")}</td></tr>` : "");
+        ).join("") + (blk.length ? `<tr><td colspan="10" class="note">规则不考虑（本档不练）：${blk.map(x => `${clsLink(x.cls)}${x.floorOnly ? "（仅吃转职保底）" : ""}（${x.ranks} 段，到目标 Lv${o.target} 加权分 ${fmtSignedNum(x.toT.total)}，${x.floor && x.floor.length ? "转职保底：" + U.esc(x.floor.join("、")) : "无转职保底"}）`).join("、")}</td></tr>` : "");
         const rr = o.recRow ? `<tr class="sum"><td>现在推荐的组合：${clsList(o.recommended, " + ")}</td><td colspan="5"></td>${diffCell(o.recRow.toT)}<td class="n">${fmtSignedNum(o.recRow.toT.gold, "G", true)}</td></tr>` : "";
         const tid = "opts:" + c.name;
         const tlbl = `${c.name}（职业选择 · ${o.tier}）`;
@@ -1011,9 +1035,11 @@
         const refSeeds = (o.recRow && o.recRow.toT && o.recRow.toT.seeds) || ((o.options.find(x => x.ok && x.toT) || {}).toT || {}).seeds || "";
         return `<details class="char" data-slug="${U.slug(c)}" data-cmt-target="${U.esc(tid)}" data-cmt-label="${U.esc(tlbl)}"${focus || hasCmt ? " open" : ""}><summary><h3>${chLink(c.name)}</h3><span>${o.tier} · Lv${o.level}→目标 Lv${o.target} · 已有 ${clsList(o.owned, "、")}${o.required.length ? ` · 必考 ${clsList(o.required, "、")}` : ""}${o.recommended.length ? ` · 推荐 ${clsList(o.recommended, "、")}` : " · 推荐：不考新职业"}</span></summary>
           <div class="sec" style="padding-bottom:0">${renderCommentBtn(tid, tlbl, "批注此角色职业选择")}${renderCommentThread(tid, tlbl)}</div>
-          ${reasonsBox(c.name)}<div class="sec">${renderHighlightsBox(c, o)}<div class="scroll"><table><tr><th rowspan="2">职业</th><th class="n" rowspan="2">考的时机</th><th class="n" rowspan="2">判定值</th><th class="n" rowspan="2">成功率</th><th rowspan="2">要练 / 转职保底</th><th class="n" rowspan="2">用它升级<br><small>到 Lv${o.target}</small></th><th colspan="4" class="grp">到目标 Lv${o.target} 差距（同${refSeeds ? " " + refSeeds + " 个" : ""}乱数 · 含转职保底，相对不考）</th></tr><tr><th>能力差（到 Lv${o.target}）</th><th class="n">点数差</th><th class="n">加权分差</th><th class="n">金币差</th></tr>${rows}${rr}</table></div>${smTable(o)}</div></details>`;
+          ${reasonsBox(c.name)}<div class="sec">${renderHighlightsBox(c, o)}<div class="scroll"><table><tr><th rowspan="2">职业</th><th class="n" rowspan="2">考的时机</th><th class="n" rowspan="2">判定值</th><th class="n" rowspan="2">成功率</th><th rowspan="2">要练 / 转职保底</th><th class="n" rowspan="2">用它升级<br><small>严格更优 + 同分</small></th><th colspan="4" class="grp">到目标 Lv${o.target} 差距（同${refSeeds ? " " + refSeeds + " 个" : ""}乱数 · 含转职保底，相对不考）</th></tr><tr><th>能力差（到 Lv${o.target}）</th><th class="n">点数差</th><th class="n">加权分差</th><th class="n">金币差</th></tr>${rows}${rr}</table></div>${smTable(o)}</div></details>`;
       }).join("");
-      return `<p class="lede">每个可考职业单独算：一定考到它、其余照规则走，和基准路线按同样多的乱数比到目标级（max(Lv35, 当前+15)；Lv35+ 可转上级职业不再拉长到 Lv45 失真），明确标出是否有转职保底，红绿着色区分增减，点数 / 加权分 / 金币 / 训练段数与乱数消耗差异分开展示。</p><div class="grid one">${cards}</div>`;
+      const maxLvTxt = RM.horizonMaxLevel ? `min(Lv${RM.horizonMaxLevel}, max(Lv35, 当前+15))` : "max(Lv35, 当前+15)";
+      const stopTxt = RM.stopOnBadAtOrAfter ? `，Lv${RM.stopOnBadAtOrAfter}+ 遇差乱数留作上级转职停止` : "";
+      return `<p class="lede">每个可考职业单独算：一定考到它、其余照规则走（有转职保底的职业同步列出「仅吃转职保底 · 升级不切它」方案），和基准路线按同样多的乱数比到目标级（${maxLvTxt}${stopTxt}），所有差值均已含转职保底，红绿着色区分增减，点数 / 加权分 / 金币 / 训练段数与乱数消耗差异分开展示。</p><div class="grid one">${cards}</div>`;
     }
 
     // ---------- 7. 我的决定（按档位 P0->P1->P2 排序 + 9 项能力差展开 + Plan Mode 批注） ----------

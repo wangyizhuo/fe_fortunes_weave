@@ -56,9 +56,9 @@ class TestBrowserE2E(unittest.TestCase):
         cls.pw = sync_playwright().start()
         args = ["--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--disable-setuid-sandbox"]
         try:
-            cls.browser = cls.pw.chromium.launch(channel="chromium", args=args)
-        except Exception:
             cls.browser = cls.pw.chromium.launch(args=args)
+        except Exception:
+            cls.browser = cls.pw.chromium.launch(channel="chromium", args=args)
 
     @classmethod
     def tearDownClass(cls):
@@ -373,9 +373,12 @@ class TestBrowserE2E(unittest.TestCase):
         plan_txt = page.inner_text("#view")
         self.assertNotIn("11-05 截图", plan_txt)
         self.assertNotIn("11-11 起不再要求", plan_txt)
-        self.assertIn("恶棍（Lv25，判定 67.22%）", plan_txt)
-        self.assertIn("防 +10（平均 6.2）", plan_txt)
+        self.assertIn("恶棍（Lv26，判定 58.16%）", plan_txt)
+        self.assertIn("防 +10（平均 5.8）", plan_txt)
         self.assertIn("弓箭手（Lv25", plan_txt)
+        self.assertIn("天翼兵（Lv21", plan_txt)
+        self.assertIn("Lv34 留作上级转职停止", plan_txt)
+        self.assertIn("严格更优", plan_txt)
 
         # 聚焦杨界验证「改考其他单中级对比（替 萨满巫师 -> 牧师）」及折叠式考试选择器、等级+考试标签与提前考按钮
         page.click('#who button[data-who="yokai"]')
@@ -384,12 +387,11 @@ class TestBrowserE2E(unittest.TestCase):
         page.evaluate("() => document.querySelectorAll('#view details').forEach(d => d.open = true)")
         yk_txt = page.inner_text("#view")
         self.assertIn("改考其他单中级对比（替换 萨满巫师", yk_txt)
-        self.assertIn("技-2、幸+2", yk_txt)
-        self.assertIn("Lv23 考试", yk_txt)
+        self.assertIn("Lv26 考试", yk_txt)
         self.assertIn("考试（到 牧师）", yk_txt)
         self.assertIn("提前考 牧师", yk_txt)
 
-        # 聚焦艾丝梅拉尔达：已移除天翼兵必考（仅保留重装步兵必考），确认「展开所有等级」不勾已完成
+        # 聚焦艾丝梅拉尔达：P0 不计金币成本自动推荐 Lv21 天翼兵 + Lv30 重装步兵，确认「展开所有等级」不勾已完成
         page.click('#who button[data-who="esmeralda"]')
         page.wait_for_timeout(150)
         page.click('button[data-expand-all]')
@@ -400,9 +402,10 @@ class TestBrowserE2E(unittest.TestCase):
         self.assertIn("预选", page.inner_text("#view"))
         page.evaluate("() => document.querySelectorAll('#view details').forEach(d => d.open = true)")
         es_txt = page.inner_text("#view")
+        self.assertIn("考试（到 天翼兵）（新职业", es_txt)
         self.assertIn("考试（到 重装步兵）（新职业", es_txt)
 
-        # 验证 #opts（职业选择）：移除 Lv35->45 额外影响列 + 明确标注转职保底/无转职保底 + 红绿着色 + 改去该级变化 + 核心属性速览
+        # 验证 #opts（职业选择）：移除 Lv35->45 额外影响列 + 明确标注转职保底/无转职保底 + 红绿着色 + 改去该级变化 + 核心属性速览 + 严格更优/同分口径
         page.click('#who button[data-who="michaela"]')
         page.click('#routeTabs a[data-v="opts"]')
         page.wait_for_timeout(150)
@@ -414,17 +417,20 @@ class TestBrowserE2E(unittest.TestCase):
         self.assertIn("已含转职保底口径", opts_txt)
         self.assertIn("核心属性最高选项速览", opts_txt)
         self.assertIn("改去该级变化", opts_txt)
+        self.assertIn("严格更优", opts_txt)
         self.assertGreater(page.locator("#view .sdiff.up, #view .sdiff.dn").count(), 0)
 
-        # 努蒂奴：展示 力+速 之和排行；杨界：说明 7.5 小数来源与具体成长项
+        # 努蒂奴：展示 力+速 之和排行 与「仅吃转职保底 · 不升级」方案；杨界：跳过/考试改用纯整数加权分（无 7.5 小数）
         page.click('#who button[data-who="nutino"]')
         page.wait_for_timeout(120)
-        self.assertIn("力+速 之和排行", page.inner_text("#view"))
+        nu_opts_txt = page.inner_text("#view")
+        self.assertIn("力+速 之和排行", nu_opts_txt)
+        self.assertIn("仅吃转职保底 · 不升级", nu_opts_txt)
         page.click('#who button[data-who="yokai"]')
         page.wait_for_timeout(120)
         yk_opts_txt = page.inner_text("#view")
-        self.assertIn("均衡加点微调", yk_opts_txt)
-        self.assertIn("原始加权", yk_opts_txt)
+        self.assertNotIn("7.5 分", yk_opts_txt)
+        self.assertIn("加权 8 分", yk_opts_txt)
 
         # 6) 我的决定（#mine）：验证角色排序同序、新路线方案选择、展开 9 项具体能力差、技能等级预估、Plan Mode 内联批注与持久化
         page.click('#who button[data-who=""]')
@@ -457,8 +463,11 @@ class TestBrowserE2E(unittest.TestCase):
         self.assertIn("#mine", saved_txt)
         self.assertIn("待处理 1", saved_txt)
 
-        # 刷新页面确认方案选择 + Plan Mode 批注均已保存在浏览器 localStorage
-        page.reload(wait_until="domcontentloaded")
+        # 重新打开页面确认方案选择 + Plan Mode 批注均已保存在浏览器 localStorage
+        page.close()
+        page = ctx.new_page()
+        page.on("pageerror", lambda err: page_errors.append(str(err)))
+        page.goto(f"{self.base_url}#mine", wait_until="domcontentloaded")
         page.wait_for_selector('input[data-rpick="努蒂奴"]')
         self.assertTrue(page.is_checked('input[data-rpick="努蒂奴"][value="safe_fallback"]'))
         self.assertIn("你已选择：Lv18 考重装步兵", page.inner_text("#view"))

@@ -87,14 +87,24 @@ def reasons_md(r):
     L = ["", "## 选择原因（程序生成，make_reasons.py）",
          f"- 路线到 Lv{rt['endLv']}（用 {rt['seeds']} 个乱数）：" + " ".join(f"{s}{v}" for s, v in zip(STATS, rt["end"]))
          + f"；点数 +{rt['pts']}，加权分 +{rt['w']}；金币 {rt['gold']}G；练技能 {rt['train']} 段；跳过 {rt['skips']} 次",
-         f"- {r['tier']}：{'可以' if r['trainAllowed'] else '不'}练技能考试", "", "### 路线里的考试"]
+         f"- {r['tier']}：{'可以' if r['trainAllowed'] else '不'}练技能考试"]
+    if rt.get("stopAdv"):
+        sa = rt["stopAdv"]
+        L.append(f"- 上级转职提前停止：Lv{sa['lv']}（第 {sa['step'] + 1} 个乱数）{sa.get('reason', '差乱数')}，假定留作上级职业转职并停止后续规划")
+    L += ["", "### 路线里的考试"]
     for e in rt["exams"]:
-        L.append(f"- **Lv{e['lv']} {e['cls']}**（{e['tier']}，判定值 {e['roll']}，成功率 {e['pct']}%，用它升 {e['used']} 级）：{e['why']}")
+        used = e.get("used", 0)
+        us, ut = e.get("usedStrict", 0), e.get("usedTied", 0)
+        if used == 0 and e.get("floor"):
+            use_txt = "仅吃转职保底（不拿它升级）"
+        else:
+            use_txt = f"用它升 {used} 级（严格更优 {us} 级 + 同分 {ut} 级）"
+        L.append(f"- **Lv{e['lv']} {e['cls']}**（{e['tier']}，判定值 {e['roll']}，成功率 {e['pct']}%，{use_txt}）：{e['why']}")
         if e.get("trainSkills"):
             L.append(f"  - 🎯 Lv{e['lv']} 考试前练好：{'、'.join(e['trainSkills'])}（共 {e['trainRanks']} 段）")
         tm = e.get("timing") or []
         if tm:
-            L.append(f"  - 换到别的乱数考（现在减它，同样多的乱数；①考试用掉的乱数 ②用不同职业升级 ③保底）：")
+            L.append(f"  - 换到别的乱数考（现在减它，同样多的乱数；①考试用掉的乱数 ②用不同职业升级 ③转职保底）：")
             for t in tm:
                 f = lambda x: f"{x['pts']:+d} 点/{x['w']:+d}"
                 L.append(f"    - Lv{t['lv']}（第 {t['step'] + 1} 个乱数，判定值 {t['roll']}，成功率 {t['pct']}%）：①{f(t['exam'])} ②{f(t['cls'])} ③{f(t['floor'])} → 合计 {f(t['total'])}，金币 {t['gold']:+d}G")

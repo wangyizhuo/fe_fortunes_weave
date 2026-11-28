@@ -110,6 +110,9 @@ def build_rules_meta(cfg: Any, tiers_data: dict[str, Any] | None = None) -> dict
         "trainCase": cfg.train_case,
         "requireMidRule": True,
         "balanceMinWeight": 4,
+        "horizonMaxLevel": cfg.horizon_max_level,
+        "stopOnBadAtOrAfter": cfg.stop_on_bad_at_or_after,
+        "p0IgnoreGold": not cfg.gold_per_pt.get("P0") or cfg.gold_per_pt.get("P0") <= 0,
         "characterTierSource": td.get("source", ""),
         "characterTierScale": td.get("scale", []),
         "priorityLinkNote": td.get("priorityLinkNote", ""),
@@ -219,6 +222,7 @@ def build_route_data() -> dict[str, Any]:
                 "planTotal": plan.total,
                 "exams": plan.exams,
                 "thr": list(p.thresholds),
+                "stopAdv": getattr(plan, "stop_adv", None),
             })
 
             # 多转一个中级对比 + 替换当前中级对比（统一拆分为「升级乱数能力差」与「额外考试耗掉的乱数」，附带技能训练差与推荐度排序）
@@ -238,7 +242,8 @@ def build_route_data() -> dict[str, Any]:
                     g_old = [u + v for u, v in zip(g_old, rr.gains)]
 
             def _analyze_variant(cls_: str, new_acts: list[tuple[str, str]], new_total: int, new_gold: int, replaces: str = "") -> dict[str, Any]:
-                used_ = sum(1 for a_, x_ in new_acts if a_ == "升级" and x_ == cls_)
+                ub_ = p.class_usage_breakdown(new_acts, cls_)
+                used_ = ub_["used"]
                 g_new, lv_o, lv_n = [0] * 9, p.level, p.level
                 same_up_diff = [0] * 9
                 lost_items: list[str] = []
@@ -331,6 +336,8 @@ def build_route_data() -> dict[str, Any]:
                     "dnet": dnet_raw,
                     "dnetReal": dnet_real,
                     "used": used_,
+                    "usedStrict": ub_["strict"],
+                    "usedTied": ub_["tied"],
                     "diff": pts_r,
                     "dpts": sum(dg),
                     "upDiff": up_diff_txt,
@@ -456,9 +463,10 @@ def build_route_data() -> dict[str, Any]:
                         n_use += 1
                         dg = [u + v - w_ for u, v, w_ in zip(dg, r.gains, ga)]
                         dsc += r.score - p.result(r.step, lvr, alt)[0]
+                ub_seg = p.class_usage_breakdown(plan.raw_actions, cls_)
                 txt = "、".join(f"{STATS[i]}{dg[i]:+d}" for i in range(9) if dg[i]) or "能力一样"
-                x.extend([n_use, txt, dsc])
-            use_info = {x[1]: x[4:7] for x in seg if x[0] == "exam" and x[1] and len(x) > 4}
+                x.extend([n_use, txt, dsc, ub_seg["strict"], ub_seg["tied"]])
+            use_info = {x[1]: x[4:9] for x in seg if x[0] == "exam" and x[1] and len(x) > 4}
 
             c["route"] = seg
             c["trend"] = {"cur": cur_cls, "n": p.n_seeds, "stay": stay, "best0": best0}
@@ -541,7 +549,7 @@ def build_route_data() -> dict[str, Any]:
                     "ranks": (getattr(p, "exam_train_ranks", {}) or {}).get(s_["cls"], 0),
                 }
                 for s_ in c["steps"]
-                if s_.get("src") == "plan" and s_["exam"] and s_.get("train") and s_["trainOk"] and s_["cls"] in used
+                if s_.get("src") == "plan" and s_["exam"] and s_.get("train") and s_["trainOk"] and (s_["cls"] in used or bool(s_.get("floor")))
             ]
 
         # 3) 合并档案、期望、长线、Lv45、攻略与长期选择

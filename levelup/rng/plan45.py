@@ -27,9 +27,9 @@ def adv_ok(name, cls):
 
 
 def net(p, plan):
-    """总分 − 每次转职的门槛（中级/上级按中级门槛，初级/跳过按初级门槛）：比较不同转职次数的路线用。"""
-    from planner import plan_gold
-    return plan.total - plan_gold(p, plan) / p.gold_per_pt   # 11-08 晚：门槛按手形金币（和 DP 同一套成本）
+    """总分 − 手形金币扣分（P0 不扣金币）：比较不同转职次数的路线用。"""
+    from planner import plan_gold, gold_cost
+    return plan.total - gold_cost(plan_gold(p, plan), p.gold_per_pt)
 
 
 def best_net(p, k):

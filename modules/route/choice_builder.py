@@ -343,7 +343,7 @@ def build_route_proposals() -> list[dict[str, Any]]:
         tier = R.tier_of(name)
         pol = DEFAULT_TIER_POLICIES[tier]
         _, lv = R.current_state(name)
-        target = max(R.HORIZON_MIN_LEVEL, lv + R.HORIZON_MIN_STEPS)
+        target = min(R.HORIZON_MAX_LEVEL, max(R.HORIZON_MIN_LEVEL, lv + R.HORIZON_MIN_STEPS))
 
         # 1) 旧基准路线（当前 golden 基线）
         p_old = R.make_planner(name, target)
@@ -393,11 +393,15 @@ def build_route_proposals() -> list[dict[str, Any]]:
             and list(best.breakdown.stat_vector) == old_tot_g
         )
 
-        marginals_packed = [
-            {
+        marginals_packed = []
+        for m in res.marginal_gains:
+            ub = p_new.class_usage_breakdown(best.actions, m.cls)
+            marginals_packed.append({
                 "cls": m.cls,
                 "isRequired": m.is_required,
                 "usedLevels": m.used_levels,
+                "strictUsedLevels": ub["strict"],
+                "tiedUsedLevels": ub["tied"],
                 "statDiff": list(m.delta_stat_vector),
                 "statDiffText": _fmt_stat_diff(m.delta_stat_vector),
                 "deltaPts": m.delta_pts,
@@ -408,9 +412,7 @@ def build_route_proposals() -> list[dict[str, Any]]:
                 "deltaMasteryLv": m.delta_mastery_lv,
                 "deltaNet": round(m.delta_net, 1),
                 "deltaObjective": round(m.delta_objective, 2),
-            }
-            for m in res.marginal_gains
-        ]
+            })
 
         options: list[dict[str, Any]] = []
         if same_as_old:

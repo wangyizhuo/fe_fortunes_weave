@@ -4,7 +4,9 @@
   "shotKey": "shot_1125",
   "horizon": {
     "minLevel": 35,
-    "minSteps": 15
+    "minSteps": 15,
+    "maxLevel": 37,
+    "stopOnBadAtOrAfter": 34
   },
   "renown": 6,
   "maxExams": 4,
@@ -35,7 +37,7 @@
     "高级": 3000
   },
   "goldPerPt": {
-    "P0": 62.5,
+    "P0": 0,
     "other": 41.666666666666664,
     "P2": 31.25
   },

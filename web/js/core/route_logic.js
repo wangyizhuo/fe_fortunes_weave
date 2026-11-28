@@ -521,7 +521,9 @@
     const cands = [
       {
         cls: "不考新职业（基准）",
+        baseCls: null,
         isBaseline: true,
+        floorOnly: false,
         lv: null,
         g: Array(stats.length).fill(0),
         pts: 0,
@@ -532,8 +534,10 @@
         ruleBlocked: false,
       },
       ...okOpts.map(x => ({
-        cls: x.cls,
+        cls: x.floorOnly ? `${x.cls}（仅吃转职保底）` : x.cls,
+        baseCls: x.cls,
         isBaseline: false,
+        floorOnly: !!x.floorOnly,
         lv: x.lv,
         g: x.toT.g,
         pts: U.psum(x.toT.g),
