@@ -64,9 +64,9 @@ class TestBrowserE2E(unittest.TestCase):
     def setUp(self):
         args = ["--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage", "--disable-setuid-sandbox"]
         try:
-            self.browser = self.pw.chromium.launch(args=args)
-        except Exception:
             self.browser = self.pw.chromium.launch(channel="chromium", args=args)
+        except Exception:
+            self.browser = self.pw.chromium.launch(args=args)
 
     def tearDown(self):
         if getattr(self, "browser", None):
@@ -77,6 +77,24 @@ class TestBrowserE2E(unittest.TestCase):
         ctx.route("**/*fonts.g*/*", lambda r: r.fulfill(status=200, content_type="text/css", body=""))
         page = ctx.new_page()
         return ctx, page
+
+    def _goto_safe(self, ctx, page, url: str, on_new_page=None):
+        """在容器环境中若 Chromium 渲染进程偶发崩溃，重建标签页重试导航（不吞 JS/断言错误）。"""
+        for attempt in range(3):
+            try:
+                page.goto(url, wait_until="domcontentloaded")
+                return page
+            except Exception as exc:
+                if "Page crashed" not in str(exc) or attempt == 2:
+                    raise
+                try:
+                    page.close()
+                except Exception:
+                    pass
+                page = ctx.new_page()
+                if on_new_page:
+                    on_new_page(page)
+        return page
 
     def test_all_tabs_desktop_and_mobile_no_errors_no_overflow(self):
         import json as _json
@@ -96,19 +114,22 @@ class TestBrowserE2E(unittest.TestCase):
             console_errors = []
             failed_reqs = []
 
-            page.on("pageerror", lambda err: page_errors.append(str(err)))
-            page.on("console", lambda msg: console_errors.append(msg.text) if msg.type == "error" else None)
-            page.on(
-                "response",
-                lambda resp: (
-                    fetched_json.add(resp.url.split("/")[-1]) if resp.url.endswith(".json") and resp.status == 200 else None,
-                    failed_reqs.append(f"{resp.status} {resp.url}") if resp.status >= 400 and "fonts.googleapis" not in resp.url else None,
-                ),
-            )
+            def _bind(pg):
+                pg.on("pageerror", lambda err: page_errors.append(str(err)))
+                pg.on("console", lambda msg: console_errors.append(msg.text) if msg.type == "error" else None)
+                pg.on(
+                    "response",
+                    lambda resp: (
+                        fetched_json.add(resp.url.split("/")[-1]) if resp.url.endswith(".json") and resp.status == 200 else None,
+                        failed_reqs.append(f"{resp.status} {resp.url}") if resp.status >= 400 and "fonts.googleapis" not in resp.url else None,
+                    ),
+                )
+
+            _bind(page)
 
             for idx, tab in enumerate(ALL_TABS):
                 if idx == 0:
-                    page.goto(f"{self.base_url}#{tab}", wait_until="domcontentloaded")
+                    page = self._goto_safe(ctx, page, f"{self.base_url}#{tab}", _bind)
                 else:
                     page.evaluate("t => { location.hash = '#' + t; }", tab)
                 page.wait_for_selector("#view > *", timeout=20000)
@@ -169,7 +190,8 @@ class TestBrowserE2E(unittest.TestCase):
         page.on("pageerror", lambda err: page_errors.append(str(err)))
 
         # 1) 友好度培养：四大主角、待挖角名册与迪线已满足筛选 + 菜单搜索
-        page.goto(f"{self.base_url}#meal", wait_until="domcontentloaded")
+        on_err = lambda pg: pg.on("pageerror", lambda err: page_errors.append(str(err)))
+        page = self._goto_safe(ctx, page, f"{self.base_url}#meal", on_err)
         page.wait_for_selector("#affQuery")
         meal_txt = page.inner_text("#view")
         for lord in ("迪托利希", "蕾达", "凯伊", "赛奥朵拉"):
@@ -269,8 +291,10 @@ class TestBrowserE2E(unittest.TestCase):
         self.assertNotIn("萨满巫师", adv_txt)
         page.click('button[data-cls-clear]')
         page.wait_for_timeout(80)
-        # 职业保底每属性一列 + 阶段内独立排序（点击 防 降序/升序，初级与中级各自独立排序不跨阶段混排）
+        # 职业保底每属性一列 + 阶段内独立排序（点击 防 降序/升序，初级与中级各自独立排序不跨阶段混排）+ 数值列宽度守卫
         self.assertIn("职业保底 / 转职保底（每属性一列", page.inner_text("#view"))
+        max_num_w = page.evaluate("""() => Math.max(...[...document.querySelectorAll('table.cls-tbl td.n')].map(td => Math.round(td.getBoundingClientRect().width)))""")
+        self.assertLessEqual(max_num_w, 90, f"职业表格数值列异常撑宽：{max_num_w}px > 90px")
         page.locator('button[data-cls-sort="min:def"]').first.click()
         page.wait_for_timeout(100)
         sorted_desc = page.evaluate("""() => ({
@@ -488,10 +512,11 @@ class TestBrowserE2E(unittest.TestCase):
         self.assertIn("待处理 1", saved_txt)
 
         # 重新打开页面确认方案选择 + Plan Mode 批注均已保存在浏览器 localStorage
+        page2 = ctx.new_page()
         page.close()
-        page = ctx.new_page()
-        page.on("pageerror", lambda err: page_errors.append(str(err)))
-        page.goto(f"{self.base_url}#mine", wait_until="domcontentloaded")
+        page = page2
+        on_err(page)
+        page = self._goto_safe(ctx, page, f"{self.base_url}#mine", on_err)
         page.wait_for_selector('input[data-rpick="努蒂奴"]')
         self.assertTrue(page.is_checked('input[data-rpick="努蒂奴"][value="safe_fallback"]'))
         self.assertIn("你已选择：Lv18 考重装步兵", page.inner_text("#view"))

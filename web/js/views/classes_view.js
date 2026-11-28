@@ -202,8 +202,10 @@
 
         const g = c.growth || {};
         const growthCells = CL.STAT_KEYS.map(k => fmtGrowthCell(g[k], sortKey === `growth:${k}`)).join("");
-        const growthLvExtra = (c.growthLv || []).length
-          ? `<br><small class="hint">${U.esc(c.growthLvNote || "随等级提升成长率")}</small>`
+        const hasGrowthLv = (c.growthLv || []).length > 0;
+        const growthLvTip = c.growthLvNote || "随等级提升成长率";
+        const growthLvBadge = hasGrowthLv
+          ? `<br><span class="tag ok cls-lv-tag" title="${U.esc(growthLvTip)}">Lv35↑</span>`
           : "";
 
         const ms = c.minStats || {};
@@ -224,6 +226,7 @@
           c.mastery && c.mastery !== "—"
             ? `<br><small>精通：<b>${LL.renderEntityLink(reg, "skill", c.mastery)}</b>${c.masteryExp ? ` (EXP ${c.masteryExp})` : ""}</small>`
             : "",
+          hasGrowthLv ? `<br><small class="hint">${U.esc(growthLvTip)}</small>` : "",
         ].join("");
 
         return `<tr class="${isFocused ? "ent-focused" : ""}" data-cls-name="${U.esc(c.name)}"${isFocused ? ' data-ent-focused="true"' : ""}>
@@ -231,11 +234,11 @@
           <td class="cls-skills"><div class="sk-list">${skillPills}</div></td>
           <td class="cls-prof">${advPills}${weakPills}</td>
           ${growthCells}
-          <td class="n${sortKey === "growth:total" ? " cls-sort-td" : ""}"><b>${c.growthTotal ?? 0}</b>${growthLvExtra}</td>
+          <td class="n cls-gtot${sortKey === "growth:total" ? " cls-sort-td" : ""}"><b>${c.growthTotal ?? 0}</b>${growthLvBadge}</td>
           ${minCells}
           <td class="n cls-min-tot${sortKey === "min:total" ? " cls-sort-td" : ""}">${minTot > 0 ? `<b>${minTot}</b>` : `<span class="cls-z">—</span>`}</td>
-          <td class="note cls-grp-sep">${reqBits}</td>
-          <td class="note">${skillBits}</td>
+          <td class="note cls-grp-sep cls-req">${reqBits}</td>
+          <td class="note cls-innate">${skillBits}</td>
         </tr>`;
       }).join("");
 
@@ -248,11 +251,11 @@
         <h2>${U.esc(grp.tier)}职业（${grp.classes.length} 个${U.esc(expNote)}）${sortLabel ? `<small class="hint" style="margin-left:8px;font-weight:400">按 ${U.esc(sortLabel)} ${sortDir === "desc" ? "↓" : "↑"}</small>` : ""}</h2>
         <div class="scroll"><table class="cls-tbl">
           <tr>
-            <th rowspan="2">职业</th>
+            <th rowspan="2" class="cls-sticky-th">职业</th>
             <th rowspan="2">可用技能</th>
             <th rowspan="2">优势 / 劣势属性</th>
-            <th colspan="10" class="grp">成长率补正（%，点击属性可阶段内排序）</th>
-            <th colspan="10" class="grp cls-grp-sep">职业保底 / 转职保底（每属性一列，点击可阶段内排序）</th>
+            <th colspan="10" class="grp">成长率补正（% · 点击排序）</th>
+            <th colspan="10" class="grp cls-grp-sep">职业保底 / 转职保底（每属性一列 · 点击排序）</th>
             <th rowspan="2" class="cls-grp-sep">转职要求 / 技能 EXP</th>
             <th rowspan="2">固有特技 / 精通</th>
           </tr>
