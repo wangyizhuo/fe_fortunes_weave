@@ -16,6 +16,8 @@ class RouteConfig:
     shot_key: str
     horizon_min_level: int
     horizon_min_steps: int
+    horizon_max_level: int
+    stop_on_bad_at_or_after: int
     renown: int | None
     max_exams: int
     equal_seeds: bool
@@ -114,6 +116,8 @@ def load_route_config(path: str | Path = DEFAULT_ROUTE_CONFIG) -> RouteConfig:
         shot_key=raw["shotKey"],
         horizon_min_level=raw["horizon"]["minLevel"],
         horizon_min_steps=raw["horizon"]["minSteps"],
+        horizon_max_level=raw["horizon"].get("maxLevel", 37),
+        stop_on_bad_at_or_after=raw["horizon"].get("stopOnBadAtOrAfter", 34),
         renown=raw.get("renown"),
         max_exams=raw["maxExams"],
         equal_seeds=bool(raw["equalSeeds"]),

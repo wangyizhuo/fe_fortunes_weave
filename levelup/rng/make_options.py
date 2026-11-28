@@ -9,7 +9,7 @@
 """
 import json, os
 import run_plans as R
-from planner import STATS
+from planner import STATS, gold_cost
 from compare import seed_diff, exam_seed_summary
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -27,10 +27,10 @@ def planner(name, target, train):
     return p
 
 
-def run(p, targets, S=None):
+def run(p, targets, S=None, no_level=()):
     p.seed_budget = S
     try:
-        r = p.rule_run(list(dict.fromkeys(list(p.required) + targets)), tuple(targets))
+        r = p.rule_run(list(dict.fromkeys(list(p.required) + targets)), tuple(targets), no_level=no_level)
     finally:
         p.seed_budget = None
     if r is None:
@@ -44,8 +44,13 @@ def run(p, targets, S=None):
             done += 1
         elif c not in (None, "跳过"):
             lv_exam.setdefault(c, (st, p.level + done))
-    return dict(acts=acts, total=total, gold=gold, g=g, net=p.plan_net(acts, total, gold), end=p.level + done,
-                train=p.train_ranks(acts), floor=p.floor_lifts(acts), lv_exam=lv_exam, used=used)
+    fl = p.floor_lifts(acts)
+    for lifts in fl.values():
+        for i, x, v in lifts:
+            g[i] += v - x
+    floor_w = p.floor_value(acts)
+    return dict(acts=acts, total=total + floor_w, gold=gold, g=g, net=p.plan_net(acts, total, gold), end=p.level + done,
+                train=p.train_ranks(acts), floor=fl, floorW=floor_w, lv_exam=lv_exam, used=used)
 
 
 def eq(p, ta, tb):
@@ -56,6 +61,7 @@ def eq(p, ta, tb):
 def diff(a, b, p=None, label_a="考它", label_b="不考基准"):
     out = {"g": [x - y for x, y in zip(a["g"], b["g"])], "total": a["total"] - b["total"],
            "net": round(a["net"] - b["net"], 1), "gold": a["gold"] - b["gold"], "train": a["train"] - b["train"],
+           "floorW": a.get("floorW", 0) - b.get("floorW", 0),
            "seeds": len(a["acts"]), "endA": a["end"], "endB": b["end"]}
     if p is not None:
         out["seedDiff"] = exam_seed_summary(seed_diff(p, a["acts"], b["acts"]), label_a, label_b)
@@ -142,6 +148,7 @@ def skip_mid(name, target):
                 row["opts"].append(dict(o, ok=False, why="照规则走不通"))
                 continue
             m = _metrics(q, r[0], r[2], r[3])
+            ub = q.class_usage_breakdown(r[0], c)
             # 考进去却没用来升级：页面上会显示成「跳过」，金币按初级算，但保底照拿
             if not m["used"].get(c):
                 m["gold"] -= p.permit_gold[MID] - p.permit_gold["初级"]
@@ -149,16 +156,54 @@ def skip_mid(name, target):
                  "total": round(m["total"] - base["total"], 1),
                  "floorPts": m["floorPts"] - base["floorPts"], "floorW": m["floorW"] - base["floorW"],
                  "gold": m["gold"] - base["gold"], "seeds": S, "endA": m["end"], "endB": base["end"]}
-            # 只用来排序/标记：规划器内部换算（加权分 + 保底 − 金币÷每分金币 − 段×每段扣分），页面不合成一个数
-            inner = d["total"] + d["floorW"] - d["gold"] / p.gold_per_pt - o["ranks"] * R.TRAIN_PTS[R.tier_of(name)]
+            # 只用来排序/标记：规划器内部换算（加权分 + 转职保底 − 金币折算 − 段×每段扣分），页面不合成一个数
+            inner = d["total"] + d["floorW"] - gold_cost(d["gold"], p.gold_per_pt) - o["ranks"] * R.TRAIN_PTS[R.tier_of(name)]
             later = [(x, c2) for x, (a2, c2) in enumerate(r[0]) if a2 == "考试" and x != st]
-            o.update(d=d, used=m["used"].get(c, 0), floor=[f for f in m["floor"] if f not in base["floor"]],
+            o.update(d=d, used=ub["used"], usedStrict=ub["strict"], usedTied=ub["tied"],
+                     floor=[f for f in m["floor"] if f not in base["floor"]],
                      worth=inner >= R.MIN_EXAM_GAIN and not o["ruleBlocked"], inner=round(inner, 1),
                      acts=[f"{'跳过' if c2 == '跳过' else '考' + c2}@{x}" for x, c2 in later])
             row["opts"].append(o)
         row["opts"].sort(key=lambda o: (not o["ok"], -o.get("inner", -999)))
         out.append(row)
     return {"target": target, "seeds": S, "skips": out, "baseExams": [c for a, c in base_acts if a == "考试"]}
+
+
+def floor_only_option(P, bT, c, name, rec, blocked):
+    """11-27 Yizhuo：显式评估「只考进该职业吃转职保底、全程不用它升级」的方案（如努蒂奴重装步兵只吃防保底、仍用飞鸵兵升级）。"""
+    if not (getattr(P, "floors", None) or {}).get(c) or not bT:
+        return None
+    best = None
+    sv_ea = getattr(P, "exam_at", None)
+    try:
+        for st in range(P.n_seeds):
+            P.exam_at = {**(sv_ea or {}), st: c}
+            a_fo = run(P, [c], no_level=(c,))
+            if not a_fo or st >= len(a_fo["acts"]) or a_fo["acts"][st] != ("考试", c):
+                continue
+            if st not in a_fo["floor"]:
+                continue   # 这一步考进去没有触发转职保底，不算「仅吃转职保底」
+            key = (a_fo["total"], sum(a_fo["g"]), -a_fo["gold"], -st)
+            if best is None or key > best[0]:
+                best = (key, st, a_fo)
+    finally:
+        P.exam_at = sv_ea
+    if best is None:
+        return None
+    _, st, a_fo = best
+    lv = a_fo["lv_exam"][c][1]
+    dT = diff(a_fo, bT, P, f"仅吃{c}转职保底", "不考基准")
+    if rec and rec.raw_actions:
+        dT["seedDiffVsRoute"] = exam_seed_summary(seed_diff(P, a_fo["acts"], rec.raw_actions), f"仅吃{c}转职保底", "现在路线")
+    return {
+        "cls": c, "tier": R._TIER_OF(c), "ok": True, "floorOnly": True, "lv": lv, "roll": round(P.exam_value(st), 2),
+        "pct": P.exam_pct(c, lv), "pctNow": now_pct(name, c, lv),
+        "train": (P.exam_train.get(c) or []) if P.exam_train_ranks.get(c) else [], "ranks": P.exam_train_ranks.get(c, 0),
+        "used": 0, "usedStrict": 0, "usedTied": 0, "used45": 0,
+        "floor": [f"{STATS[i]} {x}→{v}" for lifts in a_fo["floor"].values() for i, x, v in lifts],
+        "toT": dT, "after": None, "rec": False,
+        "ruleBlocked": blocked,
+    }
 
 
 @__import__("timing").timed("make_options.build（每人）")
@@ -201,6 +246,7 @@ def build(name):
             out["options"].append({"cls": c, "tier": R._TIER_OF(c), "ok": False, "why": "到目标级前没有能考过的种子"})
             continue
         st, lv = aT["lv_exam"][c]
+        ub = P.class_usage_breakdown(aT["acts"], c)
         dT = diff(aT, bT, P, f"考{c}", "不考基准")
         if rec and rec.raw_actions:
             dT["seedDiffVsRoute"] = exam_seed_summary(seed_diff(P, aT["acts"], rec.raw_actions), f"考{c}", "现在路线")
@@ -211,12 +257,17 @@ def build(name):
             "cls": c, "tier": R._TIER_OF(c), "ok": True, "lv": lv, "roll": round(P.exam_value(st), 2),
             "pct": P.exam_pct(c, lv), "pctNow": now_pct(name, c, lv),
             "train": (P.exam_train.get(c) or []) if P.exam_train_ranks.get(c) else [], "ranks": P.exam_train_ranks.get(c, 0),
-            "used": aT["used"].get(c, 0), "used45": (a45 or {}).get("used", {}).get(c, 0),
+            "used": ub["used"], "usedStrict": ub["strict"], "usedTied": ub["tied"], "used45": (a45 or {}).get("used", {}).get(c, 0),
             "floor": [f"{STATS[i]} {x}→{v}" for lifts in aT["floor"].values() for i, x, v in lifts],
             "toT": dT, "after": after, "rec": c in out["recommended"],
             "ruleBlocked": blocked})
+        # 若该职业存在转职保底且常规方案里用它升了级，额外列出「仅吃转职保底、升级不切它」方案供对比
+        if ub["used"] > 0:
+            fo = floor_only_option(P, bT, c, name, rec, blocked)
+            if fo:
+                out["options"].append(fo)
     out["skipMid"] = [skip_mid(name, T)] + ([skip_mid(name, 45)] if T < 45 else [])
-    out["options"].sort(key=lambda o: (not o.get("ok"), -(o.get("toT", {}).get("total", -999))))
+    out["options"].sort(key=lambda o: (not o.get("ok"), -(o.get("toT", {}).get("total", -999)), bool(o.get("floorOnly"))))
     return out
 
 
@@ -227,5 +278,6 @@ if __name__ == "__main__":
         print(n, v["tier"], f"Lv{v['level']}→{v['target']}", "推荐", v["recommended"])
         for o in v["options"][:6]:
             if o.get("ok"):
-                print(f"   {o['cls']}{'*' if o['rec'] else ''} Lv{o['lv']} 判定{o['roll']} 估{o['pct']} 练{o['ranks']} 用{o['used']}/{o['used45']} "
-                      f"到{v['target']} 净{o['toT']['net']:+} 分{o['toT']['total']:+} 金{o['toT']['gold']:+} 之后 净{o['after']['net'] if o['after'] else '—'}")
+                tag = "[仅吃转职保底]" if o.get("floorOnly") else ("*" if o["rec"] else "")
+                print(f"   {o['cls']}{tag} Lv{o['lv']} 判定{o['roll']} 估{o['pct']} 练{o['ranks']} 用{o['used']}({o.get('usedStrict',0)}优+{o.get('usedTied',0)}同) "
+                      f"到{v['target']} 净{o['toT']['net']:+} 分{o['toT']['total']:+} 金{o['toT']['gold']:+}")

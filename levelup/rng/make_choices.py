@@ -178,7 +178,7 @@ for name in ORDER:
     bm = next((o.get("money") for o in opts if o.get("cur")), None)
     for o in opts:
         if o.get("money") is not None and bm is not None:
-            o["dnet"] = round(o["gain"] - (o["money"] - bm) / gpp, 1)
+            o["dnet"] = round(o["gain"] - (0.0 if not gpp or gpp <= 0 else (o["money"] - bm) / gpp), 1)
             if o["kind"] == "budget" and not o["cur"]:
                 o["rec"] = "可选" if o["dnet"] > 0 else "不建议"
                 o["why"] = f"加权分 {o['gain']:+d}，金币 {o['money'] - bm:+d}G"

@@ -157,9 +157,9 @@ class TestClassesModule(unittest.TestCase):
         self.assertEqual(by_name["伊欧"]["tier"], "P1")
         self.assertEqual(by_name["伊欧"]["strengthTier"], "B")
         self.assertEqual(by_name["迪托利希"]["strengthTier"], "S")
-        for confirmed in ("伊欧", "奇洛伊卡", "米迦艾拉", "杨界"):
+        for confirmed in ("伊欧", "奇洛伊卡", "米迦艾拉", "杨界", "乌尔坦德"):
             self.assertEqual(by_name[confirmed]["defaultPick"], "new_best")
-        for pending in ("迪托利希", "努蒂奴", "乌尔坦德", "法毕欧", "艾丝梅拉尔达"):
+        for pending in ("迪托利希", "努蒂奴", "法毕欧", "艾丝梅拉尔达"):
             self.assertIsNone(by_name[pending]["defaultPick"])
         # 努蒂奴必须同时有 new_best (含 S/L 提醒 + 9项具体能力差) 与 safe_fallback
         nu_opts = {o["id"]: o for o in by_name["努蒂奴"]["options"]}

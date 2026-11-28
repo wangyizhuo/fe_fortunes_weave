@@ -188,7 +188,7 @@ def build(name):
                           req=f["cls"] in REQUIRED.get(name, []),
                           # 11-11：净值差 = 加权分差 − 多花的手形金币 ÷ 每分金币
                           dgold=(getattr(plan, "gold", 0) or 0) - (getattr(alt, "gold", 0) or 0),
-                          net=round(plan.total - alt.total - ((getattr(plan, "gold", 0) or 0) - (getattr(alt, "gold", 0) or 0)) / q.gold_per_pt, 1)))
+                          net=round(plan.total - alt.total - __import__("planner").gold_cost((getattr(plan, "gold", 0) or 0) - (getattr(alt, "gold", 0) or 0), q.gold_per_pt), 1)))
 
     return dict(
         name=name, weights=W,

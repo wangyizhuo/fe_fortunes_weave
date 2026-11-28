@@ -73,11 +73,13 @@ P0 = CFG.p0
 P2 = CFG.p2
 PERMIT_GOLD = CFG.permit_gold
 GOLD_PER_PT = CFG.gold_per_pt
-THRESHOLDS = {k: (round(500 / v, 1), round(300 / v, 1)) for k, v in GOLD_PER_PT.items()}
+THRESHOLDS = {k: ((0.0, 0.0) if not v or v <= 0 else (round(500 / v, 1), round(300 / v, 1))) for k, v in GOLD_PER_PT.items()}
 P2_SKIP_BELOW = CFG.p2_skip_below
 ORDER = CFG.order
 HORIZON_MIN_LEVEL = CFG.horizon_min_level
 HORIZON_MIN_STEPS = CFG.horizon_min_steps
+HORIZON_MAX_LEVEL = CFG.horizon_max_level
+STOP_ON_BAD_AT_OR_AFTER = CFG.stop_on_bad_at_or_after
 TRAIN_ALLOWED = CFG.train_allowed
 TRAIN_PTS = CFG.train_pts
 MIN_EXAM_GAIN = CFG.min_exam_gain
@@ -178,7 +180,7 @@ def current_state(name):
     return seed, level + LEVEL_FIX.get(name, 0)
 
 
-TARGET = {n: max(HORIZON_MIN_LEVEL, current_state(n)[1] + HORIZON_MIN_STEPS) for n in ORDER}
+TARGET = {n: min(HORIZON_MAX_LEVEL, max(HORIZON_MIN_LEVEL, current_state(n)[1] + HORIZON_MIN_STEPS)) for n in ORDER}
 
 
 def records(name):
@@ -353,11 +355,12 @@ def make_planner(name, target=None):
     p.thresholds = THRESHOLDS[tier]
     p.gold_per_pt, p.permit_gold = GOLD_PER_PT[tier], dict(PERMIT_GOLD)
     p.rule_based = True
-    p.skip_threshold = P2_SKIP_BELOW if name in P2 else PERMIT_GOLD["初级"] / GOLD_PER_PT[tier]
+    p.skip_threshold = P2_SKIP_BELOW if name in P2 else (0.0 if not GOLD_PER_PT[tier] or GOLD_PER_PT[tier] <= 0 else PERMIT_GOLD["初级"] / GOLD_PER_PT[tier])
     p.skip_rule = SKIP_RULE[tier]
     p.no_skip_seeds = NO_SKIP_SEEDS.get(name, set())
     p.first_bad_exam = name not in P0
     p.bad_rule = SKIP_RULE["P0"]
+    p.stop_on_bad_at_or_after = STOP_ON_BAD_AT_OR_AFTER if (target is None or target <= HORIZON_MAX_LEVEL) else None
     p.exam_at_override = dict(EXAM_AT_OVERRIDE.get(name, {}))
     p.exam_req = {c: r for c in EXAM_OPTIONS.get(name, []) if (r := exam_req(name, c))}
     p.TRAIN_PTS_PER_RANK = TRAIN_PTS[tier_of(name)]

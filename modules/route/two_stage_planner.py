@@ -70,7 +70,7 @@ def prepare_goal_first_planner(name: str, target: int | None = None) -> tuple[Pl
 
     tier = rp.tier_of(name)
     _, lv = rp.current_state(name)
-    tgt = target if target is not None else max(rp.HORIZON_MIN_LEVEL, lv + rp.HORIZON_MIN_STEPS)
+    tgt = target if target is not None else min(rp.HORIZON_MAX_LEVEL, max(rp.HORIZON_MIN_LEVEL, lv + rp.HORIZON_MIN_STEPS))
     p = rp.make_planner(name, tgt)
 
     # 全员允许照常训练：把所有有技能缺口的候选职业转成可训练成本，不再区分特批/禁练
@@ -178,13 +178,16 @@ def simulate_fixed_exams(
             )
 
         best_c = max(owned, key=val)
-        sbest = val(best_c)
 
         want_skip = False
         if allow_skips and not keep:
-            fut = p._future15(step, lv, tuple(owned), tuple(w), cur_str)
-            c1 = sbest <= policy.skip_cap + 1e-6
-            c2 = sbest <= (sum(fut) / len(fut)) * (1 - policy.skip_pct) + 1e-6
+            s_skip = max(
+                p.result(step, lv, c)[0] + (p.str_gain_bonus(cur_str, p.result(step, lv, c)[1]) if cur_str is not None else 0)
+                for c in owned
+            )
+            fut = p._future15(step, lv, tuple(owned), tuple(p.weights), cur_str)
+            c1 = s_skip <= policy.skip_cap + 1e-6
+            c2 = s_skip <= (sum(fut) / len(fut)) * (1 - policy.skip_pct) + 1e-6
             want_skip = (c1 or c2) if policy.skip_or else (c1 and c2)
 
         if want_skip:
@@ -235,7 +238,7 @@ def simulate_fixed_exams(
         mastery_levels=mastery_lv,
         mastery_bonus=round(mastery_lv * policy.mastery_pts_per_lv, 3),
         gold=gold,
-        gold_penalty=round(gold / policy.gold_per_pt, 3),
+        gold_penalty=0.0 if policy.gold_per_pt <= 0 else round(gold / policy.gold_per_pt, 3),
         train_ranks=train_rk,
         train_penalty=round(train_rk * policy.train_pts_per_rank, 3),
         raw_points=sum(tot_g),

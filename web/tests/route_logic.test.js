@@ -249,10 +249,11 @@ test("summarizeNextActions sorts by P0→P1→P2 and extracts next exam, switch,
   assert.deepEqual(groups[2].chars.map(c => c.name), ["努蒂奴", "乌尔坦德"]);
 });
 
-test("summarizeOptionHighlights ranks top core-stat pair and single stats including baseline", () => {
+test("summarizeOptionHighlights ranks top core-stat pair and single stats including baseline and floorOnly", () => {
   const optObj = {
     options: [
-      { cls: "重装步兵", ok: true, lv: 16, floor: ["防 7→10"], toT: { g: [0, 2, -1, -4, 2, 4, -1, 1, 2], total: 11, gold: 500 } },
+      { cls: "重装步兵", ok: true, lv: 16, floor: ["防 7→10"], toT: { g: [0, 2, -1, -4, 2, 7, -1, 1, 2], total: 20, gold: 500 } },
+      { cls: "重装步兵", ok: true, floorOnly: true, lv: 22, floor: ["防 8→10"], toT: { g: [0, 0, 0, 0, 0, 1, 0, -1, -1], total: 0, gold: 500 } },
       { cls: "斗士", ok: true, lv: 21, floor: [], toT: { g: [0, 1, 0, -1, 0, 0, 0, -1, 0], total: -2, gold: 300 } },
       { cls: "猎兵", ok: true, lv: 26, floor: [], toT: { g: [0, -1, 0, 0, 0, 0, 0, 0, 0], total: -8, gold: 300 } },
     ],
@@ -262,6 +263,7 @@ test("summarizeOptionHighlights ranks top core-stat pair and single stats includ
   assert.equal(hi.statB, "速");
   assert.equal(hi.pairBest, 0);
   assert.equal(hi.pairTop[0].cls, "不考新职业（基准）");
+  assert.ok(hi.pairTop.some(x => x.floorOnly && x.cls === "重装步兵（仅吃转职保底）" && x.baseCls === "重装步兵"));
   assert.equal(hi.statATop[0].cls, "重装步兵");
   assert.equal(hi.weightedTop[0].cls, "重装步兵");
 });

@@ -245,12 +245,16 @@ def p_owned_before_use():
     return bad
 
 
-@check("P2", "每人的路线都正好用掉 n_seeds 个乱数（到目标级的级数 + 1）：比较按用掉的乱数个数，不按到第几级（11-25 Yizhuo）")
+@check("P2", "每人的路线都正好用掉 n_seeds 个乱数（或 Lv34+ 遇差乱数留作上级转职提前停止）：比较按用掉的乱数个数，不按到第几级")
 def p_reach_target():
     bad = []
     for n in ORDER:
         p, pl = plan(n)
-        if len(pl.raw_actions) != p.n_seeds or p.n_seeds != TARGET[n] - p.level + p.EXTRA_SEEDS:
+        sa = getattr(pl, "stop_adv", None)
+        if sa is not None:
+            if len(pl.raw_actions) != sa["step"] or sa["lv"] < R.STOP_ON_BAD_AT_OR_AFTER:
+                bad.append(f"{n}：Lv34+ 停止位置异常（步数 {len(pl.raw_actions)}，stop_adv={sa}）")
+        elif len(pl.raw_actions) != p.n_seeds or p.n_seeds != TARGET[n] - p.level + p.EXTRA_SEEDS:
             bad.append(f"{n}：用了 {len(pl.raw_actions)} 个乱数，应为 {p.n_seeds}")
     return bad
 
@@ -341,14 +345,14 @@ def p_no_skip_seeds():
     return bad
 
 
-@check("P8", "考进去的新职业至少用来升一级，否则显示成跳过（Yizhuo：『后面没有用这个职业，如果是为了跳过就写跳过』）")
+@check("P8", "考进去的新职业至少用来升一级或吃到转职保底，否则显示成跳过")
 def p_exam_used():
     bad = []
     for n in ORDER:
         p, pl = plan(n)
         used = {r.cls for r in pl.rows if r.action == "升级"}
-        bad += [f"{n}：考了 {r.cls} 却没用来升级" for r in pl.rows
-                if r.action != "升级" and r.cls != "跳过" and r.cls not in used and r.cls not in p.keep_classes]
+        bad += [f"{n}：考了 {r.cls} 却既没用来升级也没吃到转职保底" for r in pl.rows
+                if r.action != "升级" and r.cls != "跳过" and r.cls not in used and r.cls not in p.keep_classes and not r.floor]
     return bad
 
 

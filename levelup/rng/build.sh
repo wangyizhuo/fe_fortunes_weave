@@ -21,13 +21,17 @@ now() { python3 -c 'import time; print(time.perf_counter())'; }
 elapsed() { python3 -c "print(f'{$2 - $1:.1f}')"; }
 
 step() {
-  local s=$1 a b i dt
+  local s=$1 a b i dt ok=0
   a=$(now)
-  for i in 1 2 3; do python3 "$s.py" > "$LOG/build_$s.log" 2>&1 && break; sleep 1; done || {
+  for i in 1 2 3; do
+    if python3 "$s.py" > "$LOG/build_$s.log" 2>&1; then ok=1; break; fi
+    sleep 1
+  done
+  if [ "$ok" != 1 ]; then
     echo "失败：$s"
-    tail -10 "$LOG/build_$s.log"
+    tail -15 "$LOG/build_$s.log"
     return 1
-  }
+  fi
   b=$(now)
   dt=$(elapsed "$a" "$b")
   printf "%s\t%s\n" "$s" "$dt" >> "$STEPS_LOG"
