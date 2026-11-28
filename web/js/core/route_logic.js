@@ -394,41 +394,90 @@
       let nextExam = null;
       let nextSkip = null;
       let nextSwitch = null;
+      let nextStop = null;
+      let followingStop = null;
       let prevCls = curClass;
 
       for (let i = 0; i < nx.length; i++) {
         const row = nx[i];
         const s = row.s;
+        let stopEntry = null;
         if (row.r.exam) {
           const ex = examName(s);
-          if (ex && !nextExam) {
-            nextExam = {
+          if (ex) {
+            if (!nextExam) {
+              nextExam = {
+                lv: row.frm,
+                cls: ex,
+                roll: s.roll ?? null,
+                pct: s.pct ?? null,
+                stepsAway: i,
+                train: s.train && s.trainOk ? [...s.train] : [],
+              };
+            }
+            stopEntry = {
+              kind: "exam",
               lv: row.frm,
               cls: ex,
+              fromCls: prevCls,
               roll: s.roll ?? null,
               pct: s.pct ?? null,
               stepsAway: i,
-              train: s.train && s.trainOk ? [...s.train] : [],
             };
-          } else if (!ex && !nextSkip) {
-            nextSkip = {
+          } else {
+            if (!nextSkip) {
+              nextSkip = {
+                lv: row.frm,
+                roll: s.roll ?? null,
+                stepsAway: i,
+              };
+            }
+            stopEntry = {
+              kind: "skip",
               lv: row.frm,
+              cls: "",
+              fromCls: prevCls,
               roll: s.roll ?? null,
+              pct: null,
               stepsAway: i,
             };
           }
         } else {
-          if (prevCls && row.choice && row.choice !== prevCls && !nextSwitch) {
-            nextSwitch = {
-              frm: row.frm,
+          if (row.missing) {
+            stopEntry = {
+              kind: "missing",
+              lv: row.frm,
+              to: row.to,
+              cls: row.choice,
+              fromCls: prevCls,
+              stepsAway: i,
+            };
+          } else if (prevCls && row.choice && row.choice !== prevCls) {
+            if (!nextSwitch) {
+              nextSwitch = {
+                frm: row.frm,
+                to: row.to,
+                fromCls: prevCls,
+                toCls: row.choice,
+                stepsAway: i,
+                missing: !!row.missing,
+              };
+            }
+            stopEntry = {
+              kind: "switch",
+              lv: row.frm,
               to: row.to,
               fromCls: prevCls,
               toCls: row.choice,
+              cls: row.choice,
               stepsAway: i,
-              missing: !!row.missing,
             };
           }
           if (row.choice) prevCls = row.choice;
+        }
+        if (stopEntry) {
+          if (!nextStop) nextStop = stopEntry;
+          else if (!followingStop) followingStop = stopEntry;
         }
       }
 
@@ -448,6 +497,8 @@
         endLevel: w.endLevel,
         remainingCount: nx.length,
         immediate,
+        nextStop,
+        followingStop,
         nextExam,
         nextSwitch,
         nextSkip,
@@ -455,6 +506,83 @@
         allTrains,
       };
     });
+  }
+
+  function summarizeOptionHighlights(optObj, weights, stats = U.DEFAULT_STATS) {
+    if (!optObj || !Array.isArray(optObj.options)) return null;
+    const okOpts = optObj.options.filter(x => x && x.ok && x.toT && Array.isArray(x.toT.g));
+    if (!okOpts.length) return null;
+    const wt = Array.isArray(weights) && weights.length === stats.length ? weights : [1, 5, 1, 5, 3, 2, 1, 1, 1];
+    // 取除 HP(0) 外权重最高的两项核心属性（例如物理角色为 力+速，法师为 魔+速）
+    const nonHpOrder = [1, 2, 3, 4, 5, 6, 7, 8].sort((a, b) => (wt[b] - wt[a]) || (a - b));
+    const idxA = nonHpOrder[0];
+    const idxB = nonHpOrder[1];
+
+    const cands = [
+      {
+        cls: "不考新职业（基准）",
+        isBaseline: true,
+        lv: null,
+        g: Array(stats.length).fill(0),
+        pts: 0,
+        total: 0,
+        gold: 0,
+        ranks: 0,
+        floor: [],
+        ruleBlocked: false,
+      },
+      ...okOpts.map(x => ({
+        cls: x.cls,
+        isBaseline: false,
+        lv: x.lv,
+        g: x.toT.g,
+        pts: U.psum(x.toT.g),
+        total: x.toT.total,
+        gold: x.toT.gold,
+        ranks: x.ranks || 0,
+        floor: x.floor || [],
+        ruleBlocked: !!x.ruleBlocked,
+      })),
+    ];
+
+    const pairVal = x => (x.g[idxA] || 0) + (x.g[idxB] || 0);
+    const byPair = [...cands].sort(
+      (a, b) => (pairVal(b) - pairVal(a))
+        || (Number(a.ruleBlocked) - Number(b.ruleBlocked))
+        || (b.total - a.total)
+        || (a.gold - b.gold)
+    );
+    const byA = [...cands].sort(
+      (a, b) => ((b.g[idxA] || 0) - (a.g[idxA] || 0))
+        || (pairVal(b) - pairVal(a))
+        || (b.total - a.total)
+        || (a.gold - b.gold)
+    );
+    const byB = [...cands].sort(
+      (a, b) => ((b.g[idxB] || 0) - (a.g[idxB] || 0))
+        || (pairVal(b) - pairVal(a))
+        || (b.total - a.total)
+        || (a.gold - b.gold)
+    );
+    const byW = [...cands].sort(
+      (a, b) => (b.total - a.total)
+        || (b.pts - a.pts)
+        || (a.gold - b.gold)
+    );
+
+    const bestPairScore = pairVal(byPair[0]);
+    const pairTop = byPair.filter((x, i) => i < 4 || pairVal(x) === bestPairScore).slice(0, 5);
+    return {
+      idxA,
+      idxB,
+      statA: stats[idxA],
+      statB: stats[idxB],
+      pairBest: bestPairScore,
+      pairTop,
+      statATop: byA.slice(0, 2),
+      statBTop: byB.slice(0, 2),
+      weightedTop: byW.slice(0, 2),
+    };
   }
 
   function diffOptionGains(optGains, baseGains, stats = U.DEFAULT_STATS) {
@@ -517,7 +645,7 @@
     charInfo, examName, isExamChoice, examChoiceCls, recOf, choiceOf, resultOf, stepName, eqName,
     examVerdict, walk, remain, findDecisions, compactRouteSegments, skipLevelsFor, buildSheetValues,
     resolveRoutePick, summarizeRoutePicks, formatRoutePicksExport,
-    tierOrderOf, sortCharsByTier, groupCharsByTier, summarizeNextActions, diffOptionGains,
+    tierOrderOf, sortCharsByTier, groupCharsByTier, summarizeNextActions, summarizeOptionHighlights, diffOptionGains,
     passableExamChoices, findEarlyExamSlot,
   };
 });

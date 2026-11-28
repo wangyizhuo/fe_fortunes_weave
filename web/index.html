@@ -20,14 +20,15 @@
           <button class="btn pri" id="syncBtn" type="button">同步到 Google Sheet</button>
         </span>
       </div>
-      <!-- 一级功能模块导航：友好度培养 / 道具与材料采集 / 探索规划 / 职业图鉴 / 技能图鉴 / 路线规划 -->
+      <!-- 一级功能模块导航：路线规划 / 友好度培养 / 探索规划 / 道具与材料采集 / 职业图鉴 / 技能图鉴 / 角色图鉴 -->
       <nav class="domains" id="domains" aria-label="功能模块">
-        <a href="#meal" data-domain="affinity">友好度培养<small>吃饭组合 · 支援挖角</small></a>
-        <a href="#items" data-domain="items">道具 / 材料采集<small>商店 · 以物易物 · 材料反查</small></a>
-        <a href="#explore" data-domain="explore">探索规划<small>优先级采集 · 地图标记</small></a>
-        <a href="#classes" data-domain="classes">职业图鉴<small>阶级总览 · 可用技能筛选</small></a>
-        <a href="#skills" data-domain="skills">技能图鉴<small>评级 · 通用/特有 · 角色表</small></a>
         <a href="#next" data-domain="route">路线规划<small>种子推演 · 转职 · 批注模式</small></a>
+        <a href="#meal" data-domain="affinity">友好度培养<small>吃饭组合 · 支援挖角</small></a>
+        <a href="#explore" data-domain="explore">探索规划<small>缺口交叉 · 优先级地图</small></a>
+        <a href="#items" data-domain="items">道具 / 材料采集<small>商店 · 武器评级 · 材料反查</small></a>
+        <a href="#classes" data-domain="classes">职业图鉴<small>阶级总览 · 可用技能筛选</small></a>
+        <a href="#skills" data-domain="skills">技能图鉴<small>评级 · 通用/特有 · 习得条件</small></a>
+        <a href="#chars" data-domain="chars">角色图鉴<small>63角色评级 · 熟练度 · 路线</small></a>
       </nav>
       <!-- 二级子导航（路线规划模块下展示） -->
       <nav class="tabs" id="routeTabs" aria-label="路线规划子视图">
@@ -53,6 +54,7 @@
 
   <!-- 纯核心逻辑层（零 DOM 依赖，Node.js 可直接单元测试） -->
   <script src="./js/core/utils.js"></script>
+  <script src="./js/core/links_logic.js"></script>
   <script src="./js/core/route_logic.js"></script>
   <script src="./js/core/affinity_logic.js"></script>
   <script src="./js/core/items_logic.js"></script>
@@ -68,6 +70,7 @@
   <script src="./js/views/explore_view.js"></script>
   <script src="./js/views/classes_view.js"></script>
   <script src="./js/views/skills_view.js"></script>
+  <script src="./js/views/chars_view.js"></script>
   <script src="./js/views/route_views.js"></script>
   <!-- 应用装配与路由入口 -->
   <script src="./js/app.js"></script>

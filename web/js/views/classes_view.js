@@ -2,6 +2,7 @@
 (function (root) {
   const U = root.FE.utils;
   const CL = root.FE.classesLogic;
+  const LL = root.FE.linksLogic;
 
   function fmtGrowthCell(val) {
     if (!val) return `<td class="n cls-z">—</td>`;
@@ -9,7 +10,7 @@
     return `<td class="n cls-neg">${val}</td>`;
   }
 
-  function renderClassesView(data, state) {
+  function renderClassesView(data, state, ctx) {
     const D = data || {
       classes: [],
       tierOrder: CL.TIER_ORDER,
@@ -18,27 +19,47 @@
       summary: { classCount: 0, tierCounts: {}, skillCounts: {} },
       sources: [],
     };
+    const C = ctx || {};
+    const reg = C.registry;
+    const focusName = C.focusTarget ? (LL.resolveEntity(reg, "class", C.focusTarget) || C.focusTarget) : "";
+
     const allClasses = D.classes || [];
     const tierOrder = D.tierOrder || CL.TIER_ORDER;
     const skillGroups = D.skillGroups || [];
     const allSkills = skillGroups.flatMap(g => g.skills || []);
-    const selectedTier = state.classesTier || "全部";
-    const selectedSkills = state.classesSkills || [];
-    const selectedStats = state.classesStats || [];
+    const selectedTier = focusName ? "全部" : (state.classesTier || "全部");
+    const selectedSkills = focusName ? [] : (state.classesSkills || []);
+    const selectedStats = focusName ? [] : (state.classesStats || []);
     const matchMode = state.classesMatchMode === "any" ? "any" : "all";
-    const query = state.classesQuery || "";
+    const query = focusName ? "" : (state.classesQuery || "");
     const statLabels = D.statLabels || CL.STAT_LABELS;
 
     const sumAll = CL.summarizeClasses(allClasses, allSkills);
-    const filtered = CL.filterClasses(allClasses, {
-      tier: selectedTier,
-      selectedSkills,
-      selectedStats,
-      matchMode,
-      query,
-    });
+    let filtered;
+    if (focusName) {
+      const exact = allClasses.filter(c => c.name === focusName);
+      filtered = exact.length ? exact : CL.filterClasses(allClasses, { query: focusName });
+    } else {
+      filtered = CL.filterClasses(allClasses, {
+        tier: selectedTier,
+        selectedSkills,
+        selectedStats,
+        matchMode,
+        query,
+      });
+    }
     const groups = CL.groupClassesByTier(filtered, tierOrder);
     const tierMetaMap = new Map((D.tiers || []).map(t => [t.tier, t]));
+
+    const focusBanner = focusName
+      ? `<div class="ent-focus-bar">
+          <span>🎯 当前定位职业：<b>${U.esc(focusName)}</b>（链接已固定在地址栏，可直接收藏或分享）</span>
+          <span class="ent-focus-acts">
+            <a class="btn pri" href="#classes" data-cls-clear>显示全部职业</a>
+            <button type="button" class="btn ghost" data-ent-back>← 返回上一页</button>
+          </span>
+        </div>`
+      : "";
 
     // 1) 阶级快捷筛选按钮
     const tierChips = [
@@ -47,7 +68,7 @@
         .filter(t => (sumAll.tierCounts[t] || 0) > 0)
         .map(t => [t, `${t}（${sumAll.tierCounts[t]}）`]),
     ].map(([k, label]) =>
-      `<button type="button" class="fchip" data-cls-tier="${U.esc(k)}" aria-pressed="${selectedTier === k}">${U.esc(label)}</button>`
+      `<button type="button" class="fchip" data-cls-tier="${U.esc(k)}" aria-pressed="${!focusName && selectedTier === k}">${U.esc(label)}</button>`
     ).join("");
 
     // 2) 可用技能 + 优势属性 Checkbox 筛选面板
@@ -97,7 +118,7 @@
           ? ` · 已选优势属性：<b>${U.esc(selectedStats.join(matchMode === "all" ? " + " : " / "))}</b>`
           : ""
       }</span>
-      ${selectedSkills.length || selectedStats.length || selectedTier !== "全部" || query
+      ${focusName || selectedSkills.length || selectedStats.length || selectedTier !== "全部" || query
         ? `<button type="button" class="btn" data-cls-clear>清空筛选</button>`
         : ""}
     </div>`;
@@ -107,6 +128,7 @@
       const meta = tierMetaMap.get(grp.tier);
       const expNote = meta && meta.masteryExp ? ` · 精通 EXP ${meta.masteryExp}` : "";
       const rows = grp.classes.map(c => {
+        const isFocused = focusName && c.name === focusName;
         const badges = [
           c.unitType ? `<span class="cat-pill">${U.esc(c.unitType)}</span>` : "",
           c.limit ? `<span class="tag warn">${U.esc(c.limit)}专用</span>` : "",
@@ -155,19 +177,19 @@
         ].join("");
 
         const skillBits = [
-          (c.innate || []).length ? `<span>${U.esc(c.innate.join("、"))}</span>` : `<span class="hint">—</span>`,
+          (c.innate || []).length ? `<span>${LL.linkifyList(reg, "skill", c.innate, "、")}</span>` : `<span class="hint">—</span>`,
           c.mastery && c.mastery !== "—"
-            ? `<br><small>精通：<b>${U.esc(c.mastery)}</b>${c.masteryExp ? ` (EXP ${c.masteryExp})` : ""}</small>`
+            ? `<br><small>精通：<b>${LL.renderEntityLink(reg, "skill", c.mastery)}</b>${c.masteryExp ? ` (EXP ${c.masteryExp})` : ""}</small>`
             : "",
         ].join("");
 
-        return `<tr>
-          <td class="cls-name"><b>${U.esc(c.name)}</b><div class="cls-meta">${badges}</div></td>
+        return `<tr class="${isFocused ? "ent-focused" : ""}" data-cls-name="${U.esc(c.name)}"${isFocused ? ' data-ent-focused="true"' : ""}>
+          <td class="cls-name"><b>${LL.renderEntityLink(reg, "class", c.name, { className: "ent-self" })}</b><div class="cls-meta">${badges}</div></td>
           <td class="cls-skills"><div class="sk-list">${skillPills}</div></td>
           <td class="cls-prof">${advPills}${weakPills}</td>
           ${growthCells}
           <td class="n"><b>${c.growthTotal ?? 0}</b>${growthLvExtra}</td>
-          <td class="note cls-min">${U.esc(CL.formatMinStats(c.minStats))}</td>
+          <td class="note cls-min">${(() => { const ms = CL.formatMinStats(c.minStats); return ms && ms !== "—" ? U.esc(ms) : `<span class="hint">无转职保底</span>`; })()}</td>
           <td class="note">${reqBits}</td>
           <td class="note">${skillBits}</td>
         </tr>`;
@@ -195,7 +217,8 @@
       `<li><a href="${U.esc(s.url)}" target="_blank" rel="noopener noreferrer">${U.esc(s.name)}</a>（${U.esc(s.url)}）</li>`
     ).join("");
 
-    return `<p class="lede">职业图鉴：整理全阶级职业的可用技能、<b>优势 / 劣势属性</b>、成长率补正（%）、转职保底、转职要求、固有特技与精通奖励。勾选下方技能与优势属性 Checkbox 可精准反查目标职业。</p>
+    return `<p class="lede">职业图鉴：整理全阶级职业的可用技能、<b>优势 / 劣势属性</b>、成长率补正（%）、转职保底、转职要求、固有特技与精通奖励。点击任意固有特技或精通技能可直接跳转 <a href="#skills" class="ent-link">技能图鉴</a>。</p>
+      ${focusBanner}
       <div class="filterbar">
         <input type="search" id="clsQuery" data-cls-q placeholder="搜职业名、优势属性、特技、精通、转职要求，比如 重装、天翼、乘降术、流星" value="${U.esc(query)}" aria-label="搜索职业">
         <div class="fchips">${tierChips}</div>

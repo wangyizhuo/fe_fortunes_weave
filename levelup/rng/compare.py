@@ -77,7 +77,31 @@ def explain(d, label_a="A", label_b="B"):
                      for r in d["classSeeds"])
     L.append(f"② 用不同职业升级：{rows or '没有'}　→ {gtxt(c['g'])}（{c['pts']:+d} 点，{c['w']:+d} 加权）")
     f = d["floorPart"]
-    L.append(f"③ 保底：{gtxt(f['g'])}（{f['pts']:+d} 点，{f['w']:+d} 加权）")
+    L.append(f"③ 转职保底：{gtxt(f['g'])}（{f['pts']:+d} 点，{f['w']:+d} 加权）")
     t = d["total"]
     L.append(f"合计（同样 {d['seeds']} 个乱数）：{gtxt(t['g'])}（{t['pts']:+d} 点，{t['w']:+d} 加权）")
     return L
+
+
+def exam_seed_summary(d, label_a="路线A", label_b="路线B"):
+    """仅提取两条路线「考试/跳过用掉的乱数」差异，便于页面直观说明消耗了哪一个乱数。"""
+    out = []
+    for r in d.get("examSeeds") or []:
+        step_no = r["step"] + 1
+        roll = r["roll"]
+        lost = "、".join(r.get("lost") or []) or "无"
+        a_is_exam = "升级" not in str(r["a"])
+        if a_is_exam:
+            act_a = "跳过" if r["a"] == "跳过" else f"考{r['a']}"
+            out.append(
+                f"第 {step_no} 个乱数（判定值 {roll}%）：{label_a}在 Lv{r['lvA']} 用来{act_a}；"
+                f"{label_b}在 Lv{r['lvB']} 用来{r['b']}（涨 {lost}，{abs(r['pts'])} 点 / {abs(r['w'])} 加权分）"
+            )
+        else:
+            act_b = "跳过" if r["b"] == "跳过" else f"考{r['b']}"
+            out.append(
+                f"第 {step_no} 个乱数（判定值 {roll}%）：{label_a}在 Lv{r['lvA']} 用来{r['a']}（涨 {lost}，{abs(r['pts'])} 点 / {abs(r['w'])} 加权分）；"
+                f"{label_b}在 Lv{r['lvB']} 用来{act_b}"
+            )
+    return out
+

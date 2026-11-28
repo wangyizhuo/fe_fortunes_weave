@@ -134,10 +134,56 @@
     return { total: (skills || []).length, byRating, byScope, byUnitType };
   }
 
+  const RANK_ORDER = {
+    E: 0, "E+": 1, D: 2, "D+": 3, C: 4, "C+": 5,
+    B: 6, "B+": 7, A: 8, "A+": 9, S: 10, "S+": 11,
+  };
+
+  /**
+   * 按习得条件（如「重装术 D」「重装术 C」「重装术 B」「Lv20」「个人特技」）归类整理角色列表；
+   * 组间按熟练度由低到高（E→S+）或等级由低到高排序，组内我方已招角色优先。
+   */
+  function groupCharSourcesByCondition(charSources) {
+    const groups = new Map();
+    for (const cs of charSources || []) {
+      const cond =
+        (cs.how && String(cs.how).trim()) ||
+        (cs.discipline && cs.rank ? `${cs.discipline} ${cs.rank}` : "") ||
+        (cs.lv ? `Lv${cs.lv}` : "习得");
+      if (!groups.has(cond)) {
+        const rkIdx = cs.rank && RANK_ORDER[cs.rank] != null ? RANK_ORDER[cs.rank] : 99;
+        const lvVal = typeof cs.lv === "number" ? cs.lv : 999;
+        groups.set(cond, {
+          condition: cond,
+          discipline: cs.discipline || "",
+          rank: cs.rank || "",
+          rankOrder: rkIdx,
+          lvOrder: lvVal,
+          chars: [],
+        });
+      }
+      const g = groups.get(cond);
+      if (!g.chars.some(x => x.char === cs.char)) {
+        g.chars.push(cs);
+      }
+    }
+    const list = [...groups.values()];
+    for (const g of list) {
+      g.chars.sort((a, b) => (a.recruited ? 0 : 1) - (b.recruited ? 0 : 1));
+    }
+    list.sort((a, b) =>
+      a.rankOrder - b.rankOrder ||
+      a.lvOrder - b.lvOrder ||
+      a.condition.localeCompare(b.condition, "zh-CN")
+    );
+    return list;
+  }
+
   return {
     UNIT_TYPE_ORDER,
     filterSkills,
     filterSkillChars,
     summarizeSkills,
+    groupCharSourcesByCondition,
   };
 });

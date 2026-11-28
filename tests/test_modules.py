@@ -88,6 +88,10 @@ class TestItemsModule(unittest.TestCase):
         self.assertGreater(d["summary"]["townCount"], 10)
         self.assertGreater(d["summary"]["barterCount"], 5)
         self.assertGreater(d["summary"]["materialCount"], 5)
+        self.assertEqual(d["summary"]["ratedWeaponCount"], 38)
+        barter_by_cn = {b["cn"]: b for b in d["barter"]}
+        self.assertEqual(barter_by_cn["雷电剑"]["weaponTier"], "SS")
+        self.assertEqual(barter_by_cn["伏力萨"]["weaponTier"], "S")
         mats = {m["material"]: m for m in d["materials"]}
         self.assertIn("バク", mats)
         self.assertGreaterEqual(mats["バク"]["totalUses"], 2)
@@ -240,7 +244,8 @@ class TestExploreModule(unittest.TestCase):
         self.assertEqual(by_entry[("屠马弓", "帝都鞑古席翁")]["weaponTier"], "S")
         self.assertEqual(by_entry[("达·米纳手甲", "佐托湖")]["priority"], "P1")
         self.assertEqual(by_entry[("达·米纳手甲", "佐托湖")]["weaponTier"], "A")
-        self.assertEqual(by_entry[("铁枪", "帝都鞑古席翁")]["priority"], "P2")
+        self.assertEqual(by_entry[("铁枪", "帝都鞑古席翁")]["priority"], "P0")
+        self.assertIn("招募需要", by_entry[("铁枪", "帝都鞑古席翁")]["changeReason"])
         self.assertTrue(by_entry[("巨人戒指", "海都阿雷库托")]["done"])
 
         dt = d["routes"]["dietrich"]

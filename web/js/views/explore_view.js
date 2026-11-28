@@ -154,10 +154,23 @@
     </div>`;
   }
 
-  function renderBarterBoard(bs, query) {
+  function renderBarterBoard(bs, query, allSpots) {
     if (!bs || !bs.entries || !bs.entries.length) return "";
-    const lackMats = (bs.materials || []).filter(m => m.hasShortage);
+    const mats = bs.materials || [];
+    const lackMats = mats.filter(m => m.hasShortage);
     const curQ = String(query || "").trim();
+
+    // 按采集素材名索引当前路线的地图点位，用于「一键定位到地图」交叉验证
+    const spotsByMat = new Map();
+    for (const sp of allSpots || []) {
+      if (sp.type === "商会" || sp.type === "迷宫") continue;
+      for (const it of sp.items || []) {
+        if (!it || !it.name) continue;
+        if (!spotsByMat.has(it.name)) spotsByMat.set(it.name, []);
+        spotsByMat.get(it.name).push(sp);
+      }
+    }
+
     const matBtns = lackMats.map(m => {
       const isP0 = m.shortageTier === "P0";
       const lackN = isP0 ? m.lackP0 : m.lackP01;
@@ -168,6 +181,56 @@
       </button>`;
     }).join("");
 
+    // 采集材料缺口交叉验证总表：展示所有 P0/P1 涉及的采集材料（含 P0 缺口、P1 缺口与 P0 库存已够项，方便核对）
+    const activeMats = mats.filter(m => m.hasShortage || m.needP0 > 0);
+    const matGapRows = activeMats.map(m => {
+      const isP0Lack = m.lackP0 > 0;
+      const isP1Lack = !isP0Lack && m.lackP01 > 0;
+      const badge = isP0Lack
+        ? `<span class="exp-tier t-P0">P0 缺 ${m.lackP0}</span>`
+        : isP1Lack
+          ? `<span class="exp-tier t-P1">P1 缺 ${m.lackP01}</span>`
+          : `<span class="tag ok">✓ P0 已够</span>`;
+
+      const creditHtml = m.credit > 0
+        ? `<br><small class="ok">+${m.credit} 可换（${U.esc(m.creditNote || "商会直换")}）</small>`
+        : "";
+      const needLine = [
+        m.needP0 > 0 ? `P0 需 <b>${m.needP0}</b>` : "",
+        m.needP01 > m.needP0 ? `P0+P1 共需 <b>${m.needP01}</b>` : "",
+        m.needAll > m.needP01 ? `<small class="hint">（含P2共${m.needAll}）</small>` : "",
+      ].filter(Boolean).join(" · ");
+
+      const usesHtml = (m.uses || []).map(u => {
+        const pBadge = `<span class="exp-tier t-${U.esc(u.priority)}">${U.esc(u.priority)}</span>`;
+        const wBadge = u.weaponTier ? ` <span class="ctier ctier-${U.esc(u.weaponTier)}">${U.esc(u.weaponTier)}</span>` : "";
+        return `<div class="exp-use-line">${pBadge}${wBadge} <b>${U.esc(u.item)}</b> ×${u.qty} <span class="hint">@ ${U.esc(u.place)}</span></div>`;
+      }).join("") || `<span class="hint">—</span>`;
+
+      const spotHits = spotsByMat.get(m.material) || [];
+      const spotBtns = spotHits.slice(0, 6).map(sp =>
+        `<button type="button" class="exp-spot-chip${curQ === m.material ? " on" : ""}" data-exp-focus="${U.esc(sp.id)}" title="点击在下方地图居中并选中「${U.esc(sp.name)}」">📍 #${sp.rank} ${U.esc(sp.name)}</button>`
+      ).join("");
+      const moreSpots = spotHits.length > 6
+        ? ` <button type="button" class="exp-spot-chip" data-exp-mat="${U.esc(m.material)}">地图筛全 ${spotHits.length} 处…</button>`
+        : "";
+      const buyHtml = m.buyNote ? `<div class="hint" style="margin-top:3px">💡 ${U.esc(m.buyNote)}</div>` : "";
+      const noSpotHint = !spotHits.length ? `<span class="hint">${m.buyNote ? "直接商会/商人获取" : "当前路线地图暂无采集点"}</span>` : "";
+
+      return `<tr class="${isP0Lack ? "exp-gap-p0" : isP1Lack ? "exp-gap-p1" : ""}">
+        <td>${badge}</td>
+        <td>
+          <button type="button" class="exp-mat-link" data-exp-mat="${U.esc(m.material)}" title="点击在地图上只筛选「${U.esc(m.material)}」产出点"><b>${U.esc(m.material)}</b></button>
+        </td>
+        <td class="n">
+          <b>现有 ${m.have}</b>${creditHtml}<br>
+          <small>${needLine || "—"}</small>
+        </td>
+        <td>${usesHtml}</td>
+        <td><div class="exp-spot-chips">${spotBtns}${moreSpots}${noSpotHint}</div>${buyHtml}</td>
+      </tr>`;
+    }).join("");
+
     const changedList = (bs.entries || []).filter(e => e.changed);
     const changedText = changedList.map(e =>
       `<b>${U.esc(e.item)}</b>（${U.esc(e.changeReason)}）`
@@ -175,7 +238,7 @@
 
     const rows = (bs.entries || []).map(e => {
       const pCls = e.done ? "" : `t-${U.esc(e.priority)}`;
-      const wBadge = e.weaponTier ? `<span class="sk-tier tier-${U.esc(e.weaponTier === "SS" ? "S" : e.weaponTier)}">${U.esc(e.weaponTier)}</span> ` : "";
+      const wBadge = e.weaponTier ? `<span class="ctier ctier-${U.esc(e.weaponTier)}">${U.esc(e.weaponTier)}</span> ` : "";
       const chgBadge = e.changed ? `<span class="cat-pill" style="background:#fef3c7;color:#92400e">${U.esc(e.origPriority)}→${U.esc(e.priority)}</span>` : "";
       const costStr = (e.cost || []).map(c => `${c.mat}×${c.qty}（有${c.have}）`).join("；");
       return `<tr class="${e.done ? "exp-row vis" : ""}">
@@ -191,7 +254,7 @@
     const cnt = bs.counts || {};
     return `<section class="card" style="margin-top:10px">
       <div class="ch"><div class="ct">
-        <h3>📋 旺达尔商会置换优先级（按 PR #31 武器榜 SS/S→P0 重整 · ${U.esc(bs.snapshotDate || "")} 库存）</h3>
+        <h3>📦 采集材料缺口交叉验证 &amp; 旺达尔商会置换表（${U.esc(bs.snapshotDate || "")} 库存）</h3>
         <span class="r">
           <span class="exp-tier t-P0">P0×${cnt.P0 || 0}</span>
           <span class="exp-tier t-P1">P1×${cnt.P1 || 0}</span>
@@ -201,7 +264,7 @@
         </span>
       </div></div>
       <div class="sec">
-        ${changedText ? `<p class="hint" style="margin:0 0 8px">🔄 <b>本次按 PR #31 调整：</b>${changedText}；已换完的 <b>巨人戒指 / 必圣宝珠</b> 素材（辉光鱼/赤金拜/红烁）及库存已够的 <b>太阳果 / 金鳟</b> 自动移出地图 P0。</p>` : ""}
+        ${changedText ? `<p class="hint" style="margin:0 0 8px">🔄 <b>优先级调整：</b>${changedText}；已换完的 <b>巨人戒指 / 必圣宝珠</b> 素材（辉光鱼/赤金拜/红烁）及 P0 库存已够的 <b>太阳果 / 金鳟 / 铁枪用津吉</b> 自动移出地图红标。</p>` : ""}
         <div class="sk-filter-row" style="margin-top:0">
           <span class="sk-flbl">缺口直达</span>
           <div class="pills">
@@ -209,8 +272,22 @@
             ${curQ ? `<button type="button" class="btn ghost" data-exp-mat="">清除素材聚焦</button>` : ""}
           </div>
         </div>
-        <details class="more" style="margin-top:8px">
-          <summary>展开完整 29 项商会置换重整表（含武器评级、实测库存与缺口）</summary>
+        <div class="scroll" style="margin-top:10px">
+          <table class="exp-tbl exp-gap-tbl">
+            <thead>
+              <tr>
+                <th>状态 / 缺口</th>
+                <th>采集材料（点此筛图）</th>
+                <th class="n">现有 / 需要</th>
+                <th>要换什么（优先级 · 数量 @ 兑换地点）</th>
+                <th>去哪里探索 / 下一步（点地名直达地图）</th>
+              </tr>
+            </thead>
+            <tbody>${matGapRows}</tbody>
+          </table>
+        </div>
+        <details class="more" style="margin-top:10px">
+          <summary>展开完整 ${bs.entries.length} 项商会置换重整表（含武器评级、实测库存与缺口）</summary>
           <div class="scroll" style="margin-top:8px">
             <table class="exp-tbl">
               <thead><tr><th>新优先级</th><th>道具（PR#31评级）</th><th>地点</th><th>配方（有/需）</th><th>缺口状态</th><th>理由与来源</th></tr></thead>
@@ -396,7 +473,7 @@
         ${feedback}
       </section>
 
-      ${renderBarterBoard(data.barterSummary, query)}
+      ${renderBarterBoard(data.barterSummary, query, allSpots)}
 
       <section class="exp-stage">
         <div class="exp-hud">

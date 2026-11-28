@@ -356,6 +356,10 @@ class Planner:
                 sbest = val(best)
                 passable = [c for c in pend if c not in ea.values() and self.exam_ok(step, c, lv)]
                 # 11-09 Yizhuo：跳过条件 = ①这一级 ≤ 绝对分数线 ②比未来 15 级平均低 ≥ 百分比；P0 满足其一，P1/P2 都满足
+                g_best = res(step, lv, best)[1]
+                gains_best = [STATS[i] for i, v in enumerate(g_best) if v]
+                raw_s = sum(self.weights[i] * g_best[i] for i in range(9)) \
+                    + (self.str_gain_bonus(cur_str, g_best) if cur_str is not None else 0)
                 if rule:
                     # 11-11 Yizhuo：跳过判断也用含均衡和体格加分的分（和选职业同一个分）
                     s_raw = sbest
@@ -363,10 +367,17 @@ class Planner:
                     c1 = s_raw <= rule["cap"] + 1e-6
                     c2 = s_raw <= sum(fut) / len(fut) * (1 - rule["pct"]) + 1e-6
                     want_skip = (c1 or c2) if rule["or"] else (c1 and c2)
-                    reasons[step] = {"s": round(s_raw, 2), "avg15": round(sum(fut) / len(fut), 2), "c1": c1, "c2": c2}
+                    reasons[step] = {
+                        "s": round(s_raw, 2), "raw_s": raw_s, "best_cls": best,
+                        "gains": gains_best, "bal_why": why,
+                        "avg15": round(sum(fut) / len(fut), 2), "c1": c1, "c2": c2,
+                    }
                 else:
                     want_skip = sbest < t_skip
-                    reasons[step] = {"s": round(sbest, 2)}
+                    reasons[step] = {
+                        "s": round(sbest, 2), "raw_s": raw_s, "best_cls": best,
+                        "gains": gains_best, "bal_why": why,
+                    }
                 keep = self.seed_at(step) in nss   # Yizhuo 指定保留的级：不跳也不考
                 if keep:
                     want_skip = False
@@ -531,7 +542,12 @@ class Planner:
                     (why["s"] <= br["cap"] + 1e-6) or (why["s"] <= why["avg15"] * (1 - br["pct"]) + 1e-6))
                 if bad:
                     chosen = st
-                    info[c] = {"how": "第一个不好的乱数", "step": st, "s": why.get("s"), "avg15": why.get("avg15")}
+                    info[c] = {
+                        "how": "第一个不好的乱数", "step": st,
+                        "s": why.get("s"), "raw_s": why.get("raw_s"),
+                        "best_cls": why.get("best_cls"), "gains": why.get("gains") or [],
+                        "bal_why": why.get("bal_why") or "", "avg15": why.get("avg15"),
+                    }
                     break
             if chosen is None:
                 chosen = plan_step[c]

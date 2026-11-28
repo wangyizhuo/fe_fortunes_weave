@@ -132,10 +132,10 @@ class TestPurifiedGoalFirstPlanner(unittest.TestCase):
         self.assertGreater(r_io.best.breakdown.net_without_mastery, 206.4)
 
     def test_unlimited_classes_marginal_gains_and_zero_use_allowed(self):
-        # 艾丝梅拉尔达：初级/中级不限个数，可扩展至 3 个职业并清晰报告额外职业边际收益
+        # 艾丝梅拉尔达：取消天翼兵必考后，最优为 重装步兵 + 斗拳手（2 个职业），并清晰报告额外职业边际收益
         p_es, t_es = prepare_goal_first_planner("艾丝梅拉尔达")
         r_es = plan_two_stage(p_es, t_es)
-        self.assertEqual(len(r_es.best.targets), 3)
+        self.assertEqual(len(r_es.best.targets), 2)
         self.assertIn("斗拳手", r_es.best.targets)
         by_cls = {m.cls: m for m in r_es.marginal_gains}
         self.assertGreaterEqual(by_cls["斗拳手"].delta_objective, DEFAULT_TIER_POLICIES["P0"].min_marginal_gain)
